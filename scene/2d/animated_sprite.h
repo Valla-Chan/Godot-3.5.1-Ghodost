@@ -44,7 +44,8 @@ class SpriteFrames : public Resource {
 
 		Anim() {
 			loop = true;
-			speed = 5;
+			//valla edit
+			speed = 10;
 		}
 
 		StringName normal_name;

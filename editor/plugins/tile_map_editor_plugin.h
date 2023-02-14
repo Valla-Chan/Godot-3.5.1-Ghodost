@@ -56,7 +56,9 @@ class TileMapEditor : public VBoxContainer {
 		TOOL_SELECTING,
 		TOOL_BUCKET,
 		TOOL_PICKING,
-		TOOL_PASTING
+		TOOL_PASTING,
+		TOOL_NONE_RECT,
+		TOOL_NONE_LINE,
 	};
 
 	enum Options {
@@ -90,6 +92,8 @@ class TileMapEditor : public VBoxContainer {
 	MenuButton *options;
 
 	ToolButton *paint_button;
+	ToolButton *paint_button_rect;
+	ToolButton *paint_button_line;
 	ToolButton *bucket_fill_button;
 	ToolButton *picker_button;
 	ToolButton *select_button;

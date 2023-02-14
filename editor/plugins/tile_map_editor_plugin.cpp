@@ -72,6 +72,10 @@ void TileMapEditor::_notification(int p_what) {
 				_update_palette();
 			}
 
+			//valla edit
+			paint_button_line->set_icon(get_icon("TileLine", "EditorIcons"));
+			paint_button_rect->set_icon(get_icon("TileRect", "EditorIcons"));
+			//
 			paint_button->set_icon(get_icon("Edit", "EditorIcons"));
 			bucket_fill_button->set_icon(get_icon("Bucket", "EditorIcons"));
 			picker_button->set_icon(get_icon("ColorPick", "EditorIcons"));
@@ -119,9 +123,9 @@ void TileMapEditor::_notification(int p_what) {
 }
 
 void TileMapEditor::_update_button_tool() {
-	ToolButton *tb[4] = { paint_button, bucket_fill_button, picker_button, select_button };
+	ToolButton *tb[6] = { paint_button, paint_button_line, paint_button_rect, bucket_fill_button, picker_button, select_button };
 	// Unpress all buttons
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 6; i++) {
 		tb[i]->set_pressed(false);
 	}
 
@@ -130,6 +134,12 @@ void TileMapEditor::_update_button_tool() {
 		case TOOL_NONE:
 		case TOOL_PAINTING: {
 			paint_button->set_pressed(true);
+		} break;
+		case TOOL_RECTANGLE_PAINT: {
+			paint_button_rect->set_pressed(true);
+		} break;
+		case TOOL_LINE_PAINT: {
+			paint_button_line->set_pressed(true);
 		} break;
 		case TOOL_BUCKET: {
 			bucket_fill_button->set_pressed(true);
@@ -1209,6 +1219,27 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 					_update_button_tool();
 				}
 
+				//Valla edit
+				if (tool == TOOL_NONE_RECT) {
+					tool = TOOL_RECTANGLE_PAINT;
+
+					selection_active = false;
+					rectangle_begin = over_tile;
+
+					_update_button_tool();
+				}
+
+				if (tool == TOOL_NONE_LINE) {
+					tool = TOOL_LINE_PAINT;
+
+					selection_active = false;
+					rectangle_begin = over_tile;
+
+					_update_button_tool();
+				}
+				//
+
+
 				if (tool == TOOL_PAINTING) {
 					Vector<int> ids = get_selected_tiles();
 
@@ -1229,6 +1260,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 
 			} else {
 				// Mousebutton was released.
+				//Valla Edit: make this revert to proper tool
 				if (tool != TOOL_NONE) {
 					if (tool == TOOL_PAINTING) {
 						Vector<int> ids = get_selected_tiles();
@@ -1239,6 +1271,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 
 							paint_undo.clear();
 						}
+					//Valla edits
 					} else if (tool == TOOL_LINE_PAINT) {
 						Vector<int> ids = get_selected_tiles();
 
@@ -1252,6 +1285,11 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 							paint_undo.clear();
 
 							CanvasItemEditor::get_singleton()->update_viewport();
+							if (!mb->get_shift()) {
+								tool = TOOL_NONE_LINE;
+								_update_button_tool();
+								return true;
+							}
 						}
 					} else if (tool == TOOL_RECTANGLE_PAINT) {
 						Vector<int> ids = get_selected_tiles();
@@ -1266,7 +1304,13 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 							_finish_undo();
 
 							CanvasItemEditor::get_singleton()->update_viewport();
+							if (!(mb->get_shift() && mb->get_control())) {
+								tool = TOOL_NONE_RECT;
+								_update_button_tool();
+								return true;
+							}
 						}
+					//
 					} else if (tool == TOOL_PASTING) {
 						Point2 ofs = over_tile - rectangle.position;
 						Vector<int> ids;
@@ -1566,7 +1610,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 			return false;
 		}
 
-		if (ED_IS_SHORTCUT("tile_map_editor/paint_tile", p_event)) {
+		if (ED_IS_SHORTCUT("tile_map_editor/paint_rect", p_event)) {
 			// NOTE: We do not set tool = TOOL_PAINTING as this begins painting
 			// immediately without pressing the left mouse button first.
 			tool = TOOL_NONE;
@@ -1575,6 +1619,26 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 			_update_button_tool();
 			return true;
 		}
+		//Valla edit
+		if (ED_IS_SHORTCUT("tile_map_editor/paint_rect", p_event)) {
+			// NOTE: We do not set tool = TOOL_PAINTING as this begins painting
+			// immediately without pressing the left mouse button first.
+			tool = TOOL_NONE_RECT;
+			CanvasItemEditor::get_singleton()->update_viewport();
+
+			_update_button_tool();
+			return true;
+		}
+		if (ED_IS_SHORTCUT("tile_map_editor/paint_rect", p_event)) {
+			// NOTE: We do not set tool = TOOL_PAINTING as this begins painting
+			// immediately without pressing the left mouse button first.
+			tool = TOOL_NONE_LINE;
+			CanvasItemEditor::get_singleton()->update_viewport();
+
+			_update_button_tool();
+			return true;
+		}
+		//
 		if (ED_IS_SHORTCUT("tile_map_editor/bucket_fill", p_event)) {
 			tool = TOOL_BUCKET;
 			CanvasItemEditor::get_singleton()->update_viewport();
@@ -2112,6 +2176,8 @@ TileMapEditor::TileMapEditor(EditorNode *p_editor) {
 	// Tools.
 	paint_button = memnew(ToolButton);
 	paint_button->set_shortcut(ED_SHORTCUT("tile_map_editor/paint_tile", TTR("Paint Tile"), KEY_P));
+
+
 #ifdef OSX_ENABLED
 	paint_button->set_tooltip(TTR("Shift+LMB: Line Draw\nShift+Command+LMB: Rectangle Paint"));
 #else
@@ -2119,10 +2185,32 @@ TileMapEditor::TileMapEditor(EditorNode *p_editor) {
 #endif
 	paint_button->connect("pressed", this, "_button_tool_select", make_binds(TOOL_NONE));
 	paint_button->set_toggle_mode(true);
+
+	//Valla edit
+	paint_button_rect = memnew(ToolButton);
+	paint_button_line = memnew(ToolButton);
+	paint_button_line->set_shortcut(ED_SHORTCUT("tile_map_editor/paint_line", TTR("Paint Line"),  KEY_R));
+	paint_button_rect->set_shortcut(ED_SHORTCUT("tile_map_editor/paint_rect", TTR("Paint Rectangle"), KEY_B));
+
+	paint_button_line->set_tooltip(TTR("Line Draw"));
+	paint_button_rect->set_tooltip(TTR("Rectangle Paint"));
+
+	paint_button_rect->connect("pressed", this, "_button_tool_select", make_binds(TOOL_NONE_RECT));
+	paint_button_line->connect("pressed", this, "_button_tool_select", make_binds(TOOL_NONE_LINE));
+	paint_button_rect->set_toggle_mode(true);
+	paint_button_line->set_toggle_mode(true);
+	//
+
 	toolbar->add_child(paint_button);
 
+	//Valla edit
+	toolbar->add_child(paint_button_line);
+	toolbar->add_child(paint_button_rect);
+	//
+	
+
 	bucket_fill_button = memnew(ToolButton);
-	bucket_fill_button->set_shortcut(ED_SHORTCUT("tile_map_editor/bucket_fill", TTR("Bucket Fill"), KEY_B));
+	bucket_fill_button->set_shortcut(ED_SHORTCUT("tile_map_editor/bucket_fill", TTR("Bucket Fill"), KEY_G));
 	bucket_fill_button->connect("pressed", this, "_button_tool_select", make_binds(TOOL_BUCKET));
 	bucket_fill_button->set_toggle_mode(true);
 	toolbar->add_child(bucket_fill_button);
