@@ -2975,7 +2975,8 @@ void RichTextLabel::set_align(Align p_align){
 	ERR_FAIL_INDEX((int)p_align, 4);
 	default_align = p_align;
 	_change_notify("default_align");
-	_notification(NOTIFICATION_DRAW);
+	//_notification(NOTIFICATION_DRAW);
+	minimum_size_changed();
 	update();
 }
 
