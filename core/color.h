@@ -169,6 +169,48 @@ struct _NO_DISCARD_CLASS_ Color {
 		return res;
 	}
 
+	//valla edits
+	_FORCE_INLINE_ Color multiply(const Color &p_over) const {
+		Color res;
+		float sa = 1.0 - p_over.a;
+		res.r = sa * r + p_over.a * (r * p_over.r);
+		res.g = sa * g + p_over.a * (g * p_over.g);
+		res.b = sa * b + p_over.a * (b * p_over.b);
+		return res;
+	}
+
+	_FORCE_INLINE_ Color modulate(const Color &p_over) const {
+		Color res;
+		float sa = 1.0 - p_over.a;
+		res.r = sa * r + p_over.a * (r * (p_over.r*2));
+		res.g = sa * g + p_over.a * (g * (p_over.g*2));
+		res.b = sa * b + p_over.a * (b * (p_over.b*2));
+		return res;
+	}
+
+	_FORCE_INLINE_ Color overlay(const Color &p_over) const {
+		Color res;
+		float sa = 1.0 - p_over.a;
+		size_t i = 0;
+		if (res.r > 0.5) {
+			res.r = sa * r + p_over.a * (r * (p_over.r * 2));
+		} else {
+			res.r = sa * r + p_over.a * (1 - 2 * (1 - r) * (1 - p_over.r));
+		}
+		if (res.g > 0.5) {
+			res.g = sa * g + p_over.a * (g * (p_over.g * 2));
+		} else {
+			res.g = sa * g + p_over.a * (1 - 2 * (1 - g) * (1 - p_over.g));
+		}
+		if (res.b > 0.5) {
+			res.b = sa * b + p_over.a * (b * (p_over.b * 2));
+		} else {
+			res.b = sa * b + p_over.a * (1 - 2 * (1 - b) * (1 - p_over.b));
+		}
+		return res;
+	}
+	//
+
 	_FORCE_INLINE_ Color to_linear() const {
 		return Color(
 				r < 0.04045 ? r * (1.0 / 12.92) : Math::pow((r + 0.055) * (1.0 / (1 + 0.055)), 2.4),
