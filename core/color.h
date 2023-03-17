@@ -256,7 +256,19 @@ struct _NO_DISCARD_CLASS_ Color {
 		b = p_b;
 		a = p_a;
 	}
+
+	/**
+	 * Construct a Color from another Color, but with the specified alpha value.
+	 */
+	_FORCE_INLINE_ Color(const Color &p_c, float p_a) {
+		r = p_c.r;
+		g = p_c.g;
+		b = p_c.b;
+		a = p_a;
+	}
 };
+
+	
 
 bool Color::operator<(const Color &p_color) const {
 	if (r == p_color.r) {
@@ -273,5 +285,6 @@ bool Color::operator<(const Color &p_color) const {
 		return r < p_color.r;
 	}
 }
+
 
 #endif // COLOR_H
