@@ -143,8 +143,6 @@ private:
 	PopupMenu *file_list_popup;
 	PopupMenu *tree_popup;
 
-	PopupMenu *folder_colors_menu;
-
 	DependencyEditor *deps_editor;
 	DependencyEditorOwners *owners_editor;
 	DependencyRemoveDialog *remove_dialog;
@@ -258,9 +256,6 @@ private:
 
 	MenuButton *_create_file_menu_button();
 	void _file_sort_popup(int p_id);
-
-	void _add_folder_color_options();
-	void _folder_color_index_pressed(int p_index);
 
 	void _file_and_folders_fill_popup(PopupMenu *p_popup, Vector<String> p_paths, bool p_display_path_dependent_options = true);
 	void _tree_rmb_select(const Vector2 &p_pos);

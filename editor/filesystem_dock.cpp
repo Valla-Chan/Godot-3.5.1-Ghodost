@@ -62,21 +62,15 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 	// Create a tree item for the subdirectory.
 	TreeItem *subdirectory_item = tree->create_item(p_parent);
 	String dname = p_dir->get_name();
-	String lpath = p_dir->get_path();
 	if (dname == "") {
 		dname = "res://";
 	}
 
-	// Get custom folder colors
-	Dictionary custom_folder_colors = ProjectSettings::get_singleton()->get_setting("file_customization/folder_colors");
-	Color default_folder_color = get_color(("folder_icon_color"), ("FileDialog"));
-	bool has_custom_color = custom_folder_colors.has(lpath);
-
-
 	subdirectory_item->set_text(0, dname);
 	subdirectory_item->set_icon(0, get_icon("Folder", "EditorIcons"));
-	subdirectory_item->set_icon_modulate(0, has_custom_color ? custom_folder_colors[lpath] : default_folder_color);
+	subdirectory_item->set_icon_modulate(0, get_color("folder_icon_modulate", "FileDialog"));
 	subdirectory_item->set_selectable(0, true);
+	String lpath = p_dir->get_path();
 	subdirectory_item->set_metadata(0, lpath);
 	if (!p_select_in_favorites && (path == lpath || ((display_mode == DISPLAY_MODE_SPLIT) && path.get_base_dir() == lpath))) {
 		subdirectory_item->select(0);
@@ -225,7 +219,6 @@ void FileSystemDock::_update_tree(const Vector<String> &p_uncollapsed_paths, boo
 	favorites->set_collapsed(p_uncollapsed_paths.find("Favorites") < 0);
 
 	Vector<String> favorite_paths = EditorSettings::get_singleton()->get_favorites();
-	Dictionary custom_folder_colors = ProjectSettings::get_singleton()->get_setting("file_customization/folder_colors");
 
 	DirAccessRef da = DirAccess::create(DirAccess::ACCESS_RESOURCES);
 	bool fav_changed = false;
@@ -248,7 +241,6 @@ void FileSystemDock::_update_tree(const Vector<String> &p_uncollapsed_paths, boo
 
 		Ref<Texture> folder_icon = get_icon("Folder", "EditorIcons");
 		const Color folder_color = get_color("folder_icon_modulate", "FileDialog");
-		bool has_custom_color = custom_folder_colors.has(fave);
 
 		String text;
 		Ref<Texture> icon;
@@ -256,11 +248,11 @@ void FileSystemDock::_update_tree(const Vector<String> &p_uncollapsed_paths, boo
 		if (fave == "res://") {
 			text = "/";
 			icon = folder_icon;
-			color = has_custom_color ? custom_folder_colors[fave] : folder_color;
+			color = folder_color;
 		} else if (fave.ends_with("/")) {
 			text = fave.substr(0, fave.length() - 1).get_file();
 			icon = folder_icon;
-			color = has_custom_color ? custom_folder_colors[fave] : folder_color;
+			color = folder_color;
 		} else {
 			text = fave.get_file();
 			int index;
@@ -755,7 +747,6 @@ void FileSystemDock::_update_file_list(bool p_keep_selection) {
 
 	Ref<Texture> folder_icon = (use_thumbnails) ? folder_thumbnail : get_icon("folder", "FileDialog");
 	const Color folder_color = get_color("folder_icon_modulate", "FileDialog");
-	Dictionary custom_folder_colors = ProjectSettings::get_singleton()->get_setting("file_customization/folder_colors");
 
 	// Build the FileInfo list.
 	List<FileInfo> file_list;
@@ -831,12 +822,10 @@ void FileSystemDock::_update_file_list(bool p_keep_selection) {
 					if (bd != "res://" && !bd.ends_with("/")) {
 						bd += "/";
 					}
-					bool has_custom_color = custom_folder_colors.has(bd);
-
 
 					files->set_item_metadata(files->get_item_count() - 1, bd);
 					files->set_item_selectable(files->get_item_count() - 1, false);
-					files->set_item_icon_modulate(files->get_item_count() - 1, has_custom_color ? custom_folder_colors[bd] : folder_color);
+					files->set_item_icon_modulate(files->get_item_count() - 1, folder_color);
 				}
 
 				bool reversed = file_sort == FILE_SORT_NAME_REVERSE;
@@ -844,11 +833,10 @@ void FileSystemDock::_update_file_list(bool p_keep_selection) {
 						reversed ? i >= 0 : i < efd->get_subdir_count();
 						reversed ? i-- : i++) {
 					String dname = efd->get_subdir(i)->get_name();
-					bool has_custom_color = custom_folder_colors.has(dname);
 
 					files->add_item(dname, folder_icon, true);
 					files->set_item_metadata(files->get_item_count() - 1, directory.plus_file(dname) + "/");
-					files->set_item_icon_modulate(files->get_item_count() - 1, has_custom_color ? custom_folder_colors[dname] : folder_color);
+					files->set_item_icon_modulate(files->get_item_count() - 1, folder_color);
 
 					if (cselection.has(dname)) {
 						files->select(files->get_item_count() - 1, false);
@@ -2373,90 +2361,6 @@ void FileSystemDock::_get_drag_target_folder(String &target, bool &target_favori
 	}
 }
 
-void FileSystemDock::_add_folder_color_options() {
-	const Color color_blue = Color(0.75f, 1.0f, 1.0f);
-	const Color color_green = Color(0.56f, 0.94f, 0.59f);
-	const Color color_yellow = Color(1.0f, 0.79f, 0.38f);
-	const Color color_orange = Color(0.99f, 0.6f, 0.37f);
-	const Color color_red = Color(0.88f, 0.49f, 0.47f);
-	const Color color_purple = Color(0.76f, 0.56f, 0.95f);
-	const Color color_gray = Color(0.7f, 0.7f, 0.7f);
-
-	folder_colors_menu->add_icon_item(get_icon(("Folder"), ("EditorIcons")), TTR("Default"));
-	folder_colors_menu->set_item_icon_modulate(0, get_color(("folder_icon_color"), ("FileDialog")));
-	folder_colors_menu->add_separator();
-
-	folder_colors_menu->add_icon_item(get_icon(("Folder"), ("EditorIcons")), TTR("Blue"));
-	folder_colors_menu->set_item_icon_modulate(2, color_blue);
-	folder_colors_menu->set_item_metadata(2, color_blue);
-	folder_colors_menu->add_icon_item(get_icon(("Folder"), ("EditorIcons")), TTR("Green"));
-	folder_colors_menu->set_item_icon_modulate(3, color_green);
-	folder_colors_menu->set_item_metadata(3, color_green);
-	folder_colors_menu->add_icon_item(get_icon(("Folder"), ("EditorIcons")), TTR("Yellow"));
-	folder_colors_menu->set_item_icon_modulate(4, color_yellow);
-	folder_colors_menu->set_item_metadata(4, color_yellow);
-	folder_colors_menu->add_icon_item(get_icon(("Folder"), ("EditorIcons")), TTR("Orange"));
-	folder_colors_menu->set_item_icon_modulate(5, color_orange);
-	folder_colors_menu->set_item_metadata(5, color_orange);
-	folder_colors_menu->add_icon_item(get_icon(("Folder"), ("EditorIcons")), TTR("Red"));
-	folder_colors_menu->set_item_icon_modulate(6, color_red);
-	folder_colors_menu->set_item_metadata(6, color_red);
-	folder_colors_menu->add_icon_item(get_icon(("Folder"), ("EditorIcons")), TTR("Purple"));
-	folder_colors_menu->set_item_icon_modulate(7, color_purple);
-	folder_colors_menu->set_item_metadata(7, color_purple);
-	folder_colors_menu->add_icon_item(get_icon(("Folder"), ("EditorIcons")), TTR("Gray"));
-	folder_colors_menu->set_item_icon_modulate(8, color_gray);
-	folder_colors_menu->set_item_metadata(8, color_gray);
-}
-
-void FileSystemDock::_folder_color_index_pressed(int p_index) {
-	Dictionary settings = ProjectSettings::get_singleton()->get_setting("file_customization/folder_colors");
-	Color chosen_color = folder_colors_menu->get_item_metadata(p_index);
-	Vector<String> selected;
-
-	// Get all selected folders based on whether the files panel or tree panel is currently focused, update folder color
-	if (files->has_focus()) {
-		Vector<int> files_selected_ids = files->get_selected_items();
-		for (int i = 0; i < files_selected_ids.size(); i++) {
-			selected.push_back(files->get_item_metadata(files_selected_ids[i]));
-		}
-	} else {
-		TreeItem *tree_selected = tree->get_root();
-		tree_selected = tree->get_next_selected(tree_selected);
-		while (tree_selected) {
-			selected.push_back(tree_selected->get_metadata(0));
-			tree_selected = tree->get_next_selected(tree_selected);
-		}
-	}
-
-	// Update dictionary with new folder colors
-	for (int i = 0; i < selected.size(); i++) {
-		String fpath = selected[i];
-
-		if (chosen_color != Color()) {
-			settings[fpath] = chosen_color;
-		} else {
-			settings.erase(fpath);
-		}
-	}
-
-	// Update file list parent dir manually
-	bool first_item_is_parent = files->get_item_text(0) == "..";
-	if (first_item_is_parent) {
-		String parent_dir = files->get_item_metadata(0);
-		bool has_custom_color = settings.has(parent_dir);
-		if (has_custom_color) {
-			files->set_item_icon_modulate(0, settings[parent_dir]);
-		}
-	}
-
-	ProjectSettings::get_singleton()->set_setting("file_customization/folder_colors", settings);
-	ProjectSettings::get_singleton()->save();
-
-	_update_tree(_compute_uncollapsed_paths());
-	_update_file_list(true);
-}
-
 void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, Vector<String> p_paths, bool p_display_path_dependent_options) {
 	// Add options for files and folders.
 	ERR_FAIL_COND_MSG(p_paths.empty(), "Path cannot be empty.");
@@ -2535,15 +2439,6 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, Vector<Str
 		}
 
 	} else if (all_folders && foldernames.size() > 0) {
-		if (!p_paths.find("res://")) {
-			folder_colors_menu = memnew(PopupMenu);
-			folder_colors_menu->set_name("folder_color");
-			_add_folder_color_options();
-			folder_colors_menu->connect("id_pressed", this, "_folder_color_index_pressed");
-			p_popup->add_child(folder_colors_menu);
-			p_popup->add_submenu_item(TTR("Set Folder Color..."), "folder_color");
-			p_popup->add_separator();
-		}
 		p_popup->add_icon_item(get_icon("Load", "EditorIcons"), TTR("Open"), FILE_OPEN);
 		p_popup->add_separator();
 	}

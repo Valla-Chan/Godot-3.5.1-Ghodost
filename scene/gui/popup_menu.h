@@ -38,7 +38,6 @@ class PopupMenu : public Popup {
 
 	struct Item {
 		Ref<Texture> icon;
-		Color icon_modulate = Color(1, 1, 1, 1);
 		String text;
 		String xl_text;
 		bool checked;
@@ -142,7 +141,6 @@ public:
 
 	void set_item_text(int p_idx, const String &p_text);
 	void set_item_icon(int p_idx, const Ref<Texture> &p_icon);
-	void set_item_icon_modulate(int p_idx, const Color &p_modulate);
 	void set_item_checked(int p_idx, bool p_checked);
 	void set_item_id(int p_idx, int p_id);
 	void set_item_accelerator(int p_idx, uint32_t p_accel);
@@ -164,7 +162,6 @@ public:
 	String get_item_text(int p_idx) const;
 	int get_item_idx_from_text(const String &text) const;
 	Ref<Texture> get_item_icon(int p_idx) const;
-	Color get_item_icon_modulate(int p_idx) const;
 	bool is_item_checked(int p_idx) const;
 	int get_item_id(int p_idx) const;
 	int get_item_index(int p_id) const;
