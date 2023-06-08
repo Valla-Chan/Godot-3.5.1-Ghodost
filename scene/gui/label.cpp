@@ -296,6 +296,7 @@ Size2 Label::get_minimum_size() const {
 	if (autowrap) {
 		return Size2(1, clip ? 1 : minsize.height) + min_style;
 	} else {
+
 		Size2 ms = minsize;
 		if (clip) {
 			ms.width = 1;
@@ -331,6 +332,8 @@ int Label::get_longest_line_width() const {
 	if (line_width > max_line_width) {
 		max_line_width = line_width;
 	}
+	//VALLA EDITS: add extra spaces to the minimum width.
+	max_line_width += (font->get_char_size(' ').width) * extra_spacing;
 
 	// ceiling to ensure autowrapping does not cut text
 	return Math::ceil(max_line_width);
@@ -634,6 +637,19 @@ float Label::get_percent_visible() const {
 	return percent_visible;
 }
 
+//VALLA EDITS
+void Label::set_extra_spacing(int p_amount) {
+	extra_spacing = p_amount;
+	_change_notify("extra_spacing");
+	minimum_size_changed();
+	update();
+}
+
+int Label::get_extra_spacing() const {
+	return extra_spacing;
+}
+//
+
 void Label::set_lines_skipped(int p_lines) {
 	ERR_FAIL_COND(p_lines < 0);
 	lines_skipped = p_lines;
@@ -674,6 +690,10 @@ void Label::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_clipping_text"), &Label::is_clipping_text);
 	ClassDB::bind_method(D_METHOD("set_uppercase", "enable"), &Label::set_uppercase);
 	ClassDB::bind_method(D_METHOD("is_uppercase"), &Label::is_uppercase);
+	//VALLA EDITS
+	ClassDB::bind_method(D_METHOD("set_extra_spacing", "spacing"), &Label::set_extra_spacing);
+	ClassDB::bind_method(D_METHOD("get_extra_spacing"), &Label::get_extra_spacing);
+	//
 	ClassDB::bind_method(D_METHOD("get_line_height"), &Label::get_line_height);
 	ClassDB::bind_method(D_METHOD("get_line_count"), &Label::get_line_count);
 	ClassDB::bind_method(D_METHOD("get_visible_line_count"), &Label::get_visible_line_count);
@@ -700,6 +720,9 @@ void Label::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "text", PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT_INTL), "set_text", "get_text");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "align", PROPERTY_HINT_ENUM, "Left,Center,Right,Fill"), "set_align", "get_align");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "valign", PROPERTY_HINT_ENUM, "Top,Center,Bottom,Fill"), "set_valign", "get_valign");
+	//VALLA EDITS
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "extra_spacing"), "set_extra_spacing", "get_extra_spacing");
+	//
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "autowrap"), "set_autowrap", "has_autowrap");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "clip_text"), "set_clip_text", "is_clipping_text");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "uppercase"), "set_uppercase", "is_uppercase");
