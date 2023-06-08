@@ -286,7 +286,7 @@ void Label::_notification(int p_what) {
 }
 
 Size2 Label::get_minimum_size() const {
-	Size2 min_style = get_stylebox("normal")->get_minimum_size();
+	Size2 min_style = get_stylebox("normal")->get_minimum_size() + Size2(0,extra_spacing+1);
 
 	// don't want to mutable everything
 	if (word_cache_dirty) {
