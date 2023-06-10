@@ -2883,8 +2883,17 @@ void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_visible_characters", "amount"), &RichTextLabel::set_visible_characters);
 	ClassDB::bind_method(D_METHOD("get_visible_characters"), &RichTextLabel::get_visible_characters);
 
+	//valla edits
+	ClassDB::bind_method(D_METHOD("set_align", "align_default"), &RichTextLabel::set_align);
+	ClassDB::bind_method(D_METHOD("get_align"), &RichTextLabel::get_align);
+	//
+
 	ClassDB::bind_method(D_METHOD("set_percent_visible", "percent_visible"), &RichTextLabel::set_percent_visible);
 	ClassDB::bind_method(D_METHOD("get_percent_visible"), &RichTextLabel::get_percent_visible);
+
+	//valla edit
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "default_align", PROPERTY_HINT_ENUM, "Left,Center,Right,Fill"), "set_align", "get_align");
+	//
 
 	ClassDB::bind_method(D_METHOD("get_total_character_count"), &RichTextLabel::get_total_character_count);
 
@@ -2966,6 +2975,20 @@ void RichTextLabel::_bind_methods() {
 	BIND_ENUM_CONSTANT(ITEM_RAINBOW);
 	BIND_ENUM_CONSTANT(ITEM_CUSTOMFX);
 	BIND_ENUM_CONSTANT(ITEM_META);
+}
+
+//valla edits
+void RichTextLabel::set_align(Align p_align) {
+	ERR_FAIL_INDEX((int)p_align, 4);
+	default_align = p_align;
+	_change_notify("default_align");
+	//_notification(NOTIFICATION_DRAW);
+	minimum_size_changed();
+	update();
+}
+
+int RichTextLabel::get_align() const {
+	return default_align;
 }
 
 void RichTextLabel::set_visible_characters(int p_visible) {

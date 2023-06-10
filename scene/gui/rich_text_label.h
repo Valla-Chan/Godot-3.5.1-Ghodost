@@ -502,6 +502,11 @@ public:
 
 	void set_text(const String &p_string);
 
+	//valla edits
+	void set_align(Align p_align);
+	int get_align() const;
+	//
+
 	void set_visible_characters(int p_visible);
 	int get_visible_characters() const;
 	int get_total_character_count() const;
