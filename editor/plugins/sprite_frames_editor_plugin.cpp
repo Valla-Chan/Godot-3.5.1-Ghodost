@@ -148,6 +148,7 @@ void SpriteFramesEditor::_sheet_preview_draw() {
 	split_sheet_dialog->get_ok()->set_text(vformat(TTR("Add %d Frame(s)"), frames_selected.size()));
 }
 
+//this is the selection for splitting up an image into frames, not the actual animation frames
 void SpriteFramesEditor::_sheet_preview_input(const Ref<InputEvent> &p_event) {
 	const Ref<InputEventMouseButton> mb = p_event;
 	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
@@ -1259,7 +1260,9 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	anim_speed->set_suffix(TTR("FPS"));
 	anim_speed->set_min(0);
 	anim_speed->set_max(100);
-	anim_speed->set_step(0.01);
+	//valla edit
+	anim_speed->set_step(1);
+	//anim_speed->set_step(0.01);
 	anim_speed->set_h_size_flags(SIZE_EXPAND_FILL);
 	hbc_anim_speed->add_child(anim_speed);
 	anim_speed->connect("value_changed", this, "_animation_fps_changed");
