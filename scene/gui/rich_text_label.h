@@ -330,6 +330,7 @@ private:
 	bool updating_scroll;
 	int current_idx;
 	int visible_line_count;
+	int nonblank_line_count;
 
 	int tab_size;
 	bool underline_meta;
@@ -474,6 +475,7 @@ public:
 
 	void scroll_to_line(int p_line);
 	int get_line_count() const;
+	int get_paragraph_count() const;
 	int get_visible_line_count() const;
 
 	int get_content_height() const;

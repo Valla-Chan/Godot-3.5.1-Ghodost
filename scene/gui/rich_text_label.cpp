@@ -2542,8 +2542,12 @@ void RichTextLabel::scroll_to_line(int p_line) {
 	vscroll->set_value(main->lines[p_line].height_accum_cache - main->lines[p_line].height_cache);
 }
 
+int RichTextLabel::get_paragraph_count() const {
+	return main->lines.size();
+}
+
 int RichTextLabel::get_line_count() const {
-	return current_frame->lines.size();
+	return get_content_height() / get_font("font")->get_height();
 }
 
 int RichTextLabel::get_visible_line_count() const {
@@ -2901,6 +2905,7 @@ void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_using_bbcode"), &RichTextLabel::is_using_bbcode);
 
 	ClassDB::bind_method(D_METHOD("get_line_count"), &RichTextLabel::get_line_count);
+	ClassDB::bind_method(D_METHOD("get_paragraph_count"), &RichTextLabel::get_paragraph_count);
 	ClassDB::bind_method(D_METHOD("get_visible_line_count"), &RichTextLabel::get_visible_line_count);
 
 	ClassDB::bind_method(D_METHOD("get_content_height"), &RichTextLabel::get_content_height);
