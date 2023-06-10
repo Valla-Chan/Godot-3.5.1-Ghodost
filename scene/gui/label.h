@@ -95,6 +95,8 @@ private:
 	int visible_chars;
 	int lines_skipped;
 	int max_lines_visible;
+	//VALLA EDITS
+	Size2 extra_spacing;
 
 protected:
 	void _notification(int p_what);
@@ -118,6 +120,10 @@ public:
 
 	void set_uppercase(bool p_uppercase);
 	bool is_uppercase() const;
+
+
+	void set_extra_spacing(Size2 p_amount);
+	Size2 get_extra_spacing() const;
 
 	void set_visible_characters(int p_amount);
 	int get_visible_characters() const;
