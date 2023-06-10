@@ -1,0 +1,10 @@
+short_name = "godot"
+name = "Godot Engine"
+major = 3
+minor = 5
+patch = 2
+status = "stable"
+module_config = ""
+year = 2023
+website = "https://godotengine.org"
+docs = "3.5"
