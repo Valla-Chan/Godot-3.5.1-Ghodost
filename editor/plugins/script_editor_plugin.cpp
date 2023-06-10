@@ -644,6 +644,18 @@ void ScriptEditor::_close_other_tabs() {
 	_queue_close_tabs();
 }
 
+//
+void ScriptEditor::_close_below_tabs() {
+	int current_idx = tab_container->get_current_tab();
+	for (int i = tab_container->get_child_count() - 1; i > current_idx; i--) {
+		if (i != current_idx) {
+			script_close_queue.push_back(i);
+		}
+	}
+	_queue_close_tabs();
+}
+//
+
 void ScriptEditor::_close_all_tabs() {
 	for (int i = tab_container->get_child_count() - 1; i >= 0; i--) {
 		script_close_queue.push_back(i);
@@ -1218,6 +1230,9 @@ void ScriptEditor::_menu_option(int p_option) {
 			} break;
 			case CLOSE_OTHER_TABS: {
 				_close_other_tabs();
+			} break; //there used to not be a break here in 3.5.1
+			case CLOSE_BELOW_TABS: {
+				_close_below_tabs();
 			} break;
 			case CLOSE_ALL: {
 				_close_all_tabs();
@@ -1287,6 +1302,10 @@ void ScriptEditor::_menu_option(int p_option) {
 				} break;
 				case CLOSE_OTHER_TABS: {
 					_close_other_tabs();
+				} break;
+				//valla edits
+				case CLOSE_BELOW_TABS: {
+					_close_below_tabs();
 				} break;
 				case CLOSE_ALL: {
 					_close_all_tabs();
@@ -1400,6 +1419,11 @@ void ScriptEditor::_prepare_file_menu() {
 	menu->set_item_disabled(menu->get_item_index(FILE_CLOSE), tab_container->get_child_count() < 1);
 	menu->set_item_disabled(menu->get_item_index(CLOSE_ALL), tab_container->get_child_count() < 1);
 	menu->set_item_disabled(menu->get_item_index(CLOSE_OTHER_TABS), tab_container->get_child_count() <= 1);
+
+	//valla edits
+	//menu->set_item_disabled(menu->get_item_index(CLOSE_ABOVE_TABS), tab_container->get_child_count() <= 1 );
+	menu->set_item_disabled(menu->get_item_index(CLOSE_BELOW_TABS), tab_container->get_child_count() <= 1);
+	//
 	menu->set_item_disabled(menu->get_item_index(CLOSE_DOCS), !_has_docs_tab());
 
 	menu->set_item_disabled(menu->get_item_index(FILE_RUN), current_is_doc);
@@ -2717,6 +2741,8 @@ void ScriptEditor::_make_script_list_context_menu() {
 	context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/close_file"), FILE_CLOSE);
 	context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/close_all"), CLOSE_ALL);
 	context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/close_other_tabs"), CLOSE_OTHER_TABS);
+	//VALLA EDITS
+	context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/close_below_tabs"), CLOSE_BELOW_TABS);
 	context_menu->add_separator();
 	if (se) {
 		Ref<Script> scr = se->get_edited_resource();
@@ -2739,6 +2765,9 @@ void ScriptEditor::_make_script_list_context_menu() {
 
 	context_menu->set_item_disabled(context_menu->get_item_index(CLOSE_ALL), tab_container->get_child_count() <= 0);
 	context_menu->set_item_disabled(context_menu->get_item_index(CLOSE_OTHER_TABS), tab_container->get_child_count() <= 1);
+	//valla edits
+	context_menu->set_item_disabled(context_menu->get_item_index(CLOSE_BELOW_TABS), tab_container->get_child_count() <= 1);
+	//
 	context_menu->set_item_disabled(context_menu->get_item_index(WINDOW_MOVE_UP), tab_container->get_current_tab() <= 0);
 	context_menu->set_item_disabled(context_menu->get_item_index(WINDOW_MOVE_DOWN), tab_container->get_current_tab() >= tab_container->get_child_count() - 1);
 	context_menu->set_item_disabled(context_menu->get_item_index(WINDOW_SORT), tab_container->get_child_count() <= 1);
@@ -3172,6 +3201,9 @@ void ScriptEditor::_bind_methods() {
 	ClassDB::bind_method("_close_docs_tab", &ScriptEditor::_close_docs_tab);
 	ClassDB::bind_method("_close_all_tabs", &ScriptEditor::_close_all_tabs);
 	ClassDB::bind_method("_close_other_tabs", &ScriptEditor::_close_other_tabs);
+	//valla edits
+	ClassDB::bind_method("_close_below_tabs", &ScriptEditor::_close_below_tabs);
+	//
 	ClassDB::bind_method("_queue_close_tabs", &ScriptEditor::_queue_close_tabs);
 	ClassDB::bind_method("_open_recent_script", &ScriptEditor::_open_recent_script);
 	ClassDB::bind_method("_theme_option", &ScriptEditor::_theme_option);
@@ -3397,6 +3429,9 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/close_file", TTR("Close"), KEY_MASK_CMD | KEY_W), FILE_CLOSE);
 	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/close_all", TTR("Close All")), CLOSE_ALL);
 	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/close_other_tabs", TTR("Close Other Tabs")), CLOSE_OTHER_TABS);
+	//valla edits
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/close_below_tabs", TTR("Close Below Tabs")), CLOSE_BELOW_TABS);
+	//
 	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/close_docs", TTR("Close Docs")), CLOSE_DOCS);
 
 	file_menu->get_popup()->add_separator();

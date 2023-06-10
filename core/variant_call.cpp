@@ -1106,6 +1106,10 @@ struct _VariantCall {
 		r_ret = Color::hex(*p_args[0]);
 	}
 
+	static void Color_init5(Variant &r_ret, const Variant **p_args) {
+		r_ret = Color(*p_args[0], *p_args[1]);
+	}
+
 	static void AABB_init1(Variant &r_ret, const Variant **p_args) {
 		r_ret = ::AABB(*p_args[0], *p_args[1]);
 	}

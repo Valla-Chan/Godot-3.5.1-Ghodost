@@ -2351,8 +2351,9 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 		} break;
 		case FILE_CLOSE_OTHERS:
 		case FILE_CLOSE_RIGHT:
+		case FILE_CLOSE_LEFT:
 		case FILE_CLOSE_ALL: {
-			if (editor_data.get_edited_scene_count() > 1 && (current_option != FILE_CLOSE_RIGHT || editor_data.get_edited_scene() < editor_data.get_edited_scene_count() - 1)) {
+			if (editor_data.get_edited_scene_count() > 1 && ((current_option != FILE_CLOSE_RIGHT) || editor_data.get_edited_scene() < editor_data.get_edited_scene_count() - 1)) {
 				int next_tab = editor_data.get_edited_scene() + 1;
 				next_tab %= editor_data.get_edited_scene_count();
 				_scene_tab_closed(next_tab, current_option);
@@ -3017,6 +3018,7 @@ void EditorNode::_discard_changes(const String &p_str) {
 		case FILE_CLOSE:
 		case FILE_CLOSE_OTHERS:
 		case FILE_CLOSE_RIGHT:
+		case FILE_CLOSE_LEFT:
 		case FILE_CLOSE_ALL:
 		case SCENE_TAB_CLOSE: {
 			Node *scene = editor_data.get_edited_scene_root(tab_closing);
@@ -3047,7 +3049,8 @@ void EditorNode::_discard_changes(const String &p_str) {
 				} else {
 					_menu_option_confirm(current_option, false);
 				}
-			} else if (current_option == FILE_CLOSE_OTHERS || current_option == FILE_CLOSE_RIGHT) {
+				//valla edits
+			} else if (current_option == FILE_CLOSE_OTHERS || current_option == FILE_CLOSE_RIGHT || current_option == FILE_CLOSE_LEFT) {
 				if (editor_data.get_edited_scene_count() == 1 || (current_option == FILE_CLOSE_RIGHT && editor_data.get_edited_scene_count() <= editor_data.get_edited_scene() + 1)) {
 					current_option = -1;
 					save_confirmation->hide();
@@ -5001,6 +5004,7 @@ void EditorNode::_scene_tab_input(const Ref<InputEvent> &p_input) {
 				}
 				scene_tabs_context_menu->add_item(TTR("Close Other Tabs"), FILE_CLOSE_OTHERS);
 				scene_tabs_context_menu->add_item(TTR("Close Tabs to the Right"), FILE_CLOSE_RIGHT);
+				//scene_tabs_context_menu->add_item(TTR("Close Tabs to the Left"), FILE_CLOSE_LEFT);
 				scene_tabs_context_menu->add_item(TTR("Close All Tabs"), FILE_CLOSE_ALL);
 			}
 			scene_tabs_context_menu->set_position(mb->get_global_position());
