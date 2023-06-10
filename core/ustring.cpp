@@ -1052,6 +1052,18 @@ String String::to_lower() const {
 	return lower;
 }
 
+String String::to_camel_case() const {
+	String s = this->to_pascal_case();
+	if (!s.empty()) {
+		s[0] = _find_lower(s[0]);
+	}
+	return s;
+}
+
+String String::to_pascal_case() const {
+	return this->capitalize().replace(" ", "");
+}
+
 const CharType *String::c_str() const {
 	static const CharType zero = 0;
 
