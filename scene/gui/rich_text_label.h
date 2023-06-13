@@ -474,7 +474,7 @@ public:
 	bool search(const String &p_string, bool p_from_selection = false, bool p_search_previous = false);
 
 	void scroll_to_line(int p_line);
-	float get_line_count() const;
+	int get_line_count() const;
 	int get_paragraph_count() const;
 	int get_visible_line_count() const;
 

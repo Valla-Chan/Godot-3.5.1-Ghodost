@@ -91,7 +91,6 @@ void Font::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("draw", "canvas_item", "position", "string", "modulate", "clip_w", "outline_modulate"), &Font::draw, DEFVAL(Color(1, 1, 1)), DEFVAL(-1), DEFVAL(Color(1, 1, 1)));
 	ClassDB::bind_method(D_METHOD("get_ascent"), &Font::get_ascent);
 	ClassDB::bind_method(D_METHOD("get_descent"), &Font::get_descent);
-	ClassDB::bind_method(D_METHOD("get_spacing", "type"), &Font::get_spacing);
 	ClassDB::bind_method(D_METHOD("get_height"), &Font::get_height);
 	ClassDB::bind_method(D_METHOD("is_distance_field_hint"), &Font::is_distance_field_hint);
 	ClassDB::bind_method(D_METHOD("get_char_size", "char", "next"), &Font::get_char_size, DEFVAL(0));
@@ -367,10 +366,6 @@ float BitmapFont::get_ascent() const {
 }
 float BitmapFont::get_descent() const {
 	return height - ascent;
-}
-
-int BitmapFont::get_spacing(int p_type) const {
-	return 0;
 }
 
 void BitmapFont::add_texture(const Ref<Texture> &p_texture) {

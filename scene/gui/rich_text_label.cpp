@@ -2546,11 +2546,8 @@ int RichTextLabel::get_paragraph_count() const {
 	return main->lines.size();
 }
 
-float RichTextLabel::get_line_count() const {
-	float height = get_font("font")->get_height();
-	//TODO: does this next line even do anything?
-	float spacing = get_font("font")->get_spacing(0) + get_font("font")->get_spacing(1);
-	return floor(get_content_height() / (height + spacing / height));
+int RichTextLabel::get_line_count() const {
+	return get_content_height() / get_font("font")->get_height();
 }
 
 int RichTextLabel::get_visible_line_count() const {
