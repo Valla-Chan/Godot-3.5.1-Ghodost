@@ -108,6 +108,9 @@ void CollisionShape2D::_notification(int p_what) {
 			rect = Rect2();
 
 			Color draw_col = get_tree()->get_debug_collisions_color();
+			if (use_override_color == true) {
+				draw_col = override_color;
+			}
 			if (disabled) {
 				float g = draw_col.get_v();
 				draw_col.r = g;
@@ -248,6 +251,31 @@ float CollisionShape2D::get_one_way_collision_margin() const {
 	return one_way_collision_margin;
 }
 
+// VALLA EDITS
+void CollisionShape2D::set_use_override_color(const bool p_enable) {
+	if (use_override_color == p_enable) {
+		return;
+	}
+
+	use_override_color = p_enable;
+	update();
+}
+bool CollisionShape2D::get_use_override_color() const {
+	return use_override_color;
+}
+
+void CollisionShape2D::set_override_color(const Color p_override_color) {
+	if (override_color == p_override_color) {
+		return;
+	}
+
+	override_color = p_override_color;
+	update();
+}
+Color CollisionShape2D::get_override_color() const {
+	return override_color;
+}
+//
 void CollisionShape2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_shape", "shape"), &CollisionShape2D::set_shape);
 	ClassDB::bind_method(D_METHOD("get_shape"), &CollisionShape2D::get_shape);
@@ -259,10 +287,17 @@ void CollisionShape2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_one_way_collision_margin"), &CollisionShape2D::get_one_way_collision_margin);
 	ClassDB::bind_method(D_METHOD("_shape_changed"), &CollisionShape2D::_shape_changed);
 
+	ClassDB::bind_method(D_METHOD("set_use_override_color"), &CollisionShape2D::set_use_override_color);
+	ClassDB::bind_method(D_METHOD("get_use_override_color"), &CollisionShape2D::get_use_override_color);
+	ClassDB::bind_method(D_METHOD("set_override_color"), &CollisionShape2D::set_override_color);
+	ClassDB::bind_method(D_METHOD("get_override_color"), &CollisionShape2D::get_override_color);
+
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "shape", PROPERTY_HINT_RESOURCE_TYPE, "Shape2D"), "set_shape", "get_shape");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "disabled"), "set_disabled", "is_disabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "one_way_collision"), "set_one_way_collision", "is_one_way_collision_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "one_way_collision_margin", PROPERTY_HINT_RANGE, "0,128,0.1"), "set_one_way_collision_margin", "get_one_way_collision_margin");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_override_color"), "set_use_override_color", "get_use_override_color");
+	ADD_PROPERTY(PropertyInfo(Variant::COLOR, "override_color"), "set_override_color", "get_override_color");
 }
 
 CollisionShape2D::CollisionShape2D() {
@@ -273,4 +308,6 @@ CollisionShape2D::CollisionShape2D() {
 	disabled = false;
 	one_way_collision = false;
 	one_way_collision_margin = 1.0;
+	use_override_color = false;
+	override_color = Color(1.0, 1.0, 1.0, 0.35);
 }

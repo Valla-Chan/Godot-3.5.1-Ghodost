@@ -45,6 +45,8 @@ class CollisionShape2D : public Node2D {
 	void _shape_changed();
 	bool disabled;
 	bool one_way_collision;
+	bool use_override_color;
+	Color override_color;
 	float one_way_collision_margin;
 
 	void _update_in_shape_owner(bool p_xform_only = false);
@@ -67,6 +69,13 @@ public:
 
 	void set_one_way_collision_margin(float p_margin);
 	float get_one_way_collision_margin() const;
+
+	// VALLA EDITS
+	void set_use_override_color(const bool p_enable);
+	bool get_use_override_color() const;
+	void set_override_color(const Color p_override_color);
+	Color get_override_color() const;
+	//
 
 	virtual String get_configuration_warning() const;
 

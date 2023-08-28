@@ -164,6 +164,9 @@ void CollisionPolygon2D::_notification(int p_what) {
 
 			if (one_way_collision) {
 				Color dcol = get_tree()->get_debug_collisions_color(); //0.9,0.2,0.2,0.4);
+				if (use_override_color == true) {
+					dcol = override_color;
+				}
 				dcol.a = 1.0;
 				Vector2 line_to(0, 20);
 				draw_line(Vector2(), line_to, dcol, 3);
@@ -316,6 +319,33 @@ void CollisionPolygon2D::set_one_way_collision_margin(float p_margin) {
 float CollisionPolygon2D::get_one_way_collision_margin() const {
 	return one_way_collision_margin;
 }
+
+// VALLA EDITS
+void CollisionPolygon2D::set_use_override_color(const bool p_enable) {
+	if (use_override_color == p_enable) {
+		return;
+	}
+
+	use_override_color = p_enable;
+	update();
+}
+bool CollisionPolygon2D::get_use_override_color() const {
+	return use_override_color;
+}
+
+void CollisionPolygon2D::set_override_color(const Color p_override_color) {
+	if (override_color == p_override_color) {
+		return;
+	}
+
+	override_color = p_override_color;
+	update();
+}
+Color CollisionPolygon2D::get_override_color() const {
+	return override_color;
+}
+//
+
 void CollisionPolygon2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_polygon", "polygon"), &CollisionPolygon2D::set_polygon);
 	ClassDB::bind_method(D_METHOD("get_polygon"), &CollisionPolygon2D::get_polygon);
@@ -328,6 +358,11 @@ void CollisionPolygon2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_one_way_collision_enabled"), &CollisionPolygon2D::is_one_way_collision_enabled);
 	ClassDB::bind_method(D_METHOD("set_one_way_collision_margin", "margin"), &CollisionPolygon2D::set_one_way_collision_margin);
 	ClassDB::bind_method(D_METHOD("get_one_way_collision_margin"), &CollisionPolygon2D::get_one_way_collision_margin);
+
+	ClassDB::bind_method(D_METHOD("set_use_override_color"), &CollisionPolygon2D::set_use_override_color);
+	ClassDB::bind_method(D_METHOD("get_use_override_color"), &CollisionPolygon2D::get_use_override_color);
+	ClassDB::bind_method(D_METHOD("set_override_color"), &CollisionPolygon2D::set_override_color);
+	ClassDB::bind_method(D_METHOD("get_override_color"), &CollisionPolygon2D::get_override_color);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "build_mode", PROPERTY_HINT_ENUM, "Solids,Segments"), "set_build_mode", "get_build_mode");
 	ADD_PROPERTY(PropertyInfo(Variant::POOL_VECTOR2_ARRAY, "polygon"), "set_polygon", "get_polygon");
@@ -348,4 +383,6 @@ CollisionPolygon2D::CollisionPolygon2D() {
 	disabled = false;
 	one_way_collision = false;
 	one_way_collision_margin = 1.0;
+	use_override_color = false;
+	override_color = Color(1.0, 1.0, 1.0, 0.35);
 }
