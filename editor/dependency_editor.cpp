@@ -483,6 +483,9 @@ void DependencyRemoveDialog::ok_pressed() {
 		if (files_to_delete[i] == ProjectSettings::get_singleton()->get("application/config/icon")) {
 			ProjectSettings::get_singleton()->set("application/config/icon", "");
 		}
+		if (files_to_delete[i] == ProjectSettings::get_singleton()->get("application/config/addons")) {
+			ProjectSettings::get_singleton()->set("application/config/addons", "");
+		}
 		if (files_to_delete[i] == ProjectSettings::get_singleton()->get("application/run/main_scene")) {
 			ProjectSettings::get_singleton()->set("application/run/main_scene", "");
 		}

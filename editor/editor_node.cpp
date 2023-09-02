@@ -4021,7 +4021,8 @@ Ref<ImageTexture> EditorNode::_load_custom_class_icon(const String &p_path) cons
 }
 
 String EditorNode::_to_absolute_plugin_path(const String &p_plugin_name) {
-	return "res://addons/" + p_plugin_name + "/plugin.cfg";
+	//VALLA EDITS
+	return ProjectSettings::get_singleton()->get("application/config/addons") + p_plugin_name + "/plugin.cfg";
 }
 
 void EditorNode::_pick_main_scene_custom_action(const String &p_custom_action_name) {

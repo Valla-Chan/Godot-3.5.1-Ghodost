@@ -156,7 +156,7 @@ void CreateDialog::add_type(const String &p_type, HashMap<String, TreeItem *> &p
 		}
 
 		String script_path = ScriptServer::get_global_class_path(p_type);
-		if (script_path.find("res://addons/", 0) != -1) {
+		if (script_path.find(ProjectSettings::get_singleton()->get("application/config/addons"), 0) != -1) {
 			if (!EditorNode::get_singleton()->is_addon_plugin_enabled(script_path.get_slicec('/', 3))) {
 				return;
 			}

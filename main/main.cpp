@@ -1485,6 +1485,11 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 	MAIN_PRINT("Main: DCC");
 	VisualServer::get_singleton()->set_default_clear_color(GLOBAL_DEF("rendering/environment/default_clear_color", Color(0.3, 0.3, 0.3)));
 
+	GLOBAL_DEF("application/config/addons", String());
+	ProjectSettings::get_singleton()->set_custom_property_info("application/config/addons",
+			PropertyInfo(Variant::STRING, "application/config/addons",
+					PROPERTY_HINT_DIR));
+
 	GLOBAL_DEF("application/config/icon", String());
 	ProjectSettings::get_singleton()->set_custom_property_info("application/config/icon",
 			PropertyInfo(Variant::STRING, "application/config/icon",

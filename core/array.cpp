@@ -131,6 +131,13 @@ void Array::push_back(const Variant &p_value) {
 	_p->array.push_back(p_value);
 }
 
+// VALLA EDITS: only append if not existing
+void Array::append_unique(const Variant &p_value) {
+	if (_p->array.find(p_value, 0) == -1) {
+		_p->array.push_back(p_value);
+	}
+}
+
 void Array::append_array(const Array &p_array) {
 	_p->array.append_array(p_array._p->array);
 }
