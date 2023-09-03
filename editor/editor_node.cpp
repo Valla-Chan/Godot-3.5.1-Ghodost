@@ -3954,9 +3954,9 @@ Ref<Script> EditorNode::get_object_custom_type_base(const Object *p_object) cons
 		// 	return name;
 
 		// should probably be deprecated in 4.x
-		StringName base = script->get_instance_base_type();
-		if (base != StringName() && EditorNode::get_editor_data().get_custom_types().has(base)) {
-			const Vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
+		StringName native = script->get_instance_base_type();
+		if (native != StringName() && EditorNode::get_editor_data().get_custom_types().has(native)) {
+			const Vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[native];
 
 			Ref<Script> base_script = script;
 			while (base_script.is_valid()) {
@@ -3984,7 +3984,7 @@ StringName EditorNode::get_object_custom_type_name(const Object *p_object) const
 	if (script.is_valid()) {
 		Ref<Script> base_script = script;
 		while (base_script.is_valid()) {
-			StringName name = EditorNode::get_editor_data().script_class_get_name(base_script->get_path());
+			StringName name = ScriptServer::get_global_class_name(base_script->get_path());
 			if (name != StringName()) {
 				return name;
 			}
@@ -4051,7 +4051,7 @@ Ref<Texture> EditorNode::get_object_icon(const Object *p_object, const String &p
 	if (script.is_valid() && !script_icon_cache.has(script)) {
 		Ref<Script> base_script = script;
 		while (base_script.is_valid()) {
-			StringName name = EditorNode::get_editor_data().script_class_get_name(base_script->get_path());
+			StringName name = ScriptServer::get_global_class_name(base_script->get_path());
 			String icon_path = EditorNode::get_editor_data().script_class_get_icon_path(name);
 			Ref<ImageTexture> icon = _load_custom_class_icon(icon_path);
 			if (icon.is_valid()) {
@@ -4098,36 +4098,30 @@ Ref<Texture> EditorNode::get_object_icon(const Object *p_object, const String &p
 Ref<Texture> EditorNode::get_class_icon(const String &p_class, const String &p_fallback) const {
 	ERR_FAIL_COND_V_MSG(p_class.empty(), nullptr, "Class name cannot be empty.");
 
+	EditorData &ed = get_editor_data();
 	if (ScriptServer::is_global_class(p_class)) {
-		String class_name = p_class;
-		Ref<Script> script = EditorNode::get_editor_data().script_class_load_script(class_name);
+		Ref<ImageTexture> icon;
+		Ref<Script> script = ScriptServer::get_global_class_script(p_class);
+		StringName class_name = p_class;
 
-		while (true) {
-			String icon_path = EditorNode::get_editor_data().script_class_get_icon_path(class_name);
-			Ref<Texture> icon = _load_custom_class_icon(icon_path);
+		while (script.is_valid()) {
+			class_name = ScriptServer::get_global_class_name(script->get_path());
+			String current_icon_path = ed.script_class_get_icon_path(class_name);
+			icon = _load_custom_class_icon(current_icon_path);
 			if (icon.is_valid()) {
-				return icon; // Current global class has icon.
+				return icon;
 			}
-
-			// Find next global class along the inheritance chain.
-			do {
-				Ref<Script> base_script = script->get_base_script();
-				if (base_script.is_null()) {
-					// We've reached a native class, use its icon.
-					String base_type;
-					script->get_language()->get_global_class_name(script->get_path(), &base_type);
-					if (gui_base->has_icon(base_type, "EditorIcons")) {
-						return gui_base->get_icon(base_type, "EditorIcons");
-					}
-					return gui_base->get_icon(p_fallback, "EditorIcons");
-				}
-				script = base_script;
-				class_name = EditorNode::get_editor_data().script_class_get_name(script->get_path());
-			} while (class_name.empty());
+			script = script->get_base_script();
 		}
+
+		if (icon.is_null()) {
+			icon = gui_base->get_icon(ScriptServer::get_global_class_base(class_name), "EditorIcons");
+		}
+
+		return icon;
 	}
 
-	const Map<String, Vector<EditorData::CustomType>> &p_map = EditorNode::get_editor_data().get_custom_types();
+	const Map<String, Vector<EditorData::CustomType>> &p_map = ed.get_custom_types();
 	for (const Map<String, Vector<EditorData::CustomType>>::Element *E = p_map.front(); E; E = E->next()) {
 		const Vector<EditorData::CustomType> &ct = E->value();
 		for (int i = 0; i < ct.size(); ++i) {
