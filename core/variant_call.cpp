@@ -576,6 +576,7 @@ struct _VariantCall {
 	VCALL_LOCALMEM0R(Array, pop_front);
 	VCALL_LOCALMEM1R(Array, pop_at);
 	VCALL_LOCALMEM1(Array, append);
+	VCALL_LOCALMEM1(Array, append_unique);
 	VCALL_LOCALMEM1(Array, append_array);
 	VCALL_LOCALMEM1(Array, fill);
 	VCALL_LOCALMEM1(Array, resize);
@@ -1959,6 +1960,7 @@ void register_variant_methods() {
 	ADDFUNC1NC(ARRAY, NIL, Array, push_front, NIL, "value", varray());
 	ADDFUNC1NC(ARRAY, NIL, Array, fill, NIL, "value", varray());
 	ADDFUNC1NC(ARRAY, NIL, Array, append, NIL, "value", varray());
+	ADDFUNC1NC(ARRAY, NIL, Array, append_unique, NIL, "array", varray());
 	ADDFUNC1NC(ARRAY, NIL, Array, append_array, ARRAY, "array", varray());
 	ADDFUNC1NC(ARRAY, NIL, Array, resize, INT, "size", varray());
 	ADDFUNC2NC(ARRAY, NIL, Array, insert, INT, "position", NIL, "value", varray());
