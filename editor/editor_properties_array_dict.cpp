@@ -386,12 +386,12 @@ void EditorPropertyArray::update_property() {
 				edit->set_icon(get_icon("Edit", "EditorIcons"));
 				hbox->add_child(edit);
 				edit->connect("pressed", this, "_change_type", varray(edit, i + offset));
-			} else {
-				Button *remove = memnew(Button);
-				remove->set_icon(get_icon("Remove", "EditorIcons"));
-				remove->connect("pressed", this, "_remove_pressed", varray(i + offset));
-				hbox->add_child(remove);
 			}
+			// VALLA EDITS
+			Button *remove = memnew(Button);
+			remove->set_icon(get_icon("Remove", "EditorIcons"));
+			remove->connect("pressed", this, "_remove_pressed", varray(i + offset));
+			hbox->add_child(remove);
 
 			prop->update_property();
 		}
@@ -756,6 +756,19 @@ void EditorPropertyDictionary::_property_changed(const String &p_property, Varia
 	}
 }
 
+// VALLA EDITS
+void EditorPropertyDictionary::_remove_pressed(int p_index) {
+	Dictionary dict = object->get_dict();
+	Variant key = dict.get_key_at_index(p_index);
+	dict.erase(key);
+
+	emit_changed(get_edited_property(), dict, "", false);
+
+	dict = dict.duplicate(); // Duplicate, so undo/redo works better.
+	object->set_dict(dict);
+	update_property();
+}
+
 void EditorPropertyDictionary::_change_type(Object *p_button, int p_index) {
 	Button *button = Object::cast_to<Button>(p_button);
 
@@ -1111,6 +1124,17 @@ void EditorPropertyDictionary::update_property() {
 			edit->set_icon(get_icon("Edit", "EditorIcons"));
 			hbox->add_child(edit);
 			edit->connect("pressed", this, "_change_type", varray(edit, change_index));
+			// VALLA EDITS, DICTIONARY
+			switch (value.get_type()) {
+				case Variant::NIL: {
+				} break;
+				default: {
+					Button *remove = memnew(Button);
+					remove->set_icon(get_icon("Remove", "EditorIcons"));
+					remove->connect("pressed", this, "_remove_pressed", varray(i + offset));
+					hbox->add_child(remove);
+				}
+			}
 
 			prop->update_property();
 
@@ -1182,6 +1206,7 @@ void EditorPropertyDictionary::_bind_methods() {
 	ClassDB::bind_method("_edit_pressed", &EditorPropertyDictionary::_edit_pressed);
 	ClassDB::bind_method("_page_changed", &EditorPropertyDictionary::_page_changed);
 	ClassDB::bind_method("_property_changed", &EditorPropertyDictionary::_property_changed, DEFVAL(String()), DEFVAL(false));
+	ClassDB::bind_method("_remove_pressed", &EditorPropertyDictionary::_remove_pressed);
 	ClassDB::bind_method("_change_type", &EditorPropertyDictionary::_change_type);
 	ClassDB::bind_method("_change_type_menu", &EditorPropertyDictionary::_change_type_menu);
 	ClassDB::bind_method("_add_key_value", &EditorPropertyDictionary::_add_key_value);
