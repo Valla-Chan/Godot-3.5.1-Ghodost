@@ -475,7 +475,7 @@ Rect2 DynamicFontAtSize::get_char_tx_uv_rect(CharType p_char, CharType p_next, c
 	return Rect2();
 }
 
-float DynamicFontAtSize::draw_char_scaled(RID p_canvas_item, const Point2 &p_pos, float p_scale, CharType p_char, CharType p_next, const Color &p_modulate, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks, bool p_advance_only, bool p_outline) const {
+float DynamicFontAtSize::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_char, CharType p_next, const Color &p_modulate, const Vector<Ref<DynamicFontAtSize>> &p_fallbacks, bool p_advance_only, bool p_outline) const {
 	if (!valid) {
 		return 0;
 	}
@@ -519,18 +519,18 @@ float DynamicFontAtSize::draw_char_scaled(RID p_canvas_item, const Point2 &p_pos
 
 		if (!p_advance_only && ch->texture_idx != -1) {
 			Point2 cpos = p_pos;
-			cpos.x += ch->h_align * p_scale;
-			cpos.y -= font->get_ascent() * p_scale;
-			cpos.y += ch->v_align * p_scale;
+			cpos.x += ch->h_align;
+			cpos.y -= font->get_ascent();
+			cpos.y += ch->v_align;
 			Color modulate = p_modulate;
 			if (font->textures[ch->texture_idx].texture->get_format() == Image::FORMAT_RGBA8) {
 				modulate.r = modulate.g = modulate.b = 1.0;
 			}
 			RID texture = font->textures[ch->texture_idx].texture->get_rid();
-			VisualServer::get_singleton()->canvas_item_add_texture_rect_region(p_canvas_item, Rect2(cpos, ch->rect.size * p_scale), texture, ch->rect_uv, modulate, false, RID(), false);
+			VisualServer::get_singleton()->canvas_item_add_texture_rect_region(p_canvas_item, Rect2(cpos, ch->rect.size), texture, ch->rect_uv, modulate, false, RID(), false);
 		}
 
-		advance = ch->advance * p_scale;
+		advance = ch->advance;
 	}
 
 	if (!skip_kerning) {
@@ -1203,7 +1203,7 @@ Rect2 DynamicFont::get_char_tx_uv_rect(CharType p_char, CharType p_next, bool p_
 	}
 }
 
-float DynamicFont::draw_char_scaled(RID p_canvas_item, const Point2 &p_pos, float p_scale, CharType p_char, CharType p_next, const Color &p_modulate, bool p_outline) const {
+float DynamicFont::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_char, CharType p_next, const Color &p_modulate, bool p_outline) const {
 	if (!data_at_size.is_valid()) {
 		return 0;
 	}

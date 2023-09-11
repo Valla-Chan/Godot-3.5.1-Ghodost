@@ -559,14 +559,13 @@ void EditorHelp::_update_doc() {
 
 			_add_text(cd.properties[i].name);
 
-			class_desc->pop();
-			class_desc->pop();
-
 			if (describe) {
 				class_desc->pop();
 				property_descr = true;
 			}
 
+			class_desc->pop();
+			class_desc->pop();
 			class_desc->pop(); // Cell
 
 			// Property value.
