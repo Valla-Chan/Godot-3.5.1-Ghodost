@@ -669,7 +669,7 @@ Rect2 BitmapFont::get_char_tx_uv_rect(CharType p_char, CharType p_next, bool p_o
 	}
 }
 
-float BitmapFont::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_char, CharType p_next, const Color &p_modulate, bool p_outline) const {
+float BitmapFont::draw_char_scaled(RID p_canvas_item, const Point2 &p_pos, float p_scale, CharType p_char, CharType p_next, const Color &p_modulate, bool p_outline) const {
 	int32_t ch = p_char;
 	if (((p_char & 0xfffffc00) == 0xd800) && (p_next & 0xfffffc00) == 0xdc00) { // decode surrogate pair.
 		ch = (p_char << 10UL) + p_next - ((0xd800 << 10UL) + 0xdc00 - 0x10000);
@@ -682,7 +682,7 @@ float BitmapFont::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_c
 
 	if (!c) {
 		if (fallback.is_valid()) {
-			return fallback->draw_char(p_canvas_item, p_pos, p_char, p_next, p_modulate, p_outline);
+			return fallback->draw_char_scaled(p_canvas_item, p_pos, p_scale, p_char, p_next, p_modulate, p_outline);
 		}
 		return 0;
 	}
@@ -690,13 +690,13 @@ float BitmapFont::draw_char(RID p_canvas_item, const Point2 &p_pos, CharType p_c
 	ERR_FAIL_COND_V(c->texture_idx < -1 || c->texture_idx >= textures.size(), 0);
 	if (!p_outline && c->texture_idx != -1) {
 		Point2 cpos = p_pos;
-		cpos.x += c->h_align;
-		cpos.y -= ascent;
-		cpos.y += c->v_align;
-		VisualServer::get_singleton()->canvas_item_add_texture_rect_region(p_canvas_item, Rect2(cpos, c->rect.size), textures[c->texture_idx]->get_rid(), c->rect, p_modulate, false, RID(), false);
+		cpos.x += c->h_align * p_scale;
+		cpos.y -= ascent * p_scale;
+		cpos.y += c->v_align * p_scale;
+		VisualServer::get_singleton()->canvas_item_add_texture_rect_region(p_canvas_item, Rect2(cpos, c->rect.size * p_scale), textures[c->texture_idx]->get_rid(), c->rect, p_modulate, false, RID(), false);
 	}
 
-	return get_char_size(p_char, p_next).width;
+	return get_char_size(p_char, p_next).width * p_scale;
 }
 
 Size2 BitmapFont::get_char_size(CharType p_char, CharType p_next) const {
