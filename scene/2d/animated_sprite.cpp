@@ -102,6 +102,13 @@ Rect2 AnimatedSprite::_get_rect() const {
 	if (centered) {
 		ofs -= s / 2;
 	}
+	if (basealigned) {
+		if (centered) {
+			ofs.y -= s.y / 2;
+		} else {
+			ofs.y -= s.y;
+		}
+	}
 
 	if (s == Size2(0, 0)) {
 		s = Size2(1, 1);
@@ -448,6 +455,15 @@ void AnimatedSprite::_notification(int p_what) {
 			if (centered) {
 				ofs -= s / 2;
 			}
+			//VALLA EDITS
+			if (basealigned) {
+				if (centered) {
+					ofs.y -= Size2(s).y / 2;
+				} else {
+					ofs.y -= Size2(s).y;
+					//ofs.x -= Size2(s).x / 2;
+				}
+			}
 
 			if (Engine::get_singleton()->get_use_gpu_pixel_snap()) {
 				ofs = ofs.floor();
@@ -544,6 +560,16 @@ void AnimatedSprite::set_centered(bool p_center) {
 
 bool AnimatedSprite::is_centered() const {
 	return centered;
+}
+
+void AnimatedSprite::set_basealigned(bool p_basealign) {
+	basealigned = p_basealign;
+	update();
+	item_rect_changed();
+}
+
+bool AnimatedSprite::is_basealigned() const {
+	return basealigned;
 }
 
 void AnimatedSprite::set_offset(const Point2 &p_offset) {
@@ -696,6 +722,9 @@ void AnimatedSprite::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_centered", "centered"), &AnimatedSprite::set_centered);
 	ClassDB::bind_method(D_METHOD("is_centered"), &AnimatedSprite::is_centered);
 
+	ClassDB::bind_method(D_METHOD("set_basealigned", "basealigned"), &AnimatedSprite::set_basealigned);
+	ClassDB::bind_method(D_METHOD("is_basealigned"), &AnimatedSprite::is_basealigned);
+
 	ClassDB::bind_method(D_METHOD("set_offset", "offset"), &AnimatedSprite::set_offset);
 	ClassDB::bind_method(D_METHOD("get_offset"), &AnimatedSprite::get_offset);
 
@@ -722,6 +751,7 @@ void AnimatedSprite::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "speed_scale"), "set_speed_scale", "get_speed_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "centered"), "set_centered", "is_centered");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "basealigned"), "set_basealigned", "is_basealigned");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "offset"), "set_offset", "get_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_h"), "set_flip_h", "is_flipped_h");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_v"), "set_flip_v", "is_flipped_v");
@@ -729,6 +759,7 @@ void AnimatedSprite::_bind_methods() {
 
 AnimatedSprite::AnimatedSprite() {
 	centered = true;
+	basealigned = false;
 	hflip = false;
 	vflip = false;
 

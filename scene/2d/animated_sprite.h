@@ -132,6 +132,7 @@ class AnimatedSprite : public Node2D {
 	float speed_scale;
 
 	bool centered;
+	bool basealigned;
 	Point2 offset;
 
 	bool is_over;
@@ -185,6 +186,9 @@ public:
 
 	void set_centered(bool p_center);
 	bool is_centered() const;
+
+	void set_basealigned(bool p_basecentered);
+	bool is_basealigned() const;
 
 	void set_offset(const Point2 &p_offset);
 	Point2 get_offset() const;
