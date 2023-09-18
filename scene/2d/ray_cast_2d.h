@@ -47,6 +47,7 @@ class RayCast2D : public Node2D {
 	bool exclude_parent_body;
 
 	Vector2 cast_to;
+	float cast_from;
 
 	bool collide_with_areas;
 	bool collide_with_bodies;
@@ -70,6 +71,9 @@ public:
 
 	void set_cast_to(const Vector2 &p_point);
 	Vector2 get_cast_to() const;
+
+	void set_cast_from(const float &p_percent);
+	float get_cast_from() const;
 
 	void set_collision_mask(uint32_t p_mask);
 	uint32_t get_collision_mask() const;

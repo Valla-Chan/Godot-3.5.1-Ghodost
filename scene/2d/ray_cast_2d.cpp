@@ -46,6 +46,18 @@ Vector2 RayCast2D::get_cast_to() const {
 	return cast_to;
 }
 
+
+void RayCast2D::set_cast_from(const float &p_percent) {
+	cast_from = p_percent;
+	if (is_inside_tree() && (Engine::get_singleton()->is_editor_hint() || get_tree()->is_debugging_collisions_hint())) {
+		update();
+	}
+}
+
+float RayCast2D::get_cast_from() const {
+	return cast_from;
+}
+
 void RayCast2D::set_collision_mask(uint32_t p_mask) {
 	collision_mask = p_mask;
 }
@@ -189,7 +201,8 @@ void RayCast2D::_update_raycast_state() {
 
 	Physics2DDirectSpaceState::RayResult rr;
 	bool prev_collision_state = collided;
-	if (dss->intersect_ray(gt.get_origin(), gt.xform(to), rr, exclude, collision_mask, collide_with_bodies, collide_with_areas)) {
+	//VALLA EDITS
+	if (dss->intersect_ray(gt.xform(to * Vector2(cast_from, cast_from)), gt.xform(to), rr, exclude, collision_mask, collide_with_bodies, collide_with_areas)) {
 		collided = true;
 		against = rr.collider_id;
 		collision_point = rr.position;
@@ -218,14 +231,15 @@ void RayCast2D::_draw_debug_shape() {
 	// Draw an arrow indicating where the RayCast is pointing to.
 	const real_t max_arrow_size = 6;
 	const real_t line_width = 1.4;
-	const real_t line_length = cast_to.length();
+	const real_t line_length = (cast_to).length();
 	bool no_line = line_length < line_width;
-	real_t arrow_size = CLAMP(line_length * 2 / 3, line_width, max_arrow_size);
+	real_t arrow_size = CLAMP(line_length * 2 / 3 * (1 - cast_from), line_width, max_arrow_size);
 
 	if (no_line) {
 		arrow_size = line_length;
 	} else {
-		draw_line(Vector2(), cast_to - cast_to.normalized() * arrow_size, draw_col, line_width);
+		//VALLA EDITS
+		draw_line((cast_to * Vector2(cast_from, cast_from)), cast_to - cast_to.normalized() * arrow_size, draw_col, line_width);
 	}
 
 	Transform2D xf;
@@ -309,6 +323,9 @@ void RayCast2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_cast_to", "local_point"), &RayCast2D::set_cast_to);
 	ClassDB::bind_method(D_METHOD("get_cast_to"), &RayCast2D::get_cast_to);
 
+	ClassDB::bind_method(D_METHOD("set_cast_from", "percent"), &RayCast2D::set_cast_from);
+	ClassDB::bind_method(D_METHOD("get_cast_from"), &RayCast2D::get_cast_from);
+
 	ClassDB::bind_method(D_METHOD("is_colliding"), &RayCast2D::is_colliding);
 	ClassDB::bind_method(D_METHOD("force_raycast_update"), &RayCast2D::force_raycast_update);
 
@@ -343,6 +360,7 @@ void RayCast2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "enabled"), "set_enabled", "is_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "exclude_parent"), "set_exclude_parent_body", "get_exclude_parent_body");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "cast_to"), "set_cast_to", "get_cast_to");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "cast_from", PROPERTY_HINT_RANGE, "0.0,1.0"), "set_cast_from", "get_cast_from");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "collision_mask", PROPERTY_HINT_LAYERS_2D_PHYSICS), "set_collision_mask", "get_collision_mask");
 
 	ADD_GROUP("Collide With", "collide_with");
@@ -357,6 +375,7 @@ RayCast2D::RayCast2D() {
 	against_shape = 0;
 	collision_mask = 1;
 	cast_to = Vector2(0, 50);
+	cast_from = 0.0;
 	exclude_parent_body = true;
 	collide_with_bodies = true;
 	collide_with_areas = false;
