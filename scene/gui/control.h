@@ -146,6 +146,10 @@ private:
 		Size2 minimum_size_cache;
 		bool minimum_size_valid;
 
+		//VALLA EDITS
+		bool centered;
+		bool basealigned;
+
 		Size2 last_minimum_size;
 		bool updating_last_minimum_size;
 
@@ -229,6 +233,13 @@ private:
 	String _get_tooltip() const;
 
 	void _override_changed();
+
+	// VALLA EDITS
+	//void set_centered(bool p_center);
+	//bool is_centered() const;
+
+	void set_basealigned(bool p_basealign);
+	bool is_basealigned() const;
 
 	void _update_canvas_item_transform();
 
