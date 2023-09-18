@@ -168,29 +168,6 @@ Size2 Control::_edit_get_minimum_size() const {
 }
 #endif
 
-//VALLA EDITS
-/*
-void Control::set_centered(bool p_center) {
-	centered = p_center;
-	update();
-	item_rect_changed();
-}
-
-bool Control::is_centered() const {
-	return centered;
-}
-*/
-void Control::set_basealigned(bool p_basealign) {
-	data.basealigned = p_basealign;
-	update();
-	item_rect_changed();
-}
-
-bool Control::is_basealigned() const {
-	return data.basealigned;
-}
-//
-
 void Control::set_custom_minimum_size(const Size2 &p_custom) {
 	if (p_custom == data.custom_minimum_size) {
 		return;
@@ -1220,12 +1197,6 @@ void Control::_size_changed() {
 
 	Point2 new_pos_cache = Point2(margin_pos[0], margin_pos[1]);
 	Size2 new_size_cache = Point2(margin_pos[2], margin_pos[3]) - new_pos_cache;
-
-	//if (is_basealigned()) {
-	//	new_pos_cache = Point2(margin_pos[0], margin_pos[3]);
-	//	new_size_cache = Point2(margin_pos[2] - new_pos_cache.x, margin_pos[1] + new_pos_cache.y);
-	//}
-
 
 	Size2 minimum_size = get_combined_minimum_size();
 
@@ -2797,9 +2768,6 @@ void Control::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_clip_contents", "enable"), &Control::set_clip_contents);
 	ClassDB::bind_method(D_METHOD("is_clipping_contents"), &Control::is_clipping_contents);
 
-	ClassDB::bind_method(D_METHOD("set_basealigned", "basealigned"), &Control::set_basealigned);
-	ClassDB::bind_method(D_METHOD("is_basealigned"), &Control::is_basealigned);
-
 	ClassDB::bind_method(D_METHOD("grab_click_focus"), &Control::grab_click_focus);
 
 	ClassDB::bind_method(D_METHOD("set_drag_forwarding", "target"), &Control::set_drag_forwarding);
@@ -2852,7 +2820,6 @@ void Control::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "rect_rotation", PROPERTY_HINT_RANGE, "-360,360,0.1,or_lesser,or_greater"), "set_rotation_degrees", "get_rotation_degrees");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_scale"), "set_scale", "get_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_pivot_offset"), "set_pivot_offset", "get_pivot_offset");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "basealigned"), "set_basealigned", "is_basealigned");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "rect_clip_content"), "set_clip_contents", "is_clipping_contents");
 
 	ADD_GROUP("Hint", "hint_");
@@ -2992,7 +2959,6 @@ Control::Control() {
 	data.v_grow = GROW_DIRECTION_END;
 	data.minimum_size_valid = false;
 	data.updating_last_minimum_size = false;
-	data.basealigned = false;
 
 	data.clip_contents = false;
 	for (int i = 0; i < 4; i++) {
