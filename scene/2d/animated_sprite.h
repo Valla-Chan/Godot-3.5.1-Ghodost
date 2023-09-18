@@ -187,7 +187,7 @@ public:
 	void set_centered(bool p_center);
 	bool is_centered() const;
 
-	void set_basealigned(bool p_basecentered);
+	void set_basealigned(bool p_basealign);
 	bool is_basealigned() const;
 
 	void set_offset(const Point2 &p_offset);
