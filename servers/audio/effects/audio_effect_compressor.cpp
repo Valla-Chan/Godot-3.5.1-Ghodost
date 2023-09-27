@@ -162,12 +162,13 @@ float AudioEffectCompressor::get_release_ms() const {
 	return release_ms;
 }
 
+/*
 void AudioEffectCompressor::set_mix(float p_mix) {
 	mix = p_mix;
 }
 float AudioEffectCompressor::get_mix() const {
 	return mix;
-}
+}*/
 
 void AudioEffectCompressor::set_sidechain(const StringName &p_sidechain) {
 	AudioServer::get_singleton()->lock();
@@ -207,8 +208,8 @@ void AudioEffectCompressor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_release_ms", "release_ms"), &AudioEffectCompressor::set_release_ms);
 	ClassDB::bind_method(D_METHOD("get_release_ms"), &AudioEffectCompressor::get_release_ms);
 
-	ClassDB::bind_method(D_METHOD("set_mix", "mix"), &AudioEffectCompressor::set_mix);
-	ClassDB::bind_method(D_METHOD("get_mix"), &AudioEffectCompressor::get_mix);
+	//ClassDB::bind_method(D_METHOD("set_mix", "mix"), &AudioEffectCompressor::set_mix);
+	//ClassDB::bind_method(D_METHOD("get_mix"), &AudioEffectCompressor::get_mix);
 
 	ClassDB::bind_method(D_METHOD("set_sidechain", "sidechain"), &AudioEffectCompressor::set_sidechain);
 	ClassDB::bind_method(D_METHOD("get_sidechain"), &AudioEffectCompressor::get_sidechain);
@@ -218,7 +219,7 @@ void AudioEffectCompressor::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "gain", PROPERTY_HINT_RANGE, "-20,20,0.1"), "set_gain", "get_gain");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "attack_us", PROPERTY_HINT_RANGE, "20,2000,1"), "set_attack_us", "get_attack_us");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "release_ms", PROPERTY_HINT_RANGE, "20,2000,1"), "set_release_ms", "get_release_ms");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "mix", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_mix", "get_mix");
+	//ADD_PROPERTY(PropertyInfo(Variant::REAL, "mix", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_mix", "get_mix");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "sidechain", PROPERTY_HINT_ENUM), "set_sidechain", "get_sidechain");
 }
 
@@ -228,5 +229,5 @@ AudioEffectCompressor::AudioEffectCompressor() {
 	gain = 0;
 	attack_us = 20;
 	release_ms = 250;
-	mix = 1;
+	//mix = 1;
 }

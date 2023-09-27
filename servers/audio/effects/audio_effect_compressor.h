@@ -57,7 +57,7 @@ class AudioEffectCompressor : public AudioEffect {
 	float gain;
 	float attack_us;
 	float release_ms;
-	float mix;
+	//float mix;
 	StringName sidechain;
 
 protected:
@@ -82,8 +82,8 @@ public:
 	void set_release_ms(float p_release_ms);
 	float get_release_ms() const;
 
-	void set_mix(float p_mix);
-	float get_mix() const;
+	//void set_mix(float p_mix);
+	//float get_mix() const;
 
 	void set_sidechain(const StringName &p_sidechain);
 	StringName get_sidechain() const;

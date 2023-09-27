@@ -40,14 +40,22 @@ class AudioEffectInstance : public Reference {
 public:
 	virtual void process(const AudioFrame *p_src_frames, AudioFrame *p_dst_frames, int p_frame_count) = 0;
 	virtual bool process_silence() const { return false; }
+	
 };
 
 class AudioEffect : public Resource {
 	GDCLASS(AudioEffect, Resource);
 
+protected:
+	static void _bind_methods();
+
 public:
+	float mix;
 	virtual Ref<AudioEffectInstance> instance() = 0;
 	AudioEffect();
+	void set_mix(float p_mix);
+	float get_mix() const;
+	
 };
 
 #endif // AUDIO_EFFECT_H

@@ -71,6 +71,7 @@ public:
 	float resonance;
 	float gain;
 	FilterDB db;
+	//float mix;
 
 protected:
 	static void _bind_methods();
@@ -78,6 +79,9 @@ protected:
 public:
 	void set_cutoff(float p_freq);
 	float get_cutoff() const;
+
+	//void set_mix(float p_mix);
+	//float get_mix() const;
 
 	void set_resonance(float p_amount);
 	float get_resonance() const;

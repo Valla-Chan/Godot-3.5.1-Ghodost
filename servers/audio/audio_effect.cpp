@@ -31,4 +31,19 @@
 #include "audio_effect.h"
 
 AudioEffect::AudioEffect() {
+	mix = 1.0;
 }
+
+void AudioEffect::set_mix(float p_mix) {
+	mix = p_mix;
+}
+float AudioEffect::get_mix() const {
+	return mix;
+}
+
+void AudioEffect::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("set_mix", "mix"), &AudioEffect::set_mix);
+	ClassDB::bind_method(D_METHOD("get_mix"), &AudioEffect::get_mix);
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "mix", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_mix", "get_mix");
+}
+

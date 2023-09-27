@@ -33,6 +33,7 @@
 
 template <int S>
 void AudioEffectFilterInstance::_process_filter(const AudioFrame *p_src_frames, AudioFrame *p_dst_frames, int p_frame_count) {
+	float mix = base->mix;
 	for (int i = 0; i < p_frame_count; i++) {
 		float f = p_src_frames[i].l;
 		filter_process[0][0].process_one(f);
@@ -46,7 +47,7 @@ void AudioEffectFilterInstance::_process_filter(const AudioFrame *p_src_frames, 
 			filter_process[0][3].process_one(f);
 		}
 
-		p_dst_frames[i].l = f;
+		p_dst_frames[i].l = f * mix + p_dst_frames[i].l * (1 - mix);
 	}
 
 	for (int i = 0; i < p_frame_count; i++) {
@@ -62,11 +63,12 @@ void AudioEffectFilterInstance::_process_filter(const AudioFrame *p_src_frames, 
 			filter_process[1][3].process_one(f);
 		}
 
-		p_dst_frames[i].r = f;
+		p_dst_frames[i].r = f * mix + p_dst_frames[i].r * (1 - mix);
 	}
 }
 
 void AudioEffectFilterInstance::process(const AudioFrame *p_src_frames, AudioFrame *p_dst_frames, int p_frame_count) {
+	//filter.set_mix(base->mix);
 	filter.set_cutoff(base->cutoff);
 	filter.set_gain(base->gain);
 	filter.set_resonance(base->resonance);
@@ -116,6 +118,15 @@ float AudioEffectFilter::get_cutoff() const {
 	return cutoff;
 }
 
+/*
+void AudioEffectFilter::set_mix(float p_mix) {
+	mix = p_mix;
+}
+float AudioEffectFilter::get_mix() const {
+	return mix;
+}
+*/
+
 void AudioEffectFilter::set_resonance(float p_amount) {
 	resonance = p_amount;
 }
@@ -142,6 +153,9 @@ void AudioEffectFilter::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_cutoff", "freq"), &AudioEffectFilter::set_cutoff);
 	ClassDB::bind_method(D_METHOD("get_cutoff"), &AudioEffectFilter::get_cutoff);
 
+	//ClassDB::bind_method(D_METHOD("set_mix", "mix"), &AudioEffectFilter::set_mix);
+	//ClassDB::bind_method(D_METHOD("get_mix"), &AudioEffectFilter::get_mix);
+
 	ClassDB::bind_method(D_METHOD("set_resonance", "amount"), &AudioEffectFilter::set_resonance);
 	ClassDB::bind_method(D_METHOD("get_resonance"), &AudioEffectFilter::get_resonance);
 
@@ -155,6 +169,7 @@ void AudioEffectFilter::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "resonance", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_resonance", "get_resonance");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "gain", PROPERTY_HINT_RANGE, "0,4,0.01"), "set_gain", "get_gain");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "db", PROPERTY_HINT_ENUM, "6 dB,12 dB,18 dB,24 dB"), "set_db", "get_db");
+	//ADD_PROPERTY(PropertyInfo(Variant::REAL, "mix", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_mix", "get_mix");
 
 	BIND_ENUM_CONSTANT(FILTER_6DB);
 	BIND_ENUM_CONSTANT(FILTER_12DB);
@@ -168,4 +183,5 @@ AudioEffectFilter::AudioEffectFilter(AudioFilterSW::Mode p_mode) {
 	resonance = 0.5;
 	gain = 1.0;
 	db = FILTER_6DB;
+	//mix = 1.0;
 }

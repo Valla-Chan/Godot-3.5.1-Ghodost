@@ -57,6 +57,7 @@ class AudioEffectEQ : public AudioEffect {
 	Vector<float> gain;
 	Map<StringName, int> prop_band_map;
 	Vector<String> band_names;
+	//float mix;
 
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value);
@@ -67,6 +68,8 @@ protected:
 
 public:
 	Ref<AudioEffectInstance> instance();
+	//void set_mix(float p_mix);
+	//float get_mix() const;
 	void set_band_gain_db(int p_band, float p_volume);
 	float get_band_gain_db(int p_band) const;
 	int get_band_count() const;

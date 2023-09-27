@@ -32,6 +32,7 @@
 #include "servers/audio_server.h"
 
 void AudioEffectEQInstance::process(const AudioFrame *p_src_frames, AudioFrame *p_dst_frames, int p_frame_count) {
+	float mix = base->mix;
 	int band_count = bands[0].size();
 	EQ::BandProcess *proc_l = bands[0].ptrw();
 	EQ::BandProcess *proc_r = bands[1].ptrw();
@@ -55,7 +56,7 @@ void AudioEffectEQInstance::process(const AudioFrame *p_src_frames, AudioFrame *
 			dst.r += r * bgain[j];
 		}
 
-		p_dst_frames[i] = dst;
+		p_dst_frames[i] = dst * mix + p_dst_frames[i] * (1-mix);
 	}
 }
 
@@ -73,6 +74,14 @@ Ref<AudioEffectInstance> AudioEffectEQ::instance() {
 
 	return ins;
 }
+/*
+void AudioEffectEQ::set_mix(float p_mix) {
+	mix = p_mix;
+}
+float AudioEffectEQ::get_mix() const {
+	return mix;
+}
+*/
 
 void AudioEffectEQ::set_band_gain_db(int p_band, float p_volume) {
 	ERR_FAIL_INDEX(p_band, gain.size());
@@ -115,9 +124,12 @@ void AudioEffectEQ::_get_property_list(List<PropertyInfo> *p_list) const {
 }
 
 void AudioEffectEQ::_bind_methods() {
+	//ClassDB::bind_method(D_METHOD("set_mix", "mix"), &AudioEffectEQ::set_mix);
+	//ClassDB::bind_method(D_METHOD("get_mix"), &AudioEffectEQ::get_mix);
 	ClassDB::bind_method(D_METHOD("set_band_gain_db", "band_idx", "volume_db"), &AudioEffectEQ::set_band_gain_db);
 	ClassDB::bind_method(D_METHOD("get_band_gain_db", "band_idx"), &AudioEffectEQ::get_band_gain_db);
 	ClassDB::bind_method(D_METHOD("get_band_count"), &AudioEffectEQ::get_band_count);
+	//ADD_PROPERTY(PropertyInfo(Variant::REAL, "mix", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_mix", "get_mix");
 }
 
 AudioEffectEQ::AudioEffectEQ(EQ::Preset p_preset) {
@@ -130,4 +142,5 @@ AudioEffectEQ::AudioEffectEQ(EQ::Preset p_preset) {
 		prop_band_map[name] = i;
 		band_names.push_back(name);
 	}
+	//mix = 1.0;
 }

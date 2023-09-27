@@ -31,6 +31,7 @@
 #include "audio_effect_limiter.h"
 
 void AudioEffectLimiterInstance::process(const AudioFrame *p_src_frames, AudioFrame *p_dst_frames, int p_frame_count) {
+	float mix = base->mix;
 	float threshdb = base->threshold;
 	float ceiling = Math::db2linear(base->ceiling);
 	float ceildb = base->ceiling;
@@ -62,8 +63,8 @@ void AudioEffectLimiterInstance::process(const AudioFrame *p_src_frames, AudioFr
 		spl0 = MIN(ceiling, Math::abs(spl0)) * (spl0 < 0.0 ? -1.0 : 1.0);
 		spl1 = MIN(ceiling, Math::abs(spl1)) * (spl1 < 0.0 ? -1.0 : 1.0);
 
-		p_dst_frames[i].l = spl0;
-		p_dst_frames[i].r = spl1;
+		p_dst_frames[i].l = spl0 * mix + p_dst_frames[i].l * (1 - mix);
+		p_dst_frames[i].r = spl1 * mix + p_dst_frames[i].r * (1 - mix);
 	}
 }
 
