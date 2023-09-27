@@ -54,6 +54,7 @@ class SpriteFramesEditor : public HSplitContainer {
 	ToolButton *load;
 	ToolButton *load_sheet;
 	ToolButton *_delete;
+	ToolButton *_delete_all;
 	ToolButton *copy;
 	ToolButton *paste;
 	ToolButton *empty;
@@ -84,6 +85,7 @@ class SpriteFramesEditor : public HSplitContainer {
 	StringName edited_anim;
 
 	ConfirmationDialog *delete_dialog;
+	ConfirmationDialog *delete_all_dialog;
 
 	ConfirmationDialog *split_sheet_dialog;
 	ScrollContainer *split_sheet_scroll;
@@ -121,10 +123,13 @@ class SpriteFramesEditor : public HSplitContainer {
 	void _load_pressed();
 	void _file_load_request(const PoolVector<String> &p_path, int p_at_pos = -1);
 	void _copy_pressed();
+	//void _copy_all_pressed();
 	void _paste_pressed();
 	void _empty_pressed();
 	void _empty2_pressed();
 	void _delete_pressed();
+	void _delete_all_pressed();
+	void _frames_remove_confirmed();
 	void _up_pressed();
 	void _down_pressed();
 	void _update_library(bool p_skip_selector = false);

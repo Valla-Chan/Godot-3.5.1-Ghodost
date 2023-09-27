@@ -424,6 +424,7 @@ void SpriteFramesEditor::_notification(int p_what) {
 			move_up->set_icon(get_icon("MoveLeft", "EditorIcons"));
 			move_down->set_icon(get_icon("MoveRight", "EditorIcons"));
 			_delete->set_icon(get_icon("Remove", "EditorIcons"));
+			_delete_all->set_icon(get_icon("Remove", "EditorIcons"));
 			zoom_out->set_icon(get_icon("ZoomLess", "EditorIcons"));
 			zoom_reset->set_icon(get_icon("ZoomReset", "EditorIcons"));
 			zoom_in->set_icon(get_icon("ZoomMore", "EditorIcons"));
@@ -551,6 +552,24 @@ void SpriteFramesEditor::_copy_pressed() {
 	EditorSettings::get_singleton()->set_resource_clipboard(r);
 }
 
+/*
+void SpriteFramesEditor::_copy_all_pressed() {
+	ERR_FAIL_COND(!frames->has_animation(edited_anim));
+
+	if (tree->get_current() < 0) {
+		return;
+	}
+	Array framearray = Array();
+	for (int i = 0; i < tree->get_item_count() - 1; i++) {
+		Ref<Texture> r = frames->get_frame(edited_anim, tree->get_current());
+		if (r.is_valid()) {
+			framearray.append(r);
+		}
+	};
+	EditorSettings::get_singleton()->set_resource_clipboard(framearray);
+}
+*/
+
 void SpriteFramesEditor::_empty_pressed() {
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
@@ -662,6 +681,28 @@ void SpriteFramesEditor::_delete_pressed() {
 	undo_redo->create_action(TTR("Delete Resource"));
 	undo_redo->add_do_method(frames, "remove_frame", edited_anim, to_delete);
 	undo_redo->add_undo_method(frames, "add_frame", edited_anim, frames->get_frame(edited_anim, to_delete), to_delete);
+	undo_redo->add_do_method(this, "_update_library");
+	undo_redo->add_undo_method(this, "_update_library");
+	undo_redo->commit_action();
+}
+
+void SpriteFramesEditor::_delete_all_pressed() {
+	ERR_FAIL_COND(!frames->has_animation(edited_anim));
+
+	if (tree->get_item_count() == 0) {
+		return;
+	}
+
+	delete_dialog->set_text(TTR("Delete All Frames?"));
+	delete_dialog->popup_centered_minsize();
+}
+
+void SpriteFramesEditor::_frames_remove_confirmed() {
+	undo_redo->create_action(TTR("Delete Resource"));
+	for (int i = 0; i < tree->get_item_count(); i++) {
+		undo_redo->add_do_method(frames, "remove_frame", edited_anim, i);
+		undo_redo->add_undo_method(frames, "add_frame", edited_anim, frames->get_frame(edited_anim, i), i);
+	};
 	undo_redo->add_do_method(this, "_update_library");
 	undo_redo->add_undo_method(this, "_update_library");
 	undo_redo->commit_action();
@@ -814,6 +855,7 @@ void SpriteFramesEditor::_animation_remove() {
 	delete_dialog->set_text(TTR("Delete Animation?"));
 	delete_dialog->popup_centered_minsize();
 }
+
 
 void SpriteFramesEditor::_animation_remove_confirmed() {
 	undo_redo->create_action(TTR("Remove Animation"));
@@ -1182,6 +1224,7 @@ void SpriteFramesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_empty_pressed"), &SpriteFramesEditor::_empty_pressed);
 	ClassDB::bind_method(D_METHOD("_empty2_pressed"), &SpriteFramesEditor::_empty2_pressed);
 	ClassDB::bind_method(D_METHOD("_delete_pressed"), &SpriteFramesEditor::_delete_pressed);
+	ClassDB::bind_method(D_METHOD("_delete_all_pressed"), &SpriteFramesEditor::_delete_all_pressed);
 	ClassDB::bind_method(D_METHOD("_copy_pressed"), &SpriteFramesEditor::_copy_pressed);
 	ClassDB::bind_method(D_METHOD("_paste_pressed"), &SpriteFramesEditor::_paste_pressed);
 	ClassDB::bind_method(D_METHOD("_file_load_request", "files", "at_position"), &SpriteFramesEditor::_file_load_request, DEFVAL(-1));
@@ -1193,6 +1236,7 @@ void SpriteFramesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_animation_add"), &SpriteFramesEditor::_animation_add);
 	ClassDB::bind_method(D_METHOD("_animation_remove"), &SpriteFramesEditor::_animation_remove);
 	ClassDB::bind_method(D_METHOD("_animation_remove_confirmed"), &SpriteFramesEditor::_animation_remove_confirmed);
+	ClassDB::bind_method(D_METHOD("_frames_remove_confirmed"), &SpriteFramesEditor::_frames_remove_confirmed);
 	ClassDB::bind_method(D_METHOD("_animation_search_text_changed"), &SpriteFramesEditor::_animation_search_text_changed);
 	ClassDB::bind_method(D_METHOD("_animation_loop_changed"), &SpriteFramesEditor::_animation_loop_changed);
 	ClassDB::bind_method(D_METHOD("_animation_fps_changed"), &SpriteFramesEditor::_animation_fps_changed);
@@ -1324,6 +1368,12 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	_delete->set_tooltip(TTR("Delete"));
 	hbc->add_child(_delete);
 
+	hbc->add_child(memnew(VSeparator));
+
+	_delete_all = memnew(ToolButton);
+	_delete_all->set_tooltip(TTR("Delete All"));
+	//hbc->add_child(_delete_all);
+
 	hbc->add_spacer();
 
 	zoom_out = memnew(ToolButton);
@@ -1358,6 +1408,7 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	load->connect("pressed", this, "_load_pressed");
 	load_sheet->connect("pressed", this, "_open_sprite_sheet");
 	_delete->connect("pressed", this, "_delete_pressed");
+	_delete_all->connect("pressed", this, "_delete_all_pressed");
 	copy->connect("pressed", this, "_copy_pressed");
 	paste->connect("pressed", this, "_paste_pressed");
 	empty->connect("pressed", this, "_empty_pressed");
@@ -1379,6 +1430,10 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	delete_dialog = memnew(ConfirmationDialog);
 	add_child(delete_dialog);
 	delete_dialog->connect("confirmed", this, "_animation_remove_confirmed");
+
+	delete_all_dialog = memnew(ConfirmationDialog);
+	add_child(delete_all_dialog);
+	delete_all_dialog->connect("confirmed", this, "_frames_remove_confirmed");
 
 	split_sheet_dialog = memnew(ConfirmationDialog);
 	add_child(split_sheet_dialog);
