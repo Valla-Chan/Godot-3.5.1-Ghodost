@@ -223,6 +223,20 @@ Ref<AudioStream> AudioStreamPlayer::get_stream() const {
 	return stream;
 }
 
+void AudioStreamPlayer::set_fade_in_time(float p_time) {
+	fade_in_time = p_time;
+}
+float AudioStreamPlayer::get_fade_in_time() const {
+	return fade_in_time;
+}
+
+void AudioStreamPlayer::set_fade_out_time(float p_time) {
+	fade_out_time = p_time;
+}
+float AudioStreamPlayer::get_fade_out_time() const {
+	return fade_out_time;
+}
+
 void AudioStreamPlayer::set_volume_db(float p_volume) {
 	volume_db = p_volume;
 }
@@ -419,6 +433,9 @@ AudioStreamPlayer::AudioStreamPlayer() {
 	mix_target = MIX_TARGET_STEREO;
 	fadeout_buffer.resize(512);
 	use_fadeout = false;
+
+	fade_in_time = 0.0;
+	fade_out_time = 0.0;
 
 	AudioServer::get_singleton()->connect("bus_layout_changed", this, "_bus_layout_changed");
 }

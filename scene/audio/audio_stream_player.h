@@ -57,6 +57,9 @@ private:
 	SafeFlag setstop;
 	SafeFlag stop_has_priority;
 
+	float fade_in_time;
+	float fade_out_time;
+
 	float mix_volume_db;
 	float pitch_scale;
 	float volume_db;
@@ -85,6 +88,12 @@ protected:
 public:
 	void set_stream(Ref<AudioStream> p_stream);
 	Ref<AudioStream> get_stream() const;
+
+	void set_fade_in_time(float p_time);
+	float get_fade_in_time() const;
+
+	void set_fade_out_time(float p_time);
+	float get_fade_out_time() const;
 
 	void set_volume_db(float p_volume);
 	float get_volume_db() const;
