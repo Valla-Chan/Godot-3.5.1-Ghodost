@@ -55,6 +55,8 @@
 #include "modules/modules_enabled.gen.h" // For freetype.
 
 #include <stdio.h>
+#include <algorithm>
+#include <cmath>
 #include <stdlib.h>
 
 void SceneTreeTimer::_bind_methods() {
@@ -1264,7 +1266,20 @@ void SceneTree::_update_root_rect() {
 	float viewport_aspect = desired_res.aspect();
 	float video_mode_aspect = video_mode.aspect();
 
-	if (stretch_aspect == STRETCH_ASPECT_IGNORE || Math::is_equal_approx(viewport_aspect, video_mode_aspect)) {
+	if (stretch_aspect == STRETCH_ASPECT_PIXELPERFECT) {
+		// only multiply or divide by integer
+		viewport_size = desired_res;
+
+		if (video_mode >= desired_res) {
+			Size2 scale_size = video_mode / desired_res;
+			int scale_factor = std::floor(std::min(scale_size.x, scale_size.y));
+			screen_size = desired_res * scale_factor;
+		} else {
+			Size2 scale_size = desired_res / video_mode;
+			int scale_factor = std::ceil(std::max(scale_size.x, scale_size.y));
+			screen_size = desired_res / scale_factor;
+		}
+	} else if (stretch_aspect == STRETCH_ASPECT_IGNORE || Math::is_equal_approx(viewport_aspect, video_mode_aspect)) {
 		//same aspect or ignore aspect
 		viewport_size = desired_res;
 		screen_size = video_mode;
@@ -1305,7 +1320,13 @@ void SceneTree::_update_root_rect() {
 	Size2 margin;
 	Size2 offset;
 	//black bars and margin
-	if (stretch_aspect != STRETCH_ASPECT_EXPAND && screen_size.x < video_mode.x) {
+	if (stretch_aspect == STRETCH_ASPECT_PIXELPERFECT) {
+		margin.y = Math::round((video_mode.y - screen_size.y) / 2.0);
+		margin.x = Math::round((video_mode.x - screen_size.x) / 2.0);
+		VisualServer::get_singleton()->black_bars_set_margins(margin.x, margin.y, margin.x, margin.y);
+		offset.x = Math::round(margin.x * viewport_size.y / screen_size.y);
+		offset.y = Math::round(margin.y * viewport_size.x / screen_size.x);
+	} else if (stretch_aspect != STRETCH_ASPECT_EXPAND && screen_size.x < video_mode.x) {
 		margin.x = Math::round((video_mode.x - screen_size.x) / 2.0);
 		VisualServer::get_singleton()->black_bars_set_margins(margin.x, 0, margin.x, 0);
 		offset.x = Math::round(margin.x * viewport_size.y / screen_size.y);
