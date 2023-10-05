@@ -1014,7 +1014,14 @@ void CanvasItem::set_material(const Ref<Material> &p_material) {
 	RID rid;
 	if (material.is_valid()) {
 		rid = material->get_rid();
-	}
+	}// else if (get_use_global_fallback_material()) {
+		//String global_material_path = ProjectSettings::get_singleton()->get("gui/theme/global_fallback_material");
+		//Ref<ShaderMaterial> material_fallback = ResourceLoader::load(global_material_path);
+		//material = material_fallback;
+		//if (material.is_valid()) {
+		//	rid = material->get_rid();
+		//}
+	//}
 	VS::get_singleton()->canvas_item_set_material(canvas_item, rid);
 	_change_notify(); //properties for material exposed
 }
@@ -1028,8 +1035,30 @@ bool CanvasItem::get_use_parent_material() const {
 	return use_parent_material;
 }
 
+// VALLA EDITS
+void CanvasItem::set_use_global_fallback_material(bool p_use_global_fallback_material) {
+	//use_global_fallback_material = p_use_global_fallback_material;
+	//VS::get_singleton()->canvas_item_set_use_global_fallback_material(canvas_item, p_use_global_fallback_material);
+	//set_material(get_material());
+	//_change_notify();
+}
+
+bool CanvasItem::get_use_global_fallback_material() const {
+	return use_global_fallback_material;
+}
+//
+
 Ref<Material> CanvasItem::get_material() const {
-	return material;
+	//String global_material_path = ProjectSettings::get_singleton()->get("gui/theme/global_fallback_material");
+	//Ref<ShaderMaterial> material_fallback = ResourceLoader::load(global_material_path);
+	//if (!use_global_fallback_material) {
+	//	return material;
+	//} else if (material_fallback.is_valid() && use_global_fallback_material) {
+	//	return material_fallback;
+	//} else {
+		return material;
+	//}
+	
 }
 
 Vector2 CanvasItem::make_canvas_position_local(const Vector2 &screen_point) const {
@@ -1161,6 +1190,9 @@ void CanvasItem::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_use_parent_material", "enable"), &CanvasItem::set_use_parent_material);
 	ClassDB::bind_method(D_METHOD("get_use_parent_material"), &CanvasItem::get_use_parent_material);
 
+	ClassDB::bind_method(D_METHOD("set_use_global_fallback_material", "enable"), &CanvasItem::set_use_global_fallback_material);
+	ClassDB::bind_method(D_METHOD("get_use_global_fallback_material"), &CanvasItem::get_use_global_fallback_material);
+
 	ClassDB::bind_method(D_METHOD("set_notify_local_transform", "enable"), &CanvasItem::set_notify_local_transform);
 	ClassDB::bind_method(D_METHOD("is_local_transform_notification_enabled"), &CanvasItem::is_local_transform_notification_enabled);
 
@@ -1185,6 +1217,7 @@ void CanvasItem::_bind_methods() {
 	ADD_GROUP("Material", "");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "material", PROPERTY_HINT_RESOURCE_TYPE, "ShaderMaterial,CanvasItemMaterial"), "set_material", "get_material");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_parent_material"), "set_use_parent_material", "get_use_parent_material");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_global_fallback_material"), "set_use_global_fallback_material", "get_use_global_fallback_material");
 	//exporting these things doesn't really make much sense i think
 	// ADD_PROPERTY(PropertyInfo(Variant::BOOL, "toplevel", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_as_toplevel", "is_set_as_toplevel");
 	// ADD_PROPERTY(PropertyInfo(Variant::BOOL,"transform/notify"),"set_transform_notify","is_transform_notify_enabled");
@@ -1284,6 +1317,7 @@ CanvasItem::CanvasItem() :
 	//viewport=NULL;
 	canvas_layer = nullptr;
 	use_parent_material = false;
+	use_global_fallback_material = true;
 	global_invalid = true;
 	notify_local_transform = false;
 	notify_transform = false;

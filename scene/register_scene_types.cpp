@@ -810,6 +810,8 @@ void initialize_theme() {
 	ProjectSettings::get_singleton()->set_custom_property_info("gui/theme/custom", PropertyInfo(Variant::STRING, "gui/theme/custom", PROPERTY_HINT_FILE, "*.tres,*.res,*.theme", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED));
 	String font_path = GLOBAL_DEF_RST("gui/theme/custom_font", "");
 	ProjectSettings::get_singleton()->set_custom_property_info("gui/theme/custom_font", PropertyInfo(Variant::STRING, "gui/theme/custom_font", PROPERTY_HINT_FILE, "*.tres,*.res,*.font", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED));
+	String global_material_path = GLOBAL_DEF_RST("gui/theme/global_fallback_material", "");
+	ProjectSettings::get_singleton()->set_custom_property_info("gui/theme/global_fallback_material", PropertyInfo(Variant::STRING, "gui/theme/global_fallback_material", PROPERTY_HINT_FILE, "*.tres,*.res,*.material", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED));
 
 	Ref<Font> font;
 	if (font_path != String()) {
@@ -831,6 +833,13 @@ void initialize_theme() {
 			}
 		} else {
 			ERR_PRINT("Error loading custom theme '" + theme_path + "'");
+		}
+	}
+
+	if (global_material_path != String()) {
+		Ref<Material> material = ResourceLoader::load(global_material_path);
+		if (!material.is_valid()) {
+			ERR_PRINT("Error loading global fallback material '" + global_material_path + "'");
 		}
 	}
 }

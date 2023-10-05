@@ -504,6 +504,9 @@ void DependencyRemoveDialog::ok_pressed() {
 		if (files_to_delete[i] == ProjectSettings::get_singleton()->get("gui/theme/custom_font")) {
 			ProjectSettings::get_singleton()->set("gui/theme/custom_font", "");
 		}
+		if (files_to_delete[i] == ProjectSettings::get_singleton()->get("gui/theme/global_fallback_material")) {
+			ProjectSettings::get_singleton()->set("gui/theme/global_fallback_material", "");
+		}
 		if (files_to_delete[i] == ProjectSettings::get_singleton()->get("audio/default_bus_layout")) {
 			ProjectSettings::get_singleton()->set("audio/default_bus_layout", "");
 		}

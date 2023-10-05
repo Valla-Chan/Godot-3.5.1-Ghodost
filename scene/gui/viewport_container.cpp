@@ -63,8 +63,8 @@ bool ViewportContainer::is_stretch_enabled() const {
 	return stretch;
 }
 
-void ViewportContainer::set_stretch_shrink(int p_shrink) {
-	ERR_FAIL_COND(p_shrink < 1);
+void ViewportContainer::set_stretch_shrink(float p_shrink) {
+	ERR_FAIL_COND(p_shrink < 0.001);
 	if (shrink == p_shrink) {
 		return;
 	}
@@ -87,7 +87,7 @@ void ViewportContainer::set_stretch_shrink(int p_shrink) {
 	update();
 }
 
-int ViewportContainer::get_stretch_shrink() const {
+float ViewportContainer::get_stretch_shrink() const {
 	return shrink;
 }
 
@@ -204,7 +204,7 @@ void ViewportContainer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_stretch_shrink"), &ViewportContainer::get_stretch_shrink);
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "stretch"), "set_stretch", "is_stretch_enabled");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "stretch_shrink"), "set_stretch_shrink", "get_stretch_shrink");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "stretch_shrink"), "set_stretch_shrink", "get_stretch_shrink");
 }
 
 ViewportContainer::ViewportContainer() {
