@@ -37,7 +37,7 @@ class ViewportContainer : public Container {
 	GDCLASS(ViewportContainer, Container);
 
 	bool stretch;
-	float shrink;
+	int shrink;
 
 protected:
 	void _notification(int p_what);
@@ -49,8 +49,8 @@ public:
 
 	void _input(const Ref<InputEvent> &p_event);
 	void _unhandled_input(const Ref<InputEvent> &p_event);
-	void set_stretch_shrink(float p_shrink);
-	float get_stretch_shrink() const;
+	void set_stretch_shrink(int p_shrink);
+	int get_stretch_shrink() const;
 
 	virtual Size2 get_minimum_size() const;
 

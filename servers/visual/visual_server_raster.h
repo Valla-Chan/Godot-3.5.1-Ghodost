@@ -725,7 +725,6 @@ public:
 	BIND2(canvas_item_set_material, RID, RID)
 
 	BIND2(canvas_item_set_use_parent_material, RID, bool)
-	BIND2(canvas_item_set_use_global_fallback_material, RID, bool)
 
 	BIND0R(RID, canvas_light_create)
 	BIND2(canvas_light_attach_to_canvas, RID, RID)
