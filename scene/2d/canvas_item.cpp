@@ -1293,5 +1293,7 @@ CanvasItem::CanvasItem() :
 }
 
 CanvasItem::~CanvasItem() {
-	VisualServer::get_singleton()->free(canvas_item);
+	//if (canvas_item.is_valid()) {
+		VisualServer::get_singleton()->free(canvas_item);
+	//}
 }

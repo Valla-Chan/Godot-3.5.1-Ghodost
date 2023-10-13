@@ -259,7 +259,7 @@ public:
 	static double to_double(const char *p_str);
 	static double to_double(const CharType *p_str, const CharType **r_end = nullptr);
 	static int64_t to_int(const CharType *p_str, int p_len = -1);
-	String capitalize() const;
+	String capitalize(bool replace_underscores = true) const;
 	String camelcase_to_underscore(bool lowercase = true) const;
 	String to_camel_case() const;
 	String to_pascal_case() const;

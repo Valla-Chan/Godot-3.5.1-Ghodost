@@ -646,8 +646,11 @@ void String::erase(int p_pos, int p_chars) {
 	*this = left(p_pos) + substr(p_pos + p_chars, length() - ((p_pos + p_chars)));
 }
 
-String String::capitalize() const {
-	String aux = this->camelcase_to_underscore(true).replace("_", " ").strip_edges();
+String String::capitalize(bool replace_underscores) const {
+	String aux = this->camelcase_to_underscore(true).strip_edges();
+	if (replace_underscores) {
+		aux = aux.replace("_", " ");
+	}
 	String cap;
 	for (int i = 0; i < aux.get_slice_count(" "); i++) {
 		String slice = aux.get_slicec(' ', i);
