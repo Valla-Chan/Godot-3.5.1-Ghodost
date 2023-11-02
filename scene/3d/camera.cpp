@@ -688,16 +688,16 @@ void ClippedCamera::set_margin(float p_margin) {
 float ClippedCamera::get_margin() const {
 	return margin;
 }
-void ClippedCamera::set_process_mode(ProcessMode p_mode) {
-	if (process_mode == p_mode) {
+void ClippedCamera::set_process_callback(ClipProcessCallback p_mode) {
+	if (process_callback == p_mode) {
 		return;
 	}
-	process_mode = p_mode;
-	set_process_internal(process_mode == CLIP_PROCESS_IDLE);
-	set_physics_process_internal(process_mode == CLIP_PROCESS_PHYSICS);
+	process_callback = p_mode;
+	set_process_internal(process_callback == CLIP_PROCESS_IDLE);
+	set_physics_process_internal(process_callback == CLIP_PROCESS_PHYSICS);
 }
-ClippedCamera::ProcessMode ClippedCamera::get_process_mode() const {
-	return process_mode;
+ClippedCamera::ClipProcessCallback ClippedCamera::get_process_callback() const {
+	return process_callback;
 }
 
 Transform ClippedCamera::get_camera_transform() const {
@@ -844,8 +844,8 @@ void ClippedCamera::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_margin", "margin"), &ClippedCamera::set_margin);
 	ClassDB::bind_method(D_METHOD("get_margin"), &ClippedCamera::get_margin);
 
-	ClassDB::bind_method(D_METHOD("set_process_mode", "process_mode"), &ClippedCamera::set_process_mode);
-	ClassDB::bind_method(D_METHOD("get_process_mode"), &ClippedCamera::get_process_mode);
+	ClassDB::bind_method(D_METHOD("set_process_callback", "process_callback"), &ClippedCamera::set_process_callback);
+	ClassDB::bind_method(D_METHOD("get_process_callback"), &ClippedCamera::get_process_callback);
 
 	ClassDB::bind_method(D_METHOD("set_collision_mask", "mask"), &ClippedCamera::set_collision_mask);
 	ClassDB::bind_method(D_METHOD("get_collision_mask"), &ClippedCamera::get_collision_mask);
@@ -870,7 +870,7 @@ void ClippedCamera::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("clear_exceptions"), &ClippedCamera::clear_exceptions);
 
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "margin", PROPERTY_HINT_RANGE, "0,32,0.01"), "set_margin", "get_margin");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "process_mode", PROPERTY_HINT_ENUM, "Physics,Idle"), "set_process_mode", "get_process_mode");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "process_callback", PROPERTY_HINT_ENUM, "Physics,Idle"), "set_process_callback", "get_process_callback");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "collision_mask", PROPERTY_HINT_LAYERS_3D_PHYSICS), "set_collision_mask", "get_collision_mask");
 
 	ADD_GROUP("Clip To", "clip_to");
@@ -883,7 +883,7 @@ void ClippedCamera::_bind_methods() {
 ClippedCamera::ClippedCamera() {
 	margin = 0;
 	clip_offset = 0;
-	process_mode = CLIP_PROCESS_PHYSICS;
+	process_callback = CLIP_PROCESS_PHYSICS;
 	set_physics_process_internal(true);
 	collision_mask = 1;
 	set_notify_local_transform(Engine::get_singleton()->is_editor_hint());

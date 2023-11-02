@@ -81,7 +81,7 @@ protected:
 	bool v_offset_changed;
 
 	Point2 camera_screen_center;
-	void _update_process_mode();
+	void _update_process_callback();
 	void _update_scroll();
 	void _setup_viewport();
 
@@ -92,7 +92,7 @@ protected:
 	bool limit_drawing_enabled;
 	bool margin_drawing_enabled;
 
-	Camera2DProcessMode process_mode;
+	Camera2DProcessMode process_callback;
 
 protected:
 	virtual Transform2D get_camera_transform();
@@ -136,8 +136,8 @@ public:
 	void set_follow_smoothing(float p_speed);
 	float get_follow_smoothing() const;
 
-	void set_process_mode(Camera2DProcessMode p_mode);
-	Camera2DProcessMode get_process_mode() const;
+	void set_process_callback(Camera2DProcessMode p_mode);
+	Camera2DProcessMode get_process_callback() const;
 
 	void make_current();
 	void clear_current();

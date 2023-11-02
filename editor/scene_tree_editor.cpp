@@ -253,6 +253,8 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		item->set_text(0, node_name);
 		item->set_selectable(0, marked_selectable);
 		item->set_custom_color(0, get_color("accent_color", "Editor"));
+	} else if (!p_node->can_process()) {
+		item->set_custom_color(0, get_color("disabled_font_color", "Editor"));
 	} else if (!marked_selectable && !marked_children_selectable) {
 		Node *node = p_node;
 		while (node) {
@@ -634,6 +636,11 @@ void SceneTreeEditor::_test_update_tree() {
 	tree_dirty = true;
 }
 
+void SceneTreeEditor::_tree_process_mode_changed() {
+	MessageQueue::get_singleton()->push_call(this, "_update_tree");
+	tree_dirty = true;
+}
+
 void SceneTreeEditor::_tree_changed() {
 	if (EditorNode::get_singleton()->is_exiting()) {
 		return; //speed up exit
@@ -704,6 +711,7 @@ void SceneTreeEditor::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE: {
 			get_tree()->connect("tree_changed", this, "_tree_changed");
+			get_tree()->connect("tree_process_mode_changed", this, "_tree_process_mode_changed");
 			get_tree()->connect("node_removed", this, "_node_removed");
 			get_tree()->connect("node_renamed", this, "_node_renamed");
 			get_tree()->connect("node_configuration_warning_changed", this, "_warning_changed");
@@ -714,6 +722,7 @@ void SceneTreeEditor::_notification(int p_what) {
 		} break;
 		case NOTIFICATION_EXIT_TREE: {
 			get_tree()->disconnect("tree_changed", this, "_tree_changed");
+			get_tree()->disconnect("tree_process_mode_changed", this, "_tree_process_mode_changed");
 			get_tree()->disconnect("node_removed", this, "_node_removed");
 			get_tree()->disconnect("node_renamed", this, "_node_renamed");
 			tree->disconnect("item_collapsed", this, "_cell_collapsed");

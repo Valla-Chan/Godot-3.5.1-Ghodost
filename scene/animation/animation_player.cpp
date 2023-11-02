@@ -206,7 +206,7 @@ void AnimationPlayer::_notification(int p_what) {
 			}
 		} break;
 		case NOTIFICATION_INTERNAL_PROCESS: {
-			if (animation_process_mode == ANIMATION_PROCESS_PHYSICS) {
+			if (process_callback == ANIMATION_PROCESS_PHYSICS) {
 				break;
 			}
 
@@ -215,7 +215,7 @@ void AnimationPlayer::_notification(int p_what) {
 			}
 		} break;
 		case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
-			if (animation_process_mode == ANIMATION_PROCESS_IDLE) {
+			if (process_callback == ANIMATION_PROCESS_IDLE) {
 				break;
 			}
 
@@ -1420,8 +1420,8 @@ bool AnimationPlayer::is_reset_on_save_enabled() const {
 	return reset_on_save;
 }
 
-void AnimationPlayer::set_animation_process_mode(AnimationProcessMode p_mode) {
-	if (animation_process_mode == p_mode) {
+void AnimationPlayer::set_process_callback(AnimationProcessCallback p_mode) {
+	if (process_callback == p_mode) {
 		return;
 	}
 
@@ -1429,14 +1429,14 @@ void AnimationPlayer::set_animation_process_mode(AnimationProcessMode p_mode) {
 	if (pr) {
 		_set_process(false);
 	}
-	animation_process_mode = p_mode;
+	process_callback = p_mode;
 	if (pr) {
 		_set_process(true);
 	}
 }
 
-AnimationPlayer::AnimationProcessMode AnimationPlayer::get_animation_process_mode() const {
-	return animation_process_mode;
+AnimationPlayer::AnimationProcessCallback AnimationPlayer::get_process_callback() const {
+	return process_callback;
 }
 
 void AnimationPlayer::set_method_call_mode(AnimationMethodCallMode p_mode) {
@@ -1452,7 +1452,7 @@ void AnimationPlayer::_set_process(bool p_process, bool p_force) {
 		return;
 	}
 
-	switch (animation_process_mode) {
+	switch (process_callback) {
 		case ANIMATION_PROCESS_PHYSICS:
 			set_physics_process_internal(p_process && active);
 			break;
@@ -1656,8 +1656,8 @@ void AnimationPlayer::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("clear_caches"), &AnimationPlayer::clear_caches);
 
-	ClassDB::bind_method(D_METHOD("set_animation_process_mode", "mode"), &AnimationPlayer::set_animation_process_mode);
-	ClassDB::bind_method(D_METHOD("get_animation_process_mode"), &AnimationPlayer::get_animation_process_mode);
+	ClassDB::bind_method(D_METHOD("set_process_callback", "mode"), &AnimationPlayer::set_process_callback);
+	ClassDB::bind_method(D_METHOD("get_process_callback"), &AnimationPlayer::get_process_callback);
 
 	ClassDB::bind_method(D_METHOD("set_method_call_mode", "mode"), &AnimationPlayer::set_method_call_mode);
 	ClassDB::bind_method(D_METHOD("get_method_call_mode"), &AnimationPlayer::get_method_call_mode);
@@ -1677,7 +1677,7 @@ void AnimationPlayer::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "current_animation_position", PROPERTY_HINT_NONE, "", 0), "", "get_current_animation_position");
 
 	ADD_GROUP("Playback Options", "playback_");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "playback_process_mode", PROPERTY_HINT_ENUM, "Physics,Idle,Manual"), "set_animation_process_mode", "get_animation_process_mode");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "playback_process_mode", PROPERTY_HINT_ENUM, "Physics,Idle,Manual"), "set_process_callback", "get_process_callback");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "playback_default_blend_time", PROPERTY_HINT_RANGE, "0,4096,0.01"), "set_default_blend_time", "get_default_blend_time");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playback_active", PROPERTY_HINT_NONE, "", 0), "set_active", "is_active");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "playback_speed", PROPERTY_HINT_RANGE, "-64,64,0.01"), "set_speed_scale", "get_speed_scale");
@@ -1705,7 +1705,7 @@ AnimationPlayer::AnimationPlayer() {
 	end_reached = false;
 	end_notify = false;
 	reset_on_save = true;
-	animation_process_mode = ANIMATION_PROCESS_IDLE;
+	process_callback = ANIMATION_PROCESS_IDLE;
 	method_call_mode = ANIMATION_METHOD_CALL_DEFERRED;
 	processing = false;
 	default_blend_time = 0;

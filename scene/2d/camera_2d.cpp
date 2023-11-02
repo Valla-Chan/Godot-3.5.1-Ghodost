@@ -63,9 +63,12 @@ void Camera2D::_update_scroll() {
 	};
 }
 
-void Camera2D::_update_process_mode() {
+void Camera2D::_update_process_callback() {
 	// smoothing can be enabled in the editor but will never be active
-	if (process_mode == CAMERA2D_PROCESS_IDLE) {
+	if (Engine::get_singleton()->is_editor_hint()) {
+		set_process_internal(false);
+		set_physics_process_internal(false);
+	} else if (process_callback == CAMERA2D_PROCESS_IDLE) {
 		set_process_internal(smoothing_active);
 		set_physics_process_internal(false);
 	} else {
@@ -176,7 +179,7 @@ Transform2D Camera2D::get_camera_transform() {
 		}
 
 		if (smoothing_active) {
-			float c = smoothing * (process_mode == CAMERA2D_PROCESS_PHYSICS ? get_physics_process_delta_time() : get_process_delta_time());
+			float c = smoothing * (process_callback == CAMERA2D_PROCESS_PHYSICS ? get_physics_process_delta_time() : get_process_delta_time());
 			smoothed_camera_pos = ((camera_pos - smoothed_camera_pos) * c) + smoothed_camera_pos;
 			ret_camera_pos = smoothed_camera_pos;
 		} else {
@@ -249,7 +252,7 @@ void Camera2D::_notification(int p_what) {
 			canvas = get_canvas();
 
 			_setup_viewport();
-			_update_process_mode();
+			_update_process_callback();
 
 			// if a camera enters the tree that is set to current,
 			// it should take over as the current camera, and mark
@@ -383,17 +386,17 @@ bool Camera2D::is_rotating() const {
 	return rotating;
 }
 
-void Camera2D::set_process_mode(Camera2DProcessMode p_mode) {
-	if (process_mode == p_mode) {
+void Camera2D::set_process_callback(Camera2DProcessMode p_mode) {
+	if (process_callback == p_mode) {
 		return;
 	}
 
-	process_mode = p_mode;
-	_update_process_mode();
+	process_callback = p_mode;
+	_update_process_callback();
 }
 
-Camera2D::Camera2DProcessMode Camera2D::get_process_mode() const {
-	return process_mode;
+Camera2D::Camera2DProcessMode Camera2D::get_process_callback() const {
+	return process_callback;
 }
 
 void Camera2D::_make_current(Object *p_which) {
@@ -570,7 +573,7 @@ void Camera2D::set_enable_follow_smoothing(bool p_enabled) {
 	smoothing_active = smoothing_enabled && !Engine::get_singleton()->is_editor_hint();
 
 	// keep the processing up to date after each change
-	_update_process_mode();
+	_update_process_callback();
 }
 
 bool Camera2D::is_follow_smoothing_enabled() const {
@@ -654,8 +657,8 @@ void Camera2D::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_update_scroll"), &Camera2D::_update_scroll);
 
-	ClassDB::bind_method(D_METHOD("set_process_mode", "mode"), &Camera2D::set_process_mode);
-	ClassDB::bind_method(D_METHOD("get_process_mode"), &Camera2D::get_process_mode);
+	ClassDB::bind_method(D_METHOD("set_process_callback", "mode"), &Camera2D::set_process_callback);
+	ClassDB::bind_method(D_METHOD("get_process_callback"), &Camera2D::get_process_callback);
 
 	ClassDB::bind_method(D_METHOD("_set_current", "current"), &Camera2D::_set_current);
 	ClassDB::bind_method(D_METHOD("is_current"), &Camera2D::is_current);
@@ -715,7 +718,7 @@ void Camera2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "current"), "_set_current", "is_current");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "zoom"), "set_zoom", "get_zoom");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "custom_viewport", PROPERTY_HINT_RESOURCE_TYPE, "Viewport", 0), "set_custom_viewport", "get_custom_viewport");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "process_mode", PROPERTY_HINT_ENUM, "Physics,Idle"), "set_process_mode", "get_process_mode");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "process_callback", PROPERTY_HINT_ENUM, "Physics,Idle"), "set_process_callback", "get_process_callback");
 
 	ADD_GROUP("Limit", "limit_");
 	ADD_PROPERTYI(PropertyInfo(Variant::INT, "limit_left"), "set_limit", "get_limit", MARGIN_LEFT);
@@ -775,7 +778,7 @@ Camera2D::Camera2D() {
 	viewport = nullptr;
 	custom_viewport = nullptr;
 	custom_viewport_id = 0;
-	process_mode = CAMERA2D_PROCESS_IDLE;
+	process_callback = CAMERA2D_PROCESS_IDLE;
 
 	smoothing = 5.0;
 	zoom = Vector2(1, 1);

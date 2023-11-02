@@ -41,7 +41,7 @@ class AnimationTreePlayer : public Node {
 	OBJ_CATEGORY("Animation Nodes");
 
 public:
-	enum AnimationProcessMode {
+	enum AnimationProcessCallback {
 		ANIMATION_PROCESS_PHYSICS,
 		ANIMATION_PROCESS_IDLE,
 	};
@@ -300,7 +300,7 @@ private:
 
 	ConnectError last_error;
 	AnimationNode *active_list;
-	AnimationProcessMode animation_process_mode;
+	AnimationProcessCallback process_callback;
 	bool processing;
 	bool active;
 	bool dirty_caches;
@@ -455,8 +455,8 @@ public:
 
 	ConnectError get_last_error() const;
 
-	void set_animation_process_mode(AnimationProcessMode p_mode);
-	AnimationProcessMode get_animation_process_mode() const;
+	void set_process_callback(AnimationProcessCallback p_mode);
+	AnimationProcessCallback get_process_callback() const;
 
 	void _set_process(bool p_process, bool p_force = false);
 
@@ -467,6 +467,6 @@ public:
 };
 
 VARIANT_ENUM_CAST(AnimationTreePlayer::NodeType);
-VARIANT_ENUM_CAST(AnimationTreePlayer::AnimationProcessMode);
+VARIANT_ENUM_CAST(AnimationTreePlayer::AnimationProcessCallback);
 
 #endif // ANIMATION_TREE_PLAYER_H

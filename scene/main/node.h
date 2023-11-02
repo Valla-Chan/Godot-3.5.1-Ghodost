@@ -52,11 +52,12 @@ public:
 	// be specified as UNSIGNED to work around
 	// some compilers trying to store it as signed,
 	// and requiring 1 more bit than necessary.
-	enum PauseMode : unsigned int {
-
-		PAUSE_MODE_INHERIT,
-		PAUSE_MODE_STOP,
-		PAUSE_MODE_PROCESS
+	enum ProcessMode {
+		PROCESS_MODE_INHERIT, // same as parent node
+		PROCESS_MODE_PAUSABLE, // process only if not paused
+		PROCESS_MODE_WHEN_PAUSED, // process only if paused
+		PROCESS_MODE_ALWAYS, // process always
+		PROCESS_MODE_DISABLED, // never process
 	};
 
 	enum PhysicsInterpolationMode : unsigned int {
@@ -119,12 +120,16 @@ private:
 #ifdef TOOLS_ENABLED
 		NodePath import_path; //path used when imported, used by scene editors to keep tracking
 #endif
+		String editor_description;
 
 		Viewport *viewport;
 
 		Map<StringName, GroupData> grouped;
 		List<Node *>::Element *OW; // owned element
 		List<Node *> owned;
+
+		ProcessMode process_mode;// = PROCESS_MODE_INHERIT;
+		Node *process_owner = nullptr;
 
 		Node *pause_owner;
 
@@ -135,7 +140,7 @@ private:
 		int process_priority;
 
 		// Keep bitpacked values together to get better packing
-		PauseMode pause_mode : 2;
+		//ProcessMode pause_mode : 2;
 		PhysicsInterpolationMode physics_interpolation_mode : 2;
 
 		// variables used to properly sort the node when processing, ignored otherwise
@@ -206,7 +211,7 @@ private:
 	void _propagate_physics_interpolated(bool p_interpolated);
 	void _propagate_physics_interpolation_reset_requested();
 	void _print_stray_nodes();
-	void _propagate_pause_owner(Node *p_owner);
+	void _propagate_process_owner(Node *p_owner, int p_notification);
 	Array _get_node_and_resource(const NodePath &p_path);
 
 	void _duplicate_signals(const Node *p_original, Node *p_copy) const;
@@ -224,6 +229,9 @@ private:
 	friend class SceneTree;
 
 	void _set_tree(SceneTree *p_tree);
+	void _propagate_pause_notification(bool p_enable);
+	_FORCE_INLINE_ bool _can_process(bool p_paused) const;
+
 	void _release_unique_name_in_owner();
 	void _acquire_unique_name_in_owner();
 
@@ -440,8 +448,8 @@ public:
 
 	void replace_by(Node *p_node, bool p_keep_data = false);
 
-	void set_pause_mode(PauseMode p_mode);
-	PauseMode get_pause_mode() const;
+	void set_process_mode(ProcessMode p_mode);
+	ProcessMode get_process_mode() const;
 	bool can_process() const;
 	bool can_process_notification(int p_what) const;
 

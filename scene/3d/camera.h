@@ -182,13 +182,13 @@ class ClippedCamera : public Camera {
 	GDCLASS(ClippedCamera, Camera);
 
 public:
-	enum ProcessMode {
+	enum ClipProcessCallback {
 		CLIP_PROCESS_PHYSICS,
 		CLIP_PROCESS_IDLE,
 	};
 
 private:
-	ProcessMode process_mode;
+	ClipProcessCallback process_callback;
 	RID pyramid_shape;
 	float margin;
 	float clip_offset;
@@ -215,8 +215,8 @@ public:
 	void set_margin(float p_margin);
 	float get_margin() const;
 
-	void set_process_mode(ProcessMode p_mode);
-	ProcessMode get_process_mode() const;
+	void set_process_callback(ClipProcessCallback p_mode);
+	ClipProcessCallback get_process_callback() const;
 
 	void set_collision_mask(uint32_t p_mask);
 	uint32_t get_collision_mask() const;
@@ -236,6 +236,6 @@ public:
 	~ClippedCamera();
 };
 
-VARIANT_ENUM_CAST(ClippedCamera::ProcessMode);
+VARIANT_ENUM_CAST(ClippedCamera::ClipProcessCallback);
 
 #endif // CAMERA_H

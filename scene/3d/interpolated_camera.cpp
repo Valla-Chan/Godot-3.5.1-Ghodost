@@ -35,7 +35,7 @@
 void InterpolatedCamera::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE: {
-			_update_process_mode();
+			_update_process_callback();
 		} break;
 		case NOTIFICATION_INTERNAL_PROCESS:
 		case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
@@ -48,7 +48,7 @@ void InterpolatedCamera::_notification(int p_what) {
 					break;
 				}
 
-				float delta = speed * (process_mode == INTERPOLATED_CAMERA_PROCESS_PHYSICS ? get_physics_process_delta_time() : get_process_delta_time());
+				float delta = speed * (process_callback == INTERPOLATED_CAMERA_PROCESS_PHYSICS ? get_physics_process_delta_time() : get_process_delta_time());
 				Transform target_xform = node->get_global_transform();
 				Transform local_transform = get_global_transform();
 				local_transform = local_transform.interpolate_with(target_xform, delta);
@@ -74,16 +74,16 @@ void InterpolatedCamera::_notification(int p_what) {
 	}
 }
 
-void InterpolatedCamera::set_process_mode(InterpolatedCameraProcessMode p_mode) {
-	if (process_mode == p_mode) {
+void InterpolatedCamera::set_process_callback(InterpolatedCameraProcessMode p_mode) {
+	if (process_callback == p_mode) {
 		return;
 	}
-	process_mode = p_mode;
-	_update_process_mode();
+	process_callback = p_mode;
+	_update_process_callback();
 }
 
-InterpolatedCamera::InterpolatedCameraProcessMode InterpolatedCamera::get_process_mode() const {
-	return process_mode;
+InterpolatedCamera::InterpolatedCameraProcessMode InterpolatedCamera::get_process_callback() const {
+	return process_callback;
 }
 
 void InterpolatedCamera::_set_target(const Object *p_target) {
@@ -109,14 +109,14 @@ void InterpolatedCamera::set_interpolation_enabled(bool p_enable) {
 		return;
 	}
 	enabled = p_enable;
-	_update_process_mode();
+	_update_process_callback();
 }
 
-void InterpolatedCamera::_update_process_mode() {
+void InterpolatedCamera::_update_process_callback() {
 	if (Engine::get_singleton()->is_editor_hint() || !enabled) {
 		set_process_internal(false);
 		set_physics_process_internal(false);
-	} else if (process_mode == INTERPOLATED_CAMERA_PROCESS_IDLE) {
+	} else if (process_callback == INTERPOLATED_CAMERA_PROCESS_IDLE) {
 		set_process_internal(true);
 		set_physics_process_internal(false);
 	} else {
@@ -148,13 +148,13 @@ void InterpolatedCamera::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_interpolation_enabled", "target_path"), &InterpolatedCamera::set_interpolation_enabled);
 	ClassDB::bind_method(D_METHOD("is_interpolation_enabled"), &InterpolatedCamera::is_interpolation_enabled);
 
-	ClassDB::bind_method(D_METHOD("set_process_mode", "mode"), &InterpolatedCamera::set_process_mode);
-	ClassDB::bind_method(D_METHOD("get_process_mode"), &InterpolatedCamera::get_process_mode);
+	ClassDB::bind_method(D_METHOD("set_process_callback", "mode"), &InterpolatedCamera::set_process_callback);
+	ClassDB::bind_method(D_METHOD("get_process_callback"), &InterpolatedCamera::get_process_callback);
 
 	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "target"), "set_target_path", "get_target_path");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "speed"), "set_speed", "get_speed");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "enabled"), "set_interpolation_enabled", "is_interpolation_enabled");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "process_mode", PROPERTY_HINT_ENUM, "Physics,Idle"), "set_process_mode", "get_process_mode");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "process_callback", PROPERTY_HINT_ENUM, "Physics,Idle"), "set_process_callback", "get_process_callback");
 
 	BIND_ENUM_CONSTANT(INTERPOLATED_CAMERA_PROCESS_PHYSICS);
 	BIND_ENUM_CONSTANT(INTERPOLATED_CAMERA_PROCESS_IDLE);
@@ -163,5 +163,5 @@ void InterpolatedCamera::_bind_methods() {
 InterpolatedCamera::InterpolatedCamera() {
 	enabled = false;
 	speed = 1;
-	process_mode = INTERPOLATED_CAMERA_PROCESS_IDLE;
+	process_callback = INTERPOLATED_CAMERA_PROCESS_IDLE;
 }

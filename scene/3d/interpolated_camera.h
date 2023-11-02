@@ -46,9 +46,9 @@ private:
 	bool enabled;
 	real_t speed;
 	NodePath target;
-	InterpolatedCameraProcessMode process_mode;
+	InterpolatedCameraProcessMode process_callback;
 
-	void _update_process_mode();
+	void _update_process_callback();
 
 protected:
 	void _notification(int p_what);
@@ -66,8 +66,8 @@ public:
 	void set_interpolation_enabled(bool p_enable);
 	bool is_interpolation_enabled() const;
 
-	void set_process_mode(InterpolatedCameraProcessMode p_mode);
-	InterpolatedCameraProcessMode get_process_mode() const;
+	void set_process_callback(InterpolatedCameraProcessMode p_mode);
+	InterpolatedCameraProcessMode get_process_callback() const;
 
 	InterpolatedCamera();
 };

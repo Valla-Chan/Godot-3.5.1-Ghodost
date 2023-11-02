@@ -34,8 +34,8 @@
 #include "core/os/os.h"
 #include "scene/scene_string_names.h"
 
-void AnimationTreePlayer::set_animation_process_mode(AnimationProcessMode p_mode) {
-	if (animation_process_mode == p_mode) {
+void AnimationTreePlayer::set_process_callback(AnimationProcessCallback p_mode) {
+	if (process_callback == p_mode) {
 		return;
 	}
 
@@ -43,14 +43,14 @@ void AnimationTreePlayer::set_animation_process_mode(AnimationProcessMode p_mode
 	if (pr) {
 		_set_process(false);
 	}
-	animation_process_mode = p_mode;
+	process_callback = p_mode;
 	if (pr) {
 		_set_process(true);
 	}
 }
 
-AnimationTreePlayer::AnimationProcessMode AnimationTreePlayer::get_animation_process_mode() const {
-	return animation_process_mode;
+AnimationTreePlayer::AnimationProcessCallback AnimationTreePlayer::get_process_callback() const {
+	return process_callback;
 }
 
 void AnimationTreePlayer::_set_process(bool p_process, bool p_force) {
@@ -58,7 +58,7 @@ void AnimationTreePlayer::_set_process(bool p_process, bool p_force) {
 		return;
 	}
 
-	switch (animation_process_mode) {
+	switch (process_callback) {
 		case ANIMATION_PROCESS_PHYSICS:
 			set_physics_process_internal(p_process && active);
 			break;
@@ -430,7 +430,7 @@ void AnimationTreePlayer::_notification(int p_what) {
 			}
 		} break;
 		case NOTIFICATION_INTERNAL_PROCESS: {
-			if (animation_process_mode == ANIMATION_PROCESS_PHYSICS) {
+			if (process_callback == ANIMATION_PROCESS_PHYSICS) {
 				break;
 			}
 
@@ -439,7 +439,7 @@ void AnimationTreePlayer::_notification(int p_what) {
 			}
 		} break;
 		case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
-			if (animation_process_mode == ANIMATION_PROCESS_IDLE) {
+			if (process_callback == ANIMATION_PROCESS_IDLE) {
 				break;
 			}
 
@@ -1729,8 +1729,8 @@ void AnimationTreePlayer::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_node_list"), &AnimationTreePlayer::_get_node_list);
 
-	ClassDB::bind_method(D_METHOD("set_animation_process_mode", "mode"), &AnimationTreePlayer::set_animation_process_mode);
-	ClassDB::bind_method(D_METHOD("get_animation_process_mode"), &AnimationTreePlayer::get_animation_process_mode);
+	ClassDB::bind_method(D_METHOD("set_process_callback", "mode"), &AnimationTreePlayer::set_process_callback);
+	ClassDB::bind_method(D_METHOD("get_process_callback"), &AnimationTreePlayer::get_process_callback);
 
 	ClassDB::bind_method(D_METHOD("advance", "delta"), &AnimationTreePlayer::advance);
 
@@ -1739,7 +1739,7 @@ void AnimationTreePlayer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("recompute_caches"), &AnimationTreePlayer::recompute_caches);
 
 	ADD_GROUP("Playback", "playback_");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "playback_process_mode", PROPERTY_HINT_ENUM, "Physics,Idle"), "set_animation_process_mode", "get_animation_process_mode");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "playback_process_callback", PROPERTY_HINT_ENUM, "Physics,Idle"), "set_process_callback", "get_process_callback");
 
 	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "master_player", PROPERTY_HINT_NODE_PATH_VALID_TYPES, "AnimationPlayer"), "set_master_player", "get_master_player");
 	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "base_path"), "set_base_path", "get_base_path");
@@ -1766,7 +1766,7 @@ AnimationTreePlayer::AnimationTreePlayer() {
 	out_name = "out";
 	out->pos = Point2(40, 40);
 	node_map.insert(out_name, out);
-	animation_process_mode = ANIMATION_PROCESS_IDLE;
+	process_callback = ANIMATION_PROCESS_IDLE;
 	processing = false;
 	active = false;
 	dirty_caches = true;
