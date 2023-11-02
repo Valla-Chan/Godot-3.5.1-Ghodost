@@ -143,6 +143,9 @@ void VideoPlayer::_notification(int p_notification) {
 		} break;
 
 		case NOTIFICATION_INTERNAL_PROCESS: {
+			if (!is_playing() && loops) {
+				play();
+			}
 			bus_index = AudioServer::get_singleton()->thread_find_bus_index(bus);
 
 			if (stream.is_null() || paused || playback.is_null() || !playback->is_playing()) {
@@ -197,6 +200,16 @@ void VideoPlayer::set_expand(bool p_expand) {
 
 bool VideoPlayer::has_expand() const {
 	return expand;
+}
+
+void VideoPlayer::set_looped(bool p_loops) {
+	loops = p_loops;
+	playback->set_loop(loops);
+	update();
+}
+
+bool VideoPlayer::is_looped() const {
+	return loops;
 }
 
 void VideoPlayer::set_stream(const Ref<VideoStream> &p_stream) {
@@ -421,6 +434,9 @@ void VideoPlayer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_volume", "volume"), &VideoPlayer::set_volume);
 	ClassDB::bind_method(D_METHOD("get_volume"), &VideoPlayer::get_volume);
 
+	ClassDB::bind_method(D_METHOD("set_looped", "loop"), &VideoPlayer::set_looped);
+	ClassDB::bind_method(D_METHOD("is_looped"), &VideoPlayer::is_looped);
+
 	ClassDB::bind_method(D_METHOD("set_volume_db", "db"), &VideoPlayer::set_volume_db);
 	ClassDB::bind_method(D_METHOD("get_volume_db"), &VideoPlayer::get_volume_db);
 
@@ -450,7 +466,7 @@ void VideoPlayer::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "audio_track", PROPERTY_HINT_RANGE, "0,128,1"), "set_audio_track", "get_audio_track");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PROPERTY_HINT_RESOURCE_TYPE, "VideoStream"), "set_stream", "get_stream");
-	//ADD_PROPERTY( PropertyInfo(Variant::BOOL, "stream/loop"), "set_loop", "has_loop") ;
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "loop"), "set_looped", "is_looped") ;
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "volume_db", PROPERTY_HINT_RANGE, "-80,24,0.01"), "set_volume_db", "get_volume_db");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "volume", PROPERTY_HINT_EXP_RANGE, "0,15,0.01", 0), "set_volume", "get_volume");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "autoplay"), "set_autoplay", "has_autoplay");

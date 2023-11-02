@@ -84,6 +84,9 @@ public:
 	void set_expand(bool p_expand);
 	bool has_expand() const;
 
+	void set_looped(bool p_loops);
+	bool is_looped() const;
+
 	Ref<Texture> get_video_texture() const;
 
 	void set_stream(const Ref<VideoStream> &p_stream);
