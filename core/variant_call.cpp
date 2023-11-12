@@ -247,6 +247,10 @@ struct _VariantCall {
 	VCALL_LOCALMEM3R(String, count);
 	VCALL_LOCALMEM3R(String, countn);
 	VCALL_LOCALMEM2R(String, substr);
+	// Valla edits
+	VCALL_LOCALMEM0R(String, first);
+	VCALL_LOCALMEM0R(String, last);
+	//
 	VCALL_LOCALMEM2R(String, get_slice);
 	VCALL_LOCALMEM2R(String, find);
 	VCALL_LOCALMEM1R(String, find_last);
@@ -1702,6 +1706,10 @@ void register_variant_methods() {
 	ADDFUNC0R(STRING, INT, String, length, varray());
 	ADDFUNC2R(STRING, STRING, String, substr, INT, "from", INT, "len", varray(-1));
 	ADDFUNC2R(STRING, STRING, String, get_slice, STRING, "delimiter", INT, "slice", varray());
+
+	// Valla edits
+	ADDFUNC0R(STRING, STRING, String, first, varray());
+	ADDFUNC0R(STRING, STRING, String, last, varray());
 
 	ADDFUNC2R(STRING, INT, String, find, STRING, "what", INT, "from", varray(0));
 

@@ -169,6 +169,10 @@ godot_int GDAPI godot_string_get_slice_count(const godot_string *p_self, godot_s
 godot_string GDAPI godot_string_get_slice(const godot_string *p_self, godot_string p_splitter, godot_int p_slice);
 godot_string GDAPI godot_string_get_slicec(const godot_string *p_self, wchar_t p_splitter, godot_int p_slice);
 
+// Valla edits
+godot_string GDAPI godot_string_first(const godot_string *p_self);
+godot_string GDAPI godot_string_last(const godot_string *p_self);
+
 godot_array GDAPI godot_string_split(const godot_string *p_self, const godot_string *p_splitter);
 godot_array GDAPI godot_string_split_allow_empty(const godot_string *p_self, const godot_string *p_splitter);
 godot_array GDAPI godot_string_split_floats(const godot_string *p_self, const godot_string *p_splitter);

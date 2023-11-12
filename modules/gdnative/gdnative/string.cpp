@@ -884,6 +884,26 @@ godot_int GDAPI godot_string_get_slice_count(const godot_string *p_self, godot_s
 	return self->get_slice_count(*splitter);
 }
 
+// Valla edits
+godot_string GDAPI godot_string_first(const godot_string *p_self) {
+	const String *self = (const String *)p_self;
+	godot_string result;
+	//memnew_placement(&result, String(self->substr(0, 1)));
+
+	memnew_placement(&result, String(self->first()));
+
+	return result;
+}
+
+godot_string GDAPI godot_string_last(const godot_string *p_self) {
+	const String *self = (const String *)p_self;
+	godot_string result;
+	//memnew_placement(&result, String(self->substr(self->length() - 1, 1)));
+	memnew_placement(&result, String(self->last()));
+
+	return result;
+}
+
 wchar_t GDAPI godot_string_char_lowercase(wchar_t p_char) {
 	return String::char_lowercase(p_char);
 }

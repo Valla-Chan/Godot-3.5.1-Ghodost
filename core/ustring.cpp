@@ -2446,6 +2446,16 @@ String String::substr(int p_from, int p_chars) const {
 	return s;
 }
 
+// Valla edits
+
+String String::first() const {
+	return substr(0,1);
+}
+
+String String::last() const {
+	return substr(length()-1, 1);
+}
+
 int String::find_last(const String &p_str) const {
 	return rfind(p_str);
 }
