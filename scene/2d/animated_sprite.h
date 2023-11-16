@@ -176,6 +176,8 @@ public:
 	bool is_playing() const;
 
 	void set_animation(const StringName &p_animation);
+	void set_animation_continue(const StringName &p_animation);
+	//void set_animation(const StringName &p_animation = StringName(), const bool p_resetframe = true);
 	StringName get_animation() const;
 
 	void set_frame(int p_frame);

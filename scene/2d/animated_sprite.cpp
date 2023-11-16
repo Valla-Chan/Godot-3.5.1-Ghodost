@@ -660,6 +660,7 @@ void AnimatedSprite::_reset_timeout() {
 }
 
 void AnimatedSprite::set_animation(const StringName &p_animation) {
+//void AnimatedSprite::set_animation(const StringName &p_animation, const bool p_resetframe) {
 	ERR_FAIL_COND_MSG(frames == nullptr, vformat("There is no animation with name '%s'.", p_animation));
 	ERR_FAIL_COND_MSG(frames->get_animation_names().find(p_animation) == -1, vformat("There is no animation with name '%s'.", p_animation));
 
@@ -669,7 +670,26 @@ void AnimatedSprite::set_animation(const StringName &p_animation) {
 
 	animation = p_animation;
 	_reset_timeout();
-	set_frame(0);
+	//if (p_resetframe) {
+		set_frame(0);
+	//}
+	_change_notify();
+	update();
+}
+void AnimatedSprite::set_animation_continue(const StringName &p_animation) {
+	//void AnimatedSprite::set_animation(const StringName &p_animation, const bool p_resetframe) {
+	ERR_FAIL_COND_MSG(frames == nullptr, vformat("There is no animation with name '%s'.", p_animation));
+	ERR_FAIL_COND_MSG(frames->get_animation_names().find(p_animation) == -1, vformat("There is no animation with name '%s'.", p_animation));
+
+	if (animation == p_animation) {
+		return;
+	}
+
+	animation = p_animation;
+	//_reset_timeout();
+	//if (p_resetframe) {
+	//set_frame(0);
+	//}
 	_change_notify();
 	update();
 }
@@ -711,6 +731,8 @@ void AnimatedSprite::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_sprite_frames"), &AnimatedSprite::get_sprite_frames);
 
 	ClassDB::bind_method(D_METHOD("set_animation", "animation"), &AnimatedSprite::set_animation);
+	ClassDB::bind_method(D_METHOD("set_animation_continue", "animation"), &AnimatedSprite::set_animation_continue);
+	//ClassDB::bind_method(D_METHOD("set_animation", "animation", "reset_frame"), &AnimatedSprite::set_animation, DEFVAL(StringName()), DEFVAL(false)); //, DEFVAL(StringName()), DEFVAL(false)
 	ClassDB::bind_method(D_METHOD("get_animation"), &AnimatedSprite::get_animation);
 
 	ClassDB::bind_method(D_METHOD("set_playing", "playing"), &AnimatedSprite::set_playing);
