@@ -4190,44 +4190,44 @@ msgstr ""
 msgid "2D Dodge The Creeps Demo"
 msgstr ""
 
-#: doc/classes/AnimatedSprite.xml
+#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "Plays the animation named [code]anim[/code]. If no [code]anim[/code] is "
 "provided, the current animation is played. If [code]backwards[/code] is "
 "[code]true[/code], the animation will be played in reverse."
 msgstr ""
 
-#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedSprite3D.xml
+#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedSprite3D.xml doc/classes/AnimatedTextureRect.xml
 msgid "Stops the current animation (does not reset the frame counter)."
 msgstr ""
 
-#: doc/classes/AnimatedSprite.xml
+#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "The current animation from the [member frames] resource. If this value "
 "changes, the [code]frame[/code] counter is reset."
 msgstr ""
 
-#: doc/classes/AnimatedSprite.xml doc/classes/SpriteBase3D.xml
+#: doc/classes/AnimatedSprite.xml doc/classes/SpriteBase3D.xml doc/classes/AnimatedTextureRect.xml
 msgid "If [code]true[/code], texture will be centered."
 msgstr ""
 
 #: doc/classes/AnimatedSprite.xml doc/classes/Sprite.xml
 #: doc/classes/SpriteBase3D.xml doc/classes/TextureButton.xml
-#: doc/classes/TextureRect.xml
+#: doc/classes/TextureRect.xml doc/classes/AnimatedTextureRect.xml
 msgid "If [code]true[/code], texture is flipped horizontally."
 msgstr ""
 
 #: doc/classes/AnimatedSprite.xml doc/classes/Sprite.xml
 #: doc/classes/SpriteBase3D.xml doc/classes/TextureButton.xml
-#: doc/classes/TextureRect.xml
+#: doc/classes/TextureRect.xml doc/classes/AnimatedTextureRect.xml
 msgid "If [code]true[/code], texture is flipped vertically."
 msgstr ""
 
-#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedSprite3D.xml
+#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedSprite3D.xml doc/classes/AnimatedTextureRect.xml
 msgid "The displayed animation frame's index."
 msgstr ""
 
-#: doc/classes/AnimatedSprite.xml
+#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "The [SpriteFrames] resource containing the animation(s). Allows you the "
 "option to load, edit, clear, make unique and save the states of the "
@@ -4239,31 +4239,31 @@ msgstr ""
 msgid "The texture's drawing offset."
 msgstr ""
 
-#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedSprite3D.xml
+#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedSprite3D.xml doc/classes/AnimatedTextureRect.xml
 msgid "If [code]true[/code], the [member animation] is currently playing."
 msgstr ""
 
-#: doc/classes/AnimatedSprite.xml
+#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedTextureRect.xml
 msgid "The animation speed is multiplied by this value."
 msgstr ""
 
-#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedSprite3D.xml
+#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedSprite3D.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "Emitted when the animation is finished (when it plays the last frame). If "
 "the animation is looping, this signal is emitted every time the last frame "
 "is drawn."
 msgstr ""
 
-#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedSprite3D.xml
+#: doc/classes/AnimatedSprite.xml doc/classes/AnimatedSprite3D.xml doc/classes/AnimatedTextureRect.xml
 msgid "Emitted when [member frame] changed."
 msgstr ""
 
-#: doc/classes/AnimatedSprite3D.xml
+#: doc/classes/AnimatedSprite3D.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "2D sprite node in 3D world, that can use multiple 2D textures for animation."
 msgstr ""
 
-#: doc/classes/AnimatedSprite3D.xml
+#: doc/classes/AnimatedSprite3D.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "Animations are created using a [SpriteFrames] resource, which can be "
 "configured in the editor via the SpriteFrames panel."
@@ -4314,15 +4314,15 @@ msgid ""
 "frame needs to be a separate [Texture]."
 msgstr ""
 
-#: doc/classes/AnimatedTexture.xml
+#: doc/classes/AnimatedTexture.xml doc/classes/AnimatedTextureRect.xml
 msgid "Returns the given frame's delay value."
 msgstr ""
 
-#: doc/classes/AnimatedTexture.xml
+#: doc/classes/AnimatedTexture.xml doc/classes/AnimatedTextureRect.xml
 msgid "Returns the given frame's [Texture]."
 msgstr ""
 
-#: doc/classes/AnimatedTexture.xml
+#: doc/classes/AnimatedTexture.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "Sets an additional delay (in seconds) between this frame and the next one, "
 "that will be added to the time interval defined by [member fps]. By default, "
@@ -4339,7 +4339,7 @@ msgid ""
 "[/codeblock]"
 msgstr ""
 
-#: doc/classes/AnimatedTexture.xml
+#: doc/classes/AnimatedTexture.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "Assigns a [Texture] to the given frame. Frame IDs start at 0, so the first "
 "frame has ID 0, and the last frame of the animation has ID [member frames] - "
@@ -4349,11 +4349,11 @@ msgid ""
 "animation."
 msgstr ""
 
-#: doc/classes/AnimatedTexture.xml
+#: doc/classes/AnimatedTexture.xml doc/classes/AnimatedTextureRect.xml
 msgid "Sets the currently visible frame of the texture."
 msgstr ""
 
-#: doc/classes/AnimatedTexture.xml
+#: doc/classes/AnimatedTexture.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "Animation speed in frames per second. This value defines the default time "
 "interval between two frames of the animation, and thus the overall duration "
@@ -4364,7 +4364,7 @@ msgid ""
 "code] value of 2 will run for 4 seconds, with each frame lasting 0.5 seconds."
 msgstr ""
 
-#: doc/classes/AnimatedTexture.xml
+#: doc/classes/AnimatedTexture.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "Number of frames to use in the animation. While you can create the frames "
 "independently with [method set_frame_texture], you need to set this value "
@@ -4372,21 +4372,21 @@ msgid ""
 "frames is [constant MAX_FRAMES]."
 msgstr ""
 
-#: doc/classes/AnimatedTexture.xml
+#: doc/classes/AnimatedTexture.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "If [code]true[/code], the animation will only play once and will not loop "
 "back to the first frame after reaching the end. Note that reaching the end "
 "will not set [member pause] to [code]true[/code]."
 msgstr ""
 
-#: doc/classes/AnimatedTexture.xml
+#: doc/classes/AnimatedTexture.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "If [code]true[/code], the animation will pause where it currently is (i.e. "
 "at [member current_frame]). The animation will continue from where it was "
 "paused when changing this property to [code]false[/code]."
 msgstr ""
 
-#: doc/classes/AnimatedTexture.xml
+#: doc/classes/AnimatedTexture.xml doc/classes/AnimatedTextureRect.xml
 msgid ""
 "The maximum number of frames supported by [AnimatedTexture]. If you need "
 "more frames in your animation, use [AnimationPlayer] or [AnimatedSprite]."
@@ -61626,6 +61626,11 @@ msgid ""
 "render_target_v_flip] on the Viewport. Otherwise, the image will appear "
 "upside down."
 msgstr ""
+
+#: doc/classes/AnimatedTextureRect.xml
+msgid ""
+"Control for drawing textures with frames to play for animation."
+msgstr "
 
 #: doc/classes/TextureRect.xml
 msgid "If [code]true[/code], the texture scales to fit its bounding rectangle."

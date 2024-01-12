@@ -122,6 +122,7 @@
 #include "scene/gui/text_edit.h"
 #include "scene/gui/texture_button.h"
 #include "scene/gui/texture_progress.h"
+#include "scene/gui/animated_texture_rect.h"
 #include "scene/gui/texture_rect.h"
 #include "scene/gui/tool_button.h"
 #include "scene/gui/tree.h"
@@ -320,6 +321,7 @@ void register_scene_types() {
 
 	OS::get_singleton()->yield(); //may take time to init
 
+	ClassDB::register_class<AnimatedTextureRect>();
 	ClassDB::register_class<TextureRect>();
 	ClassDB::register_class<ColorRect>();
 	ClassDB::register_class<NinePatchRect>();

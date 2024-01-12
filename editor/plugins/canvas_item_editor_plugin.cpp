@@ -48,6 +48,7 @@
 #include "scene/2d/touch_screen_button.h"
 #include "scene/gui/flow_container.h"
 #include "scene/gui/grid_container.h"
+#include "scene/gui/animated_texture_rect.h"
 #include "scene/gui/nine_patch_rect.h"
 #include "scene/gui/viewport_container.h"
 #include "scene/main/canvas_layer.h"
@@ -6613,7 +6614,9 @@ void CanvasItemEditorViewport::_perform_drop_data() {
 					child = memnew(TouchScreenButton);
 				} else if (default_type == "TextureRect") {
 					child = memnew(TextureRect);
-				} else if (default_type == "NinePatchRect") {
+				} else if (default_type == "AnimatedTextureRect") {
+				  child = memnew(AnimatedTextureRect);
+				}else if (default_type == "NinePatchRect") {
 					child = memnew(NinePatchRect);
 				} else {
 					child = memnew(Sprite); // default
