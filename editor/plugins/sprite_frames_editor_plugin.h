@@ -215,12 +215,16 @@ class SpriteFramesEditorPlugin : public EditorPlugin {
 	EditorNode *editor;
 	Button *button;
 
+protected:
+	static void _bind_methods();
+
 public:
 	virtual String get_name() const { return "SpriteFrames"; }
 	bool has_main_screen() const { return false; }
 	virtual void edit(Object *p_object);
 	virtual bool handles(Object *p_object) const;
 	virtual void make_visible(bool p_visible);
+	virtual void update_vis();
 
 	SpriteFramesEditorPlugin(EditorNode *p_node);
 	~SpriteFramesEditorPlugin();

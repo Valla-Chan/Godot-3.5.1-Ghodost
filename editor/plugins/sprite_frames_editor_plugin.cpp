@@ -433,7 +433,6 @@ void SpriteFramesEditor::_notification(int p_what) {
 			move_up->set_icon(get_icon("MoveLeft", "EditorIcons"));
 			move_down->set_icon(get_icon("MoveRight", "EditorIcons"));
 			_delete->set_icon(get_icon("Remove", "EditorIcons"));
-			//_delete_all->set_icon(get_icon("Remove", "EditorIcons"));
 			zoom_out->set_icon(get_icon("ZoomLess", "EditorIcons"));
 			zoom_reset->set_icon(get_icon("ZoomReset", "EditorIcons"));
 			zoom_in->set_icon(get_icon("ZoomMore", "EditorIcons"));
@@ -750,7 +749,6 @@ void SpriteFramesEditor::_frame_notify_send(int index) {
 				sprite->set_frame(index);
 			}
 		}
-		//if
 		//frames->emit_signal(SceneStringNames::get_singleton()->animation_changed, edited_anim);
 		//frames->emit_signal(SceneStringNames::get_singleton()->frame_changed, index);
 	}
@@ -791,6 +789,8 @@ void SpriteFramesEditor::_animation_select() {
 	_update_library(true);
 }
 
+
+// NOTE: this might have something to do with opening it?
 static void _find_anim_sprites(Node *p_node, List<Node *> *r_nodes, Ref<SpriteFrames> p_sfames) {
 	Node *edited = EditorNode::get_singleton()->get_edited_scene();
 	if (!edited) {
@@ -809,6 +809,13 @@ static void _find_anim_sprites(Node *p_node, List<Node *> *r_nodes, Ref<SpriteFr
 
 	{
 		AnimatedSprite3D *as = Object::cast_to<AnimatedSprite3D>(p_node);
+		if (as && as->get_sprite_frames() == p_sfames) {
+			r_nodes->push_back(p_node);
+		}
+	}
+
+	{
+		AnimatedTextureRect *as = Object::cast_to<AnimatedTextureRect>(p_node);
 		if (as && as->get_sprite_frames() == p_sfames) {
 			r_nodes->push_back(p_node);
 		}
@@ -1717,17 +1724,36 @@ bool SpriteFramesEditorPlugin::handles(Object *p_object) const {
 }
 
 void SpriteFramesEditorPlugin::make_visible(bool p_visible) {
+	Object *inspector_ob = EditorNode::get_singleton()->get_inspector()->get_edited_object();
+	if (inspector_ob == nullptr)
+		return;
+	/*
+	if (Object::cast_to<AnimatedTextureRect>(inspector_ob) ||
+			Object::cast_to<AnimatedSprite>(inspector_ob) ||
+			Object::cast_to<AnimatedSprite3D>(inspector_ob) ||
+			Object::cast_to<SpriteFrames>(inspector_ob)) {
+		p_visible = true;
+	}*/
+
 	if (p_visible) {
 		button->show();
 		editor->make_bottom_panel_item_visible(frames_editor);
-		//frames_editor->call_deferred("sync_anim_slot");
 		frames_editor->sync_anim_slot();
 	} else {
 		button->hide();
+
 		if (frames_editor->is_visible_in_tree()) {
 			editor->hide_bottom_panel();
 		}
 	}
+}
+
+void SpriteFramesEditorPlugin::update_vis() {
+	//if (!button->is_visible())
+	make_visible(false);
+}
+
+void SpriteFramesEditorPlugin::_bind_methods() {
 }
 
 SpriteFramesEditorPlugin::SpriteFramesEditorPlugin(EditorNode *p_node) {
@@ -1736,6 +1762,7 @@ SpriteFramesEditorPlugin::SpriteFramesEditorPlugin(EditorNode *p_node) {
 	frames_editor->set_custom_minimum_size(Size2(0, 300) * EDSCALE);
 	button = editor->add_bottom_panel_item(TTR("SpriteFrames"), frames_editor);
 	button->hide();
+	//EditorNode::get_singleton()->get_editor_selection()->connect("selection_changed", this, "update_vis");
 }
 
 SpriteFramesEditorPlugin::~SpriteFramesEditorPlugin() {
