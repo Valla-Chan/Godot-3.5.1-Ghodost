@@ -60,6 +60,7 @@ void SpriteFramesEditor::_open_sprite_sheet() {
 	file_split_sheet->popup_centered_ratio();
 }
 
+// turn mouse position in the preview window into the frame index hovered
 int SpriteFramesEditor::_sheet_preview_position_to_frame_index(const Point2 &p_position) {
 	const Size2i offset = _get_offset();
 	const Size2i frame_size = _get_frame_size();
@@ -148,7 +149,7 @@ void SpriteFramesEditor::_sheet_preview_draw() {
 	split_sheet_dialog->get_ok()->set_text(vformat(TTR("Add %d Frame(s)"), frames_selected.size()));
 }
 
-//this is the selection for splitting up an image into frames, not the actual animation frames
+//this is the selection for splitting up an image into frames, not the actual animation frames window.
 void SpriteFramesEditor::_sheet_preview_input(const Ref<InputEvent> &p_event) {
 	const Ref<InputEventMouseButton> mb = p_event;
 	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
@@ -371,6 +372,7 @@ void SpriteFramesEditor::_sheet_spin_changed(double p_value, int p_dominant_para
 	split_sheet_preview->update();
 }
 
+bool firsttexture = true;
 void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
 	Ref<Texture> texture = ResourceLoader::load(p_file);
 	if (!texture.is_valid()) {
@@ -383,27 +385,32 @@ void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
 	bool new_texture = texture != split_sheet_preview->get_texture();
 	split_sheet_preview->set_texture(texture);
 	if (new_texture) {
-		// Reset spin max.
-		const Size2i size = texture->get_size();
-		split_sheet_size_x->set_max(size.x);
-		split_sheet_size_y->set_max(size.y);
-		split_sheet_sep_x->set_max(size.x);
-		split_sheet_sep_y->set_max(size.y);
-		split_sheet_offset_x->set_max(size.x);
-		split_sheet_offset_y->set_max(size.y);
+		// Valla edits: make this not go back to 4x4 every time!!
+		// Only run once.
+		if (firsttexture) {
+			firsttexture = false;
+			// Reset spin max.
+			const Size2i size = texture->get_size();
+			split_sheet_size_x->set_max(size.x);
+			split_sheet_size_y->set_max(size.y);
+			split_sheet_sep_x->set_max(size.x);
+			split_sheet_sep_y->set_max(size.y);
+			split_sheet_offset_x->set_max(size.x);
+			split_sheet_offset_y->set_max(size.y);
 
-		// Different texture, reset to 4x4.
-		dominant_param = PARAM_FRAME_COUNT;
-		updating_split_settings = true;
-		split_sheet_h->set_value(4);
-		split_sheet_v->set_value(4);
-		split_sheet_size_x->set_value(size.x / 4);
-		split_sheet_size_y->set_value(size.y / 4);
-		split_sheet_sep_x->set_value(0);
-		split_sheet_sep_y->set_value(0);
-		split_sheet_offset_x->set_value(0);
-		split_sheet_offset_y->set_value(0);
-		updating_split_settings = false;
+			// Different texture, reset to 4x4.
+			dominant_param = PARAM_FRAME_COUNT;
+			updating_split_settings = true;
+			split_sheet_h->set_value(4);
+			split_sheet_v->set_value(4);
+			split_sheet_size_x->set_value(size.x / 4);
+			split_sheet_size_y->set_value(size.y / 4);
+			split_sheet_sep_x->set_value(0);
+			split_sheet_sep_y->set_value(0);
+			split_sheet_offset_x->set_value(0);
+			split_sheet_offset_y->set_value(0);
+			updating_split_settings = false;
+		}
 
 		// Reset zoom.
 		_sheet_zoom_reset();
