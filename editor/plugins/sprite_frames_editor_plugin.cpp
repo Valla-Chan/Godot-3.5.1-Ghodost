@@ -706,16 +706,18 @@ void SpriteFramesEditor::_delete_pressed() {
 	}
 
 	Vector<int> to_delete = tree->get_selected_items();
-	if (to_delete.size() <= 0 || to_delete.size() >= frames->get_frame_count(edited_anim)) {
+	if (to_delete.size() <= 0 || to_delete.size() > frames->get_frame_count(edited_anim)) {
 		return;
 	}
 
 	undo_redo->create_action(TTR("Delete Resource"));
+	int bump_back = 0;
 	// Detect if the previously deleted image was before this one, and bump the index back if so.
 	for (int i = 0; i < to_delete.size(); i++) {
 		int deletionframe = to_delete[i];
 		if (i != 0 && to_delete[i - 1] < deletionframe) {
-			deletionframe -= 1;
+			bump_back += 1;
+			deletionframe -= bump_back;
 		}
 		undo_redo->add_do_method(frames, "remove_frame", edited_anim, deletionframe);
 	}
