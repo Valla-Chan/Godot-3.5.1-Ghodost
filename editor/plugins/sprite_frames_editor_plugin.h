@@ -74,6 +74,7 @@ class SpriteFramesEditor : public HSplitContainer {
 	LineEdit *anim_search_box;
 
 	Tree *animations;
+	Map<StringName, TreeItem *> animations_map;
 	SpinBox *anim_speed;
 	CheckButton *anim_loop;
 
@@ -203,6 +204,7 @@ public:
 	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }
 
 	void edit(SpriteFrames *p_frames);
+	void sync_anim_slot();
 	SpriteFramesEditor();
 };
 

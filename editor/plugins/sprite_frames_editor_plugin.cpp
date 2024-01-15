@@ -1060,6 +1060,7 @@ void SpriteFramesEditor::_update_library(bool p_skip_selector) {
 		bool searching = anim_search_box->get_text().size();
 		String searched_string = searching ? anim_search_box->get_text().to_lower() : String();
 
+		animations_map.clear();
 		for (List<StringName>::Element *E = anim_names.front(); E; E = E->next()) {
 			String name = E->get();
 
@@ -1073,6 +1074,8 @@ void SpriteFramesEditor::_update_library(bool p_skip_selector) {
 
 			it->set_text(0, name);
 			it->set_editable(0, true);
+			animations_map.insert(name, it);
+			
 
 			if (E->get() == edited_anim) {
 				it->select(0);
@@ -1478,7 +1481,7 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	dialog = memnew(AcceptDialog);
 	add_child(dialog);
 
-	// send a signal when user
+	// send a signal when user double clicks on a frame
 	tree->connect("item_activated", this, "_frame_notify_send");
 
 	load->connect("pressed", this, "_load_pressed");
@@ -1663,6 +1666,33 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	set_split_offset(56 * EDSCALE);
 }
 
+void SpriteFramesEditor::sync_anim_slot() {
+	// VALLA EDITS
+	// make this switch animations to the one set in the first selected object.
+	Array selected_nodes = EditorNode::get_singleton()->get_editor_selection()->get_selected_nodes();
+	for (int i = 0; i < selected_nodes.size(); i++) {
+		if (Object::cast_to<AnimatedTextureRect>(selected_nodes[i])) {
+			AnimatedTextureRect *rect = Object::cast_to<AnimatedTextureRect>(selected_nodes[i]);
+			if (rect->get_sprite_frames()->reference() == frames->reference()) {
+				edited_anim = rect->get_animation();
+				ERR_FAIL_COND(!frames->has_animation(edited_anim));
+				_update_library(false);
+				animations->set_selected(animations_map[edited_anim]);
+				break;
+			}
+		} else if (Object::cast_to<AnimatedSprite>(selected_nodes[i])) {
+			AnimatedSprite *sprite = Object::cast_to<AnimatedSprite>(selected_nodes[i]);
+			if (sprite->get_sprite_frames()->reference() == frames->reference()) {
+				edited_anim = sprite->get_animation();
+				ERR_FAIL_COND(!frames->has_animation(edited_anim));
+				_update_library(false);
+				animations->set_selected(animations_map[edited_anim]);
+				break;
+			}
+		}
+	}
+}
+
 void SpriteFramesEditorPlugin::edit(Object *p_object) {
 	frames_editor->set_undo_redo(&get_undo_redo());
 
@@ -1690,6 +1720,8 @@ void SpriteFramesEditorPlugin::make_visible(bool p_visible) {
 	if (p_visible) {
 		button->show();
 		editor->make_bottom_panel_item_visible(frames_editor);
+		//frames_editor->call_deferred("sync_anim_slot");
+		frames_editor->sync_anim_slot();
 	} else {
 		button->hide();
 		if (frames_editor->is_visible_in_tree()) {
