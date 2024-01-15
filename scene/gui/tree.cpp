@@ -3157,6 +3157,24 @@ TreeItem *Tree::get_selected() const {
 	return selected_item;
 }
 
+void Tree::set_selected(TreeItem *p_item, int p_column) {
+	ERR_FAIL_INDEX(p_column, columns.size());
+	ERR_FAIL_COND(!p_item);
+	select_single_item(p_item, get_root(), p_column);
+}
+
+/*
+void Tree::set_selected(String p_name) const {
+	ERR_FAIL_COND(!this);
+	for (int i = 0; i < this->children(); i++) {
+		if (this->get_child(i)->name(0).to_lower() == p_name.to_lower()) {
+			selected_item = 
+		}
+
+	}
+
+}*/
+
 int Tree::get_selected_column() const {
 	return selected_col;
 }
