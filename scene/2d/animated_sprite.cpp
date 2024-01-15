@@ -129,6 +129,35 @@ void SpriteFrames::add_frame(const StringName &p_anim, const Ref<Texture> &p_fra
 
 	emit_changed();
 }
+/*
+void SpriteFrames::add_frames(const StringName &p_anim, const Vector<Ref<Texture>> &p_frames, int p_at_pos) {
+
+	Map<StringName, Anim>::Element *E = animations.find(p_anim);
+	ERR_FAIL_COND_MSG(!E, "Animation '" + String(p_anim) + "' doesn't exist.");
+
+	for (int i = 0; i < p_frames.size(); i++) {
+		if (p_at_pos >= 0 && p_at_pos < E->get().frames.size()) {
+			E->get().frames.insert(p_at_pos, p_frames[i]);
+		} else {
+			E->get().frames.push_back(p_frames[i]);
+		}
+	}
+	emit_changed();
+}
+*/
+
+Vector<Ref<Texture>> SpriteFrames::get_animation_frames(const StringName &p_anim) {
+	const Map<StringName, Anim>::Element *E = animations.find(p_anim);
+	ERR_FAIL_COND_V_MSG(!E, Vector<Ref<Texture>>(), "Animation '" + String(p_anim) + "' doesn't exist.");
+	return E->get().frames;
+}
+
+/*
+void SpriteFrames::set_animation_frames(const StringName& p_anim, Vector<Ref<Texture>>) {
+	const Map<StringName, Anim>::Element *E = animations.find(p_anim);
+	ERR_FAIL_COND_MSG(!E, "Animation '" + String(p_anim) + "' doesn't exist.");
+	E->;
+}*/
 
 int SpriteFrames::get_frame_count(const StringName &p_anim) const {
 	const Map<StringName, Anim>::Element *E = animations.find(p_anim);
@@ -299,6 +328,7 @@ void SpriteFrames::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_animation_loop", "anim"), &SpriteFrames::get_animation_loop);
 
 	ClassDB::bind_method(D_METHOD("add_frame", "anim", "frame", "at_position"), &SpriteFrames::add_frame, DEFVAL(-1));
+	//ClassDB::bind_method(D_METHOD("add_frames", "anim", "frames", "at_position"), &SpriteFrames::add_frames, DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("get_frame_count", "anim"), &SpriteFrames::get_frame_count);
 	ClassDB::bind_method(D_METHOD("get_frame", "anim", "idx"), &SpriteFrames::get_frame);
 	ClassDB::bind_method(D_METHOD("set_frame", "anim", "idx", "txt"), &SpriteFrames::set_frame);
@@ -315,6 +345,9 @@ void SpriteFrames::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_get_animations"), &SpriteFrames::_get_animations);
 
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "animations", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL), "_set_animations", "_get_animations");
+
+	ADD_SIGNAL(MethodInfo("animation_changed"));
+	ADD_SIGNAL(MethodInfo("frame_changed"));
 }
 
 SpriteFrames::SpriteFrames() {
@@ -486,10 +519,12 @@ void AnimatedSprite::_notification(int p_what) {
 void AnimatedSprite::set_sprite_frames(const Ref<SpriteFrames> &p_frames) {
 	if (frames.is_valid()) {
 		frames->disconnect("changed", this, "_res_changed");
+		frames->disconnect("frame_changed", this, "set_frame");
 	}
 	frames = p_frames;
 	if (frames.is_valid()) {
 		frames->connect("changed", this, "_res_changed");
+		frames->connect("frame_changed", this, "set_frame");
 	}
 
 	if (!frames.is_valid()) {
@@ -777,9 +812,12 @@ void AnimatedSprite::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "offset"), "set_offset", "get_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_h"), "set_flip_h", "is_flipped_h");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_v"), "set_flip_v", "is_flipped_v");
+
+
 }
 
 AnimatedSprite::AnimatedSprite() {
+
 	centered = true;
 	basealigned = false;
 	hflip = false;

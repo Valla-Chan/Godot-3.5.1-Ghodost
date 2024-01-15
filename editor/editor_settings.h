@@ -93,6 +93,7 @@ private:
 	int last_order;
 
 	Ref<Resource> clipboard;
+	Vector<Ref<Resource>> clipboard_array;
 	Map<String, Ref<ShortCut>> shortcuts;
 
 	String resource_path;
@@ -158,6 +159,9 @@ public:
 
 	void set_resource_clipboard(const Ref<Resource> &p_resource) { clipboard = p_resource; }
 	Ref<Resource> get_resource_clipboard() const { return clipboard; }
+
+	void set_resource_array_clipboard(const Vector<Ref<Resource>> &p_resource) { clipboard_array = p_resource; }
+	Vector<Ref<Resource>> get_resource_array_clipboard() const { return clipboard_array; }
 
 	String get_data_dir() const;
 	String get_templates_dir() const;

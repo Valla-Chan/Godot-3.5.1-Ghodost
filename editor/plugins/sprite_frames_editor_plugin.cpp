@@ -30,6 +30,8 @@
 
 #include "sprite_frames_editor_plugin.h"
 
+#include "scene/scene_string_names.h"
+
 #include "core/io/resource_loader.h"
 #include "core/os/input.h"
 #include "core/os/keyboard.h"
@@ -431,7 +433,7 @@ void SpriteFramesEditor::_notification(int p_what) {
 			move_up->set_icon(get_icon("MoveLeft", "EditorIcons"));
 			move_down->set_icon(get_icon("MoveRight", "EditorIcons"));
 			_delete->set_icon(get_icon("Remove", "EditorIcons"));
-			_delete_all->set_icon(get_icon("Remove", "EditorIcons"));
+			//_delete_all->set_icon(get_icon("Remove", "EditorIcons"));
 			zoom_out->set_icon(get_icon("ZoomLess", "EditorIcons"));
 			zoom_reset->set_icon(get_icon("ZoomReset", "EditorIcons"));
 			zoom_in->set_icon(get_icon("ZoomMore", "EditorIcons"));
@@ -527,8 +529,8 @@ void SpriteFramesEditor::_load_pressed() {
 void SpriteFramesEditor::_paste_pressed() {
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
-	Ref<Texture> r = EditorSettings::get_singleton()->get_resource_clipboard();
-	if (!r.is_valid()) {
+	Vector<Ref<Resource>> r = EditorSettings::get_singleton()->get_resource_array_clipboard();
+	if (r.size() <= 0) {
 		dialog->set_text(TTR("Resource clipboard is empty or not a texture!"));
 		dialog->set_title(TTR("Error!"));
 		//dialog->get_cancel()->set_text("Close");
@@ -538,8 +540,12 @@ void SpriteFramesEditor::_paste_pressed() {
 	}
 
 	undo_redo->create_action(TTR("Paste Frame"));
-	undo_redo->add_do_method(frames, "add_frame", edited_anim, r);
-	undo_redo->add_undo_method(frames, "remove_frame", edited_anim, frames->get_frame_count(edited_anim));
+	for (int i = 0; i < r.size(); i++) {
+		undo_redo->add_do_method(frames, "add_frame", edited_anim, r[i]);
+	}
+	for (int i = 0; i < r.size(); i++) {
+		undo_redo->add_undo_method(frames, "remove_frame", edited_anim, frames->get_frame_count(edited_anim)+i);
+	}
 	undo_redo->add_do_method(this, "_update_library");
 	undo_redo->add_undo_method(this, "_update_library");
 	undo_redo->commit_action();
@@ -548,34 +554,24 @@ void SpriteFramesEditor::_paste_pressed() {
 void SpriteFramesEditor::_copy_pressed() {
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
-	if (tree->get_current() < 0) {
+	if (tree->get_selected_items().size() <= 0) {
 		return;
 	}
-	Ref<Texture> r = frames->get_frame(edited_anim, tree->get_current());
-	if (!r.is_valid()) {
-		return;
-	}
-
-	EditorSettings::get_singleton()->set_resource_clipboard(r);
-}
-
-/*
-void SpriteFramesEditor::_copy_all_pressed() {
-	ERR_FAIL_COND(!frames->has_animation(edited_anim));
-
-	if (tree->get_current() < 0) {
-		return;
-	}
-	Array framearray = Array();
-	for (int i = 0; i < tree->get_item_count() - 1; i++) {
-		Ref<Texture> r = frames->get_frame(edited_anim, tree->get_current());
-		if (r.is_valid()) {
-			framearray.append(r);
+	Vector<Ref<Resource>> r;
+	for (int i = 0; i < tree->get_selected_items().size(); i++) {
+		Ref<Resource> nexttex = frames->get_frame(edited_anim, tree->get_selected_items()[i]);
+		if (!nexttex.is_valid()) {
+			return;
 		}
-	};
-	EditorSettings::get_singleton()->set_resource_clipboard(framearray);
+		r.push_back(nexttex);
+	}
+	if (r.size() <= 0) {
+		return;
+	}
+
+	EditorSettings::get_singleton()->set_resource_array_clipboard(r);
 }
-*/
+
 
 void SpriteFramesEditor::_empty_pressed() {
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
@@ -626,23 +622,38 @@ void SpriteFramesEditor::_empty2_pressed() {
 void SpriteFramesEditor::_up_pressed() {
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
-	if (tree->get_current() < 0) {
+	Vector<int> to_move = tree->get_selected_items();
+	// if the first selected item is already first, dont move.
+	if (to_move.size() <= 0 || to_move[0] < 1) {
 		return;
 	}
 
-	int to_move = tree->get_current();
-	if (to_move < 1) {
-		return;
-	}
-
-	sel = to_move;
+	sel = to_move[0];
 	sel -= 1;
 
+	Vector<Ref<Texture>> cached_texlist = frames->get_animation_frames(edited_anim);
+	for (int i = 0; i < frames->get_frame_count(edited_anim); i++) {
+		cached_texlist.push_back(frames->get_frame(edited_anim, i));
+	}
+
+	// Do & Undo
 	undo_redo->create_action(TTR("Delete Resource"));
-	undo_redo->add_do_method(frames, "set_frame", edited_anim, to_move, frames->get_frame(edited_anim, to_move - 1));
-	undo_redo->add_do_method(frames, "set_frame", edited_anim, to_move - 1, frames->get_frame(edited_anim, to_move));
-	undo_redo->add_undo_method(frames, "set_frame", edited_anim, to_move, frames->get_frame(edited_anim, to_move));
-	undo_redo->add_undo_method(frames, "set_frame", edited_anim, to_move - 1, frames->get_frame(edited_anim, to_move - 1));
+
+	// bump all the frames up without swapping in the fixes
+	for (int i = 0; i < to_move.size(); i++) {
+		undo_redo->add_do_method(frames, "set_frame", edited_anim, to_move[i]-1, frames->get_frame(edited_anim, to_move[i]));
+	}
+	// swap in the fixes from cached_texlist
+	Vector<int> needs_fix = get_gaps_after(to_move);
+	Vector<int> before_frames = get_gaps_before(to_move);
+	for (int i = 0; i < needs_fix.size(); i++) {
+		undo_redo->add_do_method(frames, "set_frame", edited_anim, needs_fix[i]-1, cached_texlist[before_frames[i]]);
+	}
+	// reset all frames to the cache, for the undo methods.
+	for (int i = 0; i < cached_texlist.size(); i++) {
+		undo_redo->add_undo_method(frames, "set_frame", edited_anim, i, cached_texlist[i]);
+	}
+
 	undo_redo->add_do_method(this, "_update_library");
 	undo_redo->add_undo_method(this, "_update_library");
 	undo_redo->commit_action();
@@ -651,23 +662,38 @@ void SpriteFramesEditor::_up_pressed() {
 void SpriteFramesEditor::_down_pressed() {
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
-	if (tree->get_current() < 0) {
+	Vector<int> to_move = tree->get_selected_items();
+	// if the last selected item is already last, dont move.
+	if (to_move.size() <= 0 || to_move[to_move.size()-1] >= frames->get_frame_count(edited_anim) - 1) {
 		return;
 	}
 
-	int to_move = tree->get_current();
-	if (to_move < 0 || to_move >= frames->get_frame_count(edited_anim) - 1) {
-		return;
-	}
-
-	sel = to_move;
+	sel = to_move[0];
 	sel += 1;
 
+	Vector<Ref<Texture>> cached_texlist = frames->get_animation_frames(edited_anim);
+	for (int i = 0; i < frames->get_frame_count(edited_anim); i++) {
+		cached_texlist.push_back(frames->get_frame(edited_anim, i));
+	}
+
+	// Do & Undo
 	undo_redo->create_action(TTR("Delete Resource"));
-	undo_redo->add_do_method(frames, "set_frame", edited_anim, to_move, frames->get_frame(edited_anim, to_move + 1));
-	undo_redo->add_do_method(frames, "set_frame", edited_anim, to_move + 1, frames->get_frame(edited_anim, to_move));
-	undo_redo->add_undo_method(frames, "set_frame", edited_anim, to_move, frames->get_frame(edited_anim, to_move));
-	undo_redo->add_undo_method(frames, "set_frame", edited_anim, to_move + 1, frames->get_frame(edited_anim, to_move + 1));
+
+	// bump all the frames down without swapping in the fixes
+	for (int i = 0; i < to_move.size(); i++) {
+		undo_redo->add_do_method(frames, "set_frame", edited_anim, to_move[i] + 1, frames->get_frame(edited_anim, to_move[i]));
+	}
+	// swap in the fixes from cached_texlist
+	Vector<int> needs_fix = get_gaps_before(to_move);
+	Vector<int> after_frames = get_gaps_after(to_move);
+	for (int i = 0; i < needs_fix.size(); i++) {
+		undo_redo->add_do_method(frames, "set_frame", edited_anim, needs_fix[i] + 1, cached_texlist[after_frames[i]]);
+	}
+	// reset all frames to the cache, for the undo methods.
+	for (int i = 0; i < cached_texlist.size(); i++) {
+		undo_redo->add_undo_method(frames, "set_frame", edited_anim, i, cached_texlist[i]);
+	}
+
 	undo_redo->add_do_method(this, "_update_library");
 	undo_redo->add_undo_method(this, "_update_library");
 	undo_redo->commit_action();
@@ -676,32 +702,64 @@ void SpriteFramesEditor::_down_pressed() {
 void SpriteFramesEditor::_delete_pressed() {
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
-	if (tree->get_current() < 0) {
+	if (tree->get_selected_items().size() <= 0) {
 		return;
 	}
 
-	int to_delete = tree->get_current();
-	if (to_delete < 0 || to_delete >= frames->get_frame_count(edited_anim)) {
+	Vector<int> to_delete = tree->get_selected_items();
+	if (to_delete.size() <= 0 || to_delete.size() >= frames->get_frame_count(edited_anim)) {
 		return;
 	}
 
 	undo_redo->create_action(TTR("Delete Resource"));
-	undo_redo->add_do_method(frames, "remove_frame", edited_anim, to_delete);
-	undo_redo->add_undo_method(frames, "add_frame", edited_anim, frames->get_frame(edited_anim, to_delete), to_delete);
+	// Detect if the previously deleted image was before this one, and bump the index back if so.
+	for (int i = 0; i < to_delete.size(); i++) {
+		int deletionframe = to_delete[i];
+		if (i != 0 && to_delete[i - 1] < deletionframe) {
+			deletionframe -= 1;
+		}
+		undo_redo->add_do_method(frames, "remove_frame", edited_anim, deletionframe);
+	}
+	for (int i = 0; i < to_delete.size(); i++) {
+		undo_redo->add_undo_method(frames, "add_frame", edited_anim, frames->get_frame(edited_anim, to_delete[i]), to_delete[i]);
+	}
 	undo_redo->add_do_method(this, "_update_library");
 	undo_redo->add_undo_method(this, "_update_library");
 	undo_redo->commit_action();
 }
 
-void SpriteFramesEditor::_delete_all_pressed() {
-	ERR_FAIL_COND(!frames->has_animation(edited_anim));
-
-	if (tree->get_item_count() == 0) {
-		return;
+#include "scene/gui/animated_texture_rect.h"
+#include "scene/2d/animated_sprite.h"
+// When double clicked, make the selected nodes change animation and frame.
+void SpriteFramesEditor::_frame_notify_send(int index) {
+	//Object* selectob = EditorNode::get_singleton()->get_inspector()->get_edited_object();
+	Array selected_nodes = EditorNode::get_singleton()->get_editor_selection()->get_selected_nodes();
+	for (int i = 0; i < selected_nodes.size(); i++) {
+		
+		if (Object::cast_to<AnimatedTextureRect>(selected_nodes[i])) {
+			AnimatedTextureRect* rect = Object::cast_to<AnimatedTextureRect>(selected_nodes[i]);
+			if (rect->get_sprite_frames()->reference() == frames->reference()) {
+				rect->set_animation(edited_anim);
+				rect->set_frame(index);
+			}
+		}
+		else if (Object::cast_to<AnimatedSprite>(selected_nodes[i])) {
+			AnimatedSprite* sprite = Object::cast_to<AnimatedSprite>(selected_nodes[i]);
+			if (sprite->get_sprite_frames()->reference() == frames->reference()) {
+				sprite->set_animation(edited_anim);
+				sprite->set_frame(index);
+			}
+		}
+		//if
+		//frames->emit_signal(SceneStringNames::get_singleton()->animation_changed, edited_anim);
+		//frames->emit_signal(SceneStringNames::get_singleton()->frame_changed, index);
 	}
+}
 
-	delete_dialog->set_text(TTR("Delete All Frames?"));
-	delete_dialog->popup_centered_minsize();
+void SpriteFramesEditor::_frame_copy() {
+	String vstr;
+	VariantWriter::write_to_string(tree->get_current(), vstr);
+	OS::get_singleton()->set_clipboard(vstr);
 }
 
 void SpriteFramesEditor::_frames_remove_confirmed() {
@@ -1029,6 +1087,7 @@ void SpriteFramesEditor::_update_library(bool p_skip_selector) {
 		return;
 	}
 
+	// Reset selection to start or end
 	if (sel >= frames->get_frame_count(edited_anim)) {
 		sel = frames->get_frame_count(edited_anim) - 1;
 	} else if (sel < 0 && frames->get_frame_count(edited_anim)) {
@@ -1063,7 +1122,7 @@ void SpriteFramesEditor::_update_library(bool p_skip_selector) {
 			tree->set_item_tooltip(tree->get_item_count() - 1, tooltip);
 		}
 		if (sel == i) {
-			tree->select(tree->get_item_count() - 1);
+			//tree->select(tree->get_item_count() - 1);
 		}
 	}
 
@@ -1231,7 +1290,8 @@ void SpriteFramesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_empty_pressed"), &SpriteFramesEditor::_empty_pressed);
 	ClassDB::bind_method(D_METHOD("_empty2_pressed"), &SpriteFramesEditor::_empty2_pressed);
 	ClassDB::bind_method(D_METHOD("_delete_pressed"), &SpriteFramesEditor::_delete_pressed);
-	ClassDB::bind_method(D_METHOD("_delete_all_pressed"), &SpriteFramesEditor::_delete_all_pressed);
+	ClassDB::bind_method(D_METHOD("_frame_copy"), &SpriteFramesEditor::_frame_copy);
+	ClassDB::bind_method(D_METHOD("_frame_notify_send"), &SpriteFramesEditor::_frame_notify_send);
 	ClassDB::bind_method(D_METHOD("_copy_pressed"), &SpriteFramesEditor::_copy_pressed);
 	ClassDB::bind_method(D_METHOD("_paste_pressed"), &SpriteFramesEditor::_paste_pressed);
 	ClassDB::bind_method(D_METHOD("_file_load_request", "files", "at_position"), &SpriteFramesEditor::_file_load_request, DEFVAL(-1));
@@ -1377,12 +1437,16 @@ SpriteFramesEditor::SpriteFramesEditor() {
 
 	hbc->add_child(memnew(VSeparator));
 
-	_delete_all = memnew(ToolButton);
-	_delete_all->set_tooltip(TTR("Delete All"));
-	//hbc->add_child(_delete_all);
+	// Copy the selected frame to the clipboard
+	_frame_copy_btn = memnew(Button);
+	_frame_copy_btn->set_text(TTR(" Copy Frame Index "));
+	_frame_copy_btn->set_tooltip(TTR("Copy the selected frame index to the clipboard."));
+	_frame_copy_btn->set_modulate(Color(1.1, 1.1, 1.1, 0.9));
+	hbc->add_child(_frame_copy_btn);
 
 	hbc->add_spacer();
 
+	// ZOOM
 	zoom_out = memnew(ToolButton);
 	zoom_out->set_tooltip(TTR("Zoom Out"));
 	hbc->add_child(zoom_out);
@@ -1394,13 +1458,15 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	zoom_in = memnew(ToolButton);
 	zoom_in->set_tooltip(TTR("Zoom In"));
 	hbc->add_child(zoom_in);
+	//
 
 	file = memnew(EditorFileDialog);
 	add_child(file);
 
+	// This is where the animaton frames are stored
 	tree = memnew(ItemList);
 	tree->set_v_size_flags(SIZE_EXPAND_FILL);
-	tree->set_icon_mode(ItemList::ICON_MODE_TOP);
+	tree->set_select_mode(ItemList::SELECT_MULTI);
 
 	tree->set_max_columns(0);
 	tree->set_icon_mode(ItemList::ICON_MODE_TOP);
@@ -1412,10 +1478,13 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	dialog = memnew(AcceptDialog);
 	add_child(dialog);
 
+	// send a signal when user
+	tree->connect("item_activated", this, "_frame_notify_send");
+
 	load->connect("pressed", this, "_load_pressed");
 	load_sheet->connect("pressed", this, "_open_sprite_sheet");
 	_delete->connect("pressed", this, "_delete_pressed");
-	_delete_all->connect("pressed", this, "_delete_all_pressed");
+	_frame_copy_btn->connect("pressed", this, "_frame_copy");
 	copy->connect("pressed", this, "_copy_pressed");
 	paste->connect("pressed", this, "_paste_pressed");
 	empty->connect("pressed", this, "_empty_pressed");

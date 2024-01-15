@@ -64,6 +64,10 @@ protected:
 	static void _bind_methods();
 
 public:
+	// return the entire array of textures
+	Vector<Ref<Texture>> get_animation_frames(const StringName &p_anim);
+	void set_animation_frames(const StringName &p_anim, Vector<Ref<Texture>>);
+
 	void add_animation(const StringName &p_anim);
 	bool has_animation(const StringName &p_anim) const;
 	void remove_animation(const StringName &p_anim);
@@ -79,7 +83,9 @@ public:
 	bool get_animation_loop(const StringName &p_anim) const;
 
 	void add_frame(const StringName &p_anim, const Ref<Texture> &p_frame, int p_at_pos = -1);
+	//void add_frames(const StringName &p_anim, const Vector<Ref<Texture>> &p_frames, int p_at_pos = -1);
 	int get_frame_count(const StringName &p_anim) const;
+	// Return texture from frame index
 	_FORCE_INLINE_ Ref<Texture> get_frame(const StringName &p_anim, int p_idx) const {
 		const Map<StringName, Anim>::Element *E = animations.find(p_anim);
 		ERR_FAIL_COND_V_MSG(!E, Ref<Texture>(), "Animation '" + String(p_anim) + "' doesn't exist.");
@@ -90,6 +96,22 @@ public:
 
 		return E->get().frames[p_idx];
 	}
+	// return multiple textures from a list of frame indices
+	/*
+	_FORCE_INLINE_ Vector<Ref<Texture>> get_frames(const StringName &p_anim, Vector<int> p_idxs) const {
+		const Map<StringName, Anim>::Element *E = animations.find(p_anim);
+		ERR_FAIL_COND_V_MSG(!E, Vector<Ref<Texture>>(), "Animation '" + String(p_anim) + "' doesn't exist.");
+		ERR_FAIL_COND_V(p_idxs.size() <= 0, Vector<Ref<Texture>>());
+		if (p_idxs.size() > E->get().frames.size()) {
+			return Vector<Ref<Texture>>();
+		}
+		Vector<Ref<Texture>> texlist;
+		for (int i = 0; i < p_idxs.size(); i++) {
+			texlist.push_back(E->get().frames[p_idxs[i]]);
+		}
+		return texlist;
+	}
+	*/
 
 	_FORCE_INLINE_ Ref<Texture> get_normal_frame(const StringName &p_anim, int p_idx) const {
 		const Map<StringName, Anim>::Element *E = animations.find(p_anim);

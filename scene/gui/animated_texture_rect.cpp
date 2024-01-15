@@ -246,10 +246,14 @@ Size2 AnimatedTextureRect::get_minimum_size() const {
 void AnimatedTextureRect::set_sprite_frames(const Ref<SpriteFrames> &p_frames) {
 	if (frames.is_valid()) {
 		frames->disconnect("changed", this, "_res_changed");
+		frames->disconnect("frame_changed", this, "set_frame");
+		frames->disconnect("animation_changed", this, "set_animation");
 	}
 	frames = p_frames;
 	if (frames.is_valid()) {
 		frames->connect("changed", this, "_res_changed");
+		frames->connect("frame_changed", this, "set_frame");
+		frames->connect("animation_changed", this, "set_animation");
 	}
 
 	if (!frames.is_valid()) {
@@ -574,6 +578,7 @@ bool AnimatedTextureRect::is_flipped_v() const {
 }
 
 AnimatedTextureRect::AnimatedTextureRect() {
+
 	expand = false;
 	hflip = false;
 	vflip = false;

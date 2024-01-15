@@ -54,7 +54,8 @@ class SpriteFramesEditor : public HSplitContainer {
 	ToolButton *load;
 	ToolButton *load_sheet;
 	ToolButton *_delete;
-	ToolButton *_delete_all;
+	Button *_frame_copy_btn;
+	//ToolButton *_delete_all;
 	ToolButton *copy;
 	ToolButton *paste;
 	ToolButton *empty;
@@ -123,12 +124,12 @@ class SpriteFramesEditor : public HSplitContainer {
 	void _load_pressed();
 	void _file_load_request(const PoolVector<String> &p_path, int p_at_pos = -1);
 	void _copy_pressed();
-	//void _copy_all_pressed();
 	void _paste_pressed();
 	void _empty_pressed();
 	void _empty2_pressed();
 	void _delete_pressed();
-	void _delete_all_pressed();
+	void _frame_copy();
+	void _frame_notify_send(int index);
 	void _frames_remove_confirmed();
 	void _up_pressed();
 	void _down_pressed();
@@ -175,6 +176,28 @@ protected:
 	void _notification(int p_what);
 	void _gui_input(Ref<InputEvent> p_event);
 	static void _bind_methods();
+
+	Vector<int> get_gaps_before(const Vector<int> &inputArray) {
+		Vector<int> result;
+		// Iterate through the input array and get the numbers before each set
+		for (size_t i = 0; i < inputArray.size(); ++i) {
+			if (i == 0 || inputArray[i] - 1 != inputArray[i - 1]) {
+				result.push_back(inputArray[i] - 1);
+			}
+		}
+		return result;
+	}
+
+	Vector<int> get_gaps_after(const Vector<int> &inputArray) {
+		Vector<int> result;
+		// Iterate through the input array and get the numbers after each set
+		for (size_t i = 0; i < inputArray.size(); ++i) {
+			if (i == inputArray.size() - 1 || inputArray[i] + 1 != inputArray[i + 1]) {
+				result.push_back(inputArray[i] + 1);
+			}
+		}
+		return result;
+	}
 
 public:
 	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }
