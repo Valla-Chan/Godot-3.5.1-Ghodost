@@ -316,7 +316,7 @@ void Node::_propagate_after_exit_branch(bool p_exiting_tree) {
 
 	if (p_exiting_tree) {
 		emit_signal(SceneStringNames::get_singleton()->tree_exited);
-	}
+	} 
 }
 
 void Node::_propagate_exit_tree() {
@@ -354,7 +354,10 @@ void Node::_propagate_exit_tree() {
 	if (get_script_instance()) {
 		get_script_instance()->call_multilevel(SceneStringNames::get_singleton()->_exit_tree, nullptr, 0);
 	}
-	emit_signal(SceneStringNames::get_singleton()->tree_exiting);
+	if (!get_suppress_tree_exit_signal())
+		emit_signal(SceneStringNames::get_singleton()->tree_exiting);
+	else
+		set_suppress_tree_exit_signal(false);
 
 	notification(NOTIFICATION_EXIT_TREE, true);
 	if (data.tree) {
@@ -1680,6 +1683,14 @@ void Node::_acquire_unique_name_in_owner() {
 		return;
 	}
 	data.owner->data.owned_unique_nodes[key] = this;
+}
+
+void Node::set_suppress_tree_exit_signal(bool p_suppress) {
+	data.suppress_tree_exit_signal = p_suppress;
+}
+
+bool Node::get_suppress_tree_exit_signal() {
+	return data.suppress_tree_exit_signal;
 }
 
 void Node::set_unique_name_in_owner(bool p_enabled) {
@@ -3060,6 +3071,8 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_filename"), &Node::get_filename);
 	ClassDB::bind_method(D_METHOD("propagate_notification", "what"), &Node::propagate_notification);
 	ClassDB::bind_method(D_METHOD("propagate_call", "method", "args", "parent_first"), &Node::propagate_call, DEFVAL(Array()), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("set_suppress_tree_exit_signal", "priority"), &Node::set_suppress_tree_exit_signal);
+	ClassDB::bind_method(D_METHOD("get_suppress_tree_exit_signal"), &Node::get_suppress_tree_exit_signal);
 	ClassDB::bind_method(D_METHOD("set_physics_process", "enable"), &Node::set_physics_process);
 	ClassDB::bind_method(D_METHOD("get_physics_process_delta_time"), &Node::get_physics_process_delta_time);
 	ClassDB::bind_method(D_METHOD("is_physics_processing"), &Node::is_physics_processing);
@@ -3235,6 +3248,7 @@ void Node::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "custom_multiplayer", PROPERTY_HINT_RESOURCE_TYPE, "MultiplayerAPI", 0), "set_custom_multiplayer", "get_custom_multiplayer");
 
 	ADD_GROUP("Process", "process_");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "suppress_tree_exit_signal", PROPERTY_HINT_NONE, "Suppress,Allow", PROPERTY_USAGE_NOEDITOR), "set_suppress_tree_exit_signal", "get_suppress_tree_exit_signal");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "physics_interpolation_mode", PROPERTY_HINT_ENUM, "Inherit,Off,On"), "set_physics_interpolation_mode", "get_physics_interpolation_mode");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "process_mode", PROPERTY_HINT_ENUM, "Inherit,Pausable,WhenPaused,Always,Disabled"), "set_process_mode", "get_process_mode");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "process_priority"), "set_process_priority", "get_process_priority");
@@ -3273,6 +3287,7 @@ Node::Node() {
 	data.blocked = 0;
 	data.parent = nullptr;
 	data.tree = nullptr;
+	data.suppress_tree_exit_signal = false;
 	data.physics_process = false;
 	data.idle_process = false;
 	data.process_priority = 0;

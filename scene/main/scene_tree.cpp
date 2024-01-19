@@ -760,6 +760,7 @@ void SceneTree::finish() {
 }
 
 void SceneTree::quit(int p_exit_code) {
+	emit_signal("game_quit");
 	if (p_exit_code >= 0) {
 		// Override the exit code if a positive argument is given (the default is `-1`).
 		// This is a shorthand for calling `set_exit_code()` on the OS singleton then quitting.
@@ -2099,6 +2100,7 @@ void SceneTree::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("connected_to_server"));
 	ADD_SIGNAL(MethodInfo("connection_failed"));
 	ADD_SIGNAL(MethodInfo("server_disconnected"));
+	ADD_SIGNAL(MethodInfo("game_quit"));
 
 	BIND_ENUM_CONSTANT(GROUP_CALL_DEFAULT);
 	BIND_ENUM_CONSTANT(GROUP_CALL_REVERSE);

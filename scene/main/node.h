@@ -139,6 +139,8 @@ private:
 
 		int process_priority;
 
+		bool suppress_tree_exit_signal;
+
 		// Keep bitpacked values together to get better packing
 		//ProcessMode pause_mode : 2;
 		PhysicsInterpolationMode physics_interpolation_mode : 2;
@@ -359,6 +361,9 @@ public:
 	void set_owner(Node *p_owner);
 	Node *get_owner() const;
 	void get_owned_by(Node *p_by, List<Node *> *p_owned);
+
+	void set_suppress_tree_exit_signal(bool p_suppress);
+	bool get_suppress_tree_exit_signal();
 
 	void set_unique_name_in_owner(bool p_enabled);
 	bool is_unique_name_in_owner() const;
