@@ -498,7 +498,7 @@ void AnimatedSprite::_notification(int p_what) {
 				}
 			}
 
-			if (Engine::get_singleton()->get_use_gpu_pixel_snap()) {
+			if (Engine::get_singleton()->get_use_gpu_pixel_snap() || force_pixel_snapping) {
 				ofs = ofs.floor();
 			}
 			Rect2 dst_rect(ofs, s);
@@ -571,6 +571,14 @@ void AnimatedSprite::set_frame(int p_frame) {
 }
 int AnimatedSprite::get_frame() const {
 	return frame;
+}
+
+void AnimatedSprite::set_force_pixel_snapping(bool p_snapping) {
+	force_pixel_snapping = p_snapping;
+}
+
+bool AnimatedSprite::get_force_pixel_snapping() const {
+	return force_pixel_snapping;
 }
 
 void AnimatedSprite::set_speed_scale(float p_speed_scale) {
@@ -776,6 +784,9 @@ void AnimatedSprite::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("play", "anim", "backwards"), &AnimatedSprite::play, DEFVAL(StringName()), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("stop"), &AnimatedSprite::stop);
 
+	ClassDB::bind_method(D_METHOD("set_force_pixel_snapping", "snap"), &AnimatedSprite::set_force_pixel_snapping);
+	ClassDB::bind_method(D_METHOD("get_force_pixel_snapping"), &AnimatedSprite::get_force_pixel_snapping);
+
 	ClassDB::bind_method(D_METHOD("set_centered", "centered"), &AnimatedSprite::set_centered);
 	ClassDB::bind_method(D_METHOD("is_centered"), &AnimatedSprite::is_centered);
 
@@ -809,6 +820,7 @@ void AnimatedSprite::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "centered"), "set_centered", "is_centered");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "basealigned"), "set_basealigned", "is_basealigned");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "force_pixel_snapping"), "set_force_pixel_snapping", "get_force_pixel_snapping");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "offset"), "set_offset", "get_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_h"), "set_flip_h", "is_flipped_h");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_v"), "set_flip_v", "is_flipped_v");
@@ -822,6 +834,7 @@ AnimatedSprite::AnimatedSprite() {
 	basealigned = false;
 	hflip = false;
 	vflip = false;
+	force_pixel_snapping = false;
 
 	frame = 0;
 	speed_scale = 1.0f;

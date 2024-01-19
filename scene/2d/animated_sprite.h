@@ -153,6 +153,7 @@ class AnimatedSprite : public Node2D {
 	int frame;
 	float speed_scale;
 
+	bool force_pixel_snapping;
 	bool centered;
 	bool basealigned;
 	Point2 offset;
@@ -207,6 +208,9 @@ public:
 
 	void set_speed_scale(float p_speed_scale);
 	float get_speed_scale() const;
+
+	void set_force_pixel_snapping(bool p_snapping);
+	bool get_force_pixel_snapping() const;
 
 	void set_centered(bool p_center);
 	bool is_centered() const;

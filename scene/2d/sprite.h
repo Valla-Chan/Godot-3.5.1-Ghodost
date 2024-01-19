@@ -40,8 +40,9 @@ class Sprite : public Node2D {
 	Ref<Texture> texture;
 	Ref<Texture> normal_map;
 
-	bool basealigned;
+	bool force_pixel_snapping;
 	bool centered;
+	bool basealigned;
 	Point2 offset;
 
 	bool hflip;
@@ -87,6 +88,9 @@ public:
 
 	void set_normal_map(const Ref<Texture> &p_texture);
 	Ref<Texture> get_normal_map() const;
+
+	void set_force_pixel_snapping(bool p_snapping);
+	bool get_force_pixel_snapping() const;
 
 	void set_centered(bool p_center);
 	bool is_centered() const;

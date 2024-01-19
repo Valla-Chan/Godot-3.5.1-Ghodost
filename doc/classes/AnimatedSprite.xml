@@ -31,6 +31,12 @@
 		<member name="animation" type="String" setter="set_animation" getter="get_animation" default="&quot;default&quot;">
 			The current animation from the [member frames] resource. If this value changes, the [code]frame[/code] counter is reset.
 		</member>
+		<member name="force_pixel_snapping" type="bool" setter="set_force_pixel_snapping" getter="get_force_pixel_snapping" default="false">
+			If [code]true[/code], this sprite will snap to pixel increments.
+		</member>
+		<member name="basealigned" type="bool" setter="set_basealigned" getter="is_basealigned" default="false">
+			If [code]true[/code], texture will be aligned to the bottom.
+		</member>
 		<member name="centered" type="bool" setter="set_centered" getter="is_centered" default="true">
 			If [code]true[/code], texture will be centered.
 		</member>

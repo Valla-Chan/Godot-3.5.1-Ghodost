@@ -108,7 +108,7 @@ void Sprite::_get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_cli
 	}
 	
 
-	if (Engine::get_singleton()->get_use_gpu_pixel_snap()) {
+	if (Engine::get_singleton()->get_use_gpu_pixel_snap() || force_pixel_snapping) {
 		dest_offset = dest_offset.floor();
 	}
 
@@ -177,6 +177,14 @@ Ref<Texture> Sprite::get_normal_map() const {
 
 Ref<Texture> Sprite::get_texture() const {
 	return texture;
+}
+
+void Sprite::set_force_pixel_snapping(bool p_snapping) {
+	force_pixel_snapping = p_snapping;
+}
+
+bool Sprite::get_force_pixel_snapping() const {
+	return force_pixel_snapping;
 }
 
 void Sprite::set_centered(bool p_center) {
@@ -397,7 +405,7 @@ Rect2 Sprite::get_rect() const {
 		}
 		
 	}
-	if (Engine::get_singleton()->get_use_gpu_pixel_snap()) {
+	if (Engine::get_singleton()->get_use_gpu_pixel_snap() || force_pixel_snapping) {
 		ofs = ofs.floor();
 	}
 
@@ -434,6 +442,9 @@ void Sprite::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_normal_map", "normal_map"), &Sprite::set_normal_map);
 	ClassDB::bind_method(D_METHOD("get_normal_map"), &Sprite::get_normal_map);
+
+	ClassDB::bind_method(D_METHOD("set_force_pixel_snapping", "snap"), &Sprite::set_force_pixel_snapping);
+	ClassDB::bind_method(D_METHOD("get_force_pixel_snapping"), &Sprite::get_force_pixel_snapping);
 
 	ClassDB::bind_method(D_METHOD("set_centered", "centered"), &Sprite::set_centered);
 	ClassDB::bind_method(D_METHOD("is_centered"), &Sprite::is_centered);
@@ -485,6 +496,7 @@ void Sprite::_bind_methods() {
 	ADD_GROUP("Offset", "");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "centered"), "set_centered", "is_centered");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "basealigned"), "set_basealigned", "is_basealigned");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "force_pixel_snapping"), "set_force_pixel_snapping", "get_force_pixel_snapping");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "offset"), "set_offset", "get_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_h"), "set_flip_h", "is_flipped_h");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_v"), "set_flip_v", "is_flipped_v");
@@ -507,6 +519,7 @@ Sprite::Sprite() {
 	vflip = false;
 	region = false;
 	region_filter_clip = false;
+	force_pixel_snapping = false;
 
 	frame = 0;
 
