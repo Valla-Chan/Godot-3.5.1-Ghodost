@@ -142,7 +142,6 @@ public:
 		TK_ERROR,
 		TK_EOF,
 		TK_CURSOR, //used for code completion
-		TK_TOOLTIP,
 		TK_MAX
 	};
 
