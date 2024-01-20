@@ -149,6 +149,9 @@ struct PropertyInfo {
 	PropertyHint hint;
 	String hint_string;
 	uint32_t usage;
+#ifdef TOOLS_ENABLED
+	String tooltip;
+#endif
 
 	_FORCE_INLINE_ PropertyInfo added_usage(int p_fl) const {
 		PropertyInfo pi = *this;
