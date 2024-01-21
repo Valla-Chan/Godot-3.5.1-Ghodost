@@ -417,13 +417,20 @@ void Object::set(const StringName &p_name, const Variant &p_value, bool *r_valid
 		}
 	}
 
+	
 	//try built-in setgetter
 	{
+		//bool valuediff = (this->get(p_name, r_valid) != p_value);
+
 		if (ClassDB::set_property(this, p_name, p_value, r_valid)) {
 			/*
 			if (r_valid)
 				*r_valid=true;
 			*/
+			//if (valuediff) {
+				// TODO: is this too process intensive? consider making this only fire on chosen vars...
+				emit_signal("var_changed", p_name, p_value);
+			//}
 			return;
 		}
 	}
@@ -1740,6 +1747,7 @@ void Object::_bind_methods() {
 	ClassDB::add_virtual_method("Object", MethodInfo("free"), false);
 
 	ADD_SIGNAL(MethodInfo("script_changed"));
+	ADD_SIGNAL(MethodInfo("var_changed"));
 
 	BIND_VMETHOD(MethodInfo("_notification", PropertyInfo(Variant::INT, "what")));
 	BIND_VMETHOD(MethodInfo(Variant::BOOL, "_set", PropertyInfo(Variant::STRING, "property"), PropertyInfo(Variant::NIL, "value")));
