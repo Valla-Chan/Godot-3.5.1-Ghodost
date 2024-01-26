@@ -2536,7 +2536,6 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 	return OK;
 }
 
-// Valla Note: fixme. this is breaking when clicking headers in the docs
 void RichTextLabel::scroll_to_line(int p_line) {
 	ERR_FAIL_INDEX(p_line, main->lines.size());
 	_validate_line_caches(main);
