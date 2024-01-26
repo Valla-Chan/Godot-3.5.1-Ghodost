@@ -106,6 +106,9 @@ private:
 		FOLDER_COLLAPSE_ALL,
 	};
 
+	Map<String, Color> folder_colors;
+	Dictionary assigned_folder_colors;
+
 	FileSortOption file_sort = FILE_SORT_NAME;
 
 	VBoxContainer *scanning_vb;
@@ -161,6 +164,8 @@ private:
 	CreateDialog *new_resource_dialog;
 
 	bool always_show_folders;
+
+	bool editor_is_dark_theme;
 
 	class FileOrFolder {
 	public:
@@ -257,6 +262,7 @@ private:
 	MenuButton *_create_file_menu_button();
 	void _file_sort_popup(int p_id);
 
+	void _folder_color_index_pressed(int p_index, PopupMenu *p_menu);
 	void _file_and_folders_fill_popup(PopupMenu *p_popup, Vector<String> p_paths, bool p_display_path_dependent_options = true);
 	void _tree_rmb_select(const Vector2 &p_pos);
 	void _tree_rmb_empty(const Vector2 &p_pos);
