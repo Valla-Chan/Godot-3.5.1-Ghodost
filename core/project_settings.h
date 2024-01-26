@@ -121,8 +121,6 @@ protected:
 
 	String project_data_dir_name;
 
-	LocalVector<String> hidden_prefixes;
-
 	bool _set(const StringName &p_name, const Variant &p_value);
 	bool _get(const StringName &p_name, Variant &r_ret) const;
 	void _get_property_list(List<PropertyInfo> *p_list) const;
@@ -163,7 +161,6 @@ public:
 	void set_hide_from_editor(const String &p_name, bool p_hide_from_editor);
 	void set_ignore_value_in_docs(const String &p_name, bool p_ignore);
 	bool get_ignore_value_in_docs(const String &p_name) const;
-	void add_hidden_prefix(const String &p_prefix);
 	bool property_can_revert(const String &p_name);
 	Variant property_get_revert(const String &p_name);
 
