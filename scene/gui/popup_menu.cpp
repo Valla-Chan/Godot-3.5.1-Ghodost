@@ -192,6 +192,20 @@ void PopupMenu::_activate_submenu(int over, bool p_by_keyboard) {
 	}
 }
 
+void PopupMenu::set_item_icon_modulate(int p_idx, const Color &p_modulate) {
+	if (p_idx < 0) {
+		p_idx += get_item_count();
+	}
+	ERR_FAIL_INDEX(p_idx, items.size());
+
+	if (items[p_idx].icon_modulate == p_modulate) {
+		return;
+	}
+
+	items.write[p_idx].icon_modulate = p_modulate;
+	//control->queue_redraw();
+}
+
 void PopupMenu::_submenu_timeout() {
 	ERR_FAIL_COND(submenu_over == -1);
 
@@ -583,6 +597,8 @@ void PopupMenu::_notification(int p_what) {
 				}
 
 				Color icon_color(1, 1, 1, items[i].disabled ? 0.5 : 1);
+
+				icon_color *= items[i].icon_modulate;
 
 				if (items[i].checkable_type) {
 					Texture *icon = (items[i].checked ? check[items[i].checkable_type - 1] : uncheck[items[i].checkable_type - 1]).ptr();
