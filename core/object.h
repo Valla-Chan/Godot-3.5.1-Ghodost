@@ -715,6 +715,7 @@ public:
 	void get_signals_connected_to_this(List<Connection> *p_connections) const;
 
 	Error connect(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method, const Vector<Variant> &p_binds = Vector<Variant>(), uint32_t p_flags = 0);
+	Error connect_once(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method, const Vector<Variant> &p_binds = Vector<Variant>());
 	void disconnect(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method);
 	bool is_connected(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method) const;
 

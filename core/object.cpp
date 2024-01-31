@@ -1508,6 +1508,11 @@ Error Object::connect(const StringName &p_signal, Object *p_to_object, const Str
 	return OK;
 }
 
+Error Object::connect_once(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method, const Vector<Variant> &p_binds) {
+	return this->connect(p_signal, p_to_object, p_to_method, p_binds, 4);
+}
+
+
 bool Object::is_connected(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method) const {
 	ERR_FAIL_NULL_V(p_to_object, false);
 	const Signal *s = signal_map.getptr(p_signal);
@@ -1731,6 +1736,7 @@ void Object::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_incoming_connections"), &Object::_get_incoming_connections);
 
 	ClassDB::bind_method(D_METHOD("connect", "signal", "target", "method", "binds", "flags"), &Object::connect, DEFVAL(Array()), DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("connect_once", "signal", "target", "method", "binds"), &Object::connect_once, DEFVAL(Array()));
 	ClassDB::bind_method(D_METHOD("disconnect", "signal", "target", "method"), &Object::disconnect);
 	ClassDB::bind_method(D_METHOD("is_connected", "signal", "target", "method"), &Object::is_connected);
 
