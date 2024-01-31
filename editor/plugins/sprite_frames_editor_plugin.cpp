@@ -750,6 +750,12 @@ void SpriteFramesEditor::_frame_notify_send(int index) {
 				sprite->set_animation(edited_anim);
 				sprite->set_frame(index);
 			}
+		} else if (Object::cast_to<AnimatedSprite3D>(selected_nodes[i])) {
+			AnimatedSprite3D *sprite = Object::cast_to<AnimatedSprite3D>(selected_nodes[i]);
+			if (sprite->get_sprite_frames()->reference() == frames->reference()) {
+				sprite->set_animation(edited_anim);
+				sprite->set_frame(index);
+			}
 		}
 		//frames->emit_signal(SceneStringNames::get_singleton()->animation_changed, edited_anim);
 		//frames->emit_signal(SceneStringNames::get_singleton()->frame_changed, index);
@@ -1698,6 +1704,15 @@ void SpriteFramesEditor::sync_anim_slot() {
 				animations->set_selected(animations_map[edited_anim]);
 				break;
 			}
+		} else if (Object::cast_to<AnimatedSprite3D>(selected_nodes[i])) {
+			AnimatedSprite3D *sprite = Object::cast_to<AnimatedSprite3D>(selected_nodes[i]);
+			if (sprite->get_sprite_frames()->reference() == frames->reference()) {
+				edited_anim = sprite->get_animation();
+				ERR_FAIL_COND(!frames->has_animation(edited_anim));
+				_update_library(false);
+				animations->set_selected(animations_map[edited_anim]);
+				break;
+			}
 		}
 	}
 }
@@ -1707,8 +1722,14 @@ void SpriteFramesEditorPlugin::edit(Object *p_object) {
 
 	SpriteFrames *s;
 	AnimatedSprite *animated_sprite = Object::cast_to<AnimatedSprite>(p_object);
+	AnimatedSprite3D *animated_sprite3d = Object::cast_to<AnimatedSprite3D>(p_object);
+	AnimatedTextureRect *animated_tex = Object::cast_to<AnimatedTextureRect>(p_object);
 	if (animated_sprite) {
 		s = *animated_sprite->get_sprite_frames();
+	} else if (animated_sprite3d) {
+		s = *animated_sprite3d->get_sprite_frames();
+	} else if (animated_tex) {
+		s = *animated_tex->get_sprite_frames();
 	} else {
 		s = Object::cast_to<SpriteFrames>(p_object);
 	}
@@ -1718,7 +1739,11 @@ void SpriteFramesEditorPlugin::edit(Object *p_object) {
 
 bool SpriteFramesEditorPlugin::handles(Object *p_object) const {
 	AnimatedSprite *animated_sprite = Object::cast_to<AnimatedSprite>(p_object);
-	if (animated_sprite && *animated_sprite->get_sprite_frames()) {
+	AnimatedSprite3D *animated_sprite3d = Object::cast_to<AnimatedSprite3D>(p_object);
+	AnimatedTextureRect *animated_tex = Object::cast_to<AnimatedTextureRect>(p_object);
+	if ((animated_sprite && *animated_sprite->get_sprite_frames()) || (animated_sprite3d && *animated_sprite3d->get_sprite_frames())) {
+		return true;
+	} else if (animated_tex && *animated_tex->get_sprite_frames()) {
 		return true;
 	} else {
 		return p_object->is_class("SpriteFrames");
@@ -1729,13 +1754,13 @@ void SpriteFramesEditorPlugin::make_visible(bool p_visible) {
 	Object *inspector_ob = EditorNode::get_singleton()->get_inspector()->get_edited_object();
 	if (inspector_ob == nullptr)
 		return;
-	/*
+	
 	if (Object::cast_to<AnimatedTextureRect>(inspector_ob) ||
 			Object::cast_to<AnimatedSprite>(inspector_ob) ||
 			Object::cast_to<AnimatedSprite3D>(inspector_ob) ||
 			Object::cast_to<SpriteFrames>(inspector_ob)) {
 		p_visible = true;
-	}*/
+	}
 
 	if (p_visible) {
 		button->show();
@@ -1751,11 +1776,11 @@ void SpriteFramesEditorPlugin::make_visible(bool p_visible) {
 }
 
 void SpriteFramesEditorPlugin::update_vis() {
-	//if (!button->is_visible())
 	make_visible(false);
 }
 
 void SpriteFramesEditorPlugin::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("update_vis"), &SpriteFramesEditorPlugin::update_vis);
 }
 
 SpriteFramesEditorPlugin::SpriteFramesEditorPlugin(EditorNode *p_node) {
@@ -1764,7 +1789,7 @@ SpriteFramesEditorPlugin::SpriteFramesEditorPlugin(EditorNode *p_node) {
 	frames_editor->set_custom_minimum_size(Size2(0, 300) * EDSCALE);
 	button = editor->add_bottom_panel_item(TTR("SpriteFrames"), frames_editor);
 	button->hide();
-	//EditorNode::get_singleton()->get_editor_selection()->connect("selection_changed", this, "update_vis");
+	EditorNode::get_singleton()->get_editor_selection()->connect("selection_changed", this, "update_vis");
 }
 
 SpriteFramesEditorPlugin::~SpriteFramesEditorPlugin() {
