@@ -180,6 +180,9 @@ inline void SpinBox::_adjust_width_for_icon(const Ref<Texture> &icon) {
 
 void SpinBox::_notification(int p_what) {
 	if (p_what == NOTIFICATION_DRAW) {
+
+		line_edit->add_constant_override("minimum_spaces", get_constant("minimum_spaces"));
+
 		Ref<Texture> updown = get_icon("updown");
 
 		_adjust_width_for_icon(updown);
