@@ -852,12 +852,12 @@ public:
 
 	ToolButton *get_pause_button() { return pause_button; }
 
-	ToolButton *add_bottom_panel_item(String p_text, Control *p_item);
+	ToolButton *add_bottom_panel_item(String p_text, Control *p_item, bool p_reparent = true);
 	bool are_bottom_panels_hidden() const;
 	void make_bottom_panel_item_visible(Control *p_item);
 	void raise_bottom_panel_item(Control *p_item);
 	void hide_bottom_panel();
-	void remove_bottom_panel_item(Control *p_item);
+	void remove_bottom_panel_item(Control *p_item, bool p_reparent = true);
 
 	Variant drag_resource(const Ref<Resource> &p_res, Control *p_from);
 	Variant drag_files_and_dirs(const Vector<String> &p_paths, Control *p_from);

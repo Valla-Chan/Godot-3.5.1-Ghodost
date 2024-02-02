@@ -5056,13 +5056,15 @@ void EditorNode::_scene_tab_changed(int p_tab) {
 	editor_data.get_undo_redo().commit_action();
 }
 
-ToolButton *EditorNode::add_bottom_panel_item(String p_text, Control *p_item) {
+ToolButton *EditorNode::add_bottom_panel_item(String p_text, Control *p_item, bool p_reparent) {
 	ToolButton *tb = memnew(ToolButton);
 	tb->connect("toggled", this, "_bottom_panel_switch", varray(bottom_panel_items.size()));
 	tb->set_text(p_text);
 	tb->set_toggle_mode(true);
 	tb->set_focus_mode(Control::FOCUS_NONE);
-	bottom_panel_vb->add_child(p_item);
+	if (p_reparent) {
+		bottom_panel_vb->add_child(p_item);
+	}
 	bottom_panel_hb->raise();
 	bottom_panel_hb_editors->add_child(tb);
 	p_item->set_v_size_flags(Control::SIZE_EXPAND_FILL);
@@ -5119,13 +5121,15 @@ void EditorNode::raise_bottom_panel_item(Control *p_item) {
 	}
 }
 
-void EditorNode::remove_bottom_panel_item(Control *p_item) {
+void EditorNode::remove_bottom_panel_item(Control *p_item, bool p_reparent) {
 	for (int i = 0; i < bottom_panel_items.size(); i++) {
 		if (bottom_panel_items[i].control == p_item) {
 			if (p_item->is_visible_in_tree()) {
 				_bottom_panel_switch(false, i);
 			}
-			bottom_panel_vb->remove_child(bottom_panel_items[i].control);
+			if (p_reparent) {
+				bottom_panel_vb->remove_child(bottom_panel_items[i].control);
+			}
 			bottom_panel_hb_editors->remove_child(bottom_panel_items[i].button);
 			memdelete(bottom_panel_items[i].button);
 			bottom_panel_items.remove(i);

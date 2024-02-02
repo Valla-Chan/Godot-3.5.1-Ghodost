@@ -174,10 +174,10 @@ public:
 
 	void add_control_to_container(CustomControlContainer p_location, Control *p_control);
 	void remove_control_from_container(CustomControlContainer p_location, Control *p_control);
-	ToolButton *add_control_to_bottom_panel(Control *p_control, const String &p_title);
+	ToolButton *add_control_to_bottom_panel(Control *p_control, const String &p_title, bool p_reparent = true);
 	void add_control_to_dock(DockSlot p_slot, Control *p_control);
 	void remove_control_from_docks(Control *p_control);
-	void remove_control_from_bottom_panel(Control *p_control);
+	void remove_control_from_bottom_panel(Control *p_control, bool p_reparent = true);
 
 	void add_tool_menu_item(const String &p_name, Object *p_handler, const String &p_callback, const Variant &p_ud = Variant());
 	void add_tool_submenu_item(const String &p_name, Object *p_submenu);
