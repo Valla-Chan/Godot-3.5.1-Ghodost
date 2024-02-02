@@ -331,6 +331,8 @@ class ScriptEditor : public PanelContainer {
 	bool use_space_indentation;
 	bool convert_indent_on_save;
 
+	void show_script_editor();
+	void open_script(const RES &p_resource, bool p_grab_focus = true);
 	void _goto_script_line2(int p_line);
 	void _goto_script_line(REF p_script, int p_line);
 	void _set_execution(REF p_script, int p_line);

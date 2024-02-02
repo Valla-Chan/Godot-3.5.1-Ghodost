@@ -286,6 +286,14 @@ void ScriptEditor::_goto_script_line2(int p_line) {
 	}
 }
 
+void ScriptEditor::show_script_editor() {
+	editor->set_visible_editor(EditorNode::EDITOR_SCRIPT);
+}
+
+void ScriptEditor::open_script(const RES &p_resource, bool p_grab_focus) {
+	edit(p_resource, p_grab_focus);
+}
+
 void ScriptEditor::_goto_script_line(REF p_script, int p_line) {
 	Ref<Script> script = Object::cast_to<Script>(*p_script);
 	if (script.is_valid() && (script->has_source_code() || script->get_path().is_resource_file())) {
@@ -3261,6 +3269,9 @@ void ScriptEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_drag_data_fw", "point", "from"), &ScriptEditor::get_drag_data_fw);
 	ClassDB::bind_method(D_METHOD("can_drop_data_fw", "point", "data", "from"), &ScriptEditor::can_drop_data_fw);
 	ClassDB::bind_method(D_METHOD("drop_data_fw", "point", "data", "from"), &ScriptEditor::drop_data_fw);
+
+	ClassDB::bind_method(D_METHOD("show_script_editor"), &ScriptEditor::show_script_editor);
+	ClassDB::bind_method(D_METHOD("open_script", "script_res", "grab_focus"), &ScriptEditor::open_script, DEFVAL(true));
 
 	ClassDB::bind_method(D_METHOD("goto_line", "line_number"), &ScriptEditor::_goto_script_line2);
 	ClassDB::bind_method(D_METHOD("get_current_script"), &ScriptEditor::_get_current_script);

@@ -44,6 +44,20 @@
 				Returns an array with all [Script] objects which are currently open in editor.
 			</description>
 		</method>
+		<method name="show_script_editor">
+			<return type="void" />
+			<description>
+				Change to the Script Editor tab.
+			</description>
+		</method>
+		<method name="open_script">
+			<return type="void" />
+			<argument index="0" name="script_res" type="Resource" />
+			<argument index="1" name="grab_focus" type="bool" />
+			<description>
+				Open a script resource in the editor.
+			</description>
+		</method>
 		<method name="goto_line">
 			<return type="void" />
 			<argument index="0" name="line_number" type="int" />
