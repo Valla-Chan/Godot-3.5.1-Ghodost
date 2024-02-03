@@ -55,6 +55,7 @@ class SpriteFramesEditor : public HSplitContainer {
 	ToolButton *load_sheet;
 	ToolButton *_delete;
 	Button *_frame_copy_btn;
+	Button *_frame_browse_btn;
 	//ToolButton *_delete_all;
 	ToolButton *copy;
 	ToolButton *paste;
@@ -130,6 +131,7 @@ class SpriteFramesEditor : public HSplitContainer {
 	void _empty2_pressed();
 	void _delete_pressed();
 	void _frame_copy();
+	void _frame_browse();
 	void _frame_notify_send(int index);
 	void _frames_remove_confirmed();
 	void _up_pressed();

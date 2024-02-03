@@ -768,6 +768,20 @@ void SpriteFramesEditor::_frame_copy() {
 	OS::get_singleton()->set_clipboard(vstr);
 }
 
+void SpriteFramesEditor::_frame_browse() {
+	Ref<Texture> frame = frames->get_frame(edited_anim, tree->get_current());
+	String tooltip = frame->get_path();
+	if (frame.is_valid()) {
+		String fpath = frame->get_path();
+
+		if (!fpath.ends_with("/")) {
+			fpath = fpath.get_base_dir();
+		}
+		String dir = ProjectSettings::get_singleton()->globalize_path(fpath);
+		OS::get_singleton()->shell_open(String("file://") + dir);
+	}
+}
+
 void SpriteFramesEditor::_frames_remove_confirmed() {
 	undo_redo->create_action(TTR("Delete Resource"));
 	for (int i = 0; i < tree->get_item_count(); i++) {
@@ -1309,6 +1323,7 @@ void SpriteFramesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_empty2_pressed"), &SpriteFramesEditor::_empty2_pressed);
 	ClassDB::bind_method(D_METHOD("_delete_pressed"), &SpriteFramesEditor::_delete_pressed);
 	ClassDB::bind_method(D_METHOD("_frame_copy"), &SpriteFramesEditor::_frame_copy);
+	ClassDB::bind_method(D_METHOD("_frame_browse"), &SpriteFramesEditor::_frame_browse);
 	ClassDB::bind_method(D_METHOD("_frame_notify_send"), &SpriteFramesEditor::_frame_notify_send);
 	ClassDB::bind_method(D_METHOD("_copy_pressed"), &SpriteFramesEditor::_copy_pressed);
 	ClassDB::bind_method(D_METHOD("_paste_pressed"), &SpriteFramesEditor::_paste_pressed);
@@ -1459,8 +1474,17 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	_frame_copy_btn = memnew(Button);
 	_frame_copy_btn->set_text(TTR(" Copy Frame Index "));
 	_frame_copy_btn->set_tooltip(TTR("Copy the selected frame index to the clipboard."));
-	_frame_copy_btn->set_modulate(Color(1.1, 1.1, 1.1, 0.9));
+	_frame_copy_btn->set_modulate(Color(1.05, 1.05, 1.05, 0.9));
+	//_frame_copy_btn->set_icon(get_icon("ActionCopy", "EditorIcons"));
 	hbc->add_child(_frame_copy_btn);
+
+	// Open the selected frame in the explorer
+	_frame_browse_btn = memnew(Button);
+	_frame_browse_btn->set_text(TTR(" Show in File Manager "));
+	_frame_browse_btn->set_tooltip(TTR("Open the selected frame's image texture in the File Manager."));
+	_frame_browse_btn->set_modulate(Color(1.05, 1.05, 1.05, 0.9));
+	//_frame_browse_btn->set_icon(get_icon("Filesystem", "EditorIcons"));
+	hbc->add_child(_frame_browse_btn);
 
 	hbc->add_spacer();
 
@@ -1503,6 +1527,7 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	load_sheet->connect("pressed", this, "_open_sprite_sheet");
 	_delete->connect("pressed", this, "_delete_pressed");
 	_frame_copy_btn->connect("pressed", this, "_frame_copy");
+	_frame_browse_btn->connect("pressed", this, "_frame_browse");
 	copy->connect("pressed", this, "_copy_pressed");
 	paste->connect("pressed", this, "_paste_pressed");
 	empty->connect("pressed", this, "_empty_pressed");
