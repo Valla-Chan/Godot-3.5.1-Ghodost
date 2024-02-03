@@ -2295,7 +2295,9 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 			if (!can_drop) {
 				OS::get_singleton()->set_cursor_shape(OS::CURSOR_FORBIDDEN);
 			} else {
-				OS::get_singleton()->set_cursor_shape(OS::CURSOR_CAN_DROP);
+				// VALLA EDITS: make cursor become the one from the receiving object.
+				//OS::get_singleton()->set_cursor_shape(OS::CURSOR_CAN_DROP);
+				OS::get_singleton()->set_cursor_shape((OS::CursorShape)over->get_default_cursor_shape());
 			}
 		}
 	}
