@@ -34,6 +34,7 @@
 #include "editor_node.h"
 #include "editor_scale.h"
 #include "editor_settings.h"
+#include "editor/node_dock.h"
 #include "plugins/script_editor_plugin.h"
 #include "scene/gui/label.h"
 #include "scene/gui/popup_menu.h"
@@ -588,6 +589,7 @@ void ConnectionsDock::_make_or_edit_connection() {
 		hide();
 	}
 
+	NodeDock::singleton->restore_last_valid_node();
 	update_tree();
 }
 
@@ -1100,6 +1102,7 @@ ConnectionsDock::ConnectionsDock(EditorNode *p_editor) {
 	connect_button->connect("pressed", this, "_connect_pressed");
 
 	connect_dialog = memnew(ConnectDialog);
+	//connect_dialog->connect("connected", NodeDock::singleton, "restore_last_valid_node"), CONNECT_DEFERRED;
 	connect_dialog->set_as_toplevel(true);
 	add_child(connect_dialog);
 

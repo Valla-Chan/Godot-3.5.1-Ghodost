@@ -50,6 +50,7 @@ void NodeDock::show_connections() {
 void NodeDock::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("show_groups"), &NodeDock::show_groups);
 	ClassDB::bind_method(D_METHOD("show_connections"), &NodeDock::show_connections);
+	ClassDB::bind_method(D_METHOD("restore_last_valid_node"), &NodeDock::restore_last_valid_node);
 }
 
 void NodeDock::_notification(int p_what) {
@@ -68,6 +69,9 @@ void NodeDock::update_lists() {
 void NodeDock::set_node(Node *p_node) {
 	connections->set_node(p_node);
 	groups->set_current(p_node);
+	if (p_node) {
+		last_valid_node = p_node;
+	}
 
 	if (p_node) {
 		if (connections_button->is_pressed()) {
@@ -84,6 +88,10 @@ void NodeDock::set_node(Node *p_node) {
 		mode_hb->hide();
 		select_a_node->show();
 	}
+}
+
+void NodeDock::restore_last_valid_node() {
+	set_node(last_valid_node);
 }
 
 NodeDock::NodeDock() {
@@ -123,6 +131,8 @@ NodeDock::NodeDock() {
 	add_child(groups);
 	groups->set_v_size_flags(SIZE_EXPAND_FILL);
 	groups->hide();
+
+	last_valid_node = nullptr;
 
 	select_a_node = memnew(Label);
 	select_a_node->set_text(TTR("Select a single node to edit its signals and groups."));
