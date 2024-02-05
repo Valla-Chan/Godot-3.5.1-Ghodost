@@ -443,6 +443,9 @@ void SpriteFramesEditor::_notification(int p_what) {
 			split_sheet_zoom_reset->set_icon(get_icon("ZoomReset", "EditorIcons"));
 			split_sheet_zoom_in->set_icon(get_icon("ZoomMore", "EditorIcons"));
 			split_sheet_scroll->add_style_override("bg", get_stylebox("bg", "Tree"));
+
+			_frame_copy_btn->set_icon(get_icon("ActionCopy", "EditorIcons"));
+			_frame_browse_btn->set_icon(get_icon("Filesystem", "EditorIcons"));
 		} break;
 
 		case NOTIFICATION_READY: {
@@ -1475,7 +1478,6 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	_frame_copy_btn->set_text(TTR(" Copy Frame Index "));
 	_frame_copy_btn->set_tooltip(TTR("Copy the selected frame index to the clipboard."));
 	_frame_copy_btn->set_modulate(Color(1.05, 1.05, 1.05, 0.9));
-	//_frame_copy_btn->set_icon(get_icon("ActionCopy", "EditorIcons"));
 	hbc->add_child(_frame_copy_btn);
 
 	// Open the selected frame in the explorer
@@ -1483,7 +1485,6 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	_frame_browse_btn->set_text(TTR(" Show in File Manager "));
 	_frame_browse_btn->set_tooltip(TTR("Open the selected frame's image texture in the File Manager."));
 	_frame_browse_btn->set_modulate(Color(1.05, 1.05, 1.05, 0.9));
-	//_frame_browse_btn->set_icon(get_icon("Filesystem", "EditorIcons"));
 	hbc->add_child(_frame_browse_btn);
 
 	hbc->add_spacer();

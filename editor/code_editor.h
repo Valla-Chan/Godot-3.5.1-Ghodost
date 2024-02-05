@@ -144,6 +144,8 @@ class CodeTextEditor : public VBoxContainer {
 	ToolButton *warning_button;
 	Label *warning_count_label;
 
+	Button *nav_up;
+	Button *nav_down;
 	Label *line_and_col_txt;
 
 	Label *info;
@@ -222,6 +224,7 @@ public:
 	void toggle_inline_comment(const String &delimiter);
 
 	void goto_line(int p_line);
+	void goto_end();
 	void goto_line_selection(int p_line, int p_begin, int p_end);
 	void goto_line_centered(int p_line);
 	void set_executing_line(int p_line);

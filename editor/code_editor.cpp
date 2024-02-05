@@ -92,6 +92,7 @@ void FindReplaceBar::_notification(int p_what) {
 		hide_button->set_hover_texture(get_icon("Close", "EditorIcons"));
 		hide_button->set_pressed_texture(get_icon("Close", "EditorIcons"));
 		hide_button->set_custom_minimum_size(hide_button->get_normal_texture()->get_size());
+
 	} else if (p_what == NOTIFICATION_VISIBILITY_CHANGED) {
 		set_process_unhandled_input(is_visible_in_tree());
 	} else if (p_what == EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED) {
@@ -1377,6 +1378,10 @@ void CodeTextEditor::goto_line(int p_line) {
 	text_editor->call_deferred("cursor_set_line", p_line);
 }
 
+void CodeTextEditor::goto_end() {
+	goto_line(text_editor->get_line_count()-1);
+}
+
 void CodeTextEditor::goto_line_selection(int p_line, int p_begin, int p_end) {
 	text_editor->unfold_line(p_line);
 	text_editor->call_deferred("cursor_set_line", p_line);
@@ -1670,6 +1675,8 @@ void CodeTextEditor::_bind_methods() {
 	ClassDB::bind_method("_toggle_scripts_pressed", &CodeTextEditor::_toggle_scripts_pressed);
 	ClassDB::bind_method("_warning_button_pressed", &CodeTextEditor::_warning_button_pressed);
 	ClassDB::bind_method("_warning_label_gui_input", &CodeTextEditor::_warning_label_gui_input);
+	ClassDB::bind_method("goto_line", &CodeTextEditor::goto_line);
+	ClassDB::bind_method("goto_end", &CodeTextEditor::goto_end);
 
 	ADD_SIGNAL(MethodInfo("validate_script"));
 	ADD_SIGNAL(MethodInfo("load_theme_settings"));
@@ -1688,6 +1695,9 @@ void CodeTextEditor::show_toggle_scripts_button() {
 void CodeTextEditor::update_toggle_scripts_button() {
 	toggle_scripts_button->set_icon(ScriptEditor::get_singleton()->is_scripts_panel_toggled() ? get_icon("Back", "EditorIcons") : get_icon("Forward", "EditorIcons"));
 	toggle_scripts_button->set_tooltip(TTR("Toggle Scripts Panel") + " (" + ED_GET_SHORTCUT("script_editor/toggle_scripts_panel")->get_as_text() + ")");
+
+	nav_up->set_icon(get_icon("MoveUp", "EditorIcons"));
+	nav_down->set_icon(get_icon("MoveDown", "EditorIcons"));
 }
 
 CodeTextEditor::CodeTextEditor() {
@@ -1733,6 +1743,7 @@ CodeTextEditor::CodeTextEditor() {
 
 	toggle_scripts_button = memnew(ToolButton);
 	toggle_scripts_button->connect("pressed", this, "_toggle_scripts_pressed");
+	// VALLA NOTES: this is the bottom of the script editor.
 	status_bar->add_child(toggle_scripts_button);
 	toggle_scripts_button->hide();
 
@@ -1771,6 +1782,22 @@ CodeTextEditor::CodeTextEditor() {
 
 	is_warnings_panel_opened = false;
 	set_warning_nb(0);
+
+	// VALLA NOTES: this is the bottom of the script editor.
+
+	nav_up = memnew(ToolButton);
+	nav_down = memnew(ToolButton);
+	nav_up->set_text(" ");
+	nav_down->set_text(" ");
+
+	nav_up->set_tooltip("Go to Start");
+	nav_down->set_tooltip("Go to End");
+
+	nav_up->connect("pressed", this, "goto_line", varray(0));
+	nav_down->connect("pressed", this, "goto_end");
+
+	status_bar->add_child(nav_up);
+	status_bar->add_child(nav_down);
 
 	// Line and column
 	line_and_col_txt = memnew(Label);
