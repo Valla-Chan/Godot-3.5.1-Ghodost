@@ -373,11 +373,6 @@ EditorInterface::EditorInterface() {
 }
 
 ///////////////////////////////////////////
-void EditorPlugin::load_scene(const String &p_scene, bool p_set_inherited) {
-	Error err = EditorNode::get_singleton()->load_scene(p_scene, false, p_set_inherited);
-}
-
-
 void EditorPlugin::add_custom_type(const String &p_type, const String &p_base, const Ref<Script> &p_script, const Ref<Texture> &p_icon) {
 	EditorNode::get_editor_data().add_custom_type(p_type, p_base, p_script, p_icon);
 }
@@ -855,7 +850,6 @@ void EditorPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("hide_bottom_panel"), &EditorPlugin::hide_bottom_panel);
 
 	ClassDB::bind_method(D_METHOD("get_undo_redo"), &EditorPlugin::_get_undo_redo);
-	ClassDB::bind_method(D_METHOD("open_scene", "scene", "inherited"), &EditorPlugin::load_scene);
 	ClassDB::bind_method(D_METHOD("queue_save_layout"), &EditorPlugin::queue_save_layout);
 	ClassDB::bind_method(D_METHOD("add_import_plugin", "importer"), &EditorPlugin::add_import_plugin);
 	ClassDB::bind_method(D_METHOD("remove_import_plugin", "importer"), &EditorPlugin::remove_import_plugin);
