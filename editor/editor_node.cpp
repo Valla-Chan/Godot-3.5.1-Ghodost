@@ -600,6 +600,10 @@ void EditorNode::_notification(int p_what) {
 				}
 			}
 
+			for (int i = 0; i < bottom_panel_items.size(); i++) {
+				bottom_panel_items[i].button->set_icon(bottom_panel_items[i].icon);
+			}
+
 			_build_icon_type_cache();
 
 			play_button->set_icon(gui_base->get_icon("MainPlay", "EditorIcons"));
@@ -5056,7 +5060,7 @@ void EditorNode::_scene_tab_changed(int p_tab) {
 	editor_data.get_undo_redo().commit_action();
 }
 
-ToolButton *EditorNode::add_bottom_panel_item(String p_text, Control *p_item, bool p_reparent) {
+ToolButton *EditorNode::add_bottom_panel_item(String p_text, Control *p_item, const Ref<Image> &p_icon, bool p_reparent) {
 	ToolButton *tb = memnew(ToolButton);
 	tb->connect("toggled", this, "_bottom_panel_switch", varray(bottom_panel_items.size()));
 	tb->set_text(p_text);
@@ -5064,6 +5068,9 @@ ToolButton *EditorNode::add_bottom_panel_item(String p_text, Control *p_item, bo
 	tb->set_focus_mode(Control::FOCUS_NONE);
 	if (p_reparent) {
 		bottom_panel_vb->add_child(p_item);
+	}
+	if (p_icon.is_valid()) {
+		tb->set_icon(p_icon);
 	}
 	bottom_panel_hb->raise();
 	bottom_panel_hb_editors->add_child(tb);
@@ -5073,6 +5080,7 @@ ToolButton *EditorNode::add_bottom_panel_item(String p_text, Control *p_item, bo
 	bpi.button = tb;
 	bpi.control = p_item;
 	bpi.name = p_text;
+	bpi.icon = &p_icon;
 	bottom_panel_items.push_back(bpi);
 
 	return tb;

@@ -176,7 +176,7 @@ public:
 
 	void add_control_to_container(CustomControlContainer p_location, Control *p_control);
 	void remove_control_from_container(CustomControlContainer p_location, Control *p_control);
-	ToolButton *add_control_to_bottom_panel(Control *p_control, const String &p_title, bool p_reparent = true);
+	ToolButton *add_control_to_bottom_panel(Control *p_control, const String &p_title, const Ref<Image> &p_icon, bool p_reparent = true);
 	void add_control_to_dock(DockSlot p_slot, Control *p_control);
 	void remove_control_from_docks(Control *p_control);
 	void remove_control_from_bottom_panel(Control *p_control, bool p_reparent = true);

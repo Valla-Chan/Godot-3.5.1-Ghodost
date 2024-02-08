@@ -394,9 +394,9 @@ void EditorPlugin::remove_autoload_singleton(const String &p_name) {
 	EditorNode::get_singleton()->get_project_settings()->get_autoload_settings()->autoload_remove(p_name);
 }
 
-ToolButton *EditorPlugin::add_control_to_bottom_panel(Control *p_control, const String &p_title, bool p_reparent) {
+ToolButton *EditorPlugin::add_control_to_bottom_panel(Control *p_control, const String &p_title, const Ref<Image> &p_icon, bool p_reparent) {
 	ERR_FAIL_NULL_V(p_control, nullptr);
-	return EditorNode::get_singleton()->add_bottom_panel_item(p_title, p_control, p_reparent);
+	return EditorNode::get_singleton()->add_bottom_panel_item(p_title, p_control, p_icon, p_reparent);
 }
 
 void EditorPlugin::add_control_to_dock(DockSlot p_slot, Control *p_control) {
@@ -835,7 +835,7 @@ ScriptCreateDialog *EditorPlugin::get_script_create_dialog() {
 
 void EditorPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("add_control_to_container", "container", "control"), &EditorPlugin::add_control_to_container);
-	ClassDB::bind_method(D_METHOD("add_control_to_bottom_panel", "control", "title", "reparent"), &EditorPlugin::add_control_to_bottom_panel, DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("add_control_to_bottom_panel", "control", "title", "icon", "reparent"), &EditorPlugin::add_control_to_bottom_panel, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("add_control_to_dock", "slot", "control"), &EditorPlugin::add_control_to_dock);
 	ClassDB::bind_method(D_METHOD("remove_control_from_docks", "control"), &EditorPlugin::remove_control_from_docks);
 	ClassDB::bind_method(D_METHOD("remove_control_from_bottom_panel", "control", "reparent"), &EditorPlugin::remove_control_from_bottom_panel, DEFVAL(true));
