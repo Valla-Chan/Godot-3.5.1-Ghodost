@@ -177,6 +177,18 @@ void EditorInterface::open_scene_from_path(const String &scene_path) {
 	EditorNode::get_singleton()->open_request(scene_path);
 }
 
+void EditorInterface::open_directory(const String &dir_path) {
+	if (!dir_path.empty()) {
+		String fpath = dir_path;
+
+		if (!fpath.ends_with("/")) {
+			fpath = fpath.get_base_dir();
+		}
+		String dir = ProjectSettings::get_singleton()->globalize_path(fpath);
+		OS::get_singleton()->shell_open(String("file://") + dir);
+	}
+}
+
 void EditorInterface::reload_scene_from_path(const String &scene_path) {
 	if (EditorNode::get_singleton()->is_changing_scene()) {
 		return;
@@ -332,6 +344,7 @@ void EditorInterface::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("edit_node", "node"), &EditorInterface::edit_node);
 	ClassDB::bind_method(D_METHOD("edit_script", "script", "line", "column", "grab_focus"), &EditorInterface::edit_script, DEFVAL(-1), DEFVAL(0), DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("open_scene_from_path", "scene_filepath"), &EditorInterface::open_scene_from_path);
+	ClassDB::bind_method(D_METHOD("open_directory", "directory_path"), &EditorInterface::open_directory);
 	ClassDB::bind_method(D_METHOD("reload_scene_from_path", "scene_filepath"), &EditorInterface::reload_scene_from_path);
 	ClassDB::bind_method(D_METHOD("play_main_scene"), &EditorInterface::play_main_scene);
 	ClassDB::bind_method(D_METHOD("play_current_scene"), &EditorInterface::play_current_scene);

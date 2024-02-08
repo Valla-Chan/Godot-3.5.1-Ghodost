@@ -773,7 +773,6 @@ void SpriteFramesEditor::_frame_copy() {
 
 void SpriteFramesEditor::_frame_browse() {
 	Ref<Texture> frame = frames->get_frame(edited_anim, tree->get_current());
-	String tooltip = frame->get_path();
 	if (frame.is_valid()) {
 		String fpath = frame->get_path();
 
