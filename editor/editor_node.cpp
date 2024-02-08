@@ -3741,7 +3741,7 @@ Error EditorNode::load_scene(const String &p_scene, bool p_ignore_broken_deps, b
 	return OK;
 }
 
-void EditorNode::open_request(const String &p_path) {
+void EditorNode::open_request(const String &p_path, bool p_inherited) {
 	if (!opening_prev) {
 		List<String>::Element *prev_scene = previous_scenes.find(p_path);
 		if (prev_scene != nullptr) {
@@ -3749,7 +3749,7 @@ void EditorNode::open_request(const String &p_path) {
 		}
 	}
 
-	load_scene(p_path); // as it will be opened in separate tab
+	load_scene(p_path, false, p_inherited); // as it will be opened in separate tab
 }
 
 void EditorNode::request_instance_scene(const String &p_path) {
