@@ -172,6 +172,8 @@ public:
 
 	//TODO: send a resource for editing to the editor node?
 
+	void load_scene(const String &p_scene, bool p_set_inherited = false);
+
 	void add_control_to_container(CustomControlContainer p_location, Control *p_control);
 	void remove_control_from_container(CustomControlContainer p_location, Control *p_control);
 	ToolButton *add_control_to_bottom_panel(Control *p_control, const String &p_title, bool p_reparent = true);
