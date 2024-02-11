@@ -1127,6 +1127,7 @@ void EditorSelection::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_transformable_selected_nodes"), &EditorSelection::_get_transformable_selected_nodes);
 	ClassDB::bind_method(D_METHOD("_emit_change"), &EditorSelection::_emit_change);
 	ADD_SIGNAL(MethodInfo("selection_changed"));
+	ADD_SIGNAL(MethodInfo("nodelist_changed"));
 }
 
 void EditorSelection::add_editor_plugin(Object *p_object) {
@@ -1159,6 +1160,7 @@ void EditorSelection::_update_nl() {
 	}
 
 	nl_changed = true;
+	emit_signal("nodelist_changed");
 }
 
 void EditorSelection::update() {
@@ -1170,7 +1172,10 @@ void EditorSelection::update() {
 	changed = false;
 	if (!emitted) {
 		emitted = true;
-		call_deferred("_emit_change");
+		// VALLA EDITS: this check may cause errors but it is done to prevent a spriteframes crash.
+		if (!nl_changed) {
+			call_deferred("_emit_change");
+		}
 	}
 }
 

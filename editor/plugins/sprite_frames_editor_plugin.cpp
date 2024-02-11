@@ -1814,7 +1814,7 @@ SpriteFramesEditorPlugin::SpriteFramesEditorPlugin(EditorNode *p_node) {
 	frames_editor->set_custom_minimum_size(Size2(0, 300) * EDSCALE);
 	button = editor->add_bottom_panel_item(TTR("SpriteFrames"), frames_editor);
 	button->hide();
-	EditorNode::get_singleton()->get_editor_selection()->connect("selection_changed", this, "update_vis");
+	EditorNode::get_singleton()->get_editor_selection()->connect("selection_changed", this, "update_vis", Vector<Variant>(), 1);
 }
 
 SpriteFramesEditorPlugin::~SpriteFramesEditorPlugin() {
