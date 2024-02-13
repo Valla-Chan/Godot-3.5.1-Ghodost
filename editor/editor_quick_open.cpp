@@ -29,6 +29,7 @@
 /**************************************************************************/
 
 #include "editor_quick_open.h"
+#include "core/io/image_loader.h"
 
 #include "core/os/keyboard.h"
 
@@ -139,6 +140,16 @@ void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, Vector<Pair<Str
 				pair.first = file;
 				StringName icon_name = search_options->has_icon(file_type, ei) ? file_type : ot;
 				pair.second = search_options->get_icon(icon_name, ei);
+				// Load image from texture if possible
+				Ref<Image> iconimage = memnew(Image);
+				Error err = ImageLoader::load_image(efsd->get_file_path(i), iconimage, nullptr, true);
+				if (err == OK) {
+					Ref<ImageTexture> icontexture = memnew(ImageTexture);
+					icontexture->create_from_image(iconimage);
+					icontexture->set_size_override(Size2(24,24));
+					pair.second = icontexture;
+				}
+				// Create pair
 				list.push_back(pair);
 
 				// Stop testing base types as soon as we got a match.
