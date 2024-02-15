@@ -877,6 +877,9 @@ void ConnectionsDock::_handle_signal_menu_option(int option) {
 			disconnect_all_dialog->set_text(vformat(TTR("Are you sure you want to remove all connections from the \"%s\" signal?"), signal_name));
 			disconnect_all_dialog->popup_centered();
 		} break;
+		case COPY: {
+			OS::get_singleton()->set_clipboard(item->get_metadata(0).operator Dictionary()["name"]);
+		}
 	}
 }
 
@@ -1199,6 +1202,8 @@ ConnectionsDock::ConnectionsDock(EditorNode *p_editor) {
 	signal_menu->connect("id_pressed", this, "_handle_signal_menu_option");
 	signal_menu->add_item(TTR("Connect..."), CONNECT);
 	signal_menu->add_item(TTR("Disconnect All"), DISCONNECT_ALL);
+	signal_menu->add_separator();
+	signal_menu->add_item(TTR("Copy Signal"), COPY);
 
 	slot_menu = memnew(PopupMenu);
 	add_child(slot_menu);
