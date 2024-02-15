@@ -118,6 +118,8 @@ void SpinBox::_gui_input(const Ref<InputEvent> &p_event) {
 
 				drag.allowed = true;
 				drag.capture_pos = mb->get_position();
+
+				
 			} break;
 			case BUTTON_RIGHT: {
 				line_edit->grab_focus();
@@ -143,6 +145,10 @@ void SpinBox::_gui_input(const Ref<InputEvent> &p_event) {
 		range_click_timer->stop();
 		_release_mouse();
 		drag.allowed = false;
+
+		if (select_on_edit) {
+			line_edit->select_all();
+		}
 	}
 
 	Ref<InputEventMouseMotion> mm = p_event;
@@ -231,6 +237,14 @@ String SpinBox::get_prefix() const {
 	return prefix;
 }
 
+void SpinBox::set_select_on_edit(bool p_select) {
+	select_on_edit = p_select;
+}
+
+bool SpinBox::get_select_on_edit() const {
+	return select_on_edit;
+}
+
 void SpinBox::set_editable(bool p_editable) {
 	line_edit->set_editable(p_editable);
 }
@@ -261,10 +275,14 @@ void SpinBox::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_line_edit_input"), &SpinBox::_line_edit_input);
 	ClassDB::bind_method(D_METHOD("_range_click_timeout"), &SpinBox::_range_click_timeout);
 
+	ClassDB::bind_method(D_METHOD("set_select_on_edit"), &SpinBox::set_select_on_edit);
+	ClassDB::bind_method(D_METHOD("get_select_on_edit"), &SpinBox::get_select_on_edit);
+
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "align", PROPERTY_HINT_ENUM, "Left,Center,Right,Fill"), "set_align", "get_align");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "editable"), "set_editable", "is_editable");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "prefix"), "set_prefix", "get_prefix");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "suffix"), "set_suffix", "get_suffix");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "select_on_edit"), "set_select_on_edit", "get_select_on_edit");
 }
 
 SpinBox::SpinBox() {

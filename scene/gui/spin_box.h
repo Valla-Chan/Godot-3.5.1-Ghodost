@@ -49,6 +49,7 @@ class SpinBox : public Range {
 	virtual void _value_changed(double);
 	String prefix;
 	String suffix;
+	bool select_on_edit;
 
 	void _line_edit_input(const Ref<InputEvent> &p_event);
 
@@ -81,6 +82,9 @@ public:
 
 	void set_editable(bool p_editable);
 	bool is_editable() const;
+
+	void set_select_on_edit(bool p_select);
+	bool get_select_on_edit() const;
 
 	void set_suffix(const String &p_suffix);
 	String get_suffix() const;
