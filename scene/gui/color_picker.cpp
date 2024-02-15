@@ -46,12 +46,14 @@ void ColorPicker::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_THEME_CHANGED: {
 			btn_pick->set_icon(get_icon("screen_picker", "ColorPicker"));
+			btn_add_preset->set_icon_align(Button::TextAlign::ALIGN_CENTER);
 			btn_add_preset->set_icon(get_icon("add_preset"));
 			_update_presets();
 			_update_controls();
 		} break;
 		case NOTIFICATION_ENTER_TREE: {
 			btn_pick->set_icon(get_icon("screen_picker", "ColorPicker"));
+			btn_add_preset->set_icon_align(Button::TextAlign::ALIGN_CENTER);
 			btn_add_preset->set_icon(get_icon("add_preset"));
 
 			_update_controls();
