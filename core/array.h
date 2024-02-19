@@ -51,6 +51,7 @@ public:
 
 	void set(int p_idx, const Variant &p_value);
 	const Variant &get(int p_idx) const;
+	const Variant &get_index(int p_idx, const Variant &p_default) const;
 
 	int size() const;
 	bool empty() const;

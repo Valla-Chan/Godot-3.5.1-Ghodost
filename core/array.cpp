@@ -230,6 +230,18 @@ const Variant &Array::get(int p_idx) const {
 	return operator[](p_idx);
 }
 
+const Variant &Array::get_index(int p_idx, const Variant &p_default) const {
+	if (p_idx < size() && p_idx >= 0) {
+		return get(p_idx);
+	}
+	else if (p_idx >= size()) {
+		return p_default;
+	} else if (p_idx < 0) {
+		return get(size()-1);
+	}
+	return p_default;
+}
+
 Array Array::duplicate(bool p_deep) const {
 	Array new_arr;
 	int element_count = size();
