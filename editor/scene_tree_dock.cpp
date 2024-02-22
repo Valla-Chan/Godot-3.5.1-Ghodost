@@ -339,6 +339,11 @@ bool SceneTreeDock::_track_inherit(const String &p_target_scene_path, Node *p_de
 	return result;
 }
 
+List<Node *> SceneTreeDock::duplicate() {
+	_tool_selected(TOOL_DUPLICATE);
+	return editor_selection->get_selected_node_list();
+}
+
 void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 	current_option = p_tool;
 

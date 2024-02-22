@@ -2264,7 +2264,9 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 				}
 			}
 			bool is_alt = Input::get_singleton()->is_key_pressed(KEY_ALT);
+			bool is_shift = Input::get_singleton()->is_key_pressed(KEY_SHIFT);
 			Point2 new_pos;
+
 			if (is_alt) {
 				new_pos = previous_pos + (drag_to - drag_from);
 			} else {
@@ -2288,6 +2290,11 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 					Transform2D xform = canvas_item->get_global_transform_with_canvas().affine_inverse() * canvas_item->get_transform();
 
 					Node2D *node2d = Object::cast_to<Node2D>(canvas_item);
+
+					//if (is_shift) {
+					//	EditorNode::get_singleton()->get_scene_tree_dock()->duplicate();
+					//}
+
 					if (node2d && se->pre_drag_bones_undo_state.size() > 0 && !force_no_IK) {
 						real_t initial_leaf_node_rotation = node2d->get_global_transform_with_canvas().get_rotation();
 						_restore_canvas_item_ik_chain(node2d, &(all_bones_ik_states[index]));
