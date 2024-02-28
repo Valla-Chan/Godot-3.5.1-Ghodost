@@ -3483,12 +3483,13 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	menu_hb->add_spacer();
 
 	script_icon = memnew(TextureRect);
+	script_icon->set_stretch_mode(TextureRect::STRETCH_KEEP_ASPECT_CENTERED);
 	menu_hb->add_child(script_icon);
 	script_name_label = memnew(Label);
 	menu_hb->add_child(script_name_label);
 
-	script_icon->hide();
-	script_name_label->hide();
+	//script_icon->hide();
+	//script_name_label->hide();
 
 	menu_hb->add_spacer();
 
