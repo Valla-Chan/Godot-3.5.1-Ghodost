@@ -57,11 +57,17 @@ void TextureRect::_notification(int p_what) {
 			case STRETCH_KEEP: {
 				size = texture->get_size();
 			} break;
+			case STRETCH_KEEP_CENTERED_TILE:
 			case STRETCH_KEEP_CENTERED: {
 				offset = (get_size() - texture->get_size()) / 2;
 				size = texture->get_size();
+				if (stretch_mode == STRETCH_KEEP_CENTERED_TILE) {
+					size = get_size();
+					tile = true;
+				}
 			} break;
 			case STRETCH_KEEP_ASPECT_CENTERED:
+			case STRETCH_KEEP_ASPECT_CENTERED_TILE:
 			case STRETCH_KEEP_ASPECT: {
 				size = get_size();
 				int tex_width = texture->get_width() * size.height / texture->get_height();
@@ -75,6 +81,12 @@ void TextureRect::_notification(int p_what) {
 				if (stretch_mode == STRETCH_KEEP_ASPECT_CENTERED) {
 					offset.x += (size.width - tex_width) / 2;
 					offset.y += (size.height - tex_height) / 2;
+				}
+
+				else if (stretch_mode == STRETCH_KEEP_ASPECT_CENTERED_TILE) {
+					offset.x += (size.width - tex_width) / 2;
+					offset.y += (size.height - tex_height) / 2;
+					tile = true;
 				}
 
 				size.width = tex_width;
@@ -136,7 +148,7 @@ void TextureRect::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_texture", "get_texture");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "expand"), "set_expand", "has_expand");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "stretch_mode", PROPERTY_HINT_ENUM, "Scale On Expand (Compat),Scale,Tile,Keep,Keep Centered,Keep Aspect,Keep Aspect Centered,Keep Aspect Covered"), "set_stretch_mode", "get_stretch_mode");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "stretch_mode", PROPERTY_HINT_ENUM, "Scale On Expand (Compat),Scale,Tile,Keep,Keep Centered,Keep Aspect,Keep Aspect Centered,Keep Aspect Covered,Keep Aspect Centered Tiled"), "set_stretch_mode", "get_stretch_mode");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_h"), "set_flip_h", "is_flipped_h");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_v"), "set_flip_v", "is_flipped_v");
 
