@@ -122,7 +122,7 @@ int Physics2DDirectSpaceStateSW::intersect_point_on_canvas(const Vector2 &p_poin
 	return _intersect_point_impl(p_point, r_results, p_result_max, p_exclude, p_collision_mask, p_collide_with_bodies, p_collide_with_areas, p_pick_point, true, p_canvas_instance_id);
 }
 
-bool Physics2DDirectSpaceStateSW::intersect_ray(const Vector2 &p_from, const Vector2 &p_to, RayResult &r_result, const Set<RID> &p_exclude, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas) {
+bool Physics2DDirectSpaceStateSW::intersect_ray(const Vector2 &p_from, const Vector2 &p_to, RayResult &r_result, const Set<RID> &p_exclude, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, bool p_hit_from_inside) {
 	ERR_FAIL_COND_V(space->locked, false);
 
 	Vector2 begin, end;
@@ -167,6 +167,22 @@ bool Physics2DDirectSpaceStateSW::intersect_ray(const Vector2 &p_from, const Vec
 		const Shape2DSW *shape = col_obj->get_shape(shape_idx);
 
 		Vector2 shape_point, shape_normal;
+
+		if (shape->contains_point(local_from)) {
+			if (p_hit_from_inside) {
+				// Hit shape at starting point.
+				min_d = 0;
+				res_point = local_from;
+				res_normal = Vector2();
+				res_shape = shape_idx;
+				res_obj = col_obj;
+				collided = true;
+				break;
+			} else {
+				// Ignore shape when starting inside.
+				continue;
+			}
+		}
 
 		if (shape->intersect_segment(local_from, local_to, shape_point, shape_normal)) {
 			Transform2D xform = col_obj->get_transform() * col_obj->get_shape_transform(shape_idx);

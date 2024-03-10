@@ -202,7 +202,8 @@ void RayCast2D::_update_raycast_state() {
 	Physics2DDirectSpaceState::RayResult rr;
 	bool prev_collision_state = collided;
 	//VALLA EDITS
-	if (dss->intersect_ray(gt.xform(to * Vector2(cast_from, cast_from)), gt.xform(to), rr, exclude, collision_mask, collide_with_bodies, collide_with_areas)) {
+
+	if (dss->intersect_ray(gt.xform(to * Vector2(cast_from, cast_from)), gt.xform(to), rr, exclude, collision_mask, collide_with_bodies, collide_with_areas, hit_from_inside)) {
 		collided = true;
 		against = rr.collider_id;
 		collision_point = rr.position;
@@ -300,20 +301,28 @@ void RayCast2D::clear_exceptions() {
 	}
 }
 
-void RayCast2D::set_collide_with_areas(bool p_clip) {
-	collide_with_areas = p_clip;
+void RayCast2D::set_collide_with_areas(bool p_enabled) {
+	collide_with_areas = p_enabled;
 }
 
 bool RayCast2D::is_collide_with_areas_enabled() const {
 	return collide_with_areas;
 }
 
-void RayCast2D::set_collide_with_bodies(bool p_clip) {
-	collide_with_bodies = p_clip;
+void RayCast2D::set_collide_with_bodies(bool p_enabled) {
+	collide_with_bodies = p_enabled;
 }
 
 bool RayCast2D::is_collide_with_bodies_enabled() const {
 	return collide_with_bodies;
+}
+
+void RayCast2D::set_hit_from_inside(bool p_enabled) {
+	hit_from_inside = p_enabled;
+}
+
+bool RayCast2D::is_hit_from_inside_enabled() const {
+	return hit_from_inside;
 }
 
 void RayCast2D::_bind_methods() {
@@ -357,11 +366,15 @@ void RayCast2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_collide_with_bodies", "enable"), &RayCast2D::set_collide_with_bodies);
 	ClassDB::bind_method(D_METHOD("is_collide_with_bodies_enabled"), &RayCast2D::is_collide_with_bodies_enabled);
 
+	ClassDB::bind_method(D_METHOD("set_hit_from_inside", "enable"), &RayCast2D::set_hit_from_inside);
+	ClassDB::bind_method(D_METHOD("is_hit_from_inside_enabled"), &RayCast2D::is_hit_from_inside_enabled);
+
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "enabled"), "set_enabled", "is_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "exclude_parent"), "set_exclude_parent_body", "get_exclude_parent_body");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "cast_to"), "set_cast_to", "get_cast_to");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "cast_from", PROPERTY_HINT_RANGE, "0.0,1.0"), "set_cast_from", "get_cast_from");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "collision_mask", PROPERTY_HINT_LAYERS_2D_PHYSICS), "set_collision_mask", "get_collision_mask");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "hit_from_inside"), "set_hit_from_inside", "is_hit_from_inside_enabled");
 
 	ADD_GROUP("Collide With", "collide_with");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "collide_with_areas", PROPERTY_HINT_LAYERS_3D_PHYSICS), "set_collide_with_areas", "is_collide_with_areas_enabled");
@@ -379,4 +392,5 @@ RayCast2D::RayCast2D() {
 	exclude_parent_body = true;
 	collide_with_bodies = true;
 	collide_with_areas = false;
+	hit_from_inside = false;
 }
