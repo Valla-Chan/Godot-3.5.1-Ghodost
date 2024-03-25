@@ -484,7 +484,7 @@ ConnectDialog::ConnectDialog() {
 
 
 
-	tree = memnew(SceneTreeEditor(false));
+	tree = memnew(SceneTreeEditor(false,false,false,true));
 	tree->set_connecting_signal(true);
 	tree->set_show_enabled_subscene(true);
 	tree->set_v_size_flags(Control::SIZE_FILL | Control::SIZE_EXPAND);

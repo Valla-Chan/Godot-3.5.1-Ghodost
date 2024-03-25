@@ -91,6 +91,7 @@ class SceneTreeEditor : public Control {
 	uint64_t last_hash;
 
 	bool can_rename;
+	bool collapsed;
 	bool can_open_instance;
 	bool updating_tree;
 	bool show_enabled_subscene;
@@ -157,7 +158,7 @@ public:
 
 	Tree *get_scene_tree() { return tree; }
 
-	SceneTreeEditor(bool p_label = true, bool p_can_rename = false, bool p_can_open_instance = false);
+	SceneTreeEditor(bool p_label = true, bool p_can_rename = false, bool p_can_open_instance = false, bool p_collapsed = false);
 	~SceneTreeEditor();
 };
 

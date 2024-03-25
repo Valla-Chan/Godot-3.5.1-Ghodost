@@ -167,6 +167,8 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		return false;
 	}
 
+	bool is_root = p_node->get_parent() == get_scene_node() || p_node == get_scene_node();
+
 	// only owned nodes are editable, since nodes can create their own (manually owned) child nodes,
 	// which the editor needs not to know about.
 
@@ -205,6 +207,9 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		if (collapsed) {
 			item->set_collapsed(true);
 		}
+	} else if (collapsed && filter == "") {
+		if (!is_root)
+			item->set_collapsed(true);
 	}
 
 	Ref<Texture> icon = EditorNode::get_singleton()->get_object_icon(p_node, "Node");
@@ -335,6 +340,8 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		if (p_node->get_editor_description() != String()) {
 			tooltip += "\n\n" + p_node->get_editor_description();
 		}
+
+		tooltip += "\n" + TTR("Index:") + " " + itos(p_node->get_position_in_parent());
 
 		item->set_tooltip(0, tooltip);
 	}
@@ -1223,7 +1230,7 @@ void SceneTreeEditor::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("open_script"));
 }
 
-SceneTreeEditor::SceneTreeEditor(bool p_label, bool p_can_rename, bool p_can_open_instance) {
+SceneTreeEditor::SceneTreeEditor(bool p_label, bool p_can_rename, bool p_can_open_instance, bool p_collapsed) {
 	connect_to_script_mode = false;
 	connecting_signal = false;
 	undo_redo = nullptr;
@@ -1234,6 +1241,7 @@ SceneTreeEditor::SceneTreeEditor(bool p_label, bool p_can_rename, bool p_can_ope
 	marked_children_selectable = false;
 	can_rename = p_can_rename;
 	can_open_instance = p_can_open_instance;
+	collapsed = p_collapsed;
 	display_foreign = false;
 	editor_selection = nullptr;
 
