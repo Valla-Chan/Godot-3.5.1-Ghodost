@@ -265,6 +265,8 @@ void ConnectDialog::_notification(int p_what) {
 }
 
 void ConnectDialog::_bind_methods() {
+	ClassDB::bind_method("_update_filter", &ConnectDialog::_update_filter);
+	ClassDB::bind_method("_focus_currently_connected", &ConnectDialog::_focus_currently_connected);
 	ClassDB::bind_method("_advanced_pressed", &ConnectDialog::_advanced_pressed);
 	ClassDB::bind_method("_cancel", &ConnectDialog::_cancel_pressed);
 	ClassDB::bind_method("_tree_node_selected", &ConnectDialog::_tree_node_selected);
@@ -359,12 +361,17 @@ void ConnectDialog::init(Connection c, bool bEdit) {
 	bEditMode = bEdit;
 }
 
+void ConnectDialog::_focus_currently_connected() {
+	tree->set_selected(source);
+}
+
 void ConnectDialog::popup_dialog(const String &p_for_signal) {
 	from_signal->set_text(p_for_signal);
 	error_label->add_color_override("font_color", get_color("error_color", "Editor"));
 	if (!advanced->is_pressed()) {
 		error_label->set_visible(!_find_first_script(get_tree()->get_edited_scene_root(), get_tree()->get_edited_scene_root()));
 	}
+	filter_nodes->clear();
 
 	popup_centered();
 }
@@ -452,6 +459,10 @@ void ConnectDialog::_select_method_confirmed() {
 	}
 }
 
+void ConnectDialog::_update_filter(String p_filtertext) {
+	tree->set_filter(p_filtertext);
+}
+
 ConnectDialog::ConnectDialog() {
 	set_custom_minimum_size(Size2(600, 500) * EDSCALE);
 
@@ -471,15 +482,34 @@ ConnectDialog::ConnectDialog() {
 	vbc_left->add_margin_child(TTR("From Signal:"), from_signal);
 	//vbc_left->add_margin_child(TTR("From Signal:"), memnew(OptionButton));
 
+
+
 	tree = memnew(SceneTreeEditor(false));
 	tree->set_connecting_signal(true);
 	tree->set_show_enabled_subscene(true);
+	tree->set_v_size_flags(Control::SIZE_FILL | Control::SIZE_EXPAND);
 	tree->get_scene_tree()->connect("item_activated", this, "_ok");
 	tree->connect("node_selected", this, "_tree_node_selected");
 	tree->set_connect_to_script_mode(true);
 
-	Node *mc = vbc_left->add_margin_child(TTR("Connect to Script:"), tree, true);
+	//Node *mc = vbc_left->add_margin_child(TTR("Connect to Script:"), tree, true);
+	HBoxContainer *hbc_filter = memnew(HBoxContainer);
+
+	filter_nodes = memnew(LineEdit);
+	hbc_filter->add_child(filter_nodes);
+	filter_nodes->set_h_size_flags(Control::SIZE_FILL | Control::SIZE_EXPAND);
+	filter_nodes->set_placeholder(TTR("Filter Nodes"));
+	filter_nodes->set_clear_button_enabled(true);
+	filter_nodes->connect("text_changed", this, "_update_filter");
+
+	Button *focus_current = memnew(Button);
+	hbc_filter->add_child(focus_current);
+	focus_current->set_text(TTR("Go to Source"));
+	focus_current->connect("pressed", this, "_focus_currently_connected");
+
+	Node *mc = vbc_left->add_margin_child(TTR("Connect to Script:"), hbc_filter, false);
 	connect_to_label = Object::cast_to<Label>(vbc_left->get_child(mc->get_index() - 1));
+	vbc_left->add_child(tree);
 
 	error_label = memnew(Label);
 	error_label->set_text(TTR("Scene does not contain any script."));

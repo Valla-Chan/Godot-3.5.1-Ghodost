@@ -54,6 +54,7 @@ class ConnectDialog : public ConfirmationDialog {
 
 	Label *connect_to_label;
 	LineEdit *from_signal;
+	LineEdit *filter_nodes;
 	Node *source;
 	StringName signal;
 	LineEdit *dst_method;
@@ -78,6 +79,7 @@ class ConnectDialog : public ConfirmationDialog {
 	void ok_pressed();
 	void _cancel_pressed();
 	void _tree_node_selected();
+	void _focus_currently_connected();
 	void _add_bind();
 	void _remove_bind();
 	void _advanced_pressed();
@@ -106,6 +108,7 @@ public:
 	void init(Connection c, bool bEdit = false);
 
 	void popup_dialog(const String &p_for_signal);
+	void _update_filter(String p_filtertext);
 	ConnectDialog();
 	~ConnectDialog();
 };
