@@ -282,7 +282,8 @@ Node *ConnectDialog::get_source() const {
 }
 
 StringName ConnectDialog::get_signal_name() const {
-	return signal;
+	//return signal;
+	return from_signal->get_text();
 }
 
 NodePath ConnectDialog::get_dst_path() const {
@@ -466,8 +467,9 @@ ConnectDialog::ConnectDialog() {
 	vbc_left->set_h_size_flags(SIZE_EXPAND_FILL);
 
 	from_signal = memnew(LineEdit);
-	from_signal->set_editable(false);
+	from_signal->set_editable(true);
 	vbc_left->add_margin_child(TTR("From Signal:"), from_signal);
+	//vbc_left->add_margin_child(TTR("From Signal:"), memnew(OptionButton));
 
 	tree = memnew(SceneTreeEditor(false));
 	tree->set_connecting_signal(true);
