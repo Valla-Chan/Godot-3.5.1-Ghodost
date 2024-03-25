@@ -947,6 +947,7 @@ void AnimationPlayer::_animation_process(float p_delta) {
 				_set_process(false);
 				if (end_notify) {
 					emit_signal(SceneStringNames::get_singleton()->animation_finished, playback.assigned);
+					emit_signal("playback_finished");
 				}
 			}
 			end_reached = false;
@@ -1204,6 +1205,7 @@ void AnimationPlayer::play(const StringName &p_name, float p_custom_blend, float
 	playing = true;
 
 	emit_signal(SceneStringNames::get_singleton()->animation_started, c.assigned);
+	emit_signal("playback_started");
 
 	if (is_inside_tree() && Engine::get_singleton()->is_editor_hint()) {
 		return; // no next in this case
@@ -1687,6 +1689,8 @@ void AnimationPlayer::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("animation_changed", PropertyInfo(Variant::STRING, "old_name"), PropertyInfo(Variant::STRING, "new_name")));
 	ADD_SIGNAL(MethodInfo("animation_started", PropertyInfo(Variant::STRING, "anim_name")));
 	ADD_SIGNAL(MethodInfo("caches_cleared"));
+	ADD_SIGNAL(MethodInfo("playback_finished"));
+	ADD_SIGNAL(MethodInfo("playback_started"));
 
 	BIND_ENUM_CONSTANT(ANIMATION_PROCESS_PHYSICS);
 	BIND_ENUM_CONSTANT(ANIMATION_PROCESS_IDLE);
