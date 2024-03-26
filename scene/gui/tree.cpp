@@ -322,6 +322,21 @@ bool TreeItem::is_collapsed() {
 	return collapsed;
 }
 
+void TreeItem::set_visible(bool p_visible) {
+	if (visible == p_visible) {
+		return;
+	}
+	visible = p_visible;
+	if (tree) {
+		tree->update();
+		_changed_notify();
+	}
+}
+
+bool TreeItem::is_visible() {
+	return visible;
+}
+
 void TreeItem::set_custom_minimum_height(int p_height) {
 	custom_min_height = p_height;
 	_changed_notify();
@@ -356,12 +371,12 @@ TreeItem *TreeItem::get_children() {
 	return children;
 }
 
-TreeItem *TreeItem::get_prev_visible(bool p_wrap) {
+TreeItem *TreeItem::_get_prev_visible(bool p_wrap) {
 	TreeItem *current = this;
 
-	TreeItem *prev = current->get_prev();
+	TreeItem *prev_item = current->get_prev();
 
-	if (!prev) {
+	if (!prev_item) {
 		current = current->parent;
 		if (current == tree->root && tree->hide_root) {
 			return nullptr;
@@ -378,11 +393,11 @@ TreeItem *TreeItem::get_prev_visible(bool p_wrap) {
 			}
 		}
 	} else {
-		current = prev;
-		while (!current->collapsed && current->children) {
+		current = prev_item;
+		while (!current->collapsed && current->get_next()) {
 			//go to the very end
 
-			current = current->children;
+			current = current->get_next();
 			while (current->next) {
 				current = current->next;
 			}
@@ -392,11 +407,25 @@ TreeItem *TreeItem::get_prev_visible(bool p_wrap) {
 	return current;
 }
 
-TreeItem *TreeItem::get_next_visible(bool p_wrap) {
+TreeItem *TreeItem::get_prev_visible(bool p_wrap) {
+	TreeItem *loop = this;
+	TreeItem *prev_item = this->_get_prev_visible(p_wrap);
+	while (prev_item && !prev_item->is_visible()) {
+		prev_item = prev_item->_get_prev_visible(p_wrap);
+		if (prev_item == loop) {
+			// Check that we haven't looped all the way around to the start.
+			prev_item = nullptr;
+			break;
+		}
+	}
+	return prev_item;
+}
+
+TreeItem *TreeItem::_get_next_visible(bool p_wrap) {
 	TreeItem *current = this;
 
-	if (!current->collapsed && current->children) {
-		current = current->children;
+	if (!current->collapsed && current->get_next()) {
+		current = current->get_next();
 
 	} else if (current->next) {
 		current = current->next;
@@ -417,6 +446,20 @@ TreeItem *TreeItem::get_next_visible(bool p_wrap) {
 	}
 
 	return current;
+}
+
+TreeItem *TreeItem::get_next_visible(bool p_wrap) {
+	TreeItem *loop = this;
+	TreeItem *next_item = this->_get_next_visible(p_wrap);
+	while (next_item && !next_item->is_visible()) {
+		next_item = next_item->_get_next_visible(p_wrap);
+		if (next_item == loop) {
+			// Check that we haven't looped all the way around to the start.
+			next_item = nullptr;
+			break;
+		}
+	}
+	return next_item;
 }
 
 void TreeItem::remove_child(TreeItem *p_item) {
@@ -3815,6 +3858,15 @@ void Tree::set_allow_reselect(bool p_allow) {
 
 bool Tree::get_allow_reselect() const {
 	return allow_reselect;
+}
+
+void Tree::set_filter(const String &p_filter) {
+	filter = p_filter;
+	update();
+}
+
+String Tree::get_filter() const {
+	return filter;
 }
 
 void Tree::_bind_methods() {

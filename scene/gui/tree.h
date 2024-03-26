@@ -136,6 +136,7 @@ private:
 	Vector<Cell> cells;
 
 	bool collapsed; // won't show children
+	bool visible = true;
 	bool disable_folding;
 	int custom_min_height;
 
@@ -150,6 +151,9 @@ private:
 	void _changed_notify();
 	void _cell_selected(int p_cell);
 	void _cell_deselected(int p_cell);
+
+	TreeItem *_get_prev_visible(bool p_wrap = false);
+	TreeItem *_get_next_visible(bool p_wrap = false);
 
 protected:
 	static void _bind_methods();
@@ -226,6 +230,9 @@ public:
 
 	void set_collapsed(bool p_collapsed);
 	bool is_collapsed();
+
+	void set_visible(bool p_visible);
+	bool is_visible();
 
 	void set_custom_minimum_height(int p_height);
 	int get_custom_minimum_height() const;
@@ -317,6 +324,7 @@ private:
 	TreeItem *single_select_defer;
 	int single_select_defer_column;
 
+	String filter;
 	int pressed_button;
 	bool pressing_for_editor;
 	String pressing_for_editor_text;
@@ -604,6 +612,9 @@ public:
 
 	void set_allow_reselect(bool p_allow);
 	bool get_allow_reselect() const;
+
+	void set_filter(const String &p_filter);
+	String get_filter() const;
 
 	Tree();
 	~Tree();
