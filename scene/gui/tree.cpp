@@ -984,7 +984,7 @@ void Tree::update_cache() {
 }
 
 int Tree::compute_item_height(TreeItem *p_item) const {
-	if (p_item == root && hide_root) {
+	if (p_item == root && hide_root || !p_item->is_visible()) {
 		return 0;
 	}
 
@@ -1041,6 +1041,9 @@ int Tree::compute_item_height(TreeItem *p_item) const {
 }
 
 int Tree::get_item_height(TreeItem *p_item) const {
+	if (!p_item->is_visible()) {
+		return 0;
+	}
 	int height = compute_item_height(p_item);
 	height += cache.vseparation;
 
@@ -1111,6 +1114,10 @@ void Tree::draw_item_rect(const TreeItem::Cell &p_cell, const Rect2i &p_rect, co
 int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 &p_draw_size, TreeItem *p_item) {
 	if (p_pos.y - cache.offset.y > (p_draw_size.height)) {
 		return -1; //draw no more!
+	}
+
+	if (!p_item->is_visible()) {
+		return 0;
 	}
 
 	RID ci = get_canvas_item();
@@ -1476,7 +1483,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 			}
 
 			// Draw relationship lines.
-			if (cache.draw_relationship_lines > 0 && (!hide_root || c->parent != root)) {
+			if (cache.draw_relationship_lines > 0 && (!hide_root || c->parent != root) && c->is_visible()) {
 				int root_ofs = children_pos.x + ((p_item->disable_folding || hide_folding) ? cache.hseparation : cache.item_margin);
 				int parent_ofs = p_pos.x + ((p_item->disable_folding || hide_folding) ? cache.hseparation : cache.item_margin);
 				Point2i root_pos = Point2i(root_ofs, children_pos.y + label_h / 2) - cache.offset + p_draw_ofs;
@@ -1683,6 +1690,11 @@ void Tree::_range_click_timeout() {
 }
 
 int Tree::propagate_mouse_event(const Point2i &p_pos, int x_ofs, int y_ofs, bool p_doubleclick, TreeItem *p_item, int p_button, const Ref<InputEventWithModifiers> &p_mod) {
+	if (p_item && !p_item->is_visible()) {
+		// Skip any processing of invisible items.
+		return 0;
+	}
+
 	int item_h = compute_item_height(p_item) + cache.vseparation;
 
 	bool skip = (p_item == root && hide_root);
@@ -3582,7 +3594,7 @@ void Tree::_do_incr_search(const String &p_add) {
 TreeItem *Tree::_find_item_at_pos(TreeItem *p_item, const Point2 &p_pos, int &r_column, int &h, int &section) const {
 	Point2 pos = p_pos;
 
-	if (root != p_item || !hide_root) {
+	if ((root != p_item || !hide_root) && p_item->is_visible()) {
 		h = compute_item_height(p_item) + cache.vseparation;
 		if (pos.y < h) {
 			if (drop_mode_flags == DROP_MODE_ON_ITEM) {
@@ -3615,7 +3627,7 @@ TreeItem *Tree::_find_item_at_pos(TreeItem *p_item, const Point2 &p_pos, int &r_
 		h = 0;
 	}
 
-	if (p_item->is_collapsed()) {
+	if (p_item->is_collapsed() || !p_item->is_visible()){
 		return nullptr; // do not try children, it's collapsed
 	}
 
