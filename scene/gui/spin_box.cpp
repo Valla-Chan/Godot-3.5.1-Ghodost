@@ -38,7 +38,7 @@ Size2 SpinBox::get_minimum_size() const {
 	return ms;
 }
 
-void SpinBox::_value_changed(double,bool set_line) {
+void SpinBox::_value_changed(double) {
 	String value = String::num(get_value(), Math::range_step_decimals(get_step()));
 	if (prefix != "") {
 		value = prefix + " " + value;
@@ -46,10 +46,9 @@ void SpinBox::_value_changed(double,bool set_line) {
 	if (suffix != "") {
 		value += " " + suffix;
 	}
-	if (set_line) {
-		line_edit->set_text(value);
-	}	
+	line_edit->set_text(value);
 }
+
 
 void SpinBox::_text_changed(const String &p_string) {
 	Ref<Expression> expr;
@@ -64,7 +63,8 @@ void SpinBox::_text_changed(const String &p_string) {
 	if (value.get_type() != Variant::NIL) {
 		set_value(value);
 	}
-	_value_changed(0,false);
+	emit_signal("value_changed", value);
+	get_line_edit()->set_cursor_position(get_line_edit()->get_text().length());
 }
 
 void SpinBox::_text_entered(const String &p_string) {
@@ -276,7 +276,7 @@ void SpinBox::apply() {
 }
 
 void SpinBox::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("_value_changed"),&SpinBox::_value_changed);
+	//ClassDB::bind_method(D_METHOD("_value_changed"),&SpinBox::_value_changed);
 	ClassDB::bind_method(D_METHOD("_gui_input"), &SpinBox::_gui_input);
 	ClassDB::bind_method(D_METHOD("_text_entered"), &SpinBox::_text_entered);
 	ClassDB::bind_method(D_METHOD("_text_changed"), &SpinBox::_text_changed);
@@ -311,10 +311,10 @@ SpinBox::SpinBox() {
 
 	line_edit->set_anchors_and_margins_preset(Control::PRESET_WIDE);
 	line_edit->set_mouse_filter(MOUSE_FILTER_PASS);
-	line_edit->connect("text_changed", this, "_text_changed");
 	line_edit->connect("text_entered", this, "_text_entered", Vector<Variant>(), CONNECT_DEFERRED);
 	line_edit->connect("focus_exited", this, "_line_edit_focus_exit", Vector<Variant>(), CONNECT_DEFERRED);
 	line_edit->connect("gui_input", this, "_line_edit_input");
+	line_edit->connect("text_changed", this, "_text_changed", Vector<Variant>(), CONNECT_DEFERRED);
 
 	range_click_timer = memnew(Timer);
 	range_click_timer->connect("timeout", this, "_range_click_timeout");

@@ -47,7 +47,7 @@ class SpinBox : public Range {
 
 	void _text_entered(const String &p_string);
 	void _text_changed(const String &p_string);
-	virtual void _value_changed(double, bool set_line = true);
+	virtual void _value_changed(double);
 	String prefix;
 	String suffix;
 	bool select_on_edit;

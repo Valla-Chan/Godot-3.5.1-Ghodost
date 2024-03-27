@@ -54,10 +54,11 @@ class Range : public Control {
 
 	void _share(Node *p_range);
 
-	void _value_changed_notify();
+	
 	void _changed_notify(const char *p_what = "");
 
 protected:
+	void _value_changed_notify();
 	virtual void _value_changed(double) {}
 
 	static void _bind_methods();
