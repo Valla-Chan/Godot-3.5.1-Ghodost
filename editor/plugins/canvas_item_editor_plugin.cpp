@@ -232,6 +232,10 @@ public:
 		p_rotation_step = rotation_step->get_value() / (180 / Math_PI);
 		p_scale_step = scale_step->get_value();
 	}
+
+	void get_grid_step(String p_grid_step_string) {
+		p_grid_step_string = String(Vector2(grid_step_x->get_value(), grid_step_y->get_value()));
+	}
 };
 
 bool CanvasItemEditor::_is_node_locked(const Node *p_node) {
@@ -995,6 +999,9 @@ void CanvasItemEditor::_commit_canvas_item_state(List<CanvasItem *> p_canvas_ite
 void CanvasItemEditor::_snap_changed() {
 	((SnapDialog *)snap_dialog)->get_fields(grid_offset, grid_step, primary_grid_steps, snap_rotation_offset, snap_rotation_step, snap_scale_step);
 	grid_step_multiplier = 0;
+	String text = "";
+	((SnapDialog *)snap_dialog)->get_grid_step(text);
+	label_gridsize->set_text(text);
 	viewport->update();
 }
 
@@ -6185,6 +6192,15 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/preview_canvas_scale", TTR("Preview Canvas Scale"), KEY_MASK_SHIFT | KEY_MASK_CMD | KEY_P), PREVIEW_CANVAS_SCALE);
 
 	main_menu_hbox->add_child(memnew(VSeparator));
+
+	menu_spacer = memnew(Control);
+	menu_spacer->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	main_menu_hbox->add_child(menu_spacer);
+
+
+	label_gridsize = memnew(Label);
+	//main_menu_hbox->add_child(label_gridsize);
+	label_gridsize->set_text("HELLO TEST");
 
 	context_menu_panel = memnew(PanelContainer);
 	context_menu_hbox = memnew(HBoxContainer);
