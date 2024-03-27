@@ -32,6 +32,7 @@
 
 #include "scene/scene_string_names.h"
 
+#include "core/math/expression.h"
 #include "core/io/resource_loader.h"
 #include "core/os/input.h"
 #include "core/os/keyboard.h"
@@ -405,9 +406,9 @@ void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
 			// Different texture, reset to 4x4.
 			split_sheet_h->set_value(4);
 			split_sheet_v->set_value(4);
-			split_sheet_size_x->set_value(size.x / 4);
-			split_sheet_size_y->set_value(size.y / 4);
 		}
+		split_sheet_size_x->set_value(size.x / split_sheet_h->get_value());
+		split_sheet_size_y->set_value(size.y / split_sheet_h->get_value());
 		split_sheet_sep_x->set_value(0);
 		split_sheet_sep_y->set_value(0);
 		split_sheet_offset_x->set_value(0);
@@ -1571,6 +1572,8 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	split_sheet_h->set_step(1);
 	split_sheet_hb->add_child(split_sheet_h);
 	split_sheet_h->connect("value_changed", this, "_sheet_spin_changed", varray(PARAM_FRAME_COUNT));
+	//split_sheet_h->get_line_edit()->connect("value_changed", this, "_sheet_spin_changed", varray(PARAM_FRAME_COUNT));
+	split_sheet_h->connect("value_typed", this, "_sheet_spin_changed", varray(PARAM_FRAME_COUNT));
 
 	split_sheet_hb->add_child(memnew(Label(TTR("Vertical:"))));
 	split_sheet_v = memnew(SpinBox);
@@ -1579,6 +1582,8 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	split_sheet_v->set_step(1);
 	split_sheet_hb->add_child(split_sheet_v);
 	split_sheet_v->connect("value_changed", this, "_sheet_spin_changed", varray(PARAM_FRAME_COUNT));
+	//split_sheet_h->get_line_edit()->connect("value_changed", this, "_sheet_spin_changed", varray(PARAM_FRAME_COUNT));
+	split_sheet_v->connect("value_typed", this, "_sheet_spin_changed", varray(PARAM_FRAME_COUNT));
 
 	split_sheet_hb->add_child(memnew(VSeparator));
 	split_sheet_hb->add_child(memnew(Label(TTR("Size:"))));

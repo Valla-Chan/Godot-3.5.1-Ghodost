@@ -61,10 +61,10 @@ void SpinBox::_text_changed(const String &p_string) {
 
 	Variant value = expr->execute(Array(), nullptr, false);
 	if (value.get_type() != Variant::NIL) {
-		set_value(value);
+		set_value_no_emit(value);
+		emit_signal("value_typed", value);
+		//get_line_edit()->set_cursor_position(get_line_edit()->get_text().length());
 	}
-	emit_signal("value_changed", value);
-	get_line_edit()->set_cursor_position(get_line_edit()->get_text().length());
 }
 
 void SpinBox::_text_entered(const String &p_string) {
@@ -302,7 +302,10 @@ void SpinBox::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "prefix"), "set_prefix", "get_prefix");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "suffix"), "set_suffix", "get_suffix");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "select_on_edit"), "set_select_on_edit", "get_select_on_edit");
+
+	ADD_SIGNAL(MethodInfo("value_typed"));
 }
+
 
 SpinBox::SpinBox() {
 	last_w = 0;
@@ -319,4 +322,6 @@ SpinBox::SpinBox() {
 	range_click_timer = memnew(Timer);
 	range_click_timer->connect("timeout", this, "_range_click_timeout");
 	add_child(range_click_timer);
+
+	
 }

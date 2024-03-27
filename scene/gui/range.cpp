@@ -101,6 +101,30 @@ void Range::set_value(double p_val) {
 
 	shared->emit_value_changed();
 }
+void Range::set_value_no_emit(double p_val) {
+	if (shared->step > 0) {
+		p_val = Math::round(p_val / shared->step) * shared->step;
+	}
+
+	if (_rounded_values) {
+		p_val = Math::round(p_val);
+	}
+
+	if (!shared->allow_greater && p_val > shared->max - shared->page) {
+		p_val = shared->max - shared->page;
+	}
+
+	if (!shared->allow_lesser && p_val < shared->min) {
+		p_val = shared->min;
+	}
+
+	if (shared->val == p_val) {
+		return;
+	}
+
+	shared->val = p_val;
+}
+
 void Range::set_min(double p_min) {
 	shared->min = p_min;
 	set_value(shared->val);
