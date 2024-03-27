@@ -40,6 +40,7 @@ class SpinBox : public Range {
 
 	LineEdit *line_edit;
 	int last_w;
+	bool change_instant;
 
 	Timer *range_click_timer;
 	void _range_click_timeout();
@@ -94,6 +95,7 @@ public:
 	String get_prefix() const;
 
 	void apply();
+	void set_change_instant(bool p_instant);
 
 	SpinBox();
 };

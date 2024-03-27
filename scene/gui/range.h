@@ -36,6 +36,8 @@
 class Range : public Control {
 	GDCLASS(Range, Control);
 
+	bool _has_just_emitted;
+
 	struct Shared {
 		double val, min, max;
 		double step, page;

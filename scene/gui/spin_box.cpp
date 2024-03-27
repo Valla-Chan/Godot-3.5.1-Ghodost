@@ -51,6 +51,9 @@ void SpinBox::_value_changed(double) {
 
 
 void SpinBox::_text_changed(const String &p_string) {
+	if (!change_instant) {
+		return;
+	}
 	Ref<Expression> expr;
 	expr.instance();
 	// Ignore the prefix and suffix in the expression
@@ -275,6 +278,10 @@ void SpinBox::apply() {
 	_text_entered(line_edit->get_text());
 }
 
+void SpinBox::set_change_instant(bool p_instant) {
+	change_instant = p_instant;
+}
+
 void SpinBox::_bind_methods() {
 	//ClassDB::bind_method(D_METHOD("_value_changed"),&SpinBox::_value_changed);
 	ClassDB::bind_method(D_METHOD("_gui_input"), &SpinBox::_gui_input);
@@ -309,6 +316,8 @@ void SpinBox::_bind_methods() {
 
 SpinBox::SpinBox() {
 	last_w = 0;
+	change_instant = true;
+	select_on_edit = false;
 	line_edit = memnew(LineEdit);
 	add_child(line_edit);
 

@@ -93,13 +93,14 @@ void Range::set_value(double p_val) {
 		p_val = shared->min;
 	}
 
-	if (shared->val == p_val) {
+	if (_has_just_emitted && shared->val == p_val) {
 		return;
 	}
 
 	shared->val = p_val;
 
 	shared->emit_value_changed();
+	_has_just_emitted = true;
 }
 void Range::set_value_no_emit(double p_val) {
 	if (shared->step > 0) {
@@ -121,6 +122,7 @@ void Range::set_value_no_emit(double p_val) {
 	if (shared->val == p_val) {
 		return;
 	}
+	_has_just_emitted = false;
 
 	shared->val = p_val;
 }
@@ -328,6 +330,7 @@ bool Range::is_lesser_allowed() const {
 }
 
 Range::Range() {
+	_has_just_emitted = false;
 	shared = memnew(Shared);
 	shared->min = 0;
 	shared->max = 100;
