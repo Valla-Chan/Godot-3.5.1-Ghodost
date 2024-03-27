@@ -319,9 +319,9 @@ void SpriteFramesEditor::_sheet_select_clear_all_frames() {
 }
 
 void SpriteFramesEditor::_sheet_spin_changed(double p_value, int p_dominant_param) {
-	//if (updating_split_settings) {
-	//	return;
-	//}
+	if (updating_split_settings) {
+		return;
+	}
 	updating_split_settings = true;
 
 	if (p_dominant_param != PARAM_USE_CURRENT) {
