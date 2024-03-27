@@ -455,6 +455,7 @@ private:
 	void _update_scroll(float);
 	void _update_scrollbars();
 	void _snap_changed();
+	void _update_snap_label();
 	void _selection_result_pressed(int);
 	void _selection_menu_hide();
 	void _add_node_pressed(int p_result);

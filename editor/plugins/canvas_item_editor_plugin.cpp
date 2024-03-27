@@ -233,8 +233,8 @@ public:
 		p_scale_step = scale_step->get_value();
 	}
 
-	void get_grid_step(String p_grid_step_string) {
-		p_grid_step_string = String(Vector2(grid_step_x->get_value(), grid_step_y->get_value()));
+	Vector2 get_grid_step() {
+		return Vector2(grid_step_x->get_value(), grid_step_y->get_value());
 	}
 };
 
@@ -487,6 +487,7 @@ void CanvasItemEditor::_unhandled_key_input(const Ref<InputEvent> &p_ev) {
 		if (multiply_grid_step_shortcut.is_valid() && multiply_grid_step_shortcut->is_shortcut(p_ev)) {
 			// Multiply the grid size
 			grid_step_multiplier = MIN(grid_step_multiplier + 1, 12);
+			_update_snap_label();
 			viewport->update();
 		} else if (divide_grid_step_shortcut.is_valid() && divide_grid_step_shortcut->is_shortcut(p_ev)) {
 			// Divide the grid size
@@ -494,6 +495,8 @@ void CanvasItemEditor::_unhandled_key_input(const Ref<InputEvent> &p_ev) {
 			if (new_grid_step.x >= 1.0 && new_grid_step.y >= 1.0) {
 				grid_step_multiplier--;
 			}
+
+			_update_snap_label();
 			viewport->update();
 		}
 	}
@@ -999,10 +1002,13 @@ void CanvasItemEditor::_commit_canvas_item_state(List<CanvasItem *> p_canvas_ite
 void CanvasItemEditor::_snap_changed() {
 	((SnapDialog *)snap_dialog)->get_fields(grid_offset, grid_step, primary_grid_steps, snap_rotation_offset, snap_rotation_step, snap_scale_step);
 	grid_step_multiplier = 0;
-	String text = "";
-	((SnapDialog *)snap_dialog)->get_grid_step(text);
-	label_gridsize->set_text(text);
 	viewport->update();
+	_update_snap_label();
+}
+
+void CanvasItemEditor::_update_snap_label() {
+	String text = String(grid_step * Math::pow(2.0, grid_step_multiplier));
+	label_gridsize->set_text(text);
 }
 
 void CanvasItemEditor::_selection_result_pressed(int p_result) {
@@ -6195,12 +6201,15 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 
 	menu_spacer = memnew(Control);
 	menu_spacer->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	main_menu_hbox->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	main_menu_hbox->add_child(menu_spacer);
 
 
 	label_gridsize = memnew(Label);
-	//main_menu_hbox->add_child(label_gridsize);
-	label_gridsize->set_text("HELLO TEST");
+	label_gridsize->set_tooltip("Grid Size");
+	main_menu_hbox->add_child(memnew(VSeparator));
+	main_menu_hbox->add_child(label_gridsize);
+	//label_gridsize->set_text("HELLO TEST");
 
 	context_menu_panel = memnew(PanelContainer);
 	context_menu_hbox = memnew(HBoxContainer);
@@ -6334,6 +6343,8 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 
 	// Update the menus' checkboxes
 	call_deferred("set_state", get_state());
+	// Update the grid size label
+	_update_snap_label();
 }
 
 CanvasItemEditor *CanvasItemEditor::singleton = nullptr;
