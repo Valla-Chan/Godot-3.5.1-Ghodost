@@ -319,9 +319,9 @@ void SpriteFramesEditor::_sheet_select_clear_all_frames() {
 }
 
 void SpriteFramesEditor::_sheet_spin_changed(double p_value, int p_dominant_param) {
-	if (updating_split_settings) {
-		return;
-	}
+	//if (updating_split_settings) {
+	//	return;
+	//}
 	updating_split_settings = true;
 
 	if (p_dominant_param != PARAM_USE_CURRENT) {
@@ -389,30 +389,30 @@ void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
 	if (new_texture) {
 		// Valla edits: make this not go back to 4x4 every time!!
 		// Only run once.
+		const Size2i size = texture->get_size();
+		// Reset spin max.
+		split_sheet_size_x->set_max(size.x);
+		split_sheet_size_y->set_max(size.y);
+		split_sheet_sep_x->set_max(size.x);
+		split_sheet_sep_y->set_max(size.y);
+		split_sheet_offset_x->set_max(size.x);
+		split_sheet_offset_y->set_max(size.y);
+		dominant_param = PARAM_FRAME_COUNT;
+		updating_split_settings = true;
+
 		if (firsttexture) {
 			firsttexture = false;
-			// Reset spin max.
-			const Size2i size = texture->get_size();
-			split_sheet_size_x->set_max(size.x);
-			split_sheet_size_y->set_max(size.y);
-			split_sheet_sep_x->set_max(size.x);
-			split_sheet_sep_y->set_max(size.y);
-			split_sheet_offset_x->set_max(size.x);
-			split_sheet_offset_y->set_max(size.y);
-
 			// Different texture, reset to 4x4.
-			dominant_param = PARAM_FRAME_COUNT;
-			updating_split_settings = true;
 			split_sheet_h->set_value(4);
 			split_sheet_v->set_value(4);
 			split_sheet_size_x->set_value(size.x / 4);
 			split_sheet_size_y->set_value(size.y / 4);
-			split_sheet_sep_x->set_value(0);
-			split_sheet_sep_y->set_value(0);
-			split_sheet_offset_x->set_value(0);
-			split_sheet_offset_y->set_value(0);
-			updating_split_settings = false;
 		}
+		split_sheet_sep_x->set_value(0);
+		split_sheet_sep_y->set_value(0);
+		split_sheet_offset_x->set_value(0);
+		split_sheet_offset_y->set_value(0);
+		updating_split_settings = false;
 
 		// Reset zoom.
 		_sheet_zoom_reset();
