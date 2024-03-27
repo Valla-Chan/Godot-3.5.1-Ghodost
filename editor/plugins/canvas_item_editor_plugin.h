@@ -382,9 +382,6 @@ private:
 	HBoxContainer *animation_hb;
 	MenuButton *animation_menu;
 
-	Control *menu_spacer;
-	Label *label_gridsize;
-
 	MenuButton *presets_menu;
 	PopupMenu *anchors_and_margins_popup;
 	PopupMenu *anchors_popup;
