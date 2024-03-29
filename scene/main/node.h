@@ -318,6 +318,7 @@ public:
 	void remove_child(Node *p_child);
 
 	int get_child_count() const;
+	void queue_free_all_children() const;
 	Node *get_child(int p_index) const;
 	bool has_node(const NodePath &p_path) const;
 	Node *get_node(const NodePath &p_path) const;

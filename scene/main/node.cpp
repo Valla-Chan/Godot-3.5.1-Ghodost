@@ -1417,6 +1417,15 @@ Node *Node::_get_child_by_name(const StringName &p_name) const {
 	return nullptr;
 }
 
+void Node::queue_free_all_children() const {
+	int cc = data.children.size();
+	Node *const *cd = data.children.ptr();
+
+	for (int i = 0; i < cc; i++) {
+		cd[i]->queue_delete();
+	}
+}
+
 Node *Node::get_node_or_null(const NodePath &p_path) const {
 	if (p_path.is_empty()) {
 		return nullptr;
@@ -3041,6 +3050,7 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_children"), &Node::_get_children);
 	ClassDB::bind_method(D_METHOD("get_child", "idx"), &Node::get_child);
 	ClassDB::bind_method(D_METHOD("get_child_by_name", "name"), &Node::_get_child_by_name);
+	ClassDB::bind_method(D_METHOD("queue_free_all_children"), &Node::queue_free_all_children);
 	ClassDB::bind_method(D_METHOD("has_node", "path"), &Node::has_node);
 	ClassDB::bind_method(D_METHOD("get_node", "path"), &Node::get_node);
 	ClassDB::bind_method(D_METHOD("get_node_or_null", "path"), &Node::get_node_or_null);
