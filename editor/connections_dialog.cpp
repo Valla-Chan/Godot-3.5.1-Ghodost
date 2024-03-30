@@ -431,6 +431,13 @@ void ConnectDialog::_select_method_pressed() {
 			dst_methods.push_back(MethodInfo("set_modulate"));
 			dst_methods.push_back(MethodInfo("set_self_modulate"));
 		}
+		if (target->has_method("play")) {
+			dst_methods.push_back(MethodInfo("play"));
+			dst_methods.push_back(MethodInfo("stop"));
+		}
+		if (target->has_method("play_backwards")) {
+			dst_methods.push_back(MethodInfo("play_backwards"));
+		}
 		dst_methods.sort();
 
 
