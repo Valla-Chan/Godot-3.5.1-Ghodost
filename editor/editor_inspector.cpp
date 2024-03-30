@@ -2201,6 +2201,10 @@ void EditorInspector::_property_pinned(const String &p_path, bool p_pinned) {
 	}
 }
 
+void EditorInspector::set_selected_path(const String &p_path, int p_focusable) {
+	_property_selected(p_path, p_focusable);
+}
+
 void EditorInspector::_property_selected(const String &p_path, int p_focusable) {
 	property_selected = p_path;
 	property_focusable = p_focusable;

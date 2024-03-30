@@ -360,6 +360,7 @@ public:
 	void set_undo_redo(UndoRedo *p_undo_redo);
 
 	String get_selected_path() const;
+	void set_selected_path(const String &p_path, int p_focusable);
 
 	void update_tree();
 	void update_property(const String &p_prop);

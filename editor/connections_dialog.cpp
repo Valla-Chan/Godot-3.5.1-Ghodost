@@ -234,6 +234,10 @@ void ConnectDialog::_remove_bind() {
 
 	ERR_FAIL_INDEX(idx, cdbinds->params.size());
 	cdbinds->params.remove(idx);
+	if (idx >= cdbinds->params.size()) {
+		idx -= 1;
+	}
+	bind_editor->set_selected_path(st.get_slice("_", 0) + "_" + String(itos(idx+1)), idx+1);
 	cdbinds->notify_changed();
 }
 
