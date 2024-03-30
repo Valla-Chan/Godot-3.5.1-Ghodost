@@ -134,7 +134,9 @@ class ConnectionsDock : public VBoxContainer {
 	enum SlotMenuOption {
 		EDIT,
 		GO_TO_SCRIPT,
-		DISCONNECT
+		DISCONNECT,
+		GO_TO_NODE,
+		DUPLICATE
 	};
 
 	Node *selectedNode;
@@ -162,9 +164,10 @@ class ConnectionsDock : public VBoxContainer {
 	void _tree_item_activated();
 	bool _is_item_signal(TreeItem &item);
 
-	void _open_connection_dialog(TreeItem &item);
-	void _open_connection_dialog(Connection cToEdit);
+	void _open_connection_dialog(TreeItem &item, bool p_edit = true);
+	void _open_connection_dialog(Connection cToEdit, bool p_edit = true);
 	void _go_to_script(TreeItem &item);
+	void _go_to_node(TreeItem &item);
 
 	void _handle_signal_menu_option(int option);
 	void _handle_slot_menu_option(int option);

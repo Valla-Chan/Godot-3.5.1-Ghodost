@@ -418,19 +418,31 @@ void ConnectDialog::_select_method_pressed() {
 
 
 	if (target->get_script_instance() != nullptr) {
+		//target->get_method_list(&dst_methods);
 		target->get_script_instance()->get_method_list(&dst_methods);
+		if (target->has_method("set_visible")) {
+			dst_methods.push_back(MethodInfo("set_visible"));
+		}
+		if (target->has_method("set_modulate")) {
+			dst_methods.push_back(MethodInfo("set_modulate"));
+			dst_methods.push_back(MethodInfo("set_self_modulate"));
+		}
 		dst_methods.sort();
-		
+
 
 		int i = 0;
+		String lastMethod;
 		for (List<MethodInfo>::Element *E = dst_methods.front(); E; E = E->next()) {
 			String methodName = E->get().name;
 			if (!methodName.begins_with("_")) {
 				methodName = methodName.capitalize();
 			}
 
-			dst_method_select_list->add_item(methodName, i);
+			if (i == 0 || (i > 0 && methodName != lastMethod)) {
+				dst_method_select_list->add_item(methodName, i);
+			}
 
+			lastMethod = methodName;
 			++i;
 		}
 
@@ -815,7 +827,7 @@ bool ConnectionsDock::_is_item_signal(TreeItem &item) {
 /*
  * Open connection dialog with TreeItem data to CREATE a brand-new connection.
  */
-void ConnectionsDock::_open_connection_dialog(TreeItem &item) {
+void ConnectionsDock::_open_connection_dialog(TreeItem &item, bool p_edit) {
 	String signal = item.get_metadata(0).operator Dictionary()["name"];
 	const String &signalname = signal;
 	String midname = selectedNode->get_name();
@@ -855,7 +867,7 @@ void ConnectionsDock::_open_connection_dialog(TreeItem &item) {
 /*
  * Open connection dialog with Connection data to EDIT an existing connection.
  */
-void ConnectionsDock::_open_connection_dialog(Connection cToEdit) {
+void ConnectionsDock::_open_connection_dialog(Connection cToEdit, bool p_edit) {
 	Node *src = static_cast<Node *>(cToEdit.source);
 	Node *dst = static_cast<Node *>(cToEdit.target);
 
@@ -863,7 +875,7 @@ void ConnectionsDock::_open_connection_dialog(Connection cToEdit) {
 		const String &signalname = cToEdit.signal;
 		connect_dialog->set_title(TTR("Edit Connection:") + cToEdit.signal);
 		connect_dialog->popup_dialog(signalname);
-		connect_dialog->init(cToEdit, true);
+		connect_dialog->init(cToEdit, p_edit);
 	}
 }
 
@@ -891,6 +903,21 @@ void ConnectionsDock::_go_to_script(TreeItem &item) {
 	if (script.is_valid() && ScriptEditor::get_singleton()->script_goto_method(script, c.method)) {
 		editor->call("_editor_select", EditorNode::EDITOR_SCRIPT);
 	}
+}
+
+void ConnectionsDock::_go_to_node(TreeItem &item) {
+	if (_is_item_signal(item)) {
+		return;
+	} 
+
+	Connection c = item.get_metadata(0);
+	ERR_FAIL_COND(c.source != selectedNode); //shouldn't happen but...bugcheck
+
+	if (!c.target || !Object::cast_to<Node>(c.target)) {
+		return;
+	}
+
+	EditorInterface::get_singleton()->edit_node(Object::cast_to<Node>(c.target));
 }
 
 void ConnectionsDock::_handle_signal_menu_option(int option) {
@@ -929,6 +956,13 @@ void ConnectionsDock::_handle_slot_menu_option(int option) {
 		} break;
 		case GO_TO_SCRIPT: {
 			_go_to_script(*item);
+		} break;
+		case GO_TO_NODE: {
+			_go_to_node(*item);
+		} break;
+		case DUPLICATE: {
+			Connection c = item->get_metadata(0);
+			_open_connection_dialog(c, false);
 		} break;
 		case DISCONNECT: {
 			_disconnect(*item);
@@ -1241,8 +1275,12 @@ ConnectionsDock::ConnectionsDock(EditorNode *p_editor) {
 	add_child(slot_menu);
 	slot_menu->connect("id_pressed", this, "_handle_slot_menu_option");
 	slot_menu->add_item(TTR("Edit..."), EDIT);
-	slot_menu->add_item(TTR("Go to Method"), GO_TO_SCRIPT);
+	slot_menu->add_item(TTR("Duplicate"), DUPLICATE);
 	slot_menu->add_item(TTR("Disconnect"), DISCONNECT);
+	slot_menu->add_separator();
+	slot_menu->add_item(TTR("Go to Method"), GO_TO_SCRIPT);
+	slot_menu->add_item(TTR("Go to Node"), GO_TO_NODE);
+
 
 	connect_dialog->connect("connected", this, "_make_or_edit_connection");
 	tree->connect("item_selected", this, "_tree_item_selected");
