@@ -717,6 +717,7 @@ void AnimatedSprite::set_animation(const StringName &p_animation) {
 		set_frame(0);
 	//}
 	_change_notify();
+	emit_signal("animation_changed");
 	update();
 }
 void AnimatedSprite::set_animation_continue(const StringName &p_animation) {
@@ -734,6 +735,7 @@ void AnimatedSprite::set_animation_continue(const StringName &p_animation) {
 	//set_frame(0);
 	//}
 	_change_notify();
+	emit_signal("animation_changed");
 	update();
 }
 StringName AnimatedSprite::get_animation() const {
@@ -811,6 +813,7 @@ void AnimatedSprite::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_res_changed"), &AnimatedSprite::_res_changed);
 
 	ADD_SIGNAL(MethodInfo("frame_changed"));
+	ADD_SIGNAL(MethodInfo("animation_changed"));
 	ADD_SIGNAL(MethodInfo("animation_finished"));
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "frames", PROPERTY_HINT_RESOURCE_TYPE, "SpriteFrames"), "set_sprite_frames", "get_sprite_frames");
