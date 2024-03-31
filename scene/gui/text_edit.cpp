@@ -4444,26 +4444,13 @@ Size2 TextEdit::get_minimum_size() const {
 	if (!expand_to_text_height) {
 		return cache.style_normal->get_minimum_size();
 	} else {
-		Ref<StyleBox> style = get_stylebox("normal");
-		Ref<Font> font = get_font("font");
 
 		Size2 min_size;
 
-		// Minimum size of text.
-		int space_size = font->get_char_size(' ').x;
-		min_size.width = get_constant("minimum_spaces") * space_size;
+		min_size.width = cache.style_normal->get_minimum_size().x;
+		min_size.height = MAX(cache.style_normal->get_minimum_size().y, get_line_height() * get_total_visible_rows());
 
-		// DO NOT SET WIDTH.
-
-		//if (expand_to_text_length) {
-			// Add a space because some fonts are too exact, and because cursor needs a bit more when at the end.
-		//	min_size.width = MAX(min_size.width, get_line_width(0));
-		//}
-
-		min_size.height = get_line_height() * get_total_visible_rows();
-		// TODO: handle wrapped text lines. loop through each line and test if wrapped and add that to the count before multiplying.
-
-		return style->get_minimum_size() + min_size;
+		return min_size;
 	}
 }
 
