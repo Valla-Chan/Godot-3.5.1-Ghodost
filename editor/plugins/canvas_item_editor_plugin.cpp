@@ -6199,18 +6199,6 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 
 	main_menu_hbox->add_child(memnew(VSeparator));
 
-	menu_spacer = memnew(Control);
-	menu_spacer->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	main_menu_hbox->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	main_menu_hbox->add_child(menu_spacer);
-
-
-	label_gridsize = memnew(Label);
-	label_gridsize->set_tooltip("Grid Size");
-	main_menu_hbox->add_child(memnew(VSeparator));
-	main_menu_hbox->add_child(label_gridsize);
-	//label_gridsize->set_text("HELLO TEST");
-
 	context_menu_panel = memnew(PanelContainer);
 	context_menu_hbox = memnew(HBoxContainer);
 	context_menu_panel->add_child(context_menu_hbox);
@@ -6320,6 +6308,20 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 	multiply_grid_step_shortcut = ED_SHORTCUT("canvas_item_editor/multiply_grid_step", TTR("Multiply grid step by 2"), KEY_KP_MULTIPLY);
 	divide_grid_step_shortcut = ED_SHORTCUT("canvas_item_editor/divide_grid_step", TTR("Divide grid step by 2"), KEY_KP_DIVIDE);
 	pan_view_shortcut = ED_SHORTCUT("canvas_item_editor/pan_view", TTR("Pan View"), KEY_SPACE);
+
+
+	// Grid size preview
+
+	menu_spacer = memnew(Control);
+	menu_spacer->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	main_menu_hbox->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	main_menu_hbox->add_child(menu_spacer);
+
+	label_gridsize = memnew(Label);
+	label_gridsize->set_tooltip("Grid Size");
+	main_menu_hbox->add_child(memnew(VSeparator));
+	main_menu_hbox->add_child(label_gridsize);
+
 
 	skeleton_menu->get_popup()->set_item_checked(skeleton_menu->get_popup()->get_item_index(SKELETON_SHOW_BONES), true);
 	singleton = this;

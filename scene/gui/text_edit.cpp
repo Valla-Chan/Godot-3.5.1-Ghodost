@@ -4441,7 +4441,30 @@ int TextEdit::get_char_count() {
 }
 
 Size2 TextEdit::get_minimum_size() const {
-	return cache.style_normal->get_minimum_size();
+	if (!expand_to_text_height) {
+		return cache.style_normal->get_minimum_size();
+	} else {
+		Ref<StyleBox> style = get_stylebox("normal");
+		Ref<Font> font = get_font("font");
+
+		Size2 min_size;
+
+		// Minimum size of text.
+		int space_size = font->get_char_size(' ').x;
+		min_size.width = get_constant("minimum_spaces") * space_size;
+
+		// DO NOT SET WIDTH.
+
+		//if (expand_to_text_length) {
+			// Add a space because some fonts are too exact, and because cursor needs a bit more when at the end.
+		//	min_size.width = MAX(min_size.width, get_line_width(0));
+		//}
+
+		min_size.height = get_line_height() * get_total_visible_rows();
+		// TODO: handle wrapped text lines. loop through each line and test if wrapped and add that to the count before multiplying.
+
+		return style->get_minimum_size() + min_size;
+	}
 }
 
 int TextEdit::_get_control_height() const {
@@ -5244,6 +5267,10 @@ void TextEdit::set_text(String p_text) {
 
 	cursor_set_line(0);
 	cursor_set_column(0);
+
+	if (expand_to_text_height) {
+		minimum_size_changed();
+	}
 
 	update();
 	setting_text = false;
@@ -6507,6 +6534,11 @@ void TextEdit::undo() {
 		cursor_set_line(undo_stack_pos->get().from_line, false);
 		cursor_set_column(undo_stack_pos->get().from_column);
 	}
+
+	if (expand_to_text_height) {
+		minimum_size_changed();
+	}
+
 	update();
 }
 
@@ -6539,6 +6571,11 @@ void TextEdit::redo() {
 	cursor_set_line(undo_stack_pos->get().to_line, false);
 	cursor_set_column(undo_stack_pos->get().to_column);
 	undo_stack_pos = undo_stack_pos->next();
+
+	if (expand_to_text_height) {
+		minimum_size_changed();
+	}
+
 	update();
 }
 
@@ -7411,6 +7448,15 @@ int TextEdit::get_line_height() const {
 	return get_row_height();
 }
 
+void TextEdit::set_expand_to_text_height(bool p_enabled) {
+	expand_to_text_height = p_enabled;
+	minimum_size_changed();
+}
+
+bool TextEdit::get_expand_to_text_height() const {
+	return expand_to_text_height;
+}
+
 void TextEdit::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_gui_input"), &TextEdit::_gui_input);
 	ClassDB::bind_method(D_METHOD("_scroll_moved"), &TextEdit::_scroll_moved);
@@ -7452,6 +7498,9 @@ void TextEdit::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("center_viewport_to_cursor"), &TextEdit::center_viewport_to_cursor);
 	ClassDB::bind_method(D_METHOD("cursor_set_column", "column", "adjust_viewport"), &TextEdit::cursor_set_column, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("cursor_set_line", "line", "adjust_viewport", "can_be_hidden", "wrap_index"), &TextEdit::cursor_set_line, DEFVAL(true), DEFVAL(true), DEFVAL(0));
+
+	ClassDB::bind_method(D_METHOD("set_expand_to_text_height", "enabled"), &TextEdit::set_expand_to_text_height);
+	ClassDB::bind_method(D_METHOD("get_expand_to_text_height"), &TextEdit::get_expand_to_text_height);
 
 	ClassDB::bind_method(D_METHOD("cursor_get_column"), &TextEdit::cursor_get_column);
 	ClassDB::bind_method(D_METHOD("cursor_get_line"), &TextEdit::cursor_get_line);
@@ -7610,6 +7659,7 @@ void TextEdit::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "wrap_enabled"), "set_wrap_enabled", "is_wrap_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "scroll_vertical"), "set_v_scroll", "get_v_scroll");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "scroll_horizontal"), "set_h_scroll", "get_h_scroll");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "expand_to_text_height"), "set_expand_to_text_height", "get_expand_to_text_height");
 
 	ADD_GROUP("Minimap", "minimap_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "minimap_draw"), "draw_minimap", "is_drawing_minimap");
@@ -7665,6 +7715,7 @@ TextEdit::TextEdit() {
 	fold_gutter_width = 0;
 	info_gutter_width = 0;
 	cache.info_gutter_width = 0;
+	expand_to_text_height = false;
 	set_default_cursor_shape(CURSOR_IBEAM);
 
 	indent_size = 4;

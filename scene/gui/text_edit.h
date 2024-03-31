@@ -520,6 +520,8 @@ private:
 	void _text_changed_emit();
 	void _line_edited_from(int p_line);
 
+	bool expand_to_text_height;
+
 	void _push_current_op();
 
 	/* Line and character position. */
@@ -616,6 +618,9 @@ public:
 	void set_text(String p_text);
 	void insert_text_at_cursor(const String &p_text);
 	void insert_at(const String &p_text, int at);
+
+	void set_expand_to_text_height(bool p_enabled);
+	bool get_expand_to_text_height() const;
 
 	int get_line_count() const;
 
