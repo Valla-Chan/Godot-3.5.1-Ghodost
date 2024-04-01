@@ -418,8 +418,6 @@ void ConnectDialog::_select_method_pressed() {
 		return;
 	}
 
-	List<MethodInfo> dst_methods;
-
 
 	if (target->get_script_instance() != nullptr) {
 		//target->get_method_list(&dst_methods);
@@ -458,6 +456,8 @@ void ConnectDialog::_select_method_pressed() {
 		}
 
 		dst_method_select_list->select(0);
+	} else {
+		dst_methods.clear();
 	}
 }
 
@@ -472,11 +472,7 @@ void ConnectDialog::_select_method_confirmed() {
 		return;
 	}
 
-	List<MethodInfo> dst_methods;
-
 	if (target->get_script_instance() != nullptr) {
-		target->get_script_instance()->get_method_list(&dst_methods);
-		dst_methods.sort();
 
 		dst_method->set_text(dst_methods[dst_method_select_list->get_selected_id()].name);
 	}

@@ -76,6 +76,8 @@ class ConnectDialog : public ConfirmationDialog {
 
 	Label *error_label;
 
+	List<MethodInfo> dst_methods;
+
 	void ok_pressed();
 	void _cancel_pressed();
 	void _tree_node_selected();
