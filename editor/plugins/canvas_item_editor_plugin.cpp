@@ -6312,15 +6312,15 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 
 	// Grid size preview
 
-	menu_spacer = memnew(Control);
-	menu_spacer->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	main_menu_hbox->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	main_menu_hbox->add_child(menu_spacer);
+	//menu_spacer = memnew(Control);
+	//menu_spacer->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	main_flow->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	//main_flow->add_child(menu_spacer);
 
 	label_gridsize = memnew(Label);
 	label_gridsize->set_tooltip("Grid Size");
-	main_menu_hbox->add_child(memnew(VSeparator));
-	main_menu_hbox->add_child(label_gridsize);
+	main_flow->add_child(memnew(VSeparator));
+	main_flow->add_child(label_gridsize);
 
 
 	skeleton_menu->get_popup()->set_item_checked(skeleton_menu->get_popup()->get_item_index(SKELETON_SHOW_BONES), true);
