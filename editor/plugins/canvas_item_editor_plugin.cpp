@@ -5900,10 +5900,24 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 	HFlowContainer *main_flow = memnew(HFlowContainer);
 	add_child(main_flow);
 
+
 	// Main toolbars.
 	HBoxContainer *main_menu_hbox = memnew(HBoxContainer);
 	main_menu_hbox->set_anchors_and_margins_preset(Control::PRESET_WIDE);
 	main_flow->add_child(main_menu_hbox);
+
+	// Grid size preview
+
+	//menu_spacer = memnew(Control);
+	//menu_spacer->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	//main_menu_hbox->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	//main_menu_hbox->add_child(menu_spacer);
+
+	label_gridsize = memnew(Label);
+	label_gridsize->set_tooltip("Grid Size");
+	main_menu_hbox->add_child(label_gridsize);
+	main_menu_hbox->add_child(memnew(VSeparator));
+
 
 	bottom_split = memnew(VSplitContainer);
 	add_child(bottom_split);
@@ -6309,18 +6323,6 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 	divide_grid_step_shortcut = ED_SHORTCUT("canvas_item_editor/divide_grid_step", TTR("Divide grid step by 2"), KEY_KP_DIVIDE);
 	pan_view_shortcut = ED_SHORTCUT("canvas_item_editor/pan_view", TTR("Pan View"), KEY_SPACE);
 
-
-	// Grid size preview
-
-	//menu_spacer = memnew(Control);
-	//menu_spacer->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	main_flow->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	//main_flow->add_child(menu_spacer);
-
-	label_gridsize = memnew(Label);
-	label_gridsize->set_tooltip("Grid Size");
-	main_flow->add_child(memnew(VSeparator));
-	main_flow->add_child(label_gridsize);
 
 
 	skeleton_menu->get_popup()->set_item_checked(skeleton_menu->get_popup()->get_item_index(SKELETON_SHOW_BONES), true);
