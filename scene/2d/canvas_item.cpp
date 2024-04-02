@@ -354,6 +354,10 @@ bool CanvasItem::is_visible_in_tree() const {
 		return false;
 	}
 
+	if (is_vis_hidden() && Engine::get_singleton()->is_editor_hint()) {
+		return false;
+	}
+
 	const CanvasItem *p = this;
 
 	while (p) {
@@ -612,7 +616,7 @@ void CanvasItem::_notification(int p_what) {
 		} break;
 		case NOTIFICATION_VISIBILITY_CHANGED: {
 			emit_signal(SceneStringNames::get_singleton()->visibility_changed);
-		} break;
+		}break;
 	}
 }
 
@@ -1098,6 +1102,10 @@ void CanvasItem::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_visible", "visible"), &CanvasItem::set_visible);
 	ClassDB::bind_method(D_METHOD("is_visible"), &CanvasItem::is_visible);
 	ClassDB::bind_method(D_METHOD("is_visible_in_tree"), &CanvasItem::is_visible_in_tree);
+
+	ClassDB::bind_method(D_METHOD("set_vis_hidden", "visible"), &CanvasItem::set_vis_hidden);
+	ClassDB::bind_method(D_METHOD("is_vis_hidden"), &CanvasItem::is_vis_hidden);
+
 	ClassDB::bind_method(D_METHOD("show"), &CanvasItem::show);
 	ClassDB::bind_method(D_METHOD("hide"), &CanvasItem::hide);
 

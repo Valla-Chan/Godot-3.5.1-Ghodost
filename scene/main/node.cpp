@@ -1672,6 +1672,21 @@ void Node::_set_owner_nocheck(Node *p_owner) {
 	owner_changed_notify();
 }
 
+
+bool Node::is_vis_hidden() const {
+	return data.vis_hidden;
+}
+
+void Node::set_vis_hidden(bool p_hidden) {
+	if (data.vis_hidden == p_hidden) {
+		return;
+	}
+
+	data.vis_hidden = p_hidden;
+	emit_signal("visgroup_hidden_changed");
+	//VisualServer::get_singleton()->canvas_item_set_visible(canvas_item, visible);
+}
+
 void Node::_release_unique_name_in_owner() {
 	ERR_FAIL_NULL(data.owner); // Sanity check.
 	StringName key = StringName(UNIQUE_NODE_PREFIX + data.name.operator String());
@@ -3060,6 +3075,9 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_node_and_resource", "path"), &Node::has_node_and_resource);
 	ClassDB::bind_method(D_METHOD("get_node_and_resource", "path"), &Node::_get_node_and_resource);
 
+	ClassDB::bind_method(D_METHOD("set_vis_hidden", "visible"), &Node::set_vis_hidden);
+	ClassDB::bind_method(D_METHOD("is_vis_hidden"), &Node::is_vis_hidden);
+
 	ClassDB::bind_method(D_METHOD("is_inside_tree"), &Node::is_inside_tree);
 	ClassDB::bind_method(D_METHOD("is_a_parent_of", "node"), &Node::is_a_parent_of);
 	ClassDB::bind_method(D_METHOD("is_greater_than", "node"), &Node::is_greater_than);
@@ -3235,6 +3253,7 @@ void Node::_bind_methods() {
 	BIND_ENUM_CONSTANT(DUPLICATE_SCRIPTS);
 	BIND_ENUM_CONSTANT(DUPLICATE_USE_INSTANCING);
 
+	ADD_SIGNAL(MethodInfo("visgroup_hidden_changed"));
 	ADD_SIGNAL(MethodInfo("ready"));
 	ADD_SIGNAL(MethodInfo("renamed"));
 	ADD_SIGNAL(MethodInfo("tree_entered"));
@@ -3309,6 +3328,8 @@ Node::Node() {
 	data.physics_interpolation_reset_requested = false;
 	data.physics_interpolated_client_side = false;
 	data.use_identity_transform = false;
+
+	data.vis_hidden = false;
 
 	data.owner = nullptr;
 	data.OW = nullptr;

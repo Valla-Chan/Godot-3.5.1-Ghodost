@@ -345,6 +345,7 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 
 		item->set_tooltip(0, tooltip);
 	}
+	item->set_visible(!p_node->is_vis_hidden());
 
 	if (can_open_instance && undo_redo) { //Show buttons only when necessary(SceneTreeDock) to avoid crashes
 
@@ -383,6 +384,10 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 				p_node->connect("visibility_changed", this, "_node_visibility_changed", varray(p_node));
 			}
 
+			if (!p_node->is_connected("visgroup_hidden_changed", this, "_node_visibility_changed")) {
+				p_node->connect("visgroup_hidden_changed", this, "_node_visibility_changed", varray(p_node));
+			}
+
 			_update_visibility_color(p_node, item);
 		} else if (p_node->is_class("CanvasLayer")) {
 			bool v = p_node->call("is_visible");
@@ -395,6 +400,11 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 			if (!p_node->is_connected("visibility_changed", this, "_node_visibility_changed")) {
 				p_node->connect("visibility_changed", this, "_node_visibility_changed", varray(p_node));
 			}
+
+			if (!p_node->is_connected("visgroup_hidden_changed", this, "_node_visibility_changed")) {
+				p_node->connect("visgroup_hidden_changed", this, "_node_visibility_changed", varray(p_node));
+			}
+
 		} else if (p_node->is_class("Spatial")) {
 			bool is_locked = p_node->has_meta("_edit_lock_");
 			if (is_locked) {
@@ -416,6 +426,10 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 			if (!p_node->is_connected("visibility_changed", this, "_node_visibility_changed")) {
 				p_node->connect("visibility_changed", this, "_node_visibility_changed", varray(p_node));
 			}
+			if (!p_node->is_connected("visgroup_hidden_changed", this, "_node_visibility_changed")) {
+				p_node->connect("visgroup_hidden_changed", this, "_node_visibility_changed", varray(p_node));
+			}
+
 
 			_update_visibility_color(p_node, item);
 		} else if (p_node->is_class("AnimationPlayer")) {
@@ -500,6 +514,7 @@ void SceneTreeEditor::_node_visibility_changed(Node *p_node) {
 	ERR_FAIL_COND(idx == -1);
 
 	bool visible = false;
+	bool vis_hidden = false;
 
 	if (p_node->is_class("CanvasItem")) {
 		visible = p_node->call("is_visible");
@@ -510,6 +525,9 @@ void SceneTreeEditor::_node_visibility_changed(Node *p_node) {
 	} else if (p_node->is_class("Spatial")) {
 		visible = p_node->call("is_visible");
 	}
+
+	vis_hidden = p_node->is_vis_hidden();
+	item->set_visible(!vis_hidden);
 
 	if (visible) {
 		item->set_button(0, idx, get_icon("GuiVisibilityVisible", "EditorIcons"));
@@ -569,6 +587,10 @@ void SceneTreeEditor::_node_removed(Node *p_node) {
 		if (p_node->is_connected("visibility_changed", this, "_node_visibility_changed")) {
 			p_node->disconnect("visibility_changed", this, "_node_visibility_changed");
 		}
+		if (p_node->is_connected("visgroup_hidden_changed", this, "_node_visibility_changed")) {
+			p_node->disconnect("visgroup_hidden_changed", this, "_node_visibility_changed");
+		}
+
 	}
 
 	if (p_node == selected) {

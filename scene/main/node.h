@@ -112,6 +112,7 @@ private:
 		HashMap<StringName, Node *> owned_unique_nodes;
 		bool unique_name_in_owner = false;
 
+		bool vis_hidden;
 		int pos;
 		int depth;
 		int blocked; // safeguard that throws an error when attempting to modify the tree in a harmful way while being traversed.
@@ -312,6 +313,9 @@ public:
 
 	StringName get_name() const;
 	void set_name(const String &p_name);
+
+	void set_vis_hidden(bool p_hidden);
+	bool is_vis_hidden() const;
 
 	void add_child(Node *p_child, bool p_legible_unique_name = false);
 	void add_child_below_node(Node *p_node, Node *p_child, bool p_legible_unique_name = false);
