@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  node_dock.h                                                           */
+/*  connections_dialog.h                                                  */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,43 +28,63 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef NODE_DOCK_H
-#define NODE_DOCK_H
+/**
+@author Juan Linietsky <reduzio@gmail.com>
+*/
 
-#include "connections_dialog.h"
-#include "visgroups_dock.h"
-#include "groups_editor.h"
+#ifndef VISGROUP_DOCK_H
+#define VISGROUP_DOCK_H
 
-class NodeDock : public VBoxContainer {
-	GDCLASS(NodeDock, VBoxContainer);
+#include "core/undo_redo.h"
+#include "editor/editor_inspector.h"
+#include "editor/scene_tree_editor.h"
+#include "scene/gui/button.h"
+#include "scene/gui/check_button.h"
+#include "scene/gui/dialogs.h"
+#include "scene/gui/line_edit.h"
+#include "scene/gui/menu_button.h"
+#include "scene/gui/tree.h"
 
-	ToolButton *connections_button;
-	ToolButton *groups_button;
+class PopupMenu;
 
-	ConnectionsDock *connections;
-	GroupsEditor *groups;
+//////////////////////////////////////////
+class VisgroupsDock : public VBoxContainer {
+	GDCLASS(VisgroupsDock, VBoxContainer);
 
-	HBoxContainer *mode_hb;
+	enum {
+		BUTTON_VISIBILITY = 0,
+	};
 
-	Label *select_a_node;
-	Node *last_valid_node;
+	Tree *tree;
+	EditorNode *editor;
+
+	LineEdit *search_box;
+
+	void _filter_changed(const String &p_text);
+
+	struct GroupData {
+		Ref<Texture> icon;
+		TreeItem *item;
+		TreeItem *parent;
+		List<String> classes;
+		int index;
+	};
+	TreeItem* _add_visgroup_item(const String p_name, const String &p_class, Object *p_parent);
+	TreeItem* _add_visgroup_item(const String p_name, const List<String> &p_classes, Object *p_parent);
+
+	// map a group name to a list of class strings
+	Map<String, GroupData> groups;
 
 protected:
-	static void _bind_methods();
 	void _notification(int p_what);
+	static void _bind_methods();
+	void _tree_button_pressed(Object *p_item, int p_column, int p_id);
 
 public:
-	static NodeDock *singleton;
+	void update_tree();
 
-	void set_node(Node *p_node);
-	void restore_last_valid_node();
-
-	void show_groups();
-	void show_connections();
-
-	void update_lists();
-
-	NodeDock();
+	VisgroupsDock(EditorNode *p_editor = nullptr);
+	~VisgroupsDock();
 };
 
-#endif // NODE_DOCK_H
+#endif // CONNECTIONS_DIALOG_H

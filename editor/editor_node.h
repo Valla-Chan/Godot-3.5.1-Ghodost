@@ -38,6 +38,7 @@
 #include "editor/inspector_dock.h"
 #include "editor/property_editor.h"
 #include "editor/scene_tree_dock.h"
+#include "editor/visgroups_dock.h"
 #include "scene/gui/link_button.h"
 
 typedef void (*EditorNodeInitCallback)();
@@ -312,6 +313,7 @@ private:
 	SceneTreeDock *scene_tree_dock;
 	InspectorDock *inspector_dock;
 	NodeDock *node_dock;
+	VisgroupsDock *visgroups_dock;
 	ImportDock *import_dock;
 	FileSystemDock *filesystem_dock;
 	EditorRunNative *run_native;

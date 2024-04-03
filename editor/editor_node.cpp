@@ -106,6 +106,7 @@
 #include "editor/import_dock.h"
 #include "editor/multi_node_edit.h"
 #include "editor/node_dock.h"
+#include "editor/visgroups_dock.h"
 #include "editor/pane_drag.h"
 #include "editor/plugin_config_dialog.h"
 #include "editor/plugins/animation_blend_space_1d_editor.h"
@@ -5649,6 +5650,7 @@ void EditorNode::_feature_profile_changed() {
 	Ref<EditorFeatureProfile> profile = feature_profile_manager->get_current_profile();
 	TabContainer *import_tabs = cast_to<TabContainer>(import_dock->get_parent());
 	TabContainer *node_tabs = cast_to<TabContainer>(node_dock->get_parent());
+	TabContainer *visgroup_tabs = cast_to<TabContainer>(visgroups_dock->get_parent());
 	TabContainer *fs_tabs = cast_to<TabContainer>(filesystem_dock->get_parent());
 	if (profile.is_valid()) {
 		node_tabs->set_tab_hidden(node_dock->get_index(), profile->is_feature_disabled(EditorFeatureProfile::FEATURE_NODE_DOCK));
@@ -5670,9 +5672,11 @@ void EditorNode::_feature_profile_changed() {
 	} else {
 		import_tabs->set_tab_hidden(import_dock->get_index(), false);
 		node_tabs->set_tab_hidden(node_dock->get_index(), false);
+		visgroup_tabs->set_tab_hidden(visgroups_dock->get_index(), false);
 		fs_tabs->set_tab_hidden(filesystem_dock->get_index(), false);
 		import_dock->set_visible(true);
 		node_dock->set_visible(true);
+		visgroups_dock->set_visible(true);
 		filesystem_dock->set_visible(true);
 		main_editor_buttons[EDITOR_3D]->set_visible(true);
 		main_editor_buttons[EDITOR_SCRIPT]->set_visible(true);
@@ -6739,6 +6743,7 @@ EditorNode::EditorNode() {
 	inspector_dock = memnew(InspectorDock(this, editor_data));
 	import_dock = memnew(ImportDock);
 	node_dock = memnew(NodeDock);
+	visgroups_dock = memnew(VisgroupsDock);
 
 	filesystem_dock = memnew(FileSystemDock(this));
 	filesystem_dock->connect("inherit", this, "_inherit_request");
@@ -6764,6 +6769,9 @@ EditorNode::EditorNode() {
 	// Node: Full height right, behind Inspector
 	dock_slot[DOCK_SLOT_RIGHT_UL]->add_child(node_dock);
 	dock_slot[DOCK_SLOT_RIGHT_UL]->set_tab_title(node_dock->get_index(), TTR("Node"));
+
+	dock_slot[DOCK_SLOT_RIGHT_UL]->add_child(visgroups_dock);
+	dock_slot[DOCK_SLOT_RIGHT_UL]->set_tab_title(visgroups_dock->get_index(), TTR("Visgroups"));
 
 	// Hide unused dock slots and vsplits
 	dock_slot[DOCK_SLOT_LEFT_UL]->hide();
