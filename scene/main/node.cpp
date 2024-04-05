@@ -3075,9 +3075,6 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_node_and_resource", "path"), &Node::has_node_and_resource);
 	ClassDB::bind_method(D_METHOD("get_node_and_resource", "path"), &Node::_get_node_and_resource);
 
-	ClassDB::bind_method(D_METHOD("set_vis_hidden", "visible"), &Node::set_vis_hidden);
-	ClassDB::bind_method(D_METHOD("is_vis_hidden"), &Node::is_vis_hidden);
-
 	ClassDB::bind_method(D_METHOD("is_inside_tree"), &Node::is_inside_tree);
 	ClassDB::bind_method(D_METHOD("is_a_parent_of", "node"), &Node::is_a_parent_of);
 	ClassDB::bind_method(D_METHOD("is_greater_than", "node"), &Node::is_greater_than);
