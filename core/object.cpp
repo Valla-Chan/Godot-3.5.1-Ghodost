@@ -1172,7 +1172,7 @@ Error Object::emit_signal(const StringName &p_name, const Variant **p_args, int 
 #ifdef DEBUG_ENABLED
 		bool signal_is_valid = ClassDB::has_signal(get_class_name(), p_name);
 		//check in script
-		ERR_FAIL_COND_V_MSG(!signal_is_valid && !script.is_null() && !Ref<Script>(script)->has_script_signal(p_name), ERR_UNAVAILABLE, "Can't emit non-existing signal " + String("\"") + p_name + "\".");
+		ERR_FAIL_COND_V_MSG(!signal_is_valid && !script.is_null() && !Ref<Script>(script)->has_script_signal(p_name), ERR_UNAVAILABLE, String(get_class_name()) + " can't emit non-existing signal " + String("\"") + p_name + "\".");
 #endif
 		//not connected? just return
 		return ERR_UNAVAILABLE;
