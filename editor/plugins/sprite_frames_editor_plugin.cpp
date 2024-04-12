@@ -810,10 +810,18 @@ void SpriteFramesEditor::_animation_select() {
 
 	TreeItem *selected = animations->get_selected();
 	ERR_FAIL_COND(!selected);
+
 	edited_anim = selected->get_text(0);
 	_update_library(true);
 }
 
+Ref<Texture> SpriteFramesEditor::_get_locked_icon(bool p_locked) {
+	if (p_locked) {
+		return get_icon("Lock", "EditorIcons");
+	} else {
+		get_icon("Unlock", "EditorIcons");
+	}
+}
 
 // NOTE: this might have something to do with opening it?
 static void _find_anim_sprites(Node *p_node, List<Node *> *r_nodes, Ref<SpriteFrames> p_sfames) {
@@ -1105,12 +1113,22 @@ void SpriteFramesEditor::_update_library(bool p_skip_selector) {
 			it->set_metadata(0, name);
 
 			it->set_text(0, name);
+			it->set_selectable(0,!animation_locked);
 			it->set_editable(0, true);
 			animations_map.insert(name, it);
+			if (animation_locked) {
+				it->set_custom_color(0, Color(1.0, 1.0, 1.0, 0.4));
+			}
 			
 
 			if (E->get() == edited_anim) {
 				it->select(0);
+				it->set_selectable(0,true);
+				it->clear_custom_color(0);
+				if (animation_locked) {
+					it->add_button(0, _get_locked_icon(true), -1, false, "Lock Animation");
+				}
+					
 			}
 		}
 	}
@@ -1694,6 +1712,8 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	add_child(file_split_sheet);
 	file_split_sheet->connect("file_selected", this, "_prepare_sprite_sheet");
 
+	animation_locked = false;
+
 	// Config scale.
 	scale_ratio = 1.2f;
 	thumbnail_default_size = 96 * MAX(1, EDSCALE);
@@ -1754,12 +1774,16 @@ void SpriteFramesEditorPlugin::edit(Object *p_object) {
 	AnimatedSprite *animated_sprite = Object::cast_to<AnimatedSprite>(p_object);
 	AnimatedSprite3D *animated_sprite3d = Object::cast_to<AnimatedSprite3D>(p_object);
 	AnimatedTextureRect *animated_tex = Object::cast_to<AnimatedTextureRect>(p_object);
+	frames_editor->animation_locked = false;
 	if (animated_sprite) {
 		s = *animated_sprite->get_sprite_frames();
+		frames_editor->animation_locked = animated_sprite->is_animation_locked();
 	} else if (animated_sprite3d) {
 		s = *animated_sprite3d->get_sprite_frames();
+		frames_editor->animation_locked = animated_sprite3d->is_animation_locked();
 	} else if (animated_tex) {
 		s = *animated_tex->get_sprite_frames();
+		frames_editor->animation_locked = animated_tex->is_animation_locked();
 	} else {
 		s = Object::cast_to<SpriteFrames>(p_object);
 	}

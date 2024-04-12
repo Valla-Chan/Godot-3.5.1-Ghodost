@@ -786,6 +786,7 @@ void Sprite3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_hframes", "hframes"), &Sprite3D::set_hframes);
 	ClassDB::bind_method(D_METHOD("get_hframes"), &Sprite3D::get_hframes);
 
+
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_texture", "get_texture");
 	ADD_GROUP("Animation", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "hframes", PROPERTY_HINT_RANGE, "1,16384,1"), "set_hframes", "get_hframes");
@@ -1071,7 +1072,17 @@ void AnimatedSprite3D::_reset_timeout() {
 	}
 }
 
+void AnimatedSprite3D::set_animation_locked(bool p_lock) {
+	animation_locked = p_lock;
+}
+bool AnimatedSprite3D::is_animation_locked() const {
+	return animation_locked;
+}
+
 void AnimatedSprite3D::set_animation(const StringName &p_animation) {
+	// override animation locked if switching away from a nonexistent animation.
+	if (animation_locked && frames->has_animation(animation))
+		return;
 	if (animation == p_animation) {
 		return;
 	}
@@ -1080,8 +1091,23 @@ void AnimatedSprite3D::set_animation(const StringName &p_animation) {
 	_reset_timeout();
 	set_frame(0);
 	_change_notify();
+	emit_signal("animation_changed");
 	_queue_update();
 }
+
+void AnimatedSprite3D::set_animation_continue(const StringName &p_animation) {
+	if (animation_locked)
+		return;
+	if (animation == p_animation) {
+		return;
+	}
+
+	animation = p_animation;
+	_change_notify();
+	emit_signal("animation_changed");
+	_queue_update();
+}
+
 StringName AnimatedSprite3D::get_animation() const {
 	return animation;
 }
@@ -1134,6 +1160,10 @@ void AnimatedSprite3D::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_res_changed"), &AnimatedSprite3D::_res_changed);
 
+	ClassDB::bind_method(D_METHOD("set_animation_locked", "lock"), &AnimatedSprite3D::set_animation_locked);
+	ClassDB::bind_method(D_METHOD("is_animation_locked"), &AnimatedSprite3D::is_animation_locked);
+
+	ADD_SIGNAL(MethodInfo("animation_changed"));
 	ADD_SIGNAL(MethodInfo("frame_changed"));
 	ADD_SIGNAL(MethodInfo("animation_finished"));
 
@@ -1147,5 +1177,6 @@ AnimatedSprite3D::AnimatedSprite3D() {
 	frame = 0;
 	playing = false;
 	animation = "default";
+	animation_locked = false;
 	timeout = 0;
 }

@@ -204,6 +204,7 @@ class AnimatedSprite3D : public SpriteBase3D {
 	Ref<SpriteFrames> frames;
 	bool playing;
 	StringName animation;
+	bool animation_locked;
 	int frame;
 
 	bool centered;
@@ -236,7 +237,11 @@ public:
 	bool is_playing() const;
 
 	void set_animation(const StringName &p_animation);
+	void set_animation_continue(const StringName &p_animation);
 	StringName get_animation() const;
+
+	void set_animation_locked(bool p_lock);
+	bool is_animation_locked() const;
 
 	void set_frame(int p_frame);
 	int get_frame() const;

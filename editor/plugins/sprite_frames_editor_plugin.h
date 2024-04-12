@@ -138,6 +138,7 @@ class SpriteFramesEditor : public HSplitContainer {
 	void _down_pressed();
 	void _update_library(bool p_skip_selector = false);
 
+	Ref<Texture> _get_locked_icon(bool p_locked);
 	void _animation_select();
 	void _animation_name_edited();
 	void _animation_add();
@@ -203,6 +204,7 @@ protected:
 	}
 
 public:
+	bool animation_locked;
 	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }
 
 	void edit(SpriteFrames *p_frames);

@@ -150,6 +150,7 @@ class AnimatedSprite : public Node2D {
 	bool playing;
 	bool backwards;
 	StringName animation;
+	bool animation_locked;
 	int frame;
 	float speed_scale;
 
@@ -226,6 +227,9 @@ public:
 
 	void set_flip_v(bool p_flip);
 	bool is_flipped_v() const;
+
+	void set_animation_locked(bool p_lock);
+	bool is_animation_locked() const;
 
 	virtual String get_configuration_warning() const;
 	virtual void get_argument_options(const StringName &p_function, int p_idx, List<String> *r_options) const;

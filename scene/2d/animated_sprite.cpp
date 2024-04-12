@@ -641,6 +641,13 @@ bool AnimatedSprite::is_flipped_v() const {
 	return vflip;
 }
 
+void AnimatedSprite::set_animation_locked(bool p_lock) {
+	animation_locked = p_lock;
+}
+bool AnimatedSprite::is_animation_locked() const {
+	return animation_locked;
+}
+
 void AnimatedSprite::_res_changed() {
 	set_frame(frame);
 
@@ -703,7 +710,10 @@ void AnimatedSprite::_reset_timeout() {
 }
 
 void AnimatedSprite::set_animation(const StringName &p_animation) {
-//void AnimatedSprite::set_animation(const StringName &p_animation, const bool p_resetframe) {
+	// override animation locked if switching away from a nonexistent animation.
+	if (animation_locked && frames->has_animation(animation))
+		return;
+	//void AnimatedSprite::set_animation(const StringName &p_animation, const bool p_resetframe) {
 	ERR_FAIL_COND_MSG(frames == nullptr, vformat("There is no animation with name '%s'.", p_animation));
 	ERR_FAIL_COND_MSG(frames->get_animation_names().find(p_animation) == -1, vformat("There is no animation with name '%s'.", p_animation));
 
@@ -721,6 +731,8 @@ void AnimatedSprite::set_animation(const StringName &p_animation) {
 	update();
 }
 void AnimatedSprite::set_animation_continue(const StringName &p_animation) {
+	if (animation_locked)
+		return;
 	//void AnimatedSprite::set_animation(const StringName &p_animation, const bool p_resetframe) {
 	ERR_FAIL_COND_MSG(frames == nullptr, vformat("There is no animation with name '%s'.", p_animation));
 	ERR_FAIL_COND_MSG(frames->get_animation_names().find(p_animation) == -1, vformat("There is no animation with name '%s'.", p_animation));
@@ -810,6 +822,9 @@ void AnimatedSprite::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_speed_scale", "speed_scale"), &AnimatedSprite::set_speed_scale);
 	ClassDB::bind_method(D_METHOD("get_speed_scale"), &AnimatedSprite::get_speed_scale);
 
+	ClassDB::bind_method(D_METHOD("set_animation_locked", "speed_scale"), &AnimatedSprite::set_animation_locked);
+	ClassDB::bind_method(D_METHOD("is_animation_locked"), &AnimatedSprite::is_animation_locked);
+
 	ClassDB::bind_method(D_METHOD("_res_changed"), &AnimatedSprite::_res_changed);
 
 	ADD_SIGNAL(MethodInfo("frame_changed"));
@@ -818,6 +833,7 @@ void AnimatedSprite::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "frames", PROPERTY_HINT_RESOURCE_TYPE, "SpriteFrames"), "set_sprite_frames", "get_sprite_frames");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "animation"), "set_animation", "get_animation");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "animation_locked"), "set_animation_locked", "is_animation_locked");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "frame"), "set_frame", "get_frame");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "speed_scale"), "set_speed_scale", "get_speed_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
@@ -844,6 +860,7 @@ AnimatedSprite::AnimatedSprite() {
 	playing = false;
 	backwards = false;
 	animation = "default";
+	animation_locked = false;
 	timeout = 0;
 	is_over = false;
 }

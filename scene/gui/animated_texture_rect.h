@@ -58,6 +58,7 @@ private:
 	bool playing;
 	bool backwards;
 	StringName animation;
+	bool animation_locked;
 	int frame;
 	float speed_scale;
 
@@ -128,6 +129,8 @@ public:
 	void set_flip_v(bool p_flip);
 	bool is_flipped_v() const;
 
+	void set_animation_locked(bool p_lock);
+	bool is_animation_locked() const;
 
 	AnimatedTextureRect();
 	~AnimatedTextureRect();
