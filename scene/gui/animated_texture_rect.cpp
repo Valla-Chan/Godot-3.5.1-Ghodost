@@ -409,6 +409,7 @@ void AnimatedTextureRect::set_animation(const StringName &p_animation) {
 	set_frame(0);
 	//}
 	_change_notify();
+	emit_signal("animation_changed");
 	update();
 }
 void AnimatedTextureRect::set_animation_continue(const StringName &p_animation) {
@@ -428,6 +429,7 @@ void AnimatedTextureRect::set_animation_continue(const StringName &p_animation) 
 	//set_frame(0);
 	//}
 	_change_notify();
+	emit_signal("animation_changed");
 	update();
 }
 StringName AnimatedTextureRect::get_animation() const {
@@ -492,6 +494,8 @@ void AnimatedTextureRect::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_res_changed"), &AnimatedTextureRect::_res_changed);
 
+	ADD_SIGNAL(MethodInfo("animation_locked_change"));
+	ADD_SIGNAL(MethodInfo("animation_changed"));
 	ADD_SIGNAL(MethodInfo("frame_changed"));
 	ADD_SIGNAL(MethodInfo("animation_finished"));
 	//
@@ -600,7 +604,10 @@ bool AnimatedTextureRect::is_flipped_v() const {
 }
 
 void AnimatedTextureRect::set_animation_locked(bool p_lock) {
-	animation_locked = p_lock;
+	if (animation_locked != p_lock) {
+		animation_locked = p_lock;
+		emit_signal("animation_locked_changed");
+	}
 }
 bool AnimatedTextureRect::is_animation_locked() const {
 	return animation_locked;

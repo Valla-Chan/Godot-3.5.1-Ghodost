@@ -1073,7 +1073,10 @@ void AnimatedSprite3D::_reset_timeout() {
 }
 
 void AnimatedSprite3D::set_animation_locked(bool p_lock) {
-	animation_locked = p_lock;
+	if (animation_locked != p_lock) {
+		animation_locked = p_lock;
+		emit_signal("animation_locked_changed");
+	}
 }
 bool AnimatedSprite3D::is_animation_locked() const {
 	return animation_locked;
@@ -1163,9 +1166,10 @@ void AnimatedSprite3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_animation_locked", "lock"), &AnimatedSprite3D::set_animation_locked);
 	ClassDB::bind_method(D_METHOD("is_animation_locked"), &AnimatedSprite3D::is_animation_locked);
 
-	ADD_SIGNAL(MethodInfo("animation_changed"));
 	ADD_SIGNAL(MethodInfo("frame_changed"));
+	ADD_SIGNAL(MethodInfo("animation_changed"));
 	ADD_SIGNAL(MethodInfo("animation_finished"));
+	ADD_SIGNAL(MethodInfo("animation_locked_changed"));
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "frames", PROPERTY_HINT_RESOURCE_TYPE, "SpriteFrames"), "set_sprite_frames", "get_sprite_frames");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "animation"), "set_animation", "get_animation");
