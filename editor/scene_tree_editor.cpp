@@ -462,13 +462,13 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 	// VALLA EDITS
 	switch (filter_type) {
 		case 0: {
-			keep = (filter.is_subsequence_ofi(String(p_node->get_name())));
+			keep = filter.is_subsequence_ofi(String(p_node->get_name()));
 		} break;
 		case 1: {
-			keep = (filter.is_subsequence_ofi(String(p_node->get_class())));
+			keep = filter.is_subsequence_ofi(String(p_node->get_script_class_name())) || filter.is_subsequence_ofi(String(p_node->get_class()));
 		} break;
 		case 2: {
-			keep = (filter.is_subsequence_ofi(String(p_node->get_name()))) || (filter.is_subsequence_ofi(String(p_node->get_class())));
+			keep = filter.is_subsequence_ofi(String(p_node->get_name())) || (filter.is_subsequence_ofi(String(p_node->get_script_class_name())) || filter.is_subsequence_ofi(String(p_node->get_class())));
 		} break;
 	}
 
