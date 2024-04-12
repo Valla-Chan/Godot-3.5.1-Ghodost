@@ -408,7 +408,7 @@ void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
 			split_sheet_v->set_value(4);
 		}
 		split_sheet_size_x->set_value(size.x / split_sheet_h->get_value());
-		split_sheet_size_y->set_value(size.y / split_sheet_h->get_value());
+		split_sheet_size_y->set_value(size.y / split_sheet_v->get_value());
 		split_sheet_sep_x->set_value(0);
 		split_sheet_sep_y->set_value(0);
 		split_sheet_offset_x->set_value(0);
