@@ -665,6 +665,15 @@ void Object::get_method_list(List<MethodInfo> *p_list) const {
 	}
 }
 
+StringName Object::get_script_class_name() const {
+	if (!script.is_null()) {
+		Ref<Script> s = script;
+		return ScriptServer::get_global_class_name(s->get_path());
+	}
+
+	return StringName();
+}
+
 Variant Object::_call_bind(const Variant **p_args, int p_argcount, Variant::CallError &r_error) {
 	if (p_argcount < 1) {
 		r_error.error = Variant::CallError::CALL_ERROR_TOO_FEW_ARGUMENTS;
@@ -1668,6 +1677,7 @@ void Object::clear_internal_resource_paths() {
 
 void Object::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_class"), &Object::get_class);
+	ClassDB::bind_method(D_METHOD("get_script_class_name"), &Object::get_script_class_name);
 	ClassDB::bind_method(D_METHOD("is_class", "class"), &Object::is_class);
 	ClassDB::bind_method(D_METHOD("set", "property", "value"), &Object::_set_bind);
 	ClassDB::bind_method(D_METHOD("get", "property"), &Object::_get_bind);

@@ -301,7 +301,9 @@ public:                                                                         
 	static String inherits_static() {                                                                                                   \
 		return String(#m_inherits);                                                                                                     \
 	}                                                                                                                                   \
-	virtual bool is_class(const String &p_class) const { return (p_class == (#m_class)) ? true : m_inherits::is_class(p_class); }       \
+	virtual bool is_class(const String &p_class) const {																				\
+		return (p_class == (#m_class)) ? true : m_inherits::is_class(p_class);															\
+	}																																	\
 	virtual bool is_class_ptr(void *p_ptr) const { return (p_ptr == get_class_ptr_static()) ? true : m_inherits::is_class_ptr(p_ptr); } \
                                                                                                                                         \
 	static void get_valid_parents_static(List<String> *p_parents) {                                                                     \
@@ -643,7 +645,9 @@ public:
 	virtual String get_class() const { return "Object"; }
 	virtual String get_save_class() const { return get_class(); } //class stored when saving
 
-	virtual bool is_class(const String &p_class) const { return (p_class == "Object"); }
+	virtual bool is_class(const String &p_class) const {
+		return (p_class == "Object");
+	}
 	virtual bool is_class_ptr(void *p_ptr) const { return get_class_ptr_static() == p_ptr; }
 
 	_FORCE_INLINE_ const StringName &get_class_name() const {
@@ -667,6 +671,7 @@ public:
 
 	bool has_method(const StringName &p_method) const;
 	void get_method_list(List<MethodInfo> *p_list) const;
+	StringName get_script_class_name() const;
 	Variant callv(const StringName &p_method, const Array &p_args);
 	virtual Variant call(const StringName &p_method, const Variant **p_args, int p_argcount, Variant::CallError &r_error);
 	virtual void call_multilevel(const StringName &p_method, const Variant **p_args, int p_argcount);

@@ -228,6 +228,22 @@ void ScriptServer::remove_global_class(const StringName &p_class) {
 bool ScriptServer::is_global_class(const StringName &p_class) {
 	return global_classes.has(p_class);
 }
+StringName ScriptServer::get_global_class_name(const StringName &p_path) {
+
+	const StringName *K = nullptr;
+	List<StringName> classes;
+	while ((K = global_classes.next(K))) {
+		classes.push_back(*K);
+	}
+	classes.sort_custom<StringName::AlphCompare>();
+	for (List<StringName>::Element *E = classes.front(); E; E = E->next()) {
+		if (*K != nullptr && global_classes.get(*K).path == p_path) {
+			return *K;
+		}
+	}
+	return StringName();
+}
+
 StringName ScriptServer::get_global_class_language(const StringName &p_class) {
 	ERR_FAIL_COND_V(!global_classes.has(p_class), StringName());
 	return global_classes[p_class].language;
