@@ -61,6 +61,7 @@ class SceneTreeEditor : public Control {
 	ObjectID instance_node;
 
 	String filter;
+	int filter_type = 0;
 
 	AcceptDialog *error;
 	AcceptDialog *warning;
@@ -137,6 +138,9 @@ public:
 	void set_filter(const String &p_filter);
 	String get_filter() const;
 
+	void set_filter_type(const int &p_filtertype);
+	int get_filter_type() const;
+
 	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; };
 	void set_display_foreign_nodes(bool p_display);
 	bool get_display_foreign_nodes() const;
@@ -174,6 +178,7 @@ class SceneTreeDialog : public ConfirmationDialog {
 	void _cancel();
 	void _selected_changed();
 	void _filter_changed(const String &p_filter);
+	void _filter_type_changed(const int &p_filtertype);
 
 protected:
 	void _notification(int p_what);

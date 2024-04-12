@@ -158,6 +158,7 @@ class SceneTreeDock : public VBoxContainer {
 	EditorFileDialog *new_scene_from_dialog;
 
 	LineEdit *filter;
+	OptionButton *filter_type;
 	TextureRect *filter_icon;
 
 	PopupMenu *menu;
@@ -243,6 +244,7 @@ class SceneTreeDock : public VBoxContainer {
 	void _tree_rmb(const Vector2 &p_menu_pos);
 
 	void _filter_changed(const String &p_filter);
+	void _filter_type_changed(const int &p_filtertype);
 
 	void _perform_instance_scenes(const Vector<String> &p_files, Node *parent, int p_pos);
 	void _replace_with_branch_scene(const String &p_file, Node *base);
@@ -274,6 +276,8 @@ public:
 	List<Node *> duplicate();
 	String get_filter();
 	void set_filter(const String &p_filter);
+	int get_filter_type();
+	void set_filter_type(const int &p_filtertype);
 	void save_branch_to_file(String p_directory);
 
 	void _focus_node();

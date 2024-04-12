@@ -458,7 +458,19 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		item->set_as_cursor(0);
 	}
 
-	bool keep = (filter.is_subsequence_ofi(String(p_node->get_name())));
+	bool keep = true;
+	// VALLA EDITS
+	switch (filter_type) {
+		case 0: {
+			keep = (filter.is_subsequence_ofi(String(p_node->get_name())));
+		} break;
+		case 1: {
+			keep = (filter.is_subsequence_ofi(String(p_node->get_class())));
+		} break;
+		case 2: {
+			keep = (filter.is_subsequence_ofi(String(p_node->get_name()))) || (filter.is_subsequence_ofi(String(p_node->get_class())));
+		} break;
+	}
 
 	for (int i = 0; i < p_node->get_child_count(); i++) {
 		bool child_keep = _add_nodes(p_node->get_child(i), item, p_scroll_to_selected);
@@ -922,8 +934,17 @@ void SceneTreeEditor::set_filter(const String &p_filter) {
 	_update_tree(true);
 }
 
+void SceneTreeEditor::set_filter_type(const int &p_filtertype) {
+	filter_type = p_filtertype;
+	_update_tree(true);
+}
+
 String SceneTreeEditor::get_filter() const {
 	return filter;
+}
+
+int SceneTreeEditor::get_filter_type() const {
+	return filter_type;
 }
 
 void SceneTreeEditor::set_display_foreign_nodes(bool p_display) {
@@ -1365,11 +1386,16 @@ void SceneTreeDialog::_filter_changed(const String &p_filter) {
 	tree->set_filter(p_filter);
 }
 
+void SceneTreeDialog::_filter_type_changed(const int &p_filtertype) {
+	tree->set_filter_type(p_filtertype);
+}
+
 void SceneTreeDialog::_bind_methods() {
 	ClassDB::bind_method("_select", &SceneTreeDialog::_select);
 	ClassDB::bind_method("_cancel", &SceneTreeDialog::_cancel);
 	ClassDB::bind_method(D_METHOD("_selected_changed"), &SceneTreeDialog::_selected_changed);
 	ClassDB::bind_method(D_METHOD("_filter_changed"), &SceneTreeDialog::_filter_changed);
+	ClassDB::bind_method(D_METHOD("_filter_type_changed"), &SceneTreeDialog::_filter_type_changed);
 
 	ADD_SIGNAL(MethodInfo("selected", PropertyInfo(Variant::NODE_PATH, "path")));
 }

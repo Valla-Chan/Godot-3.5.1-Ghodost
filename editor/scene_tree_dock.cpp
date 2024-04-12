@@ -3043,13 +3043,26 @@ void SceneTreeDock::_filter_changed(const String &p_filter) {
 	scene_tree->set_filter(p_filter);
 }
 
+void SceneTreeDock::_filter_type_changed(const int &p_filtertype) {
+	scene_tree->set_filter_type(p_filtertype);
+}
+
 String SceneTreeDock::get_filter() {
 	return filter->get_text();
+}
+
+int SceneTreeDock::get_filter_type() {
+	return filter_type->get_selected();
 }
 
 void SceneTreeDock::set_filter(const String &p_filter) {
 	filter->set_text(p_filter);
 	scene_tree->set_filter(p_filter);
+}
+
+void SceneTreeDock::set_filter_type(const int &p_filtertype) {
+	filter->select(p_filtertype);
+	scene_tree->set_filter_type(p_filtertype);
 }
 
 void SceneTreeDock::save_branch_to_file(String p_directory) {
@@ -3377,6 +3390,7 @@ void SceneTreeDock::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_quick_open"), &SceneTreeDock::_quick_open);
 	ClassDB::bind_method(D_METHOD("_script_dropped"), &SceneTreeDock::_script_dropped);
 	ClassDB::bind_method(D_METHOD("_tree_rmb"), &SceneTreeDock::_tree_rmb);
+	ClassDB::bind_method(D_METHOD("_filter_type_changed"), &SceneTreeDock::_filter_type_changed);
 	ClassDB::bind_method(D_METHOD("_filter_changed"), &SceneTreeDock::_filter_changed);
 	ClassDB::bind_method(D_METHOD("_focus_node"), &SceneTreeDock::_focus_node);
 	ClassDB::bind_method(D_METHOD("_remote_tree_selected"), &SceneTreeDock::_remote_tree_selected);
@@ -3458,6 +3472,14 @@ SceneTreeDock::SceneTreeDock(EditorNode *p_editor, Node *p_scene_root, EditorSel
 	filter_hbc->add_child(filter);
 	filter->add_constant_override("minimum_spaces", 0);
 	filter->connect("text_changed", this, "_filter_changed");
+
+	filter_type = memnew(OptionButton);
+	filter_type->add_item(TTR("Name"));
+	filter_type->add_item(TTR("Class"));
+	filter_type->add_item(TTR("Both"));
+	filter_type->select(0);
+	filter_hbc->add_child(filter_type);
+	filter_type->connect("item_selected", this, "_filter_type_changed");
 
 	button_create_script = memnew(ToolButton);
 	button_create_script->connect("pressed", this, "_tool_selected", make_binds(TOOL_ATTACH_SCRIPT, false));
