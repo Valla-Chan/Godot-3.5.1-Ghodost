@@ -494,7 +494,7 @@ void AnimatedTextureRect::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_res_changed"), &AnimatedTextureRect::_res_changed);
 
-	ADD_SIGNAL(MethodInfo("animation_locked_change"));
+	ADD_SIGNAL(MethodInfo("animation_locked_changed"));
 	ADD_SIGNAL(MethodInfo("animation_changed"));
 	ADD_SIGNAL(MethodInfo("frame_changed"));
 	ADD_SIGNAL(MethodInfo("animation_finished"));
