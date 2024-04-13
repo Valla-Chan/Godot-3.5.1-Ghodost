@@ -66,7 +66,7 @@ void NativeScript::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_library"), &NativeScript::get_library);
 
 	ClassDB::bind_method(D_METHOD("set_script_class_name", "class_name"), &NativeScript::set_script_class_name);
-	ClassDB::bind_method(D_METHOD("get_script_class_name"), &NativeScript::get_script_class_name);
+	//ClassDB::bind_method(D_METHOD("get_script_class_name"), &NativeScript::get_script_class_name);
 	ClassDB::bind_method(D_METHOD("set_script_class_icon_path", "icon_path"), &NativeScript::set_script_class_icon_path);
 	ClassDB::bind_method(D_METHOD("get_script_class_icon_path"), &NativeScript::get_script_class_icon_path);
 

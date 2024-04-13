@@ -1340,7 +1340,7 @@ void VisualScript::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_get_data"), &VisualScript::_get_data);
 
 	ClassDB::bind_method(D_METHOD("set_script_class_name", "script_class_name"), &VisualScript::set_script_class_name);
-	ClassDB::bind_method(D_METHOD("get_script_class_name"), &VisualScript::get_script_class_name);
+//	ClassDB::bind_method(D_METHOD("get_script_class_name"), &VisualScript::get_script_class_name);
 	ClassDB::bind_method(D_METHOD("set_script_class_icon_path", "script_class_icon_path"), &VisualScript::set_script_class_icon_path);
 	ClassDB::bind_method(D_METHOD("get_script_class_icon_path"), &VisualScript::get_script_class_icon_path);
 
