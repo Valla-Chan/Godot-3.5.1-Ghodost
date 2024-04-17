@@ -64,9 +64,11 @@ void SpinBox::_text_changed(const String &p_string) {
 
 	Variant value = expr->execute(Array(), nullptr, false);
 	if (value.get_type() != Variant::NIL) {
+		int cursor_pos = get_line_edit()->get_cursor_position();
 		set_value_no_emit(value);
 		emit_signal("value_typed", value);
-		//get_line_edit()->set_cursor_position(get_line_edit()->get_text().length());
+		//get_line_edit()->set_cursor_position(get_line_edit()->get_text().split(" ")[0].length());
+		get_line_edit()->set_cursor_position(cursor_pos+1);
 	}
 }
 

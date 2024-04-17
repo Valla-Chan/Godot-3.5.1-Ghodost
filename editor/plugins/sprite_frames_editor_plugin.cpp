@@ -127,8 +127,12 @@ void SpriteFramesEditor::_sheet_preview_draw() {
 	_draw_shadowed_line(split_sheet_preview, draw_offset + Vector2(0, draw_size.y), Vector2(draw_size.x, 0), Vector2(0, 1), line_color, shadow_color);
 
 	if (frames_selected.size() == 0) {
-		split_sheet_dialog->get_ok()->set_disabled(true);
-		split_sheet_dialog->get_ok()->set_text(TTR("No Frames Selected"));
+		// VALLA EDITS: if no frame is selected, import all of them.
+		// 
+		//split_sheet_dialog->get_ok()->set_disabled(true);
+		//split_sheet_dialog->get_ok()->set_text(TTR("No Frames Selected"));
+		split_sheet_dialog->get_ok()->set_disabled(false);
+		split_sheet_dialog->get_ok()->set_text(vformat(TTR("Add All Frame(s)")));//_get_frame_count().x * _get_frame_count().y
 		return;
 	}
 
@@ -257,6 +261,10 @@ void SpriteFramesEditor::_sheet_add_frames() {
 	undo_redo->create_action(TTR("Add Frame"));
 
 	int fc = frames->get_frame_count(edited_anim);
+
+	if (frames_selected.size() == 0) {
+		_sheet_select_clear_all_frames();
+	}
 
 	for (Set<int>::Element *E = frames_selected.front(); E; E = E->next()) {
 		int idx = E->get();
