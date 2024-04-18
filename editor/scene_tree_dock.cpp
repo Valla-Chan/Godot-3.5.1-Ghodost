@@ -3043,21 +3043,22 @@ void SceneTreeDock::_filter_changed(const String &p_filter) {
 	scene_tree->set_filter(p_filter);
 }
 
-void SceneTreeDock::_filter_type_changed(const int &p_filtertype) {
-	scene_tree->set_filter_type(p_filtertype);
-}
-
 String SceneTreeDock::get_filter() {
 	return filter->get_text();
-}
-
-int SceneTreeDock::get_filter_type() {
-	return filter_type->get_selected();
 }
 
 void SceneTreeDock::set_filter(const String &p_filter) {
 	filter->set_text(p_filter);
 	scene_tree->set_filter(p_filter);
+}
+
+
+void SceneTreeDock::_filter_type_changed(const int &p_filtertype) {
+	scene_tree->set_filter_type(p_filtertype);
+}
+
+int SceneTreeDock::get_filter_type() {
+	return filter_type->get_selected();
 }
 
 void SceneTreeDock::set_filter_type(const int &p_filtertype) {
@@ -3477,7 +3478,7 @@ SceneTreeDock::SceneTreeDock(EditorNode *p_editor, Node *p_scene_root, EditorSel
 	filter_type->add_item(TTR("Name"));
 	filter_type->add_item(TTR("Class"));
 	filter_type->add_item(TTR("Both"));
-	filter_type->select(0);
+	filter_type->select(2);
 	filter_hbc->add_child(filter_type);
 	filter_type->connect("item_selected", this, "_filter_type_changed");
 

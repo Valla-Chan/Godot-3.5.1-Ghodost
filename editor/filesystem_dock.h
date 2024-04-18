@@ -126,6 +126,8 @@ private:
 	HBoxContainer *toolbar2_hbc;
 	LineEdit *tree_search_box;
 	MenuButton *tree_button_sort;
+	OptionButton *tree_search_types;
+	int tree_search_filter_type;
 
 	LineEdit *file_list_search_box;
 	MenuButton *file_list_button_sort;
@@ -253,6 +255,10 @@ private:
 
 	void _focus_current_search_box();
 	void _search_changed(const String &p_text, const Control *p_from);
+
+	void _filter_type_changed(const int &p_filtertype);
+	int get_filter_type();
+	void set_filter_type(const int &p_filtertype);
 
 	MenuButton *_create_file_menu_button();
 	void _file_sort_popup(int p_id);

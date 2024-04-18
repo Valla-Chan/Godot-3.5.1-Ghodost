@@ -84,9 +84,12 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 	} else {
 		subdirectory_item->set_collapsed(uncollapsed_paths.find(lpath) < 0);
 	}
-	if (searched_string.length() > 0 && dname.to_lower().find(searched_string) >= 0) {
-		parent_should_expand = true;
+	if (get_filter_type() != 0) {
+		if (searched_string.length() > 0 && dname.to_lower().find(searched_string) >= 0) {
+			parent_should_expand = true;
+		}
 	}
+	
 
 	// Create items for all subdirectories.
 	bool reversed = file_sort == FILE_SORT_NAME_REVERSE;
@@ -112,12 +115,35 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 
 			String file_name = p_dir->get_file(i);
 			if (searched_string.length() > 0) {
-				if (file_name.to_lower().find(searched_string) < 0) {
-					// The searched string is not in the file name, we skip it.
-					continue;
-				} else {
-					// We expand all parents.
-					parent_should_expand = true;
+				switch (get_filter_type()) {
+					case 0: { // Files only. Normal search mode.
+						if (file_name.to_lower().find(searched_string) < 0) {
+							// The searched string is not in the file name, so we skip it.
+							continue;
+						} else
+							parent_should_expand = true;
+					} break;
+					case 1: {  // Folders only. Show ALL valid folder contents.
+						if (lpath.to_lower().find(searched_string) < 0) {
+							// The searched string is not in the file path, so we skip it.
+							continue;
+						} else {
+							parent_should_expand = true;
+							//subdirectory_item->set_collapsed(true);
+						}
+					} break;
+					case 2: { // Files and Folders. Show ALL valid folder contents, and extra matching files.
+						if (file_name.to_lower().find(searched_string) >= 0) {
+							parent_should_expand = true;
+						} else if (lpath.to_lower().find(searched_string) < 0) {
+							// The searched string is not in the file name OR the path, so we skip it.
+							continue;
+						} else {
+							parent_should_expand = true;
+							//subdirectory_item->set_collapsed(true);
+						}
+					} break;
+					
 				}
 			}
 
@@ -133,6 +159,9 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 		// Sort the file list if needed.
 		_sort_file_info_list(file_list);
 
+		if (searched_string.length() > 0 && parent_should_expand) {
+			subdirectory_item->set_collapsed(false);
+		} 
 		// Build the tree.
 		for (List<FileInfo>::Element *E = file_list.front(); E; E = E->next()) {
 			FileInfo fi = E->get();
@@ -153,6 +182,26 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 			udata.push_back(tree_update_id);
 			udata.push_back(file_item);
 			EditorResourcePreview::get_singleton()->queue_resource_preview(file_metadata, this, "_tree_thumbnail_done", udata);
+
+			if (searched_string.length() > 0) {
+				switch (get_filter_type()) {
+					case 0: { // Files only. Normal search mode.
+						if (file_metadata.to_lower().find(searched_string) < 0)
+							subdirectory_item->set_collapsed(true);
+					} break;
+					case 1: { // Folders only. Subfolders are collapsed.
+						subdirectory_item->set_collapsed(false);
+						if ((file_metadata.to_lower().find(searched_string) >= 0) && subdirectory_item->get_text(0).to_lower().find(searched_string) < 0)
+							subdirectory_item->set_collapsed(true);
+					} break;
+					case 2: { // Files and Folders. Subfolders are collapsed.
+						subdirectory_item->set_collapsed(false);
+						if ((fi.name.to_lower().find(searched_string) < 0) && (file_metadata.to_lower().find(searched_string) >= 0) && subdirectory_item->get_text(0).to_lower().find(searched_string) < 0)
+							subdirectory_item->set_collapsed(true);
+					} break;
+				}
+			}
+
 		}
 	} else if (display_mode == DISPLAY_MODE_SPLIT) {
 		if (lpath.get_base_dir() == path.get_base_dir()) {
@@ -162,8 +211,8 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 	}
 
 	if (searched_string.length() > 0) {
-		if (parent_should_expand) {
-			subdirectory_item->set_collapsed(false);
+		if (parent_should_expand ) {//&& subdirectory_item->get_parent() == tree->get_root()) {
+			//subdirectory_item->set_collapsed(false);
 		} else if (dname != "res://") {
 			subdirectory_item->get_parent()->remove_child(subdirectory_item);
 			memdelete(subdirectory_item);
@@ -265,25 +314,26 @@ void FileSystemDock::_update_tree(const Vector<String> &p_uncollapsed_paths, boo
 			color = Color(1, 1, 1);
 		}
 
-		if (searched_string.length() == 0 || text.to_lower().find(searched_string) >= 0) {
-			TreeItem *ti = tree->create_item(favorites);
-			ti->set_text(0, text);
-			ti->set_icon(0, icon);
-			ti->set_icon_modulate(0, color);
-			ti->set_tooltip(0, fave);
-			ti->set_selectable(0, true);
-			ti->set_metadata(0, fave);
-			if (p_select_in_favorites && fave == path) {
-				ti->select(0);
-				ti->set_as_cursor(0);
+			if (searched_string.length() == 0 || text.to_lower().find(searched_string) >= 0) {
+				TreeItem *ti = tree->create_item(favorites);
+				ti->set_text(0, text);
+				ti->set_icon(0, icon);
+				ti->set_icon_modulate(0, color);
+				ti->set_tooltip(0, fave);
+				ti->set_selectable(0, true);
+				ti->set_metadata(0, fave);
+				if (p_select_in_favorites && fave == path) {
+					ti->select(0);
+					ti->set_as_cursor(0);
+				}
+				if (!fave.ends_with("/")) {
+					Array udata;
+					udata.push_back(tree_update_id);
+					udata.push_back(ti);
+					EditorResourcePreview::get_singleton()->queue_resource_preview(fave, this, "_tree_thumbnail_done", udata);
+				}
 			}
-			if (!fave.ends_with("/")) {
-				Array udata;
-				udata.push_back(tree_update_id);
-				udata.push_back(ti);
-				EditorResourcePreview::get_singleton()->queue_resource_preview(fave, this, "_tree_thumbnail_done", udata);
-			}
-		}
+
 	}
 
 	Vector<String> uncollapsed_paths = p_uncollapsed_paths;
@@ -1982,6 +2032,22 @@ void FileSystemDock::_focus_current_search_box() {
 	}
 }
 
+// Valla edits
+
+void FileSystemDock::_filter_type_changed(const int &p_filtertype) {
+	tree_search_filter_type = p_filtertype;
+	_search_changed(tree_search_box->get_text(), tree_search_box);
+}
+
+int FileSystemDock::get_filter_type() {
+	return tree_search_types->get_selected();
+}
+
+void FileSystemDock::set_filter_type(const int &p_filtertype) {
+	tree_search_types->select(p_filtertype);
+}
+//
+
 void FileSystemDock::_search_changed(const String &p_text, const Control *p_from) {
 	if (searched_string.length() == 0) {
 		// Register the uncollapsed paths before they change.
@@ -2782,6 +2848,7 @@ void FileSystemDock::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_duplicate_operation_confirm"), &FileSystemDock::_duplicate_operation_confirm);
 
 	ClassDB::bind_method(D_METHOD("_search_changed"), &FileSystemDock::_search_changed);
+	ClassDB::bind_method(D_METHOD("_filter_type_changed"), &FileSystemDock::_filter_type_changed);
 
 	ClassDB::bind_method(D_METHOD("get_drag_data_fw", "point", "from"), &FileSystemDock::get_drag_data_fw);
 	ClassDB::bind_method(D_METHOD("can_drop_data_fw", "point", "data", "from"), &FileSystemDock::can_drop_data_fw);
@@ -2867,9 +2934,19 @@ FileSystemDock::FileSystemDock(EditorNode *p_editor) {
 
 	tree_search_box = memnew(LineEdit);
 	tree_search_box->set_h_size_flags(SIZE_EXPAND_FILL);
+	// Valla Notes: this IS the one in the FileSystem tab.
 	tree_search_box->set_placeholder(TTR("Search files"));
 	tree_search_box->connect("text_changed", this, "_search_changed", varray(tree_search_box));
 	toolbar2_hbc->add_child(tree_search_box);
+
+	tree_search_types = memnew(OptionButton);
+	tree_search_types->add_item(TTR("File"));
+	tree_search_types->add_item(TTR("Folder"));
+	tree_search_types->add_item(TTR("Both"));
+	tree_search_types->select(0);
+	toolbar2_hbc->add_child(tree_search_types);
+	tree_search_types->connect("item_selected", this, "_filter_type_changed");
+
 
 	tree_button_sort = _create_file_menu_button();
 	toolbar2_hbc->add_child(tree_button_sort);
@@ -2911,6 +2988,7 @@ FileSystemDock::FileSystemDock(EditorNode *p_editor) {
 
 	file_list_search_box = memnew(LineEdit);
 	file_list_search_box->set_h_size_flags(SIZE_EXPAND_FILL);
+	// Valla Notes: this is not the one in the "FileSystem" tab.
 	file_list_search_box->set_placeholder(TTR("Search files"));
 	file_list_search_box->connect("text_changed", this, "_search_changed", varray(file_list_search_box));
 	path_hb->add_child(file_list_search_box);
