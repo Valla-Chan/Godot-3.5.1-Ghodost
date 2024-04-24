@@ -68,7 +68,7 @@ void SpinBox::_text_changed(const String &p_string) {
 		set_value_no_emit(value);
 		emit_signal("value_typed", value);
 		//get_line_edit()->set_cursor_position(get_line_edit()->get_text().split(" ")[0].length());
-		get_line_edit()->set_cursor_position(cursor_pos+1);
+		get_line_edit()->set_cursor_position(cursor_pos);
 	}
 }
 

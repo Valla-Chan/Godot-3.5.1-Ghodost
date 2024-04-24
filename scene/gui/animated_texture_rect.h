@@ -39,7 +39,7 @@ class AnimatedTextureRect : public Control {
 
 public:
 	enum StretchMode {
-		STRETCH_SCALE_ON_EXPAND, //default, for backwards compatibility
+		STRETCH_SCALE_ON_EXPAND, //default, for reversed compatibility
 		STRETCH_SCALE,
 		STRETCH_TILE,
 		STRETCH_KEEP,
@@ -56,7 +56,7 @@ private:
 	// From AnimatedSprite
 	Ref<SpriteFrames> frames;
 	bool playing;
-	bool backwards;
+	bool reversed;
 	StringName animation;
 	bool animation_locked;
 	int frame;
@@ -102,11 +102,14 @@ public:
 	void set_sprite_frames(const Ref<SpriteFrames> &p_frames);
 	Ref<SpriteFrames> get_sprite_frames() const;
 
-	void play(const StringName &p_animation = StringName(), const bool p_backwards = false);
+	void play(const StringName &p_animation = StringName(), const bool p_reversed = false);
 	void stop();
 
 	void set_playing(bool p_playing);
 	bool is_playing() const;
+
+	void set_reversed(const bool p_reversed);
+	bool is_reversed();
 
 	void set_animation(const StringName &p_animation);
 	void set_animation_continue(const StringName &p_animation);

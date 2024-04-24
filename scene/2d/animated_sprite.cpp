@@ -423,9 +423,9 @@ void AnimatedSprite::_notification(int p_what) {
 					timeout = _get_frame_duration();
 
 					int fc = frames->get_frame_count(animation);
-					if ((!backwards && frame >= fc - 1) || (backwards && frame <= 0)) {
+					if ((!reversed && frame >= fc - 1) || (reversed && frame <= 0)) {
 						if (frames->get_animation_loop(animation)) {
-							if (backwards) {
+							if (reversed) {
 								frame = fc - 1;
 							} else {
 								frame = 0;
@@ -433,7 +433,7 @@ void AnimatedSprite::_notification(int p_what) {
 
 							emit_signal(SceneStringNames::get_singleton()->animation_finished);
 						} else {
-							if (backwards) {
+							if (reversed) {
 								frame = 0;
 							} else {
 								frame = fc - 1;
@@ -445,7 +445,7 @@ void AnimatedSprite::_notification(int p_what) {
 							}
 						}
 					} else {
-						if (backwards) {
+						if (reversed) {
 							frame--;
 						} else {
 							frame++;
@@ -675,12 +675,20 @@ bool AnimatedSprite::is_playing() const {
 	return playing;
 }
 
-void AnimatedSprite::play(const StringName &p_animation, const bool p_backwards) {
-	backwards = p_backwards;
+void AnimatedSprite::set_reversed(const bool p_reversed) {
+	reversed = p_reversed;
+}
+
+bool AnimatedSprite::is_reversed() {
+	return reversed;
+}
+
+void AnimatedSprite::play(const StringName &p_animation, const bool p_reversed) {
+	reversed = p_reversed;
 
 	if (p_animation) {
 		set_animation(p_animation);
-		if (frames.is_valid() && backwards && get_frame() == 0) {
+		if (frames.is_valid() && reversed && get_frame() == 0) {
 			set_frame(frames->get_frame_count(p_animation) - 1);
 		}
 	}
@@ -798,7 +806,10 @@ void AnimatedSprite::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_playing", "playing"), &AnimatedSprite::set_playing);
 	ClassDB::bind_method(D_METHOD("is_playing"), &AnimatedSprite::is_playing);
 
-	ClassDB::bind_method(D_METHOD("play", "anim", "backwards"), &AnimatedSprite::play, DEFVAL(StringName()), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("set_reversed", "reversed"), &AnimatedSprite::set_reversed);
+	ClassDB::bind_method(D_METHOD("is_reversed"), &AnimatedSprite::is_reversed);
+
+	ClassDB::bind_method(D_METHOD("play", "anim", "reversed"), &AnimatedSprite::play, DEFVAL(StringName()), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("stop"), &AnimatedSprite::stop);
 
 	ClassDB::bind_method(D_METHOD("set_force_pixel_snapping", "snap"), &AnimatedSprite::set_force_pixel_snapping);
@@ -840,6 +851,7 @@ void AnimatedSprite::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "animation_locked"), "set_animation_locked", "is_animation_locked");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "frame"), "set_frame", "get_frame");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "speed_scale"), "set_speed_scale", "get_speed_scale");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "reversed"), "set_reversed", "is_reversed");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "centered"), "set_centered", "is_centered");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "basealigned"), "set_basealigned", "is_basealigned");
@@ -862,7 +874,7 @@ AnimatedSprite::AnimatedSprite() {
 	frame = 0;
 	speed_scale = 1.0f;
 	playing = false;
-	backwards = false;
+	reversed = false;
 	animation = "default";
 	animation_locked = false;
 	timeout = 0;

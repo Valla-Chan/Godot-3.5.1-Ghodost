@@ -148,7 +148,7 @@ class AnimatedSprite : public Node2D {
 
 	Ref<SpriteFrames> frames;
 	bool playing;
-	bool backwards;
+	bool reversed;
 	StringName animation;
 	bool animation_locked;
 	int frame;
@@ -193,9 +193,11 @@ public:
 	void set_sprite_frames(const Ref<SpriteFrames> &p_frames);
 	Ref<SpriteFrames> get_sprite_frames() const;
 
-	void play(const StringName &p_animation = StringName(), const bool p_backwards = false);
+	void play(const StringName &p_animation = StringName(), const bool p_reversed = false);
 	void stop();
 
+	void set_reversed(const bool p_reversed);
+	bool is_reversed();
 	void set_playing(bool p_playing);
 	bool is_playing() const;
 
