@@ -826,9 +826,8 @@ void SpriteFramesEditor::_animation_select() {
 Ref<Texture> SpriteFramesEditor::_get_locked_icon(bool p_locked) {
 	if (p_locked) {
 		return get_icon("Lock", "EditorIcons");
-	} else {
-		get_icon("Unlock", "EditorIcons");
 	}
+	get_icon("Unlock", "EditorIcons");
 }
 
 // NOTE: this might have something to do with opening it?
