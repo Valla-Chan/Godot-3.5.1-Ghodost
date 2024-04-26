@@ -59,7 +59,7 @@ public:
 	virtual bool _edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const;
 #endif
 
-	bool is_pixel_opaque(const Point2 &p_point) const;
+	virtual bool is_pixel_opaque(const Point2 &p_point) const;
 
 	void set_force_pixel_snapping(bool p_snapping);
 	bool get_force_pixel_snapping() const;

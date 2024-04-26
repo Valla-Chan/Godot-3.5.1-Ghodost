@@ -55,11 +55,17 @@ bool AnimatedSprite::_edit_use_rect() const {
 	}
 	return t.is_valid();
 }
+
+bool AnimatedSprite::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
+	return Node2D::_edit_is_selected_on_click(p_point, p_tolerance);
+}
+
 #endif
 
 Rect2 AnimatedSprite::get_anchorable_rect() const {
 	return _get_rect();
 }
+
 
 Rect2 AnimatedSprite::_get_rect() const {
 	if (!frames.is_valid() || !frames->has_animation(animation) || frame < 0 || frame >= frames->get_frame_count(animation)) {
