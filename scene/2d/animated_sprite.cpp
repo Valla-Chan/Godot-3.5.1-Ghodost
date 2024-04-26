@@ -539,6 +539,18 @@ void AnimatedSprite::set_sprite_frames(const Ref<SpriteFrames> &p_frames) {
 	update_configuration_warning();
 }
 
+Ref<Texture> AnimatedSprite::get_sprite_texture() const {
+	Ref<Texture> t;
+	if (!frames.is_valid()) {
+		return t;
+	} else {
+		if (animation) {
+			t = frames->get_frame(animation, frame);
+		}
+		return t;
+	}
+}
+
 Ref<SpriteFrames> AnimatedSprite::get_sprite_frames() const {
 	return frames;
 }

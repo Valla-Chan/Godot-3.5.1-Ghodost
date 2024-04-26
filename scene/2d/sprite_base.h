@@ -28,27 +28,29 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef SPRITE_H
-#define SPRITE_H
+#ifndef SPRITE_BASE_H
+#define SPRITE_BASE_H
 
-#include "sprite_base.h"
+#include "scene/2d/node_2d.h"
+#include "scene/resources/texture.h"
 
-class Sprite : public SpriteBase {
-	GDCLASS(Sprite, SpriteBase);
+class SpriteBase : public Node2D {
+	GDCLASS(SpriteBase, Node2D);
 
-	Ref<Texture> texture;
-	Ref<Texture> normal_map;
+	//Ref<Texture> texture;
+	//Ref<Texture> normal_map;
 
-	bool region;
-	Rect2 region_rect;
-	bool region_filter_clip;
+	bool force_pixel_snapping;
+	bool centered;
+	bool basealigned;
+	Point2 offset;
 
-	int vframes;
-	int hframes;
+	bool hflip;
+	bool vflip;
+
+	int frame;
 
 	void _get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_clip) const;
-
-	void _texture_changed();
 
 protected:
 	void _notification(int p_what);
@@ -58,35 +60,49 @@ protected:
 	virtual void _validate_property(PropertyInfo &property) const;
 
 public:
+#ifdef TOOLS_ENABLED
+	virtual Dictionary _edit_get_state() const;
+	virtual void _edit_set_state(const Dictionary &p_state);
 
-	void set_texture(const Ref<Texture> &p_texture);
-	Ref<Texture> get_texture() const;
+	virtual void _edit_set_pivot(const Point2 &p_pivot);
+	virtual Point2 _edit_get_pivot() const;
+	virtual bool _edit_use_pivot() const;
+	virtual bool _edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const;
 
-	void set_normal_map(const Ref<Texture> &p_texture);
-	Ref<Texture> get_normal_map() const;
+	virtual Rect2 _edit_get_rect() const;
+	virtual bool _edit_use_rect() const;
+#endif
 
-	void set_region(bool p_region);
-	bool is_region() const;
+	bool is_pixel_opaque(const Point2 &p_point) const;
 
-	void set_region_filter_clip(bool p_enable);
-	bool is_region_filter_clip_enabled() const;
+	virtual Ref<Texture> get_sprite_texture() const;
 
-	void set_region_rect(const Rect2 &p_region_rect);
-	Rect2 get_region_rect() const;
+	void set_force_pixel_snapping(bool p_snapping);
+	bool get_force_pixel_snapping() const;
+
+	void set_centered(bool p_center);
+	bool is_centered() const;
+
+	void set_basealigned(bool p_basealign);
+	bool is_basealigned() const;
+
+	void set_offset(const Point2 &p_offset);
+	Point2 get_offset() const;
+
+	void set_flip_h(bool p_flip);
+	bool is_flipped_h() const;
+
+	void set_flip_v(bool p_flip);
+	bool is_flipped_v() const;
 
 	void set_frame(int p_frame);
+	int get_frame() const;
 
-	void set_frame_coords(const Vector2 &p_coord);
-	Vector2 get_frame_coords() const;
+	Rect2 get_rect() const;
+	virtual Rect2 get_anchorable_rect() const;
 
-	void set_vframes(int p_amount);
-	int get_vframes() const;
-
-	void set_hframes(int p_amount);
-	int get_hframes() const;
-
-	Sprite();
-	~Sprite();
+	SpriteBase();
+	~SpriteBase();
 };
 
-#endif // SPRITE_H
+#endif // SPRITE_BASE_H
