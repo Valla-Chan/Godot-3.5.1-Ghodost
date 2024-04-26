@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="SpriteBase" inherits="Node2D" version="3.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
+	<brief_description>
+		The basis for all 2D Sprite nodes.
+	</brief_description>
+	<description>
+		The basis for nodes that display 2D textures.
+	</description>
+	<methods>
+	</methods>
+	<members>
+		<member name="basealigned" type="bool" setter="set_basealigned" getter="is_basealigned" default="false">
+			If [code]true[/code], texture is aligned to the bottom of the image.
+		</member>
+		<member name="centered" type="bool" setter="set_centered" getter="is_centered" default="true">
+			If [code]true[/code], texture is centered.
+		</member>
+		<member name="flip_h" type="bool" setter="set_flip_h" getter="is_flipped_h" default="false">
+			If [code]true[/code], texture is flipped horizontally.
+		</member>
+		<member name="flip_v" type="bool" setter="set_flip_v" getter="is_flipped_v" default="false">
+			If [code]true[/code], texture is flipped vertically.
+		</member>
+		<member name="offset" type="Vector2" setter="set_offset" getter="get_offset" default="Vector2( 0, 0 )">
+			The texture's drawing offset.
+		</member>
+	</members>
+	<signals>
+	</signals>
+	<constants>
+	</constants>
+</class>

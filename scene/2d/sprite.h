@@ -43,6 +43,8 @@ class Sprite : public SpriteBase {
 	Rect2 region_rect;
 	bool region_filter_clip;
 
+	int frame;
+
 	int vframes;
 	int hframes;
 
@@ -58,6 +60,12 @@ protected:
 	virtual void _validate_property(PropertyInfo &property) const;
 
 public:
+#ifdef TOOLS_ENABLED
+	virtual Rect2 _edit_get_rect() const;
+	virtual bool _edit_use_rect() const;
+#endif
+
+	bool is_pixel_opaque(const Point2 &p_point) const;
 
 	void set_texture(const Ref<Texture> &p_texture);
 	Ref<Texture> get_texture() const;
@@ -75,6 +83,7 @@ public:
 	Rect2 get_region_rect() const;
 
 	void set_frame(int p_frame);
+	int get_frame() const;
 
 	void set_frame_coords(const Vector2 &p_coord);
 	Vector2 get_frame_coords() const;
@@ -84,6 +93,9 @@ public:
 
 	void set_hframes(int p_amount);
 	int get_hframes() const;
+
+	Rect2 get_rect() const;
+	virtual Rect2 get_anchorable_rect() const;
 
 	Sprite();
 	~Sprite();

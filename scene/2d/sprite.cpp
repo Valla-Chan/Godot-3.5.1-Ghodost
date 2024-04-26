@@ -34,6 +34,21 @@
 #include "scene/main/viewport.h"
 #include "scene/scene_string_names.h"
 
+#ifdef TOOLS_ENABLED
+
+Rect2 Sprite::_edit_get_rect() const {
+	return get_rect();
+}
+
+bool Sprite::_edit_use_rect() const {
+	return texture.is_valid();
+}
+#endif
+
+Rect2 Sprite::get_anchorable_rect() const {
+	return get_rect();
+}
+
 void Sprite::_get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_clip) const {
 	Rect2 base_rect;
 
@@ -46,7 +61,7 @@ void Sprite::_get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_cli
 	}
 
 	Size2 frame_size = base_rect.size / Size2(hframes, vframes);
-	Point2 frame_offset = Point2(get_frame() % hframes, get_frame() / hframes);
+	Point2 frame_offset = Point2(frame % hframes, frame / hframes);
 	frame_offset *= frame_size;
 
 	r_src_rect.size = frame_size;
@@ -180,14 +195,19 @@ bool Sprite::is_region_filter_clip_enabled() const {
 void Sprite::set_frame(int p_frame) {
 	ERR_FAIL_INDEX(p_frame, vframes * hframes);
 
-	if (get_frame() != p_frame) {
+	if (frame != p_frame) {
 		item_rect_changed();
 	}
 
-	SpriteBase::set_frame(p_frame);
+	frame = p_frame;
 
+	_change_notify("frame");
 	_change_notify("frame_coords");
 	emit_signal(SceneStringNames::get_singleton()->frame_changed);
+}
+
+int Sprite::get_frame() const {
+	return frame;
 }
 
 void Sprite::set_frame_coords(const Vector2 &p_coord) {
@@ -198,7 +218,7 @@ void Sprite::set_frame_coords(const Vector2 &p_coord) {
 }
 
 Vector2 Sprite::get_frame_coords() const {
-	return Vector2(get_frame() % hframes, get_frame() / hframes);
+	return Vector2(frame % hframes, frame / hframes);
 }
 
 void Sprite::set_vframes(int p_amount) {
@@ -221,6 +241,98 @@ void Sprite::set_hframes(int p_amount) {
 }
 int Sprite::get_hframes() const {
 	return hframes;
+}
+
+bool Sprite::is_pixel_opaque(const Point2 &p_point) const {
+	if (texture.is_null()) {
+		return false;
+	}
+
+	if (texture->get_size().width == 0 || texture->get_size().height == 0) {
+		return false;
+	}
+
+	Rect2 src_rect, dst_rect;
+	bool filter_clip;
+	_get_rects(src_rect, dst_rect, filter_clip);
+	dst_rect.size = dst_rect.size.abs();
+
+	if (!dst_rect.has_point(p_point)) {
+		return false;
+	}
+
+	Vector2 q = (p_point - dst_rect.position) / dst_rect.size;
+	if (is_flipped_h()) {
+		q.x = 1.0f - q.x;
+	}
+	if (is_flipped_v()) {
+		q.y = 1.0f - q.y;
+	}
+	q = q * src_rect.size + src_rect.position;
+
+	bool is_repeat = texture->get_flags() & Texture::FLAG_REPEAT;
+	bool is_mirrored_repeat = texture->get_flags() & Texture::FLAG_MIRRORED_REPEAT;
+	if (is_repeat) {
+		int mirror_x = 0;
+		int mirror_y = 0;
+		if (is_mirrored_repeat) {
+			mirror_x = (int)(q.x / texture->get_size().width);
+			mirror_y = (int)(q.y / texture->get_size().height);
+		}
+		q.x = Math::fmod(q.x, texture->get_size().width);
+		q.y = Math::fmod(q.y, texture->get_size().height);
+		if (mirror_x % 2 == 1) {
+			q.x = texture->get_size().width - q.x - 1;
+		}
+		if (mirror_y % 2 == 1) {
+			q.y = texture->get_size().height - q.y - 1;
+		}
+	} else {
+		q.x = MIN(q.x, texture->get_size().width - 1);
+		q.y = MIN(q.y, texture->get_size().height - 1);
+	}
+
+	return texture->is_pixel_opaque((int)q.x, (int)q.y);
+}
+
+Rect2 Sprite::get_rect() const {
+	if (texture.is_null()) {
+		return Rect2(0, 0, 1, 1);
+	}
+
+	Size2i s;
+
+	if (region) {
+		s = region_rect.size;
+	} else {
+		s = texture->get_size();
+	}
+
+	s = s / Point2(hframes, vframes);
+
+	Point2 ofs = get_offset();
+	if (is_centered()) {
+		ofs -= Size2(s) / 2;
+	}
+	//VALLA EDITS
+	if (is_basealigned()) {
+		if (is_centered()) {
+			ofs.y -= Size2(s).y / 2;
+		} else {
+			ofs.y -= Size2(s).y;
+			//ofs.x -= Size2(s).x / 2;
+		}
+		
+	}
+	if (Engine::get_singleton()->get_use_gpu_pixel_snap() || get_force_pixel_snapping()) {
+		ofs = ofs.floor();
+	}
+
+	if (s == Size2(0, 0)) {
+		s = Size2(1, 1);
+	}
+
+	return Rect2(ofs, s);
 }
 
 void Sprite::_validate_property(PropertyInfo &property) const {
@@ -259,6 +371,9 @@ void Sprite::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_region_filter_clip", "enabled"), &Sprite::set_region_filter_clip);
 	ClassDB::bind_method(D_METHOD("is_region_filter_clip_enabled"), &Sprite::is_region_filter_clip_enabled);
 
+	ClassDB::bind_method(D_METHOD("set_frame", "frame"), &Sprite::set_frame);
+	ClassDB::bind_method(D_METHOD("get_frame"), &Sprite::get_frame);
+
 	ClassDB::bind_method(D_METHOD("set_frame_coords", "coords"), &Sprite::set_frame_coords);
 	ClassDB::bind_method(D_METHOD("get_frame_coords"), &Sprite::get_frame_coords);
 
@@ -268,13 +383,19 @@ void Sprite::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_hframes", "hframes"), &Sprite::set_hframes);
 	ClassDB::bind_method(D_METHOD("get_hframes"), &Sprite::get_hframes);
 
+	ClassDB::bind_method(D_METHOD("get_rect"), &Sprite::get_rect);
+
 	ClassDB::bind_method(D_METHOD("_texture_changed"), &Sprite::_texture_changed);
+
+	ADD_SIGNAL(MethodInfo("frame_changed"));
+	ADD_SIGNAL(MethodInfo("texture_changed"));
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_texture", "get_texture");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "normal_map", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_normal_map", "get_normal_map");
 	ADD_GROUP("Animation", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "hframes", PROPERTY_HINT_RANGE, "1,16384,1"), "set_hframes", "get_hframes");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "vframes", PROPERTY_HINT_RANGE, "1,16384,1"), "set_vframes", "get_vframes");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "frame"), "set_frame", "get_frame");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "frame_coords", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR), "set_frame_coords", "get_frame_coords");
 
 	ADD_GROUP("Region", "region_");
@@ -286,6 +407,8 @@ void Sprite::_bind_methods() {
 Sprite::Sprite() {
 	region = false;
 	region_filter_clip = false;
+
+	frame = 0;
 
 	vframes = 1;
 	hframes = 1;

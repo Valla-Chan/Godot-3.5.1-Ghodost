@@ -31,8 +31,7 @@
 #ifndef ANIMATED_SPRITE_H
 #define ANIMATED_SPRITE_H
 
-#include "scene/2d/node_2d.h"
-#include "scene/resources/texture.h"
+#include "sprite_base.h"
 
 class SpriteFrames : public Resource {
 	GDCLASS(SpriteFrames, Resource);
@@ -66,7 +65,7 @@ protected:
 public:
 	// return the entire array of textures
 	Vector<Ref<Texture>> get_animation_frames(const StringName &p_anim);
-	void set_animation_frames(const StringName &p_anim, Vector<Ref<Texture>>);
+	//void set_animation_frames(const StringName &p_anim, Vector<Ref<Texture>>);
 
 	void add_animation(const StringName &p_anim);
 	bool has_animation(const StringName &p_anim) const;
@@ -96,22 +95,6 @@ public:
 
 		return E->get().frames[p_idx];
 	}
-	// return multiple textures from a list of frame indices
-	/*
-	_FORCE_INLINE_ Vector<Ref<Texture>> get_frames(const StringName &p_anim, Vector<int> p_idxs) const {
-		const Map<StringName, Anim>::Element *E = animations.find(p_anim);
-		ERR_FAIL_COND_V_MSG(!E, Vector<Ref<Texture>>(), "Animation '" + String(p_anim) + "' doesn't exist.");
-		ERR_FAIL_COND_V(p_idxs.size() <= 0, Vector<Ref<Texture>>());
-		if (p_idxs.size() > E->get().frames.size()) {
-			return Vector<Ref<Texture>>();
-		}
-		Vector<Ref<Texture>> texlist;
-		for (int i = 0; i < p_idxs.size(); i++) {
-			texlist.push_back(E->get().frames[p_idxs[i]]);
-		}
-		return texlist;
-	}
-	*/
 
 	_FORCE_INLINE_ Ref<Texture> get_normal_frame(const StringName &p_anim, int p_idx) const {
 		const Map<StringName, Anim>::Element *E = animations.find(p_anim);
@@ -143,8 +126,8 @@ public:
 	SpriteFrames();
 };
 
-class AnimatedSprite : public Node2D {
-	GDCLASS(AnimatedSprite, Node2D);
+class AnimatedSprite : public SpriteBase {
+	GDCLASS(AnimatedSprite, SpriteBase);
 
 	Ref<SpriteFrames> frames;
 	bool playing;
@@ -154,16 +137,8 @@ class AnimatedSprite : public Node2D {
 	int frame;
 	float speed_scale;
 
-	bool force_pixel_snapping;
-	bool centered;
-	bool basealigned;
-	Point2 offset;
-
 	bool is_over;
 	float timeout;
-
-	bool hflip;
-	bool vflip;
 
 	void _res_changed();
 
@@ -175,16 +150,9 @@ protected:
 	static void _bind_methods();
 	void _notification(int p_what);
 	virtual void _validate_property(PropertyInfo &property) const;
-	Ref<Texture> get_sprite_texture() const;
 
 public:
 #ifdef TOOLS_ENABLED
-	virtual Dictionary _edit_get_state() const;
-	virtual void _edit_set_state(const Dictionary &p_state);
-
-	virtual void _edit_set_pivot(const Point2 &p_pivot);
-	virtual Point2 _edit_get_pivot() const;
-	virtual bool _edit_use_pivot() const;
 	virtual Rect2 _edit_get_rect() const;
 	virtual bool _edit_use_rect() const;
 #endif
@@ -204,7 +172,6 @@ public:
 
 	void set_animation(const StringName &p_animation);
 	void set_animation_continue(const StringName &p_animation);
-	//void set_animation(const StringName &p_animation = StringName(), const bool p_resetframe = true);
 	StringName get_animation() const;
 
 	void set_frame(int p_frame);
@@ -212,24 +179,6 @@ public:
 
 	void set_speed_scale(float p_speed_scale);
 	float get_speed_scale() const;
-
-	void set_force_pixel_snapping(bool p_snapping);
-	bool get_force_pixel_snapping() const;
-
-	void set_centered(bool p_center);
-	bool is_centered() const;
-
-	void set_basealigned(bool p_basealign);
-	bool is_basealigned() const;
-
-	void set_offset(const Point2 &p_offset);
-	Point2 get_offset() const;
-
-	void set_flip_h(bool p_flip);
-	bool is_flipped_h() const;
-
-	void set_flip_v(bool p_flip);
-	bool is_flipped_v() const;
 
 	void set_animation_locked(bool p_lock);
 	bool is_animation_locked() const;

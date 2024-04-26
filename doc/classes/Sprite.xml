@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="Sprite" inherits="Node2D" version="3.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
+<class name="Sprite" inherits="SpriteBase" version="3.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
 	<brief_description>
 		General-purpose sprite node.
 	</brief_description>
@@ -32,6 +32,9 @@
 		</method>
 	</methods>
 	<members>
+		<member name="basealigned" type="bool" setter="set_basealigned" getter="is_basealigned" default="false">
+			If [code]true[/code], texture is aligned to the bottom of the image.
+		</member>
 		<member name="centered" type="bool" setter="set_centered" getter="is_centered" default="true">
 			If [code]true[/code], texture is centered.
 		</member>

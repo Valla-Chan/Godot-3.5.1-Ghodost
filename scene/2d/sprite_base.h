@@ -37,9 +37,6 @@
 class SpriteBase : public Node2D {
 	GDCLASS(SpriteBase, Node2D);
 
-	//Ref<Texture> texture;
-	//Ref<Texture> normal_map;
-
 	bool force_pixel_snapping;
 	bool centered;
 	bool basealigned;
@@ -48,16 +45,8 @@ class SpriteBase : public Node2D {
 	bool hflip;
 	bool vflip;
 
-	int frame;
-
-	void _get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_clip) const;
-
 protected:
-	void _notification(int p_what);
-
 	static void _bind_methods();
-
-	virtual void _validate_property(PropertyInfo &property) const;
 
 public:
 #ifdef TOOLS_ENABLED
@@ -68,14 +57,9 @@ public:
 	virtual Point2 _edit_get_pivot() const;
 	virtual bool _edit_use_pivot() const;
 	virtual bool _edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const;
-
-	virtual Rect2 _edit_get_rect() const;
-	virtual bool _edit_use_rect() const;
 #endif
 
 	bool is_pixel_opaque(const Point2 &p_point) const;
-
-	virtual Ref<Texture> get_sprite_texture() const;
 
 	void set_force_pixel_snapping(bool p_snapping);
 	bool get_force_pixel_snapping() const;
@@ -94,12 +78,6 @@ public:
 
 	void set_flip_v(bool p_flip);
 	bool is_flipped_v() const;
-
-	void set_frame(int p_frame);
-	int get_frame() const;
-
-	Rect2 get_rect() const;
-	virtual Rect2 get_anchorable_rect() const;
 
 	SpriteBase();
 	~SpriteBase();

@@ -40,29 +40,6 @@
 #define NORMAL_SUFFIX "_normal"
 
 #ifdef TOOLS_ENABLED
-Dictionary AnimatedSprite::_edit_get_state() const {
-	Dictionary state = Node2D::_edit_get_state();
-	state["offset"] = offset;
-	return state;
-}
-
-void AnimatedSprite::_edit_set_state(const Dictionary &p_state) {
-	Node2D::_edit_set_state(p_state);
-	set_offset(p_state["offset"]);
-}
-
-void AnimatedSprite::_edit_set_pivot(const Point2 &p_pivot) {
-	set_offset(get_offset() - p_pivot);
-	set_position(get_transform().xform(p_pivot));
-}
-
-Point2 AnimatedSprite::_edit_get_pivot() const {
-	return Vector2();
-}
-
-bool AnimatedSprite::_edit_use_pivot() const {
-	return true;
-}
 
 Rect2 AnimatedSprite::_edit_get_rect() const {
 	return _get_rect();
@@ -98,12 +75,12 @@ Rect2 AnimatedSprite::_get_rect() const {
 	}
 	Size2 s = t->get_size();
 
-	Point2 ofs = offset;
-	if (centered) {
+	Point2 ofs = get_offset();
+	if (is_centered()) {
 		ofs -= s / 2;
 	}
-	if (basealigned) {
-		if (centered) {
+	if (is_basealigned()) {
+		if (is_centered()) {
 			ofs.y -= s.y / 2;
 		} else {
 			ofs.y -= s.y;
@@ -129,35 +106,12 @@ void SpriteFrames::add_frame(const StringName &p_anim, const Ref<Texture> &p_fra
 
 	emit_changed();
 }
-/*
-void SpriteFrames::add_frames(const StringName &p_anim, const Vector<Ref<Texture>> &p_frames, int p_at_pos) {
-
-	Map<StringName, Anim>::Element *E = animations.find(p_anim);
-	ERR_FAIL_COND_MSG(!E, "Animation '" + String(p_anim) + "' doesn't exist.");
-
-	for (int i = 0; i < p_frames.size(); i++) {
-		if (p_at_pos >= 0 && p_at_pos < E->get().frames.size()) {
-			E->get().frames.insert(p_at_pos, p_frames[i]);
-		} else {
-			E->get().frames.push_back(p_frames[i]);
-		}
-	}
-	emit_changed();
-}
-*/
 
 Vector<Ref<Texture>> SpriteFrames::get_animation_frames(const StringName &p_anim) {
 	const Map<StringName, Anim>::Element *E = animations.find(p_anim);
 	ERR_FAIL_COND_V_MSG(!E, Vector<Ref<Texture>>(), "Animation '" + String(p_anim) + "' doesn't exist.");
 	return E->get().frames;
 }
-
-/*
-void SpriteFrames::set_animation_frames(const StringName& p_anim, Vector<Ref<Texture>>) {
-	const Map<StringName, Anim>::Element *E = animations.find(p_anim);
-	ERR_FAIL_COND_MSG(!E, "Animation '" + String(p_anim) + "' doesn't exist.");
-	E->;
-}*/
 
 int SpriteFrames::get_frame_count(const StringName &p_anim) const {
 	const Map<StringName, Anim>::Element *E = animations.find(p_anim);
@@ -328,7 +282,6 @@ void SpriteFrames::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_animation_loop", "anim"), &SpriteFrames::get_animation_loop);
 
 	ClassDB::bind_method(D_METHOD("add_frame", "anim", "frame", "at_position"), &SpriteFrames::add_frame, DEFVAL(-1));
-	//ClassDB::bind_method(D_METHOD("add_frames", "anim", "frames", "at_position"), &SpriteFrames::add_frames, DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("get_frame_count", "anim"), &SpriteFrames::get_frame_count);
 	ClassDB::bind_method(D_METHOD("get_frame", "anim", "idx"), &SpriteFrames::get_frame);
 	ClassDB::bind_method(D_METHOD("set_frame", "anim", "idx", "txt"), &SpriteFrames::set_frame);
@@ -484,13 +437,13 @@ void AnimatedSprite::_notification(int p_what) {
 			RID ci = get_canvas_item();
 
 			Size2 s = texture->get_size();
-			Point2 ofs = offset;
-			if (centered) {
+			Point2 ofs = get_offset();
+			if (is_centered()) {
 				ofs -= s / 2;
 			}
 			//VALLA EDITS
-			if (basealigned) {
-				if (centered) {
+			if (is_basealigned()) {
+				if (is_centered()) {
 					ofs.y -= Size2(s).y / 2;
 				} else {
 					ofs.y -= Size2(s).y;
@@ -498,15 +451,15 @@ void AnimatedSprite::_notification(int p_what) {
 				}
 			}
 
-			if (Engine::get_singleton()->get_use_gpu_pixel_snap() || force_pixel_snapping) {
+			if (Engine::get_singleton()->get_use_gpu_pixel_snap() || get_force_pixel_snapping()) {
 				ofs = ofs.floor();
 			}
 			Rect2 dst_rect(ofs, s);
 
-			if (hflip) {
+			if (is_flipped_h()) {
 				dst_rect.size.x = -dst_rect.size.x;
 			}
-			if (vflip) {
+			if (is_flipped_v()) {
 				dst_rect.size.y = -dst_rect.size.y;
 			}
 
@@ -537,18 +490,6 @@ void AnimatedSprite::set_sprite_frames(const Ref<SpriteFrames> &p_frames) {
 	_reset_timeout();
 	update();
 	update_configuration_warning();
-}
-
-Ref<Texture> AnimatedSprite::get_sprite_texture() const {
-	Ref<Texture> t;
-	if (!frames.is_valid()) {
-		return t;
-	} else {
-		if (animation) {
-			t = frames->get_frame(animation, frame);
-		}
-		return t;
-	}
 }
 
 Ref<SpriteFrames> AnimatedSprite::get_sprite_frames() const {
@@ -585,14 +526,6 @@ int AnimatedSprite::get_frame() const {
 	return frame;
 }
 
-void AnimatedSprite::set_force_pixel_snapping(bool p_snapping) {
-	force_pixel_snapping = p_snapping;
-}
-
-bool AnimatedSprite::get_force_pixel_snapping() const {
-	return force_pixel_snapping;
-}
-
 void AnimatedSprite::set_speed_scale(float p_speed_scale) {
 	float elapsed = _get_frame_duration() - timeout;
 
@@ -605,52 +538,6 @@ void AnimatedSprite::set_speed_scale(float p_speed_scale) {
 
 float AnimatedSprite::get_speed_scale() const {
 	return speed_scale;
-}
-
-void AnimatedSprite::set_centered(bool p_center) {
-	centered = p_center;
-	update();
-	item_rect_changed();
-}
-
-bool AnimatedSprite::is_centered() const {
-	return centered;
-}
-
-void AnimatedSprite::set_basealigned(bool p_basealign) {
-	basealigned = p_basealign;
-	update();
-	item_rect_changed();
-}
-
-bool AnimatedSprite::is_basealigned() const {
-	return basealigned;
-}
-
-void AnimatedSprite::set_offset(const Point2 &p_offset) {
-	offset = p_offset;
-	update();
-	item_rect_changed();
-	_change_notify("offset");
-}
-Point2 AnimatedSprite::get_offset() const {
-	return offset;
-}
-
-void AnimatedSprite::set_flip_h(bool p_flip) {
-	hflip = p_flip;
-	update();
-}
-bool AnimatedSprite::is_flipped_h() const {
-	return hflip;
-}
-
-void AnimatedSprite::set_flip_v(bool p_flip) {
-	vflip = p_flip;
-	update();
-}
-bool AnimatedSprite::is_flipped_v() const {
-	return vflip;
 }
 
 void AnimatedSprite::set_animation_locked(bool p_lock) {
@@ -746,9 +633,7 @@ void AnimatedSprite::set_animation(const StringName &p_animation) {
 
 	animation = p_animation;
 	_reset_timeout();
-	//if (p_resetframe) {
-		set_frame(0);
-	//}
+	set_frame(0);
 	_change_notify();
 	emit_signal("animation_changed");
 	update();
@@ -765,10 +650,6 @@ void AnimatedSprite::set_animation_continue(const StringName &p_animation) {
 	}
 
 	animation = p_animation;
-	//_reset_timeout();
-	//if (p_resetframe) {
-	//set_frame(0);
-	//}
 	_change_notify();
 	emit_signal("animation_changed");
 	update();
@@ -824,24 +705,6 @@ void AnimatedSprite::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("play", "anim", "reversed"), &AnimatedSprite::play, DEFVAL(StringName()), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("stop"), &AnimatedSprite::stop);
 
-	ClassDB::bind_method(D_METHOD("set_force_pixel_snapping", "snap"), &AnimatedSprite::set_force_pixel_snapping);
-	ClassDB::bind_method(D_METHOD("get_force_pixel_snapping"), &AnimatedSprite::get_force_pixel_snapping);
-
-	ClassDB::bind_method(D_METHOD("set_centered", "centered"), &AnimatedSprite::set_centered);
-	ClassDB::bind_method(D_METHOD("is_centered"), &AnimatedSprite::is_centered);
-
-	ClassDB::bind_method(D_METHOD("set_basealigned", "basealigned"), &AnimatedSprite::set_basealigned);
-	ClassDB::bind_method(D_METHOD("is_basealigned"), &AnimatedSprite::is_basealigned);
-
-	ClassDB::bind_method(D_METHOD("set_offset", "offset"), &AnimatedSprite::set_offset);
-	ClassDB::bind_method(D_METHOD("get_offset"), &AnimatedSprite::get_offset);
-
-	ClassDB::bind_method(D_METHOD("set_flip_h", "flip_h"), &AnimatedSprite::set_flip_h);
-	ClassDB::bind_method(D_METHOD("is_flipped_h"), &AnimatedSprite::is_flipped_h);
-
-	ClassDB::bind_method(D_METHOD("set_flip_v", "flip_v"), &AnimatedSprite::set_flip_v);
-	ClassDB::bind_method(D_METHOD("is_flipped_v"), &AnimatedSprite::is_flipped_v);
-
 	ClassDB::bind_method(D_METHOD("set_frame", "frame"), &AnimatedSprite::set_frame);
 	ClassDB::bind_method(D_METHOD("get_frame"), &AnimatedSprite::get_frame);
 
@@ -865,23 +728,10 @@ void AnimatedSprite::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "speed_scale"), "set_speed_scale", "get_speed_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "reversed"), "set_reversed", "is_reversed");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "centered"), "set_centered", "is_centered");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "basealigned"), "set_basealigned", "is_basealigned");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "force_pixel_snapping"), "set_force_pixel_snapping", "get_force_pixel_snapping");
-	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "offset"), "set_offset", "get_offset");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_h"), "set_flip_h", "is_flipped_h");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_v"), "set_flip_v", "is_flipped_v");
-
 
 }
 
 AnimatedSprite::AnimatedSprite() {
-
-	centered = true;
-	basealigned = false;
-	hflip = false;
-	vflip = false;
-	force_pixel_snapping = false;
 
 	frame = 0;
 	speed_scale = 1.0f;
