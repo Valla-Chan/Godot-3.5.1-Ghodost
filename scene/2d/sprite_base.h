@@ -79,6 +79,8 @@ public:
 	void set_flip_v(bool p_flip);
 	bool is_flipped_v() const;
 
+	void queue_set_flipped(bool p_flip_h, bool p_flip_v);
+
 	SpriteBase();
 	~SpriteBase();
 };

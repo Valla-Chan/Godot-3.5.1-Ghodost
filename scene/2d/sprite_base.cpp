@@ -120,6 +120,18 @@ bool SpriteBase::is_flipped_v() const {
 	return vflip;
 }
 
+// set the flipped mode without updating
+void SpriteBase::queue_set_flipped(bool p_flip_h = -1, bool p_flip_v = -1) {
+	if (p_flip_h == -1) {
+		p_flip_h = hflip;
+	}
+	if (p_flip_v == -1) {
+		p_flip_v = vflip;
+	}
+
+	hflip = p_flip_h;
+	vflip = p_flip_v;
+}
 
 bool SpriteBase::is_pixel_opaque(const Point2 &p_point) const {
 	return true;
@@ -145,6 +157,8 @@ void SpriteBase::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_flip_v", "flip_v"), &SpriteBase::set_flip_v);
 	ClassDB::bind_method(D_METHOD("is_flipped_v"), &SpriteBase::is_flipped_v);
+
+	ClassDB::bind_method(D_METHOD("queue_set_flipped", "flip_h", "flip_v"), &SpriteBase::queue_set_flipped);
 
 	ClassDB::bind_method(D_METHOD("is_pixel_opaque", "pos"), &SpriteBase::is_pixel_opaque);
 
