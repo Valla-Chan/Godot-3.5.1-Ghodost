@@ -1331,6 +1331,46 @@ void Node::add_child(Node *p_child, bool p_legible_unique_name) {
 	_add_child_nocheck(p_child, p_child->data.name);
 }
 
+// remove child node from its parent, then add child to self, keeping the existing position.
+void Node::reparent_child(Node *p_child, bool p_legible_unique_name) {
+	Node *childparent = p_child->get_parent();
+	if (childparent) {
+		// 2D node
+		if (Object::cast_to<Node2D>(p_child)) {
+			Node2D *child2d = Object::cast_to<Node2D>(p_child);
+			Vector2 pos = child2d->get_global_position();
+			p_child->get_parent()->remove_child(p_child);
+			add_child(p_child, p_legible_unique_name);
+			child2d->set_global_position(pos);
+			return;
+		// UI node
+		} else if (Object::cast_to<Control>(p_child)) {
+			Control *childui = Object::cast_to<Control>(p_child);
+			Vector2 pos = childui->get_global_position();
+			p_child->get_parent()->remove_child(p_child);
+			add_child(p_child, p_legible_unique_name);
+			childui->set_global_position(pos);
+			return;
+		// 3D node
+		} else if (Object::cast_to<Spatial>(p_child)) {
+			Spatial *child3d = Object::cast_to<Spatial>(p_child);
+			Vector3 pos = child3d->get_global_translation();
+			p_child->get_parent()->remove_child(p_child);
+			add_child(p_child, p_legible_unique_name);
+			child3d->set_global_translation(pos);
+			return;
+		// neither
+		} else {
+			p_child->get_parent()->remove_child(p_child);
+			add_child(p_child, p_legible_unique_name);
+			return;
+		}
+	}
+	// child has no parent, simply add child.
+	add_child(p_child, p_legible_unique_name);
+}
+
+
 void Node::add_child_below_node(Node *p_node, Node *p_child, bool p_legible_unique_name) {
 	ERR_FAIL_NULL(p_node);
 	ERR_FAIL_NULL(p_child);
@@ -3060,6 +3100,7 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_name", "name"), &Node::set_name);
 	ClassDB::bind_method(D_METHOD("get_name"), &Node::get_name);
 	ClassDB::bind_method(D_METHOD("add_child", "node", "legible_unique_name"), &Node::add_child, DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("reparent_child", "node", "legible_unique_name"), &Node::reparent_child, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("remove_child", "node"), &Node::remove_child);
 	ClassDB::bind_method(D_METHOD("get_child_count"), &Node::get_child_count);
 	ClassDB::bind_method(D_METHOD("get_children"), &Node::_get_children);

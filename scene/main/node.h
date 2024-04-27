@@ -318,6 +318,7 @@ public:
 	bool is_vis_hidden() const;
 
 	void add_child(Node *p_child, bool p_legible_unique_name = false);
+	void reparent_child(Node *p_child, bool p_legible_unique_name = false);
 	void add_child_below_node(Node *p_node, Node *p_child, bool p_legible_unique_name = false);
 	void remove_child(Node *p_child);
 
