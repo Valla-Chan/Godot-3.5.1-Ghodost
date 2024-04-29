@@ -2230,6 +2230,8 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseMotion> m = p_event;
 	Ref<InputEventKey> k = p_event;
 
+	Dictionary children_positions;
+
 	if (drag_type == DRAG_NONE) {
 		//Start moving the nodes
 		if (b.is_valid() && b->get_button_index() == BUTTON_LEFT && b->is_pressed()) {
@@ -2248,14 +2250,46 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 					drag_from = transform.affine_inverse().xform(b->get_position());
 					_save_canvas_item_state(drag_selection);
 				}
+
+				// store original child positions
+				children_positions.clear();
+				for (int i = 0; i < drag_selection.size(); i++) {
+					for (int j = 0; j < drag_selection[i]->get_child_count(); j++) {
+						CanvasItem *child = Object::cast_to<CanvasItem>(drag_selection[i]->get_child(j));
+						if (child) {
+							children_positions[child] = child->_edit_get_position();
+						}
+					}
+				}
+
 				return true;
 			}
 		}
 	}
 
+	// Valla Edits: add is_origin_only
 	if (drag_type == DRAG_MOVE) {
+		bool is_origin_only = Input::get_singleton()->is_key_pressed(KEY_A);
+		/*
+		List<CanvasItem *> drag_selection_and_children;
+		
+		if (is_origin_only) {
+			drag_selection_and_children = drag_selection;
+			for (int i = 0; i < drag_selection.size(); i++) {
+				for (int j = 0; j < drag_selection[i]->get_child_count(); j++) {
+					CanvasItem *child = Object::cast_to<CanvasItem>(drag_selection[i]->get_child(j));
+					if (child) {
+						drag_selection_and_children.push_back(child);
+					}
+					
+				}
+			}
+		}
+		*/
+
 		// Move the nodes
 		if (m.is_valid()) {
+
 			// Save the ik chain for reapplying before IK solve
 			Vector<List<Dictionary>> all_bones_ik_states;
 			for (List<CanvasItem *>::Element *E = drag_selection.front(); E; E = E->next()) {
@@ -2279,6 +2313,7 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 			bool is_alt = Input::get_singleton()->is_key_pressed(KEY_ALT);
 			bool is_shift = Input::get_singleton()->is_key_pressed(KEY_SHIFT);
 			Point2 new_pos;
+			Point2 child_offset = Vector2(0,0);
 
 			if (is_alt) {
 				new_pos = previous_pos + (drag_to - drag_from);
@@ -2292,6 +2327,10 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 				} else {
 					new_pos.x = previous_pos.x;
 				}
+			}
+
+			if (is_origin_only) {
+				child_offset = (previous_pos - new_pos);
 			}
 
 			bool force_no_IK = m->get_alt();
@@ -2314,8 +2353,27 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 						real_t final_leaf_node_rotation = node2d->get_global_transform_with_canvas().get_rotation();
 						node2d->rotate(initial_leaf_node_rotation - final_leaf_node_rotation);
 						_solve_IK(node2d, new_pos);
+						// counteract child offsets
+						if (is_origin_only) {
+							for (int i = 0; i < node2d->get_child_count(); i++) {
+								Node2D *child2d = Object::cast_to<Node2D>(node2d->get_child(i));
+								if (child2d) {
+
+									_solve_IK(child2d, Vector2(children_positions.get(child2d, Vector2(0, 0))) + child_offset / canvas_item->_edit_get_scale());
+								}
+							}
+						}
 					} else {
 						canvas_item->_edit_set_position(canvas_item->_edit_get_position() + xform.xform(new_pos) - xform.xform(previous_pos));
+						// counteract child offsets
+						if (is_origin_only) {
+							for (int i = 0; i < node2d->get_child_count(); i++) {
+								CanvasItem *canvas_child = Object::cast_to<CanvasItem>(canvas_item->get_child(i));
+								if (canvas_child) {
+									canvas_child->_edit_set_position(Vector2(children_positions.get(canvas_child, Vector2(0, 0))) + child_offset / canvas_item->_edit_get_scale());
+								}
+							}
+						}
 					}
 				}
 				index++;
@@ -2326,20 +2384,44 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 		// Confirm the move (only if it was moved)
 		if (b.is_valid() && !b->is_pressed() && b->get_button_index() == BUTTON_LEFT) {
 			if (transform.affine_inverse().xform(b->get_position()) != drag_from) {
+				// Valla edits
+				// multiple items
 				if (drag_selection.size() != 1) {
-					_commit_canvas_item_state(
+					//if (!is_origin_only) {
+						_commit_canvas_item_state(
 							drag_selection,
 							vformat(TTR("Move %d CanvasItems"), drag_selection.size()),
 							true);
-				} else {
-					_commit_canvas_item_state(
-							drag_selection,
-							vformat(
-									TTR("Move CanvasItem \"%s\" to (%d, %d)"),
-									drag_selection[0]->get_name(),
-									drag_selection[0]->_edit_get_position().x,
-									drag_selection[0]->_edit_get_position().y),
-							true);
+					//} else {
+					//	_commit_canvas_item_state(
+					//		drag_selection_and_children,
+					//		vformat(TTR("Move %d CanvasItems, correct child positions"), drag_selection.size()),
+					//		true);
+					//}
+					
+				}
+				// single items
+				else {
+					//if (!is_origin_only) {
+						_commit_canvas_item_state(
+								drag_selection,
+								vformat(
+										TTR("Move CanvasItem \"%s\" to (%d, %d)"),
+										drag_selection[0]->get_name(),
+										drag_selection[0]->_edit_get_position().x,
+										drag_selection[0]->_edit_get_position().y),
+								true);
+					//} else {
+					//	_commit_canvas_item_state(
+					//			drag_selection_and_children,
+					//			vformat(
+					//					TTR("Move CanvasItem \"%s\" to (%d, %d), correct child positions"),
+					//					drag_selection[0]->get_name(),
+					//					drag_selection[0]->_edit_get_position().x,
+					//					drag_selection[0]->_edit_get_position().y),
+					//			true);
+					//}
+
 				}
 			}
 
