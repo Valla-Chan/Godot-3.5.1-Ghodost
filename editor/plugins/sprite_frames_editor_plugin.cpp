@@ -53,14 +53,23 @@ void SpriteFramesEditor::_gui_input(Ref<InputEvent> p_event) {
 }
 
 void SpriteFramesEditor::_open_sprite_sheet() {
-	file_split_sheet->clear_filters();
-	List<String> extensions;
-	ResourceLoader::get_recognized_extensions_for_type("Texture", &extensions);
-	for (int i = 0; i < extensions.size(); i++) {
-		file_split_sheet->add_filter("*." + extensions[i]);
-	}
 
-	file_split_sheet->popup_centered_ratio();
+	bool held_ctrl = Input::get_singleton()->is_key_pressed(KEY_CONTROL);
+
+	if (!held_ctrl) {
+		file_split_sheet->clear_filters();
+		List<String> extensions;
+		ResourceLoader::get_recognized_extensions_for_type("Texture", &extensions);
+		for (int i = 0; i < extensions.size(); i++) {
+			file_split_sheet->add_filter("*." + extensions[i]);
+		}
+
+		file_split_sheet->popup_centered_ratio();
+	} else {
+		open_in_split_sheet = true;
+		quick_open->popup_dialog("Texture", false);
+		quick_open->set_title(TTR("Quick Open Sprite Sheet..."));
+	}
 }
 
 // turn mouse position in the preview window into the frame index hovered
@@ -463,6 +472,22 @@ void SpriteFramesEditor::_notification(int p_what) {
 	}
 }
 
+// Valla edits
+void SpriteFramesEditor::_quick_opened() {
+	Vector<String> files = quick_open->get_selected_files();
+	PoolVector<String> files_pooled;
+
+	if (!open_in_split_sheet) {
+		for (int i = 0; i < files.size(); i++) {
+			files_pooled.push_back(files[i]);
+		}
+		_file_load_request(files_pooled, -1);
+	} else {
+		_prepare_sprite_sheet(quick_open->get_selected());
+	}
+	
+}
+
 void SpriteFramesEditor::_file_load_request(const PoolVector<String> &p_path, int p_at_pos) {
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 
@@ -524,17 +549,26 @@ Size2i SpriteFramesEditor::_get_separation() const {
 void SpriteFramesEditor::_load_pressed() {
 	ERR_FAIL_COND(!frames->has_animation(edited_anim));
 	loading_scene = false;
+	open_in_split_sheet = false;
 
-	file->clear_filters();
-	List<String> extensions;
-	ResourceLoader::get_recognized_extensions_for_type("Texture", &extensions);
-	for (int i = 0; i < extensions.size(); i++) {
-		file->add_filter("*." + extensions[i]);
+	bool held_ctrl = Input::get_singleton()->is_key_pressed(KEY_CONTROL);
+
+	if (!held_ctrl) {
+		file->clear_filters();
+		List<String> extensions;
+		ResourceLoader::get_recognized_extensions_for_type("Texture", &extensions);
+		for (int i = 0; i < extensions.size(); i++) {
+			file->add_filter("*." + extensions[i]);
+		}
+
+		file->set_mode(EditorFileDialog::MODE_OPEN_FILES);
+
+		file->popup_centered_ratio();
+	} else {
+		quick_open->popup_dialog("Texture", true);
+		quick_open->set_title(TTR("Quick Open Frames..."));
 	}
-
-	file->set_mode(EditorFileDialog::MODE_OPEN_FILES);
-
-	file->popup_centered_ratio();
+	
 }
 
 void SpriteFramesEditor::_paste_pressed() {
@@ -827,7 +861,7 @@ Ref<Texture> SpriteFramesEditor::_get_locked_icon(bool p_locked) {
 	if (p_locked) {
 		return get_icon("Lock", "EditorIcons");
 	}
-	get_icon("Unlock", "EditorIcons");
+	return get_icon("Unlock", "EditorIcons");
 }
 
 // NOTE: this might have something to do with opening it?
@@ -1356,6 +1390,7 @@ void SpriteFramesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_copy_pressed"), &SpriteFramesEditor::_copy_pressed);
 	ClassDB::bind_method(D_METHOD("_paste_pressed"), &SpriteFramesEditor::_paste_pressed);
 	ClassDB::bind_method(D_METHOD("_file_load_request", "files", "at_position"), &SpriteFramesEditor::_file_load_request, DEFVAL(-1));
+	ClassDB::bind_method(D_METHOD("_quick_opened"), &SpriteFramesEditor::_quick_opened);
 	ClassDB::bind_method(D_METHOD("_update_library", "skipsel"), &SpriteFramesEditor::_update_library, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("_up_pressed"), &SpriteFramesEditor::_up_pressed);
 	ClassDB::bind_method(D_METHOD("_down_pressed"), &SpriteFramesEditor::_down_pressed);
@@ -1455,11 +1490,11 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	sub_vb->add_child(hbc);
 
 	load = memnew(ToolButton);
-	load->set_tooltip(TTR("Add a Texture from File"));
+	load->set_tooltip(TTR("Add a Texture from File") + "\n(Hold Control to " + TTR("Quick Load") + ")");
 	hbc->add_child(load);
 
 	load_sheet = memnew(ToolButton);
-	load_sheet->set_tooltip(TTR("Add Frames from a Sprite Sheet"));
+	load_sheet->set_tooltip(TTR("Add Frames from a Sprite Sheet") + "\n(Hold Control to " + TTR("Quick Load") + ")");
 	hbc->add_child(load_sheet);
 
 	hbc->add_child(memnew(VSeparator));
@@ -1542,6 +1577,11 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	tree->set_drag_forwarding(this);
 
 	sub_vb->add_child(tree);
+
+	// VALLA EDITS
+	quick_open = memnew(EditorQuickOpen);
+	add_child(quick_open);
+	quick_open->connect("quick_open", this, "_quick_opened"); //_file_load_request
 
 	dialog = memnew(AcceptDialog);
 	add_child(dialog);

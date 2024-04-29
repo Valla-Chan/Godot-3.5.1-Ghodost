@@ -1600,6 +1600,7 @@ void Tree::select_single_item(TreeItem *p_selected, TreeItem *p_current, int p_c
 					emit_signal("cell_selected");
 					if (select_mode == SELECT_MULTI) {
 						emit_signal("multi_selected", p_current, i, true);
+						emit_signal("item_selected");
 					} else if (select_mode == SELECT_SINGLE) {
 						emit_signal("item_selected");
 					}
@@ -1614,11 +1615,13 @@ void Tree::select_single_item(TreeItem *p_selected, TreeItem *p_current, int p_c
 					if (!c.selected && c.selectable) {
 						c.selected = true;
 						emit_signal("multi_selected", p_current, i, true);
+						emit_signal("item_selected");
 					}
 
 				} else if (!r_in_range || p_force_deselect) {
 					if (select_mode == SELECT_MULTI && c.selected) {
 						emit_signal("multi_selected", p_current, i, false);
+						emit_signal("item_selected");
 					}
 					c.selected = false;
 				}

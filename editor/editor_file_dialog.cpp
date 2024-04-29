@@ -280,7 +280,6 @@ void EditorFileDialog::_post_popup() {
 	}
 
 	if (is_visible_in_tree()) {
-		Ref<Texture> folder = get_icon("folder", "FileDialog");
 		const Color folder_color = get_color("folder_icon_modulate", "FileDialog");
 		recent->clear();
 
@@ -292,20 +291,27 @@ void EditorFileDialog::_post_popup() {
 				continue;
 			}
 			String name = recentd[i];
+			String tooltip = recentd[i];
+			Ref<Texture> icon = _get_folder_icon(recentd[i]);
 			if (res && name == "res://") {
 				name = "/";
+				tooltip = "/";
 			} else {
 				if (name.ends_with("/")) {
 					name = name.substr(0, name.length() - 1);
+					tooltip = name.substr(0, name.length() - 1);
 				}
 				name = name.get_file() + "/";
+				Vector<String> tooltip_chunks = tooltip.split("/");
+				tooltip = tooltip_chunks[tooltip_chunks.size() - 2] + "/" + tooltip_chunks[tooltip_chunks.size() - 1];
 			}
 			bool exists = dir_access->dir_exists(recentd[i]);
 			if (!exists) {
 				// Remove invalid directory from the list of Recent directories.
 				recentd.remove(i--);
 			} else {
-				recent->add_item(name, folder);
+				recent->add_item(name, icon);
+				recent->set_item_tooltip(recent->get_item_count() - 1, tooltip);
 				recent->set_item_metadata(recent->get_item_count() - 1, recentd[i]);
 				recent->set_item_icon_modulate(recent->get_item_count() - 1, folder_color);
 			}
@@ -320,6 +326,31 @@ void EditorFileDialog::_post_popup() {
 	}
 
 	set_process_unhandled_input(true);
+}
+
+// analyze the path, and return an appropriate icon for folder
+Ref<Texture> EditorFileDialog::_get_folder_icon(const String &p_path) {
+	String path = p_path.to_lower();
+	if (path.find("scripts/") != -1) {
+		return get_icon("Script", "EditorIcons");
+	}
+	else if (path.find("textures/") != -1) {
+		return get_icon("ImageTexture", "EditorIcons");
+	}
+	else if (path.find("scenes/") != -1) {
+		return get_icon("PackedScene", "EditorIcons");
+	}
+	else if (path.find("portraits/") != -1) {
+		return get_icon("KeyboardPhysical", "EditorIcons");
+	}
+	else if (path.find("actors/") != -1) {
+		return get_icon("AutoTriangle", "EditorIcons");
+	}
+	else if (path.find("ents/") != -1) {
+		return get_icon("Object", "EditorIcons");
+	}
+	// default folder icon
+	return get_icon("folder", "FileDialog");
 }
 
 void EditorFileDialog::_thumbnail_result(const String &p_path, const Ref<Texture> &p_preview, const Ref<Texture> &p_small_preview, const Variant &p_udata) {
@@ -1209,7 +1240,7 @@ void EditorFileDialog::_update_favorites() {
 	bool res = access == ACCESS_RESOURCES;
 
 	String current = get_current_dir();
-	Ref<Texture> folder_icon = get_icon("Folder", "EditorIcons");
+	//Ref<Texture> folder_icon = get_icon("Folder", "EditorIcons");
 	const Color folder_color = get_color("folder_icon_modulate", "FileDialog");
 	favorites->clear();
 
@@ -1234,13 +1265,17 @@ void EditorFileDialog::_update_favorites() {
 			continue;
 		}
 		String name = favorited[i];
+		String tooltip = favorited[i];
 		bool setthis = false;
+
+		Ref<Texture> folder_icon = _get_folder_icon(favorited[i]);
 
 		if (res && name == "res://") {
 			if (name == current) {
 				setthis = true;
 			}
 			name = "/";
+			tooltip = "/";
 
 			favorites->add_item(name, folder_icon);
 		} else if (name.ends_with("/")) {
@@ -1250,11 +1285,14 @@ void EditorFileDialog::_update_favorites() {
 			name = name.substr(0, name.length() - 1);
 			name = name.get_file();
 
+			Vector<String> tooltip_chunks = tooltip.split("/");
+			tooltip = tooltip_chunks[tooltip_chunks.size() - 2] + "/" + tooltip_chunks[tooltip_chunks.size() - 1];
+
 			favorites->add_item(name, folder_icon);
 		} else {
 			continue; // We don't handle favorite files here.
 		}
-
+		favorites->set_item_tooltip(favorites->get_item_count() - 1, tooltip);
 		favorites->set_item_metadata(favorites->get_item_count() - 1, favorited[i]);
 		favorites->set_item_icon_modulate(favorites->get_item_count() - 1, folder_color);
 

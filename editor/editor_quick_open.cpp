@@ -30,11 +30,14 @@
 
 #include "editor_quick_open.h"
 #include "core/io/image_loader.h"
+#include "scene/gui/center_container.h"
 
 #include "core/os/keyboard.h"
 
 void EditorQuickOpen::popup_dialog(const StringName &p_base, bool p_enable_multi, bool p_dontclear) {
 	base_type = p_base;
+	img_preview->set_visible(base_type == "Texture");
+
 	search_options->set_select_mode(p_enable_multi ? Tree::SELECT_MULTI : Tree::SELECT_SINGLE);
 	popup_centered_ratio(0.4);
 
@@ -145,7 +148,7 @@ void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, Vector<Pair<Str
 				Error err = ImageLoader::load_image(efsd->get_file_path(i), iconimage, nullptr, true);
 				if (err == OK) {
 					Ref<ImageTexture> icontexture = memnew(ImageTexture);
-					icontexture->create_from_image(iconimage);
+					icontexture->create_from_image(iconimage,0);
 					icontexture->set_size_override(Size2(24,24));
 					pair.second = icontexture;
 				}
@@ -199,6 +202,10 @@ void EditorQuickOpen::_update_search() {
 	EditorFileSystemDirectory *efsd = EditorFileSystem::get_singleton()->get_filesystem();
 	Vector<Pair<String, Ref<Texture>>> list;
 
+	// clear texture
+	img_preview->set_texture(Ref<Texture>());
+	img_preview->update();
+
 	_parse_fs(efsd, list);
 	list = _sort_fs(list);
 
@@ -218,6 +225,19 @@ void EditorQuickOpen::_update_search() {
 	get_ok()->set_disabled(root->get_children() == nullptr);
 }
 
+void EditorQuickOpen::_selected_multi(TreeItem *p_current, int p_column = 0, bool p_selected = true) {
+	_selected();
+}
+
+void EditorQuickOpen::_selected() {
+	TreeItem *ti = search_options->get_selected();
+	if (!ti) {
+		return;
+	}
+	img_preview->set_texture(ti->get_icon(0));
+	img_preview->update();
+}
+
 void EditorQuickOpen::_confirmed() {
 	TreeItem *ti = search_options->get_selected();
 	if (!ti) {
@@ -226,6 +246,7 @@ void EditorQuickOpen::_confirmed() {
 	emit_signal("quick_open");
 	hide();
 }
+
 
 void EditorQuickOpen::_notification(int p_what) {
 	switch (p_what) {
@@ -250,6 +271,8 @@ StringName EditorQuickOpen::get_base_type() const {
 
 void EditorQuickOpen::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_text_changed"), &EditorQuickOpen::_text_changed);
+	ClassDB::bind_method(D_METHOD("_selected"), &EditorQuickOpen::_selected);
+	//ClassDB::bind_method(D_METHOD("_selected_multi", "item", "column", "selected"), &EditorQuickOpen::_selected_multi, DEFVAL(0), DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("_confirmed"), &EditorQuickOpen::_confirmed);
 	ClassDB::bind_method(D_METHOD("_sbox_input"), &EditorQuickOpen::_sbox_input);
 
@@ -258,19 +281,38 @@ void EditorQuickOpen::_bind_methods() {
 
 EditorQuickOpen::EditorQuickOpen() {
 	VBoxContainer *vbc = memnew(VBoxContainer);
+	HBoxContainer *hbc = memnew(HBoxContainer);
 	add_child(vbc);
+
 
 	search_box = memnew(LineEdit);
 	search_box->connect("text_changed", this, "_text_changed");
 	search_box->connect("gui_input", this, "_sbox_input");
 	vbc->add_margin_child(TTR("Search:"), search_box);
 
+	hbc->set_h_size_flags(SIZE_EXPAND_FILL);
+	hbc->set_v_size_flags(SIZE_EXPAND_FILL);
+	vbc->add_child(hbc);
+
+	img_preview = memnew(TextureRect);
+	img_preview->set_custom_minimum_size(Size2(128, 128));
+	img_preview->set_stretch_mode(TextureRect::STRETCH_KEEP_ASPECT_CENTERED);
+	img_preview->set_h_size_flags(SIZE_FILL);
+	img_preview->set_v_size_flags(SIZE_FILL);
+	hbc->add_child(img_preview);
+
+	VBoxContainer *tree_vbox = memnew(VBoxContainer);
+	tree_vbox->set_h_size_flags(SIZE_EXPAND_FILL);
+	tree_vbox->set_v_size_flags(SIZE_EXPAND_FILL);
+	hbc->add_child(tree_vbox);
 	search_options = memnew(Tree);
 	search_options->connect("item_activated", this, "_confirmed");
+	//search_options->connect("multi_selected", this, "_selected_multi");
+	search_options->connect("item_selected", this, "_selected");
 	search_options->set_hide_root(true);
 	search_options->set_hide_folding(true);
 	search_options->add_constant_override("draw_guides", 1);
-	vbc->add_margin_child(TTR("Matches:"), search_options, true);
+	tree_vbox->add_margin_child(TTR("Matches:"), search_options, true);
 
 	get_ok()->set_text(TTR("Open"));
 	get_ok()->set_disabled(true);

@@ -79,6 +79,8 @@ class SpriteFramesEditor : public HSplitContainer {
 	SpinBox *anim_speed;
 	CheckButton *anim_loop;
 
+	EditorQuickOpen *quick_open;
+
 	EditorFileDialog *file;
 
 	AcceptDialog *dialog;
@@ -104,6 +106,8 @@ class SpriteFramesEditor : public HSplitContainer {
 	ToolButton *split_sheet_zoom_out;
 	ToolButton *split_sheet_zoom_reset;
 	ToolButton *split_sheet_zoom_in;
+
+	bool open_in_split_sheet;
 	EditorFileDialog *file_split_sheet;
 	Set<int> frames_selected;
 	Set<int> frames_toggled_by_mouse_hover;
@@ -123,6 +127,7 @@ class SpriteFramesEditor : public HSplitContainer {
 	Size2i _get_offset() const;
 	Size2i _get_separation() const;
 
+	void _quick_opened();
 	void _load_pressed();
 	void _file_load_request(const PoolVector<String> &p_path, int p_at_pos = -1);
 	void _copy_pressed();

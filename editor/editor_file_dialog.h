@@ -190,6 +190,7 @@ private:
 	void _save_to_recent();
 	//callback function is callback(String p_path,Ref<Texture> preview,Variant udata) preview null if could not load
 
+	Ref<Texture> _get_folder_icon(const String &p_path);
 	void _thumbnail_result(const String &p_path, const Ref<Texture> &p_preview, const Ref<Texture> &p_small_preview, const Variant &p_udata);
 	void _thumbnail_done(const String &p_path, const Ref<Texture> &p_preview, const Ref<Texture> &p_small_preview, const Variant &p_udata);
 	void _request_single_thumbnail(const String &p_path);

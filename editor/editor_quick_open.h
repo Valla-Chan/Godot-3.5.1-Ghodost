@@ -35,10 +35,12 @@
 #include "editor_file_system.h"
 #include "scene/gui/dialogs.h"
 #include "scene/gui/tree.h"
+#include "scene/gui/texture_rect.h"
 
 class EditorQuickOpen : public ConfirmationDialog {
 	GDCLASS(EditorQuickOpen, ConfirmationDialog);
 
+	TextureRect *img_preview;
 	LineEdit *search_box;
 	Tree *search_options;
 	StringName base_type;
@@ -52,6 +54,8 @@ class EditorQuickOpen : public ConfirmationDialog {
 	Vector<Pair<String, Ref<Texture>>> _sort_fs(Vector<Pair<String, Ref<Texture>>> &list);
 	float _path_cmp(String search, String path) const;
 
+	void _selected();
+	void _selected_multi(TreeItem *p_current, int p_column, bool p_selected);
 	void _confirmed();
 	void _text_changed(const String &p_newtext);
 
