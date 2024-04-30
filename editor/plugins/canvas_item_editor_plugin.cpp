@@ -2225,25 +2225,55 @@ bool CanvasItemEditor::_gui_input_scale(const Ref<InputEvent> &p_event) {
 	return false;
 }
 
+Dictionary children_positions;
+
+// Check if a selected object's children are also selected.
+bool CanvasItemEditor::_is_object_selected(CanvasItem *p_object) {
+	List<CanvasItem *> selection = _get_edited_canvas_items(true,false);
+	// search for object in the selected nodes list
+	for (List<CanvasItem *>::Element *E = selection.front(); E; E = E->next()) {
+		print_line(vformat("%s %s", E->get(), p_object));
+		if (E->get() == p_object) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+// Check if a selected object's children are also selected.
+bool CanvasItemEditor::_is_child_selected(const Ref<CanvasItem> &p_object, const int p_child_index) {
+	if (p_object->get_child_count() <= p_child_index)
+		return false;
+	// search for child in the selected nodes list
+	CanvasItem *child = Object::cast_to<CanvasItem>(p_object->get_child(p_child_index));
+	return _is_object_selected(child);
+}
+
+List<CanvasItem *> CanvasItemEditor::_populate_drag_selection(const bool include_children) {
+	List<CanvasItem *> selection = _get_edited_canvas_items(false, !include_children);
+
+	drag_selection.clear();
+	for (int i = 0; i < selection.size(); i++) {
+		if (_is_node_movable(selection[i], true)) {
+			drag_selection.push_back(selection[i]);
+		}
+	}
+	return selection;
+}
+
 bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseButton> b = p_event;
 	Ref<InputEventMouseMotion> m = p_event;
 	Ref<InputEventKey> k = p_event;
 
-	Dictionary children_positions;
+	bool is_origin_only = Input::get_singleton()->is_key_pressed(KEY_A);
 
 	if (drag_type == DRAG_NONE) {
 		//Start moving the nodes
 		if (b.is_valid() && b->get_button_index() == BUTTON_LEFT && b->is_pressed()) {
 			if ((b->get_alt() && !b->get_control()) || tool == TOOL_MOVE) {
-				List<CanvasItem *> selection = _get_edited_canvas_items();
-
-				drag_selection.clear();
-				for (int i = 0; i < selection.size(); i++) {
-					if (_is_node_movable(selection[i], true)) {
-						drag_selection.push_back(selection[i]);
-					}
-				}
+				List<CanvasItem *> selection = _populate_drag_selection(!is_origin_only);
 
 				if (selection.size() > 0) {
 					drag_type = DRAG_MOVE;
@@ -2253,11 +2283,13 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 
 				// store original child positions
 				children_positions.clear();
-				for (int i = 0; i < drag_selection.size(); i++) {
-					for (int j = 0; j < drag_selection[i]->get_child_count(); j++) {
-						CanvasItem *child = Object::cast_to<CanvasItem>(drag_selection[i]->get_child(j));
-						if (child) {
-							children_positions[child] = child->_edit_get_position();
+				for (int i = 0; i < selection.size(); i++) {
+					for (int j = 0; j < selection[i]->get_child_count(); j++) {
+						CanvasItem *child = Object::cast_to<CanvasItem>(selection[i]->get_child(j));
+						if (child && !_is_object_selected(child) && !_is_node_locked(child) && _is_node_movable(child)) {
+							children_positions[child] = child->get_transform().get_origin();
+						} else if (children_positions.has(child)) {
+							children_positions.erase(child);
 						}
 					}
 				}
@@ -2269,7 +2301,6 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 
 	// Valla Edits: add is_origin_only
 	if (drag_type == DRAG_MOVE) {
-		bool is_origin_only = Input::get_singleton()->is_key_pressed(KEY_A);
 		/*
 		List<CanvasItem *> drag_selection_and_children;
 		
@@ -2335,6 +2366,7 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 
 			bool force_no_IK = m->get_alt();
 			int index = 0;
+
 			for (List<CanvasItem *>::Element *E = drag_selection.front(); E; E = E->next()) {
 				CanvasItem *canvas_item = E->get();
 				CanvasItemEditorSelectedItem *se = editor_selection->get_node_editor_data<CanvasItemEditorSelectedItem>(canvas_item);
@@ -2352,25 +2384,29 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 						_restore_canvas_item_ik_chain(node2d, &(all_bones_ik_states[index]));
 						real_t final_leaf_node_rotation = node2d->get_global_transform_with_canvas().get_rotation();
 						node2d->rotate(initial_leaf_node_rotation - final_leaf_node_rotation);
-						_solve_IK(node2d, new_pos);
+
+						//manually parse out child selections if origin only
+						if (!is_origin_only || (is_origin_only && !_is_object_selected(Object::cast_to<Node2D>(node2d->get_parent()))))
+							_solve_IK(node2d, new_pos);
 						// counteract child offsets
 						if (is_origin_only) {
 							for (int i = 0; i < node2d->get_child_count(); i++) {
 								Node2D *child2d = Object::cast_to<Node2D>(node2d->get_child(i));
-								if (child2d) {
-
-									_solve_IK(child2d, Vector2(children_positions.get(child2d, Vector2(0, 0))) + child_offset / canvas_item->_edit_get_scale());
+								if (child2d && children_positions.has(node2d->get_child(i))) {
+									_solve_IK(child2d, Vector2(children_positions[node2d->get_child(i)]) + child_offset / canvas_item->_edit_get_scale());
 								}
 							}
 						}
 					} else {
-						canvas_item->_edit_set_position(canvas_item->_edit_get_position() + xform.xform(new_pos) - xform.xform(previous_pos));
+						//manually parse out child selections if origin only
+						if (!is_origin_only || (is_origin_only && !_is_object_selected(Object::cast_to<Node2D>(canvas_item->get_parent()))))
+							canvas_item->_edit_set_position(canvas_item->_edit_get_position() + xform.xform(new_pos) - xform.xform(previous_pos));
 						// counteract child offsets
 						if (is_origin_only) {
-							for (int i = 0; i < node2d->get_child_count(); i++) {
+							for (int i = 0; i < canvas_item->get_child_count(); i++) {
 								CanvasItem *canvas_child = Object::cast_to<CanvasItem>(canvas_item->get_child(i));
-								if (canvas_child) {
-									canvas_child->_edit_set_position(Vector2(children_positions.get(canvas_child, Vector2(0, 0))) + child_offset / canvas_item->_edit_get_scale());
+								if (canvas_child && children_positions.has(canvas_item->get_child(i))) {
+									canvas_child->_edit_set_position(Vector2(children_positions[canvas_item->get_child(i)]) + child_offset / canvas_item->_edit_get_scale());
 								}
 							}
 						}
@@ -2378,6 +2414,7 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 				}
 				index++;
 			}
+			
 			return true;
 		}
 

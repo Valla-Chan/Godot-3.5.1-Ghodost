@@ -504,6 +504,10 @@ private:
 
 	void _draw_viewport();
 
+	bool _is_object_selected(CanvasItem *p_object);
+	bool _is_child_selected(const Ref<CanvasItem> &p_object, const int p_child_index);
+	List<CanvasItem *> _populate_drag_selection(const bool include_children);
+
 	bool _gui_input_anchors(const Ref<InputEvent> &p_event);
 	bool _gui_input_move(const Ref<InputEvent> &p_event);
 	bool _gui_input_open_scene_on_double_click(const Ref<InputEvent> &p_event);
