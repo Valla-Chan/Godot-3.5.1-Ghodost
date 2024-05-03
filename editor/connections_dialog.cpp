@@ -155,7 +155,7 @@ void ConnectDialog::_tree_node_selected() {
 	dst_path = source->get_path_to(current);
 	_update_ok_enabled();
 
-	method_option_btn->set_disabled(current->get_script_instance() == nullptr);
+	method_option_btn->set_disabled(current->get_script_instance() == nullptr && (!current->has_method("play") && !current->has_method("set_visible")));
 	method_option_btn->release_focus();
 
 }
@@ -414,14 +414,17 @@ void ConnectDialog::_select_method_pressed() {
 		return;
 	}
 
-	if (!advanced->is_pressed() && target->get_script().is_null()) {
+	if (!advanced->is_pressed() && target->get_script().is_null() && !target->has_method("play") && !target->has_method("set_visible")) {
 		return;
 	}
 
 
-	if (target->get_script_instance() != nullptr) {
+	if (target->get_script_instance() != nullptr || target->has_method("play") || target->has_method("set_visible")) {
 		//target->get_method_list(&dst_methods);
-		target->get_script_instance()->get_method_list(&dst_methods);
+		dst_methods.clear();
+		if (target->get_script_instance() != nullptr) {
+			target->get_script_instance()->get_method_list(&dst_methods);
+		}
 		if (target->has_method("set_visible")) {
 			dst_methods.push_back(MethodInfo("set_visible"));
 		}
