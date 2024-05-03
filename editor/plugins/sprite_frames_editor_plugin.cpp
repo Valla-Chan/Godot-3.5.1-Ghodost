@@ -1834,7 +1834,6 @@ void SpriteFramesEditorPlugin::edit(Object *p_object) {
 		}
 	}
 
-	//edited_object = EditorNode::get_singleton()->get_inspector()->get_edited_object();
 	edited_object = p_object;
 	if (edited_object && (edited_object->is_class("AnimatedTextureRect") || edited_object->is_class("AnimatedSprite") || edited_object->is_class("AnimatedSprite3D"))) {
 		edited_object->connect("frames_resource_changed", this, "edit_current_object");
