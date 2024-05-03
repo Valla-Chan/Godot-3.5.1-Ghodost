@@ -943,6 +943,10 @@ void AnimatedSprite3D::set_sprite_frames(const Ref<SpriteFrames> &p_frames) {
 	if (frames.is_valid()) {
 		frames->disconnect("changed", this, "_res_changed");
 	}
+	bool emit_changed_signal = false;
+	if (frames != p_frames) {
+		emit_changed_signal = true;
+	}
 	frames = p_frames;
 	if (frames.is_valid()) {
 		frames->connect("changed", this, "_res_changed");
@@ -958,6 +962,10 @@ void AnimatedSprite3D::set_sprite_frames(const Ref<SpriteFrames> &p_frames) {
 	_reset_timeout();
 	_queue_update();
 	update_configuration_warning();
+
+	if (emit_changed_signal) {
+		emit_signal("frames_resource_changed");
+	}
 }
 
 Ref<SpriteFrames> AnimatedSprite3D::get_sprite_frames() const {
@@ -1166,6 +1174,7 @@ void AnimatedSprite3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_animation_locked", "lock"), &AnimatedSprite3D::set_animation_locked);
 	ClassDB::bind_method(D_METHOD("is_animation_locked"), &AnimatedSprite3D::is_animation_locked);
 
+	ADD_SIGNAL(MethodInfo("frames_resource_changed"));
 	ADD_SIGNAL(MethodInfo("frame_changed"));
 	ADD_SIGNAL(MethodInfo("animation_changed"));
 	ADD_SIGNAL(MethodInfo("animation_finished"));

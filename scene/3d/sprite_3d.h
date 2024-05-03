@@ -246,6 +246,8 @@ public:
 	void set_frame(int p_frame);
 	int get_frame() const;
 
+	void resource_changed(const RES &p_res);
+
 	virtual Rect2 get_item_rect() const;
 
 	virtual String get_configuration_warning() const;

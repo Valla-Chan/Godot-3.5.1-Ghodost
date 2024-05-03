@@ -262,6 +262,10 @@ void AnimatedTextureRect::set_sprite_frames(const Ref<SpriteFrames> &p_frames) {
 		frames->disconnect("frame_changed", this, "set_frame");
 		frames->disconnect("animation_changed", this, "set_animation");
 	}
+	bool emit_changed_signal = false;
+	if (frames != p_frames) {
+		emit_changed_signal = true;
+	}
 	frames = p_frames;
 	if (frames.is_valid()) {
 		frames->connect("changed", this, "_res_changed");
@@ -279,6 +283,10 @@ void AnimatedTextureRect::set_sprite_frames(const Ref<SpriteFrames> &p_frames) {
 	_reset_timeout();
 	update();
 	update_configuration_warning();
+
+	if (emit_changed_signal) {
+		emit_signal("frames_resource_changed");
+	}
 }
 
 Ref<SpriteFrames> AnimatedTextureRect::get_sprite_frames() const {
@@ -472,8 +480,6 @@ void AnimatedTextureRect::get_argument_options(const StringName &p_function, int
 	}
 	Node::get_argument_options(p_function, p_idx, r_options);
 }
-//
-
 
 void AnimatedTextureRect::_bind_methods() {
 
@@ -505,6 +511,7 @@ void AnimatedTextureRect::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_res_changed"), &AnimatedTextureRect::_res_changed);
 
+	ADD_SIGNAL(MethodInfo("frames_resource_changed"));
 	ADD_SIGNAL(MethodInfo("animation_locked_changed"));
 	ADD_SIGNAL(MethodInfo("animation_changed"));
 	ADD_SIGNAL(MethodInfo("frame_changed"));

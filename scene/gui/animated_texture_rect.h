@@ -135,6 +135,8 @@ public:
 	void set_animation_locked(bool p_lock);
 	bool is_animation_locked() const;
 
+	void resource_changed(const RES &p_res);
+
 	AnimatedTextureRect();
 	~AnimatedTextureRect();
 };

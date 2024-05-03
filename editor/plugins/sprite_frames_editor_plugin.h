@@ -230,6 +230,7 @@ protected:
 public:
 	virtual String get_name() const { return "SpriteFrames"; }
 	bool has_main_screen() const { return false; }
+	void edit_current_object();
 	virtual void edit(Object *p_object);
 	virtual bool handles(Object *p_object) const;
 	virtual void make_visible(bool p_visible);

@@ -776,7 +776,8 @@ void SpriteFramesEditor::_delete_pressed() {
 }
 
 #include "scene/gui/animated_texture_rect.h"
-#include "scene/2d/animated_sprite.h"
+//#include "scene/2d/animated_sprite.h"
+
 // When double clicked, make the selected nodes change animation and frame.
 void SpriteFramesEditor::_frame_notify_send(int index) {
 	//Object* selectob = EditorNode::get_singleton()->get_inspector()->get_edited_object();
@@ -1780,12 +1781,13 @@ SpriteFramesEditor::SpriteFramesEditor() {
 
 void SpriteFramesEditor::sync_anim_slot() {
 	// VALLA EDITS
+
 	// make this switch animations to the one set in the first selected object.
 	Array selected_nodes = EditorNode::get_singleton()->get_editor_selection()->get_selected_nodes();
 	for (int i = 0; i < selected_nodes.size(); i++) {
 		if (Object::cast_to<AnimatedTextureRect>(selected_nodes[i])) {
 			AnimatedTextureRect *rect = Object::cast_to<AnimatedTextureRect>(selected_nodes[i]);
-			if (rect->get_sprite_frames()->reference() == frames->reference()) {
+			if (rect->get_sprite_frames()->reference() && rect->get_sprite_frames()->reference() == frames->reference()) {
 				edited_anim = rect->get_animation();
 				ERR_FAIL_COND(!frames->has_animation(edited_anim));
 				_update_library(false);
@@ -1794,7 +1796,7 @@ void SpriteFramesEditor::sync_anim_slot() {
 			}
 		} else if (Object::cast_to<AnimatedSprite>(selected_nodes[i])) {
 			AnimatedSprite *sprite = Object::cast_to<AnimatedSprite>(selected_nodes[i]);
-			if (sprite->get_sprite_frames()->reference() == frames->reference()) {
+			if (sprite->get_sprite_frames()->reference() && sprite->get_sprite_frames()->reference() == frames->reference()) {
 				edited_anim = sprite->get_animation();
 				ERR_FAIL_COND(!frames->has_animation(edited_anim));
 				_update_library(false);
@@ -1803,7 +1805,7 @@ void SpriteFramesEditor::sync_anim_slot() {
 			}
 		} else if (Object::cast_to<AnimatedSprite3D>(selected_nodes[i])) {
 			AnimatedSprite3D *sprite = Object::cast_to<AnimatedSprite3D>(selected_nodes[i]);
-			if (sprite->get_sprite_frames()->reference() == frames->reference()) {
+			if (sprite->get_sprite_frames()->reference() && sprite->get_sprite_frames()->reference() == frames->reference()) {
 				edited_anim = sprite->get_animation();
 				ERR_FAIL_COND(!frames->has_animation(edited_anim));
 				_update_library(false);
@@ -1814,14 +1816,36 @@ void SpriteFramesEditor::sync_anim_slot() {
 	}
 }
 
+Object *edited_object;
+
+void SpriteFramesEditorPlugin::edit_current_object() {
+	if (edited_object && EditorNode::get_singleton()->get_inspector()->get_edited_object() == edited_object) {
+		edit(edited_object);
+	}
+}
+
+
 void SpriteFramesEditorPlugin::edit(Object *p_object) {
 	frames_editor->set_undo_redo(&get_undo_redo());
+
+	if (edited_object && (edited_object->is_class("AnimatedTextureRect") || edited_object->is_class("AnimatedSprite") || edited_object->is_class("AnimatedSprite3D"))) {
+		if (edited_object->is_connected("frames_resource_changed", this, "edit_current_object")) {
+			edited_object->disconnect("frames_resource_changed", this, "edit_current_object");
+		}
+	}
+
+	//edited_object = EditorNode::get_singleton()->get_inspector()->get_edited_object();
+	edited_object = p_object;
+	if (edited_object && (edited_object->is_class("AnimatedTextureRect") || edited_object->is_class("AnimatedSprite") || edited_object->is_class("AnimatedSprite3D"))) {
+		edited_object->connect("frames_resource_changed", this, "edit_current_object");
+	}
 
 	SpriteFrames *s;
 	AnimatedSprite *animated_sprite = Object::cast_to<AnimatedSprite>(p_object);
 	AnimatedSprite3D *animated_sprite3d = Object::cast_to<AnimatedSprite3D>(p_object);
 	AnimatedTextureRect *animated_tex = Object::cast_to<AnimatedTextureRect>(p_object);
 	frames_editor->animation_locked = false;
+
 	if (animated_sprite) {
 		s = *animated_sprite->get_sprite_frames();
 		frames_editor->animation_locked = animated_sprite->is_animation_locked();
@@ -1875,13 +1899,13 @@ void SpriteFramesEditorPlugin::make_visible(bool p_visible) {
 		}
 	}
 }
-
 void SpriteFramesEditorPlugin::update_vis() {
 	make_visible(false);
 }
 
 void SpriteFramesEditorPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("update_vis"), &SpriteFramesEditorPlugin::update_vis);
+	ClassDB::bind_method(D_METHOD("edit_current_object"), &SpriteFramesEditorPlugin::edit_current_object);
 }
 
 SpriteFramesEditorPlugin::SpriteFramesEditorPlugin(EditorNode *p_node) {
