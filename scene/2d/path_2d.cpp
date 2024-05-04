@@ -86,6 +86,10 @@ bool Path2D::_edit_is_selected_on_click(const Point2 &p_point, double p_toleranc
 }
 #endif
 
+Rect2 Path2D::get_bbox() const {
+	return _edit_get_rect();
+}
+
 void Path2D::_notification(int p_what) {
 	if (p_what == NOTIFICATION_DRAW && curve.is_valid()) {
 		//draw the curve!!
@@ -151,6 +155,7 @@ Ref<Curve2D> Path2D::get_curve() const {
 }
 
 void Path2D::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_bbox"), &Path2D::get_bbox);
 	ClassDB::bind_method(D_METHOD("set_curve", "curve"), &Path2D::set_curve);
 	ClassDB::bind_method(D_METHOD("get_curve"), &Path2D::get_curve);
 	ClassDB::bind_method(D_METHOD("_curve_changed"), &Path2D::_curve_changed);
