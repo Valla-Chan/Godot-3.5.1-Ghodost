@@ -2312,6 +2312,13 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 			new_scene();
 
 		} break;
+		// VALLA EDITS
+		case FILE_NEW_INHERITED_SCENE_CURRENT: {
+			Node *scene = editor_data.get_edited_scene_root(editor_data.get_edited_scene());
+			if (scene && scene->get_filename() != "") {
+				load_scene(scene->get_filename(), false, true);
+			}
+		} break;
 		case FILE_NEW_INHERITED_SCENE:
 		case FILE_OPEN_SCENE: {
 			file->set_mode(EditorFileDialog::MODE_OPEN_FILE);
@@ -4982,6 +4989,8 @@ void EditorNode::_scene_tab_input(const Ref<InputEvent> &p_input) {
 			scene_tabs_context_menu->set_size(Size2(1, 1));
 
 			scene_tabs_context_menu->add_shortcut(ED_GET_SHORTCUT("editor/new_scene"), FILE_NEW_SCENE);
+			// VALLA EDITS
+			scene_tabs_context_menu->add_shortcut(ED_GET_SHORTCUT("editor/new_inherited_scene"), FILE_NEW_INHERITED_SCENE_CURRENT);
 			if (scene_tabs->get_hovered_tab() >= 0) {
 				scene_tabs_context_menu->add_shortcut(ED_GET_SHORTCUT("editor/save_scene"), FILE_SAVE_SCENE);
 				scene_tabs_context_menu->add_shortcut(ED_GET_SHORTCUT("editor/save_scene_as"), FILE_SAVE_AS_SCENE);
