@@ -1172,10 +1172,7 @@ void EditorSelection::update() {
 	changed = false;
 	if (!emitted) {
 		emitted = true;
-		// VALLA EDITS: this check may cause errors but it is done to prevent a spriteframes crash.
-		if (!nl_changed) {
-			call_deferred("_emit_change");
-		}
+		call_deferred("_emit_change");
 	}
 }
 
