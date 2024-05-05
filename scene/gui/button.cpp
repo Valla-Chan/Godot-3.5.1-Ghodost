@@ -33,8 +33,8 @@
 #include "core/translation.h"
 #include "servers/visual_server.h"
 
-Size2 Button::get_minimum_size() const {
-	Size2 minsize = get_font("font")->get_string_size(xl_text);
+Size2 Button::get_size_for_text(const String &p_text) const {
+	Size2 minsize = get_font("font")->get_string_size(p_text);
 	if (clip_text) {
 		minsize.width = 0;
 	}
@@ -62,6 +62,10 @@ Size2 Button::get_minimum_size() const {
 	}
 
 	return get_stylebox("normal")->get_minimum_size() + minsize;
+}
+
+Size2 Button::get_minimum_size() const {
+	return get_size_for_text(xl_text);
 }
 
 void Button::_set_internal_margin(Margin p_margin, float p_value) {
@@ -361,6 +365,8 @@ Button::TextAlign Button::get_icon_align() const {
 }
 
 void Button::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_size_for_text", "text"), &Button::get_size_for_text);
+
 	ClassDB::bind_method(D_METHOD("set_text", "text"), &Button::set_text);
 	ClassDB::bind_method(D_METHOD("get_text"), &Button::get_text);
 	ClassDB::bind_method(D_METHOD("set_button_icon", "texture"), &Button::set_icon);

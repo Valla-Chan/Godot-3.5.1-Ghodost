@@ -84,7 +84,7 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 	} else {
 		subdirectory_item->set_collapsed(uncollapsed_paths.find(lpath) < 0);
 	}
-	if (get_filter_type() != 0) {
+	if (get_filter_type() == 1 || get_filter_type() == 5) {
 		if (searched_string.length() > 0 && dname.to_lower().find(searched_string) >= 0) {
 			parent_should_expand = true;
 		}
@@ -114,25 +114,79 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 			}
 
 			String file_name = p_dir->get_file(i);
-			if (searched_string.length() > 0) {
+			if (searched_string.length() > 0 || (get_filter_type() >= 2 && get_filter_type() <= 4)) {
 				switch (get_filter_type()) {
-					case 0: { // Files only. Normal search mode.
+					//// Files only. Normal search mode.
+					case 0: {
 						if (file_name.to_lower().find(searched_string) < 0) {
 							// The searched string is not in the file name, so we skip it.
 							continue;
 						} else
 							parent_should_expand = true;
 					} break;
-					case 1: {  // Folders only. Show ALL valid folder contents.
+					//// Folders only. Show ALL valid folder contents.
+					case 1: {  
 						if (lpath.to_lower().find(searched_string) < 0) {
 							// The searched string is not in the file path, so we skip it.
 							continue;
 						} else {
 							parent_should_expand = true;
-							//subdirectory_item->set_collapsed(true);
 						}
 					} break;
-					case 2: { // Files and Folders. Show ALL valid folder contents, and extra matching files.
+					//// Ents. exclude scripts.
+					case 2: { 
+						// skip non-scene file types, and script paths.
+						if ( (file_name.to_lower().find(".") >= 0 && !file_name.to_lower().ends_with("scn")) || (lpath.to_lower().find("/scripts") >= 0)) {
+							continue;
+						}
+						// no search, fake a general term.
+						if (searched_string.length() == 0) {
+							searched_string = ".";
+						}
+						if (file_name.to_lower().find(searched_string) >= 0 || (lpath.to_lower().find(searched_string) >= 0 )) {
+							if (lpath.to_lower().find("ents/") >= 0) {
+								parent_should_expand = true;
+							}
+						} else {
+							continue;
+						}
+					} break;
+					//// Scripts
+					case 3: {
+						// skip non-script file types
+						if (file_name.to_lower().find(".") >= 0 && !file_name.to_lower().ends_with("gd")) {
+							continue;
+						}
+						// no search, fake a general term.
+						if (searched_string.length() == 0) {
+							searched_string = ".";
+						}
+						if (file_name.to_lower().find(searched_string) >= 0 || (lpath.to_lower().find(searched_string) >= 0)) {
+							parent_should_expand = true;
+						} else {
+							continue;
+						}
+					} break;
+					//// Scenes
+					case 4: {
+						// skip non-scene file types, and script paths.
+						if ((file_name.to_lower().find(".") >= 0 && !file_name.to_lower().ends_with("scn")) || (lpath.to_lower().find("/scripts") >= 0 || lpath.to_lower().find("/objects") >= 0)) {
+							continue;
+						}
+						// no search, fake a general term.
+						if (searched_string.length() == 0) {
+							searched_string = ".";
+						}
+						if (file_name.to_lower().find(searched_string) >= 0 || (lpath.to_lower().find(searched_string) >= 0)) {
+							if (lpath.to_lower().find("scenes/") >= 0) {
+								parent_should_expand = true;
+							}
+						} else {
+							continue;
+						}
+					} break;
+					//// Files and Folders. Show ALL valid folder contents, and extra matching files.
+					case 5: {
 						if (file_name.to_lower().find(searched_string) >= 0) {
 							parent_should_expand = true;
 						} else if (lpath.to_lower().find(searched_string) < 0) {
@@ -140,7 +194,6 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 							continue;
 						} else {
 							parent_should_expand = true;
-							//subdirectory_item->set_collapsed(true);
 						}
 					} break;
 					
@@ -2942,7 +2995,12 @@ FileSystemDock::FileSystemDock(EditorNode *p_editor) {
 	tree_search_types = memnew(OptionButton);
 	tree_search_types->add_item(TTR("File"));
 	tree_search_types->add_item(TTR("Folder"));
-	tree_search_types->add_item(TTR("Both"));
+	tree_search_types->add_item(TTR("Ents"));
+	tree_search_types->add_item(TTR("Scripts"));
+	tree_search_types->add_item(TTR("Scenes"));
+	tree_search_types->add_item(TTR("All"));
+	tree_search_types->set_text_align(Button::ALIGN_CENTER);
+	tree_search_types->set_custom_minimum_size(tree_search_types->get_size_for_text(TTR("Scripts")));
 	tree_search_types->select(0);
 	toolbar2_hbc->add_child(tree_search_types);
 	tree_search_types->connect("item_selected", this, "_filter_type_changed");

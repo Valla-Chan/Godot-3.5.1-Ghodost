@@ -60,6 +60,7 @@ protected:
 	static void _bind_methods();
 
 public:
+	Size2 get_size_for_text(const String &p_text) const;
 	virtual Size2 get_minimum_size() const;
 
 	void set_text(const String &p_text);
