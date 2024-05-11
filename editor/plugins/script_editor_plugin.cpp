@@ -1831,31 +1831,29 @@ void ScriptEditor::_update_script_names() {
 	for (int i = 0; i < tab_container->get_child_count(); i++) {
 		ScriptEditorBase *se = Object::cast_to<ScriptEditorBase>(tab_container->get_child(i));
 		if (se) {
+			Ref<Texture> icon;
+			Ref<Script> script = se->get_edited_resource();
 
-			Ref<Texture> icon = EditorNode::get_singleton()->get_object_icon(*se->get_edited_resource(), "Node");
-
-			// get custom icon based on path
-			if (se->get_edited_resource()->get_path().find("/addons/") > -1) {
-				icon = get_icon("PluginScript", "EditorIcons");
-			} else if (se->get_edited_resource()->get_path().to_lower().find("/locale/") > -1) {
-				icon = get_icon("TextFile", "EditorIcons");
-			} else if (se->get_edited_resource()->get_path().to_lower().find("/global/") > -1) {
-				icon = get_icon("Node", "EditorIcons");
+			// has cached icon
+			if (script_icon_cache.has(script) && script_icon_cache[script].is_valid()) {
+				icon = script_icon_cache[script];
+			} else {
+				icon = EditorNode::get_singleton()->get_object_icon(*se->get_edited_resource(), "Node");
+				// ensure icon is grayscale
+				Ref<Image> icondata = icon->get_data();
+				icondata->convert(Image::FORMAT_LA8);
+				icondata->convert(Image::FORMAT_RGBA8);
+				Ref<ImageTexture> image_texture = memnew(ImageTexture);
+				image_texture->create_from_image(icondata, ImageTexture::FLAGS_DEFAULT);
+				icon = image_texture;
+				script_icon_cache[script] = icon;
 			}
 
-			// ensure icon is grayscale
-			Ref<Image> icondata = icon->get_data();
-			icondata->convert(Image::FORMAT_LA8);
-			icondata->convert(Image::FORMAT_RGBA8);
-			Ref<ImageTexture> image_texture = memnew(ImageTexture);
-			image_texture->create_from_image(icondata, ImageTexture::FLAGS_DEFAULT);
-
-			//Ref<Texture> icon = se->get_icon(); // legacy
 			String path = se->get_edited_resource()->get_path();
 			String name = se->get_name();
 
 			_ScriptEditorItemData sd;
-			sd.icon = image_texture;
+			sd.icon = icon;
 			sd.name = name;
 			sd.tooltip = path;
 			sd.index = i;

@@ -152,6 +152,8 @@ public:
 	void set_lossy_storage_quality(float p_lossy_storage_quality);
 	float get_lossy_storage_quality() const;
 
+	void convert_to_grayscale();
+
 	void set_size_override(const Size2 &p_size);
 
 	virtual void set_path(const String &p_path, bool p_take_over = false);

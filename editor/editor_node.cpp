@@ -4062,8 +4062,27 @@ Ref<Texture> EditorNode::get_object_icon(const Object *p_object, const String &p
 
 	if (script.is_valid() && !script_icon_cache.has(script)) {
 		Ref<Script> base_script = script;
+
 		while (base_script.is_valid()) {
 			StringName name = ScriptServer::get_global_class_name(base_script->get_path());
+
+			if (name == "") {
+				// get custom script icon based on path
+				if (script->get_path().find("/addons/") > -1) {
+					Ref<ImageTexture> icon = gui_base->get_icon("PluginScript", "EditorIcons");
+					script_icon_cache[script] = icon;
+					return icon;
+				} else if (script->get_path().to_lower().find("/locale/") > -1) {
+					Ref<ImageTexture> icon = gui_base->get_icon("TextFile", "EditorIcons");
+					script_icon_cache[script] = icon;
+					return icon;
+				} else if (script->get_path().to_lower().find("/global/") > -1) {
+					Ref<ImageTexture> icon = gui_base->get_icon("Node", "EditorIcons");
+					script_icon_cache[script] = icon;
+					return icon;
+				}
+			}
+
 			String icon_path = EditorNode::get_editor_data().script_class_get_icon_path(name);
 			Ref<ImageTexture> icon = _load_custom_class_icon(icon_path);
 			if (icon.is_valid()) {

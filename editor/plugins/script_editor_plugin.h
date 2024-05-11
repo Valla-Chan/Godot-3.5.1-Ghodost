@@ -210,6 +210,8 @@ class ScriptEditor : public PanelContainer {
 	Button *site_search;
 	EditorHelpSearch *help_search_dialog;
 
+	Map<Ref<Script>, Ref<Texture>> script_icon_cache;
+
 	ItemList *script_list;
 	HSplitContainer *script_split;
 	ItemList *members_overview;

@@ -368,6 +368,14 @@ float ImageTexture::get_lossy_storage_quality() const {
 	return lossy_storage_quality;
 }
 
+// WARNING: lossy conversion!
+void ImageTexture::convert_to_grayscale() {
+	Ref<Image> imgdata = get_data();
+	imgdata->convert(Image::FORMAT_LA8);
+	imgdata->convert(Image::FORMAT_RGBA8);
+	create_from_image(imgdata, flags);
+}
+
 void ImageTexture::_set_data(Dictionary p_data) {
 	Ref<Image> img = p_data["image"];
 	ERR_FAIL_COND(!img.is_valid());
@@ -388,6 +396,7 @@ void ImageTexture::_bind_methods() {
 #ifndef DISABLE_DEPRECATED
 	ClassDB::bind_method(D_METHOD("load", "path"), &ImageTexture::load);
 #endif
+	ClassDB::bind_method(D_METHOD("convert_to_grayscale"), &ImageTexture::convert_to_grayscale);
 	ClassDB::bind_method(D_METHOD("set_data", "image"), &ImageTexture::set_data);
 	ClassDB::bind_method(D_METHOD("set_storage", "mode"), &ImageTexture::set_storage);
 	ClassDB::bind_method(D_METHOD("get_storage"), &ImageTexture::get_storage);
