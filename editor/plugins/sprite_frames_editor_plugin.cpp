@@ -1793,6 +1793,9 @@ void SpriteFramesEditor::sync_anim_slot() {
 				_update_library(false);
 				animations->set_selected(animations_map[edited_anim]);
 				break;
+			} else if (rect->get_sprite_frames() == nullptr) {
+				frames = memnew(SpriteFrames);
+				rect->set_sprite_frames(frames);
 			}
 		} else if (Object::cast_to<AnimatedSprite>(selected_nodes[i])) {
 			AnimatedSprite *sprite = Object::cast_to<AnimatedSprite>(selected_nodes[i]);
@@ -1802,6 +1805,9 @@ void SpriteFramesEditor::sync_anim_slot() {
 				_update_library(false);
 				animations->set_selected(animations_map[edited_anim]);
 				break;
+			} else if (sprite->get_sprite_frames() == nullptr) {
+				frames = memnew(SpriteFrames);
+				sprite->set_sprite_frames(frames);
 			}
 		} else if (Object::cast_to<AnimatedSprite3D>(selected_nodes[i])) {
 			AnimatedSprite3D *sprite = Object::cast_to<AnimatedSprite3D>(selected_nodes[i]);
@@ -1811,6 +1817,9 @@ void SpriteFramesEditor::sync_anim_slot() {
 				_update_library(false);
 				animations->set_selected(animations_map[edited_anim]);
 				break;
+			} else if (sprite->get_sprite_frames() == nullptr) {
+				frames = memnew(SpriteFrames);
+				sprite->set_sprite_frames(frames);
 			}
 		}
 	}
