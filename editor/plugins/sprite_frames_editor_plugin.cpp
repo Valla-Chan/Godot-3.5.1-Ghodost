@@ -1787,7 +1787,7 @@ void SpriteFramesEditor::sync_anim_slot() {
 	for (int i = 0; i < selected_nodes.size(); i++) {
 		if (Object::cast_to<AnimatedTextureRect>(selected_nodes[i])) {
 			AnimatedTextureRect *rect = Object::cast_to<AnimatedTextureRect>(selected_nodes[i]);
-			if (rect->get_sprite_frames()->reference() && rect->get_sprite_frames()->reference() == frames->reference()) {
+			if (rect->get_sprite_frames() != nullptr && rect->get_sprite_frames()->reference() == frames->reference()) {
 				edited_anim = rect->get_animation();
 				ERR_FAIL_COND(!frames->has_animation(edited_anim));
 				_update_library(false);
@@ -1796,7 +1796,7 @@ void SpriteFramesEditor::sync_anim_slot() {
 			}
 		} else if (Object::cast_to<AnimatedSprite>(selected_nodes[i])) {
 			AnimatedSprite *sprite = Object::cast_to<AnimatedSprite>(selected_nodes[i]);
-			if (sprite->get_sprite_frames()->reference() && sprite->get_sprite_frames()->reference() == frames->reference()) {
+			if (sprite->get_sprite_frames() != nullptr && sprite->get_sprite_frames()->reference() == frames->reference()) {
 				edited_anim = sprite->get_animation();
 				ERR_FAIL_COND(!frames->has_animation(edited_anim));
 				_update_library(false);
@@ -1805,7 +1805,7 @@ void SpriteFramesEditor::sync_anim_slot() {
 			}
 		} else if (Object::cast_to<AnimatedSprite3D>(selected_nodes[i])) {
 			AnimatedSprite3D *sprite = Object::cast_to<AnimatedSprite3D>(selected_nodes[i]);
-			if (sprite->get_sprite_frames()->reference() && sprite->get_sprite_frames()->reference() == frames->reference()) {
+			if (sprite->get_sprite_frames() != nullptr && sprite->get_sprite_frames()->reference() == frames->reference()) {
 				edited_anim = sprite->get_animation();
 				ERR_FAIL_COND(!frames->has_animation(edited_anim));
 				_update_library(false);
