@@ -306,8 +306,27 @@ void SpriteFramesEditor::_sheet_zoom_on_position(float p_zoom, const Vector2 &p_
 	split_sheet_scroll->set_v_scroll(offset.y);
 }
 
+// auto zoom the sheet editor
+
+void SpriteFramesEditor::_sheet_zoom_auto() {
+	//if (sheet_zoom == 1) {
+	_sheet_zoom_in();
+	_sheet_zoom_out();
+	while (split_sheet_preview->get_custom_minimum_size().y < 192 && split_sheet_preview->get_custom_minimum_size().x < 192) {
+		_sheet_zoom_in();
+	}
+	while (split_sheet_preview->get_custom_minimum_size().y > 510 || split_sheet_preview->get_custom_minimum_size().x > 510) {
+		_sheet_zoom_out();
+	}
+	Size2 texture_size = split_sheet_preview->get_texture()->get_size();
+	split_sheet_preview->set_custom_minimum_size(texture_size * sheet_zoom);
+	//}
+	
+}
+
 void SpriteFramesEditor::_sheet_zoom_in() {
 	_sheet_zoom_on_position(scale_ratio, Vector2());
+	print_line(vformat("%d", split_sheet_preview->get_custom_minimum_size().x));
 }
 
 void SpriteFramesEditor::_sheet_zoom_out() {
@@ -403,11 +422,12 @@ void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
 	last_frame_selected = -1;
 
 	bool new_texture = texture != split_sheet_preview->get_texture();
+	bool new_size = split_sheet_preview->get_texture() == nullptr || texture->get_size() != split_sheet_preview->get_texture()->get_size();
 	split_sheet_preview->set_texture(texture);
-	if (new_texture) {
-		// Valla edits: make this not go back to 4x4 every time!!
-		// Only run once.
+	{
+		// Valla edits: make this not go back to 4x1 every time!!
 		const Size2i size = texture->get_size();
+
 		// Reset spin max.
 		split_sheet_size_x->set_max(size.x);
 		split_sheet_size_y->set_max(size.y);
@@ -418,11 +438,11 @@ void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
 		dominant_param = PARAM_FRAME_COUNT;
 		updating_split_settings = true;
 
-		if (firsttexture) {
+		if (firsttexture || (new_texture && new_size)) {
 			firsttexture = false;
-			// Different texture, reset to 4x4.
+			// Different texture, reset to 4x1.
 			split_sheet_h->set_value(4);
-			split_sheet_v->set_value(4);
+			split_sheet_v->set_value(1);
 		}
 		split_sheet_size_x->set_value(size.x / split_sheet_h->get_value());
 		split_sheet_size_y->set_value(size.y / split_sheet_v->get_value());
@@ -433,7 +453,7 @@ void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
 		updating_split_settings = false;
 
 		// Reset zoom.
-		_sheet_zoom_reset();
+		_sheet_zoom_auto();
 	}
 	split_sheet_dialog->popup_centered_ratio(0.65);
 }
@@ -460,6 +480,7 @@ void SpriteFramesEditor::_notification(int p_what) {
 			split_sheet_zoom_out->set_icon(get_icon("ZoomLess", "EditorIcons"));
 			split_sheet_zoom_reset->set_icon(get_icon("ZoomReset", "EditorIcons"));
 			split_sheet_zoom_in->set_icon(get_icon("ZoomMore", "EditorIcons"));
+			split_sheet_zoom_auto->set_icon(get_icon("PackedDataContainer", "EditorIcons"));
 			split_sheet_scroll->add_style_override("bg", get_stylebox("bg", "Tree"));
 
 			_frame_copy_btn->set_icon(get_icon("ActionCopy", "EditorIcons"));
@@ -1418,6 +1439,7 @@ void SpriteFramesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_sheet_scroll_input"), &SpriteFramesEditor::_sheet_scroll_input);
 	ClassDB::bind_method(D_METHOD("_sheet_spin_changed"), &SpriteFramesEditor::_sheet_spin_changed);
 	ClassDB::bind_method(D_METHOD("_sheet_add_frames"), &SpriteFramesEditor::_sheet_add_frames);
+	ClassDB::bind_method(D_METHOD("_sheet_zoom_auto"), &SpriteFramesEditor::_sheet_zoom_auto);
 	ClassDB::bind_method(D_METHOD("_sheet_zoom_in"), &SpriteFramesEditor::_sheet_zoom_in);
 	ClassDB::bind_method(D_METHOD("_sheet_zoom_out"), &SpriteFramesEditor::_sheet_zoom_out);
 	ClassDB::bind_method(D_METHOD("_sheet_zoom_reset"), &SpriteFramesEditor::_sheet_zoom_reset);
@@ -1735,6 +1757,13 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	split_sheet_zoom_margin->add_constant_override("margin_left", 5);
 	HBoxContainer *split_sheet_zoom_hb = memnew(HBoxContainer);
 	split_sheet_zoom_margin->add_child(split_sheet_zoom_hb);
+
+	split_sheet_zoom_auto = memnew(ToolButton);
+	split_sheet_zoom_auto->set_focus_mode(FOCUS_NONE);
+	split_sheet_zoom_auto->set_tooltip(TTR("Auto Zoom"));
+	split_sheet_zoom_auto->connect("pressed", this, "_sheet_zoom_auto");
+	split_sheet_zoom_hb->add_child(split_sheet_zoom_auto);
+	split_sheet_zoom_hb->add_child(memnew(VSeparator));
 
 	split_sheet_zoom_out = memnew(ToolButton);
 	split_sheet_zoom_out->set_focus_mode(FOCUS_NONE);
