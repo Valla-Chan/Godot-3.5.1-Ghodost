@@ -345,7 +345,7 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 
 		item->set_tooltip(0, tooltip);
 	}
-	item->set_visible(!p_node->is_vis_hidden());
+	//item->set_visible(!p_node->is_vis_hidden());
 
 	if (can_open_instance && undo_redo) { //Show buttons only when necessary(SceneTreeDock) to avoid crashes
 
@@ -538,8 +538,8 @@ void SceneTreeEditor::_node_visibility_changed(Node *p_node) {
 		visible = p_node->call("is_visible");
 	}
 
-	vis_hidden = p_node->is_vis_hidden();
-	item->set_visible(!vis_hidden);
+	//vis_hidden = p_node->is_vis_hidden();
+	//item->set_visible(!vis_hidden);
 
 	if (visible) {
 		item->set_button(0, idx, get_icon("GuiVisibilityVisible", "EditorIcons"));
