@@ -36,9 +36,11 @@
 class Sprite : public SpriteBase {
 	GDCLASS(Sprite, SpriteBase);
 
+	Ref<Texture> current_texture;
 	Ref<Texture> texture;
 	Ref<Texture> normal_map;
 
+	bool use_normal_as_texture;
 	bool region;
 	Rect2 region_rect;
 	bool region_filter_clip;
@@ -51,6 +53,7 @@ class Sprite : public SpriteBase {
 	void _get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_clip) const;
 
 	void _texture_changed();
+	void update();
 
 protected:
 	void _notification(int p_what);
@@ -69,12 +72,16 @@ public:
 
 	void set_texture(const Ref<Texture> &p_texture);
 	Ref<Texture> get_texture() const;
+	Ref<Texture> get_current_texture() const;
 
 	void set_normal_map(const Ref<Texture> &p_texture);
 	Ref<Texture> get_normal_map() const;
 
 	void set_region(bool p_region);
 	bool is_region() const;
+
+	void set_use_normal_as_texture(bool p_use_normal);
+	bool get_use_normal_as_texture() const;
 
 	void set_region_filter_clip(bool p_enable);
 	bool is_region_filter_clip_enabled() const;

@@ -41,7 +41,7 @@ Rect2 Sprite::_edit_get_rect() const {
 }
 
 bool Sprite::_edit_use_rect() const {
-	return texture.is_valid();
+	return current_texture.is_valid();
 }
 #endif
 
@@ -57,7 +57,7 @@ void Sprite::_get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_cli
 		base_rect = region_rect;
 	} else {
 		r_filter_clip = false;
-		base_rect = Rect2(0, 0, texture->get_width(), texture->get_height());
+		base_rect = Rect2(0, 0, current_texture->get_width(), current_texture->get_height());
 	}
 
 	Size2 frame_size = base_rect.size / Size2(hframes, vframes);
@@ -98,9 +98,12 @@ void Sprite::_get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_cli
 void Sprite::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_DRAW: {
+
 			if (texture.is_null()) {
 				return;
 			}
+
+			
 
 			RID ci = get_canvas_item();
 
@@ -112,7 +115,7 @@ void Sprite::_notification(int p_what) {
 			Rect2 src_rect, dst_rect;
 			bool filter_clip;
 			_get_rects(src_rect, dst_rect, filter_clip);
-			texture->draw_rect_region(ci, dst_rect, src_rect, Color(1, 1, 1), false, normal_map, filter_clip);
+			current_texture->draw_rect_region(ci, dst_rect, src_rect, Color(1, 1, 1), false, normal_map, filter_clip);
 
 		} break;
 	}
@@ -152,6 +155,15 @@ Ref<Texture> Sprite::get_texture() const {
 	return texture;
 }
 
+Ref<Texture> Sprite::get_current_texture() const {
+	if (use_normal_as_texture) {
+		return normal_map;
+	} else {
+		return texture;
+	}
+	
+}
+
 void Sprite::set_region(bool p_region) {
 	if (p_region == region) {
 		return;
@@ -163,6 +175,18 @@ void Sprite::set_region(bool p_region) {
 
 bool Sprite::is_region() const {
 	return region;
+}
+
+void Sprite::set_use_normal_as_texture(bool p_use_normal) {
+	if (p_use_normal == use_normal_as_texture) {
+		return;
+	}
+	use_normal_as_texture = p_use_normal;
+	update();
+}
+
+bool Sprite::get_use_normal_as_texture() const {
+	return use_normal_as_texture;
 }
 
 void Sprite::set_region_rect(const Rect2 &p_region_rect) {
@@ -244,11 +268,11 @@ int Sprite::get_hframes() const {
 }
 
 bool Sprite::is_pixel_opaque(const Point2 &p_point) const {
-	if (texture.is_null()) {
+	if (current_texture.is_null()) {
 		return false;
 	}
 
-	if (texture->get_size().width == 0 || texture->get_size().height == 0) {
+	if (current_texture->get_size().width == 0 || current_texture->get_size().height == 0) {
 		return false;
 	}
 
@@ -270,33 +294,33 @@ bool Sprite::is_pixel_opaque(const Point2 &p_point) const {
 	}
 	q = q * src_rect.size + src_rect.position;
 
-	bool is_repeat = texture->get_flags() & Texture::FLAG_REPEAT;
-	bool is_mirrored_repeat = texture->get_flags() & Texture::FLAG_MIRRORED_REPEAT;
+	bool is_repeat = current_texture->get_flags() & Texture::FLAG_REPEAT;
+	bool is_mirrored_repeat = current_texture->get_flags() & Texture::FLAG_MIRRORED_REPEAT;
 	if (is_repeat) {
 		int mirror_x = 0;
 		int mirror_y = 0;
 		if (is_mirrored_repeat) {
-			mirror_x = (int)(q.x / texture->get_size().width);
-			mirror_y = (int)(q.y / texture->get_size().height);
+			mirror_x = (int)(q.x / current_texture->get_size().width);
+			mirror_y = (int)(q.y / current_texture->get_size().height);
 		}
-		q.x = Math::fmod(q.x, texture->get_size().width);
-		q.y = Math::fmod(q.y, texture->get_size().height);
+		q.x = Math::fmod(q.x, current_texture->get_size().width);
+		q.y = Math::fmod(q.y, current_texture->get_size().height);
 		if (mirror_x % 2 == 1) {
-			q.x = texture->get_size().width - q.x - 1;
+			q.x = current_texture->get_size().width - q.x - 1;
 		}
 		if (mirror_y % 2 == 1) {
-			q.y = texture->get_size().height - q.y - 1;
+			q.y = current_texture->get_size().height - q.y - 1;
 		}
 	} else {
-		q.x = MIN(q.x, texture->get_size().width - 1);
-		q.y = MIN(q.y, texture->get_size().height - 1);
+		q.x = MIN(q.x, current_texture->get_size().width - 1);
+		q.y = MIN(q.y, current_texture->get_size().height - 1);
 	}
 
-	return texture->is_pixel_opaque((int)q.x, (int)q.y);
+	return current_texture->is_pixel_opaque((int)q.x, (int)q.y);
 }
 
 Rect2 Sprite::get_rect() const {
-	if (texture.is_null()) {
+	if (current_texture.is_null()) {
 		return Rect2(0, 0, 1, 1);
 	}
 
@@ -305,7 +329,7 @@ Rect2 Sprite::get_rect() const {
 	if (region) {
 		s = region_rect.size;
 	} else {
-		s = texture->get_size();
+		s = current_texture->get_size();
 	}
 
 	s = s / Point2(hframes, vframes);
@@ -355,7 +379,14 @@ void Sprite::_texture_changed() {
 	}
 }
 
+void Sprite::update() {
+	CanvasItem::update();
+	current_texture = get_current_texture();
+}
+
 void Sprite::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_current_texture"), &Sprite::get_current_texture);
+
 	ClassDB::bind_method(D_METHOD("set_texture", "texture"), &Sprite::set_texture);
 	ClassDB::bind_method(D_METHOD("get_texture"), &Sprite::get_texture);
 
@@ -380,6 +411,9 @@ void Sprite::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_vframes", "vframes"), &Sprite::set_vframes);
 	ClassDB::bind_method(D_METHOD("get_vframes"), &Sprite::get_vframes);
 
+	ClassDB::bind_method(D_METHOD("set_use_normal_as_texture", "use_normal"), &Sprite::set_use_normal_as_texture);
+	ClassDB::bind_method(D_METHOD("get_use_normal_as_texture"), &Sprite::get_use_normal_as_texture);
+
 	ClassDB::bind_method(D_METHOD("set_hframes", "hframes"), &Sprite::set_hframes);
 	ClassDB::bind_method(D_METHOD("get_hframes"), &Sprite::get_hframes);
 
@@ -392,6 +426,8 @@ void Sprite::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_texture", "get_texture");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "normal_map", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_normal_map", "get_normal_map");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_normal_as_texture"), "set_use_normal_as_texture", "get_use_normal_as_texture");
+
 	ADD_GROUP("Animation", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "hframes", PROPERTY_HINT_RANGE, "1,16384,1"), "set_hframes", "get_hframes");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "vframes", PROPERTY_HINT_RANGE, "1,16384,1"), "set_vframes", "get_vframes");
@@ -405,6 +441,7 @@ void Sprite::_bind_methods() {
 }
 
 Sprite::Sprite() {
+	use_normal_as_texture = false;
 	region = false;
 	region_filter_clip = false;
 
