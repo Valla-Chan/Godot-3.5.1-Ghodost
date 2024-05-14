@@ -40,7 +40,6 @@
 #include "scene/gui/texture_button.h"
 
 class AnimationTrackEditor;
-class EditorUndoRedoManager;
 class AnimationPlayerEditorPlugin;
 
 class AnimationPlayerEditor : public VBoxContainer {
@@ -105,7 +104,7 @@ class AnimationPlayerEditor : public VBoxContainer {
 	LineEdit *scale;
 	LineEdit *name;
 	Label *name_title;
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 	Ref<Texture> autoplay_icon;
 	Ref<Texture> reset_icon;
 	Ref<Texture> autoplay_reset_icon;
@@ -238,7 +237,7 @@ public:
 
 	void ensure_visibility();
 
-	void set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo);
+	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }
 	void edit(AnimationPlayer *p_player);
 	void forward_force_draw_over_viewport(Control *p_overlay);
 

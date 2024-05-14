@@ -37,7 +37,6 @@
 #include "grid_map.h"
 
 class SpatialEditorPlugin;
-class EditorUndoRedoManager;
 
 class GridMapEditor : public VBoxContainer {
 	GDCLASS(GridMapEditor, VBoxContainer);
@@ -69,7 +68,7 @@ class GridMapEditor : public VBoxContainer {
 		DISPLAY_LIST
 	};
 
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 	InputAction input_action;
 	Panel *panel;
 	MenuButton *options;

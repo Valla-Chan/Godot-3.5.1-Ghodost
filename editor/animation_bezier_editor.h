@@ -33,7 +33,6 @@
 
 #include "animation_track_editor.h"
 
-class EditorUndoRedoManager;
 class AnimationBezierTrackEdit : public Control {
 	GDCLASS(AnimationBezierTrackEdit, Control);
 
@@ -53,7 +52,7 @@ class AnimationBezierTrackEdit : public Control {
 	OptionButton *handle_mode_option;
 
 	AnimationTimelineEdit *timeline;
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 	Node *root;
 	Control *play_position; //separate control used to draw so updates for only position changed are much faster
 	float play_position_pos;
@@ -151,7 +150,7 @@ public:
 	void set_animation_and_track(const Ref<Animation> &p_animation, int p_track);
 	virtual Size2 get_minimum_size() const;
 
-	void set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo);
+	void set_undo_redo(UndoRedo *p_undo_redo);
 	void set_timeline(AnimationTimelineEdit *p_timeline);
 	void set_editor(AnimationTrackEditor *p_editor);
 	void set_root(Node *p_root);

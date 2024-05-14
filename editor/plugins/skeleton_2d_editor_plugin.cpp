@@ -34,7 +34,6 @@
 #include "scene/2d/mesh_instance_2d.h"
 #include "scene/gui/box_container.h"
 #include "thirdparty/misc/clipper.hpp"
-#include "editor/editor_undo_redo_manager.h"
 
 void Skeleton2DEditor::_node_removed(Node *p_node) {
 	if (p_node == node) {
@@ -59,7 +58,7 @@ void Skeleton2DEditor::_menu_option(int p_option) {
 				err_dialog->popup_centered_minsize();
 				return;
 			}
-			Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
+			UndoRedo *ur = EditorNode::get_singleton()->get_undo_redo();
 			ur->create_action(TTR("Set Rest Pose to Bones"));
 			for (int i = 0; i < node->get_bone_count(); i++) {
 				Bone2D *bone = node->get_bone(i);
@@ -75,7 +74,7 @@ void Skeleton2DEditor::_menu_option(int p_option) {
 				err_dialog->popup_centered_minsize();
 				return;
 			}
-			Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
+			UndoRedo *ur = EditorNode::get_singleton()->get_undo_redo();
 			ur->create_action(TTR("Create Rest Pose from Bones"));
 			for (int i = 0; i < node->get_bone_count(); i++) {
 				Bone2D *bone = node->get_bone(i);

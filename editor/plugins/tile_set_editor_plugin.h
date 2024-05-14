@@ -103,7 +103,7 @@ class TileSetEditor : public HSplitContainer {
 	Ref<TileSet> tileset;
 	TilesetEditorContext *helper;
 	EditorNode *editor;
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 
 	ConfirmationDialog *cd;
 	AcceptDialog *err_dialog;

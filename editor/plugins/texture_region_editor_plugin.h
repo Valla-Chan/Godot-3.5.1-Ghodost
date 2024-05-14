@@ -44,8 +44,6 @@
 	@author Mariano Suligoy
 */
 
-class EditorUndoRedoManager;
-
 class TextureRegionEditor : public VBoxContainer {
 	GDCLASS(TextureRegionEditor, VBoxContainer);
 
@@ -74,7 +72,7 @@ class TextureRegionEditor : public VBoxContainer {
 	HScrollBar *hscroll;
 
 	EditorNode *editor;
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 
 	Vector2 draw_ofs;
 	float draw_zoom;

@@ -30,7 +30,6 @@
 
 #include "animation_bezier_editor.h"
 
-#include "editor/editor_undo_redo_manager.h"
 #include "editor/editor_node.h"
 #include "editor_scale.h"
 
@@ -521,7 +520,7 @@ Size2 AnimationBezierTrackEdit::get_minimum_size() const {
 	return Vector2(1, 1);
 }
 
-void AnimationBezierTrackEdit::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
+void AnimationBezierTrackEdit::set_undo_redo(UndoRedo *p_undo_redo) {
 	undo_redo = p_undo_redo;
 }
 

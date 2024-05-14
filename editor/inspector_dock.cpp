@@ -118,8 +118,7 @@ void InspectorDock::_menu_option(int p_option) {
 				}
 			}
 
-			int history_id = editor_data->get_undo_redo()->get_history_for_object(current).id;
-			editor_data->get_undo_redo()->clear_history(true, history_id);
+			editor_data->get_undo_redo().clear_history();
 
 			editor->get_editor_plugins_over()->edit(nullptr);
 			editor->get_editor_plugins_over()->edit(current);
@@ -666,7 +665,7 @@ InspectorDock::InspectorDock(EditorNode *p_editor, EditorData &p_editor_data) {
 	inspector->set_property_name_style(EditorPropertyNameProcessor::get_default_inspector_style());
 	inspector->set_use_folding(!bool(EDITOR_GET("interface/inspector/disable_folding")));
 	inspector->register_text_enter(search);
-	inspector->set_undo_redo(editor_data->get_undo_redo());
+	inspector->set_undo_redo(&editor_data->get_undo_redo());
 
 	inspector->set_use_filter(true); // TODO: check me
 

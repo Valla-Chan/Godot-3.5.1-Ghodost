@@ -911,10 +911,6 @@ void AnimationPlayerEditor::_update_animation_list_icons() {
 	}
 }
 
-void AnimationPlayerEditor::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
-	undo_redo = p_undo_redo;
-}
-
 void AnimationPlayerEditor::edit(AnimationPlayer *p_player) {
 	if (player && pin->is_pressed()) {
 		return; // Ignore, pinned.
@@ -1827,7 +1823,7 @@ void AnimationPlayerEditorPlugin::_notification(int p_what) {
 }
 
 void AnimationPlayerEditorPlugin::edit(Object *p_object) {
-	anim_editor->set_undo_redo(get_undo_redo());
+	anim_editor->set_undo_redo(&get_undo_redo());
 	if (!p_object) {
 		return;
 	}

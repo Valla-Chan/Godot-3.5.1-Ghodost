@@ -37,7 +37,6 @@
 #include "editor/editor_node.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
-#include "editor/editor_undo_redo_manager.h"
 #include "editor/plugins/animation_player_editor_plugin.h"
 #include "editor/plugins/script_editor_plugin.h"
 #include "editor/script_editor_debugger.h"
@@ -4489,10 +4488,6 @@ void CanvasItemEditor::_selection_changed() {
 	selected_from_canvas = false;
 }
 
-void CanvasItemEditor::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
-	undo_redo = p_undo_redo;
-}
-
 void CanvasItemEditor::edit(CanvasItem *p_canvas_item) {
 	Array selection = editor_selection->get_selected_nodes();
 	if (selection.size() != 1 || (Node *)selection[0] != p_canvas_item) {
@@ -6478,7 +6473,7 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 CanvasItemEditor *CanvasItemEditor::singleton = nullptr;
 
 void CanvasItemEditorPlugin::edit(Object *p_object) {
-	canvas_item_editor->set_undo_redo(EditorNode::get_undo_redo());
+	canvas_item_editor->set_undo_redo(&get_undo_redo());
 	canvas_item_editor->edit(Object::cast_to<CanvasItem>(p_object));
 }
 
@@ -6629,22 +6624,22 @@ void CanvasItemEditorViewport::_create_nodes(Node *parent, Node *child, String &
 	Size2 texture_size = texture->get_size();
 
 	if (parent) {
-		editor_data->get_undo_redo()->add_do_method(parent, "add_child", child, true);
-		editor_data->get_undo_redo()->add_do_method(child, "set_owner", EditorNode::get_singleton()->get_edited_scene());
-		editor_data->get_undo_redo()->add_do_reference(child);
-		editor_data->get_undo_redo()->add_undo_method(parent, "remove_child", child);
-	} else { // If no parent is selected, set as root node of the scene.
-		editor_data->get_undo_redo()->add_do_method(EditorNode::get_singleton(), "set_edited_scene", child);
-		editor_data->get_undo_redo()->add_do_method(child, "set_owner", EditorNode::get_singleton()->get_edited_scene());
-		editor_data->get_undo_redo()->add_do_reference(child);
-		editor_data->get_undo_redo()->add_undo_method(EditorNode::get_singleton(), "set_edited_scene", (Object *)nullptr);
+		editor_data->get_undo_redo().add_do_method(parent, "add_child", child);
+		editor_data->get_undo_redo().add_do_method(child, "set_owner", editor->get_edited_scene());
+		editor_data->get_undo_redo().add_do_reference(child);
+		editor_data->get_undo_redo().add_undo_method(parent, "remove_child", child);
+	} else { // if we haven't parent, lets try to make a child as a parent.
+		editor_data->get_undo_redo().add_do_method(editor, "set_edited_scene", child);
+		editor_data->get_undo_redo().add_do_method(child, "set_owner", editor->get_edited_scene());
+		editor_data->get_undo_redo().add_do_reference(child);
+		editor_data->get_undo_redo().add_undo_method(editor, "set_edited_scene", (Object *)nullptr);
 	}
 
 	if (parent) {
 		String new_name = parent->validate_child_name(child);
 		ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
-		editor_data->get_undo_redo()->add_do_method(sed, "live_debug_create_node", EditorNode::get_singleton()->get_edited_scene()->get_path_to(parent), child->get_class(), new_name);
-		editor_data->get_undo_redo()->add_undo_method(sed, "live_debug_remove_node", NodePath(String(EditorNode::get_singleton()->get_edited_scene()->get_path_to(parent)) + "/" + new_name));
+		editor_data->get_undo_redo().add_do_method(sed, "live_debug_create_node", editor->get_edited_scene()->get_path_to(parent), child->get_class(), new_name);
+		editor_data->get_undo_redo().add_undo_method(sed, "live_debug_remove_node", NodePath(String(editor->get_edited_scene()->get_path_to(parent)) + "/" + new_name));
 	}
 
 	// handle with different property for texture
@@ -6663,18 +6658,18 @@ void CanvasItemEditorViewport::_create_nodes(Node *parent, Node *child, String &
 			break;
 		}
 	}
-	editor_data->get_undo_redo()->add_do_property(child, property, texture);
+	editor_data->get_undo_redo().add_do_property(child, property, texture);
 
 	// make visible for certain node type
 	if (default_type == "NinePatchRect") {
-		editor_data->get_undo_redo()->add_do_property(child, "rect/size", texture_size);
+		editor_data->get_undo_redo().add_do_property(child, "rect/size", texture_size);
 	} else if (default_type == "Polygon2D") {
 		PoolVector<Vector2> list;
 		list.push_back(Vector2(0, 0));
 		list.push_back(Vector2(texture_size.width, 0));
 		list.push_back(Vector2(texture_size.width, texture_size.height));
 		list.push_back(Vector2(0, texture_size.height));
-		editor_data->get_undo_redo()->add_do_property(child, "polygon", list);
+		editor_data->get_undo_redo().add_do_property(child, "polygon", list);
 	}
 
 	// Compute the global position
@@ -6683,7 +6678,7 @@ void CanvasItemEditorViewport::_create_nodes(Node *parent, Node *child, String &
 
 	// there's nothing to be used as source position so snapping will work as absolute if enabled
 	target_position = canvas_item_editor->snap_point(target_position);
-	editor_data->get_undo_redo()->add_do_method(child, "set_global_position", target_position);
+	editor_data->get_undo_redo().add_do_method(child, "set_global_position", target_position);
 }
 
 bool CanvasItemEditorViewport::_create_instance(Node *parent, String &path, const Point2 &p_point) {
@@ -6706,15 +6701,15 @@ bool CanvasItemEditorViewport::_create_instance(Node *parent, String &path, cons
 
 	instanced_scene->set_filename(ProjectSettings::get_singleton()->localize_path(path));
 
-	editor_data->get_undo_redo()->add_do_method(parent, "add_child", instanced_scene);
-	editor_data->get_undo_redo()->add_do_method(instanced_scene, "set_owner", editor->get_edited_scene());
-	editor_data->get_undo_redo()->add_do_reference(instanced_scene);
-	editor_data->get_undo_redo()->add_undo_method(parent, "remove_child", instanced_scene);
+	editor_data->get_undo_redo().add_do_method(parent, "add_child", instanced_scene);
+	editor_data->get_undo_redo().add_do_method(instanced_scene, "set_owner", editor->get_edited_scene());
+	editor_data->get_undo_redo().add_do_reference(instanced_scene);
+	editor_data->get_undo_redo().add_undo_method(parent, "remove_child", instanced_scene);
 
 	String new_name = parent->validate_child_name(instanced_scene);
 	ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
-	editor_data->get_undo_redo()->add_do_method(sed, "live_debug_instance_node", editor->get_edited_scene()->get_path_to(parent), path, new_name);
-	editor_data->get_undo_redo()->add_undo_method(sed, "live_debug_remove_node", NodePath(String(editor->get_edited_scene()->get_path_to(parent)) + "/" + new_name));
+	editor_data->get_undo_redo().add_do_method(sed, "live_debug_instance_node", editor->get_edited_scene()->get_path_to(parent), path, new_name);
+	editor_data->get_undo_redo().add_undo_method(sed, "live_debug_remove_node", NodePath(String(editor->get_edited_scene()->get_path_to(parent)) + "/" + new_name));
 
 	CanvasItem *instance_ci = Object::cast_to<CanvasItem>(instanced_scene);
 	if (instance_ci) {
@@ -6728,7 +6723,7 @@ bool CanvasItemEditorViewport::_create_instance(Node *parent, String &path, cons
 		// Preserve instance position of the original scene.
 		target_pos += instance_ci->_edit_get_position();
 
-		editor_data->get_undo_redo()->add_do_method(instanced_scene, "set_position", target_pos);
+		editor_data->get_undo_redo().add_do_method(instanced_scene, "set_position", target_pos);
 	}
 
 	return true;
@@ -6746,7 +6741,7 @@ void CanvasItemEditorViewport::_perform_drop_data() {
 
 	Vector<String> error_files;
 
-	editor_data->get_undo_redo()->create_action(TTR("Create Node"));
+	editor_data->get_undo_redo().create_action(TTR("Create Node"));
 
 	for (int i = 0; i < selected_files.size(); i++) {
 		String path = selected_files[i];
@@ -6795,7 +6790,7 @@ void CanvasItemEditorViewport::_perform_drop_data() {
 		}
 	}
 
-	editor_data->get_undo_redo()->commit_action();
+	editor_data->get_undo_redo().commit_action();
 
 	if (error_files.size() > 0) {
 		String files_str;

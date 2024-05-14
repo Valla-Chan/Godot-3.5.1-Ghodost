@@ -32,7 +32,6 @@
 
 #include "canvas_item_editor_plugin.h"
 #include "editor/editor_node.h"
-#include "editor/editor_undo_redo_manager.h"
 
 void RayCast2DEditor::_notification(int p_what) {
 	switch (p_what) {

@@ -34,7 +34,6 @@
 #include "core/project_settings.h"
 #include "editor_node.h"
 #include "editor_scale.h"
-#include "editor/editor_undo_redo_manager.h"
 #include "project_settings_editor.h"
 #include "scene/main/viewport.h"
 #include "scene/resources/packed_scene.h"
@@ -148,7 +147,7 @@ void EditorAutoloadSettings::_autoload_edited() {
 	TreeItem *ti = tree->get_edited();
 	int column = tree->get_edited_column();
 
-	Ref<EditorUndoRedoManager> undo_redo = EditorNode::get_undo_redo();
+	UndoRedo *undo_redo = EditorNode::get_undo_redo();
 
 	if (column == 0) {
 		String name = ti->get_text(0);
@@ -240,7 +239,7 @@ void EditorAutoloadSettings::_autoload_button_pressed(Object *p_item, int p_colu
 
 	String name = "autoload/" + ti->get_text(0);
 
-	Ref<EditorUndoRedoManager> undo_redo = EditorNode::get_undo_redo();
+	UndoRedo *undo_redo = EditorNode::get_undo_redo();
 
 	switch (p_button) {
 		case BUTTON_OPEN: {
@@ -655,7 +654,7 @@ void EditorAutoloadSettings::drop_data_fw(const Point2 &p_point, const Variant &
 
 	orders.sort();
 
-	Ref<EditorUndoRedoManager> undo_redo = EditorNode::get_undo_redo();
+	UndoRedo *undo_redo = EditorNode::get_undo_redo();
 
 	undo_redo->create_action(TTR("Rearrange Autoloads"));
 
@@ -699,7 +698,7 @@ bool EditorAutoloadSettings::autoload_add(const String &p_name, const String &p_
 
 	name = "autoload/" + name;
 
-	Ref<EditorUndoRedoManager> undo_redo = EditorNode::get_undo_redo();
+	UndoRedo *undo_redo = EditorNode::get_undo_redo();
 
 	undo_redo->create_action(TTR("Add AutoLoad"));
 	// Singleton autoloads are represented with a leading "*" in their path.
@@ -725,7 +724,7 @@ bool EditorAutoloadSettings::autoload_add(const String &p_name, const String &p_
 void EditorAutoloadSettings::autoload_remove(const String &p_name) {
 	String name = "autoload/" + p_name;
 
-	Ref<EditorUndoRedoManager> undo_redo = EditorNode::get_undo_redo();
+	UndoRedo *undo_redo = EditorNode::get_undo_redo();
 
 	int order = ProjectSettings::get_singleton()->get_order(name);
 

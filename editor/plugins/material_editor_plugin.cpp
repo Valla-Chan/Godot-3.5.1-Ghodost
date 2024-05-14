@@ -31,7 +31,6 @@
 #include "material_editor_plugin.h"
 
 #include "editor/editor_scale.h"
-#include "editor/editor_undo_redo_manager.h"
 #include "scene/gui/viewport_container.h"
 #include "scene/resources/particles_material.h"
 

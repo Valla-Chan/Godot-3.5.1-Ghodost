@@ -117,9 +117,9 @@ void EditorSettingsDialog::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_READY: {
 			ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
-			undo_redo->get_or_create_history(EditorUndoRedoManager::GLOBAL_HISTORY).undo_redo->set_method_notify_callback(sed->_method_changeds, nullptr);
-			undo_redo->get_or_create_history(EditorUndoRedoManager::GLOBAL_HISTORY).undo_redo->set_property_notify_callback(sed->_property_changeds, nullptr);
-			undo_redo->get_or_create_history(EditorUndoRedoManager::GLOBAL_HISTORY).undo_redo->set_commit_notify_callback(_undo_redo_callback, this);
+			undo_redo->set_method_notify_callback(sed->_method_changeds, sed);
+			undo_redo->set_property_notify_callback(sed->_property_changeds, sed);
+			undo_redo->set_commit_notify_callback(_undo_redo_callback, this);
 		} break;
 		case NOTIFICATION_ENTER_TREE: {
 			_update_icons();
@@ -405,7 +405,7 @@ void EditorSettingsDialog::_bind_methods() {
 EditorSettingsDialog::EditorSettingsDialog() {
 	set_title(TTR("Editor Settings"));
 	set_resizable(true);
-	undo_redo = EditorNode::get_undo_redo();
+	undo_redo = memnew(UndoRedo);
 
 	tabs = memnew(TabContainer);
 	tabs->set_tab_align(TabContainer::ALIGN_LEFT);
@@ -511,4 +511,5 @@ EditorSettingsDialog::EditorSettingsDialog() {
 }
 
 EditorSettingsDialog::~EditorSettingsDialog() {
+	memdelete(undo_redo);
 }

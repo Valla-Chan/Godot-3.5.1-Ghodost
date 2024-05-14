@@ -39,12 +39,11 @@
 #include "scene/gui/tool_button.h"
 
 class CanvasItemEditor;
-class EditorUndoRedoManager;
 
 class Polygon3DEditor : public HBoxContainer {
 	GDCLASS(Polygon3DEditor, HBoxContainer);
 
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 	enum Mode {
 
 		MODE_CREATE,

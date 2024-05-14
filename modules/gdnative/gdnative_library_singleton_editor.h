@@ -40,7 +40,7 @@ class GDNativeLibrarySingletonEditor : public VBoxContainer {
 
 private:
 	Tree *libraries;
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 
 	bool updating;
 

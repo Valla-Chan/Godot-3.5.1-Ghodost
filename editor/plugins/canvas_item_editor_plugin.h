@@ -39,7 +39,6 @@
 #include "scene/gui/label.h"
 #include "scene/gui/panel_container.h"
 #include "scene/gui/spin_box.h"
-class EditorUndoRedoManager;
 
 class CanvasItemEditorViewport;
 
@@ -466,7 +465,7 @@ private:
 	void _prepare_grid_menu();
 	void _on_grid_menu_id_pressed(int p_id);
 
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 	bool _build_bones_list(Node *p_node);
 	bool _get_bone_shape(Vector<Vector2> *shape, Vector<Vector2> *outline_shape, Map<BoneKey, BoneList>::Element *bone);
 
@@ -665,7 +664,7 @@ public:
 	Tool get_current_tool() { return tool; }
 	void set_current_tool(Tool p_tool);
 
-	void set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo);
+	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }
 	void edit(CanvasItem *p_canvas_item);
 
 	void focus_selection();

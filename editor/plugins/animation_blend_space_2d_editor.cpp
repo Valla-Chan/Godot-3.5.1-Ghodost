@@ -41,7 +41,6 @@
 #include "scene/gui/menu_button.h"
 #include "scene/gui/panel.h"
 #include "scene/main/viewport.h"
-#include "editor/editor_undo_redo_manager.h"
 
 bool AnimationNodeBlendSpace2DEditor::can_edit(const Ref<AnimationNode> &p_node) {
 	Ref<AnimationNodeBlendSpace2D> bs2d = p_node;

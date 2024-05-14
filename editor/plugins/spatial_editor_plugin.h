@@ -44,7 +44,6 @@ class SpatialEditor;
 class EditorSpatialGizmoPlugin;
 class ViewportContainer;
 class SpatialEditorViewport;
-class EditorUndoRedoManager;
 
 class EditorSpatialGizmo : public SpatialGizmo {
 	GDCLASS(EditorSpatialGizmo, SpatialGizmo);
@@ -259,7 +258,7 @@ private:
 	EditorNode *editor;
 	EditorData *editor_data;
 	EditorSelection *editor_selection;
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 
 	CheckBox *preview_camera;
 	ViewportContainer *viewport_container;
@@ -719,7 +718,7 @@ private:
 	HBoxContainer *context_menu_hbox = nullptr;
 
 	void _generate_selection_boxes();
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 
 	int camera_override_viewport_id;
 
@@ -798,13 +797,13 @@ public:
 	void select_gizmo_highlight_axis(int p_axis);
 	void set_custom_camera(Node *p_camera) { custom_camera = p_camera; }
 
+	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }
 	Dictionary get_state() const;
 	void set_state(const Dictionary &p_state);
 
 	Ref<Environment> get_viewport_environment() { return viewport_environment; }
 
-	void set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo);
-	Ref<EditorUndoRedoManager> get_undo_redo();
+	UndoRedo *get_undo_redo() { return undo_redo; }
 
 	void add_control_to_menu_panel(Control *p_control);
 	void remove_control_from_menu_panel(Control *p_control);

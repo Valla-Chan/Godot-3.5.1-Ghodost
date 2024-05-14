@@ -41,8 +41,6 @@
 #include "scene/gui/menu_button.h"
 #include "scene/gui/tool_button.h"
 
-class EditorUndoRedoManager;
-
 class TileMapEditor : public VBoxContainer {
 	GDCLASS(TileMapEditor, VBoxContainer);
 
@@ -77,7 +75,7 @@ class TileMapEditor : public VBoxContainer {
 	Vector2 manual_position;
 
 	EditorNode *editor;
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 	Control *canvas_item_editor_viewport;
 
 	LineEdit *search_box;

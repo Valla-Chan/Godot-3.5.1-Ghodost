@@ -36,7 +36,6 @@
 #include "core/os/keyboard.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
-#include "editor/editor_undo_redo_manager.h"
 #include "scene/gui/split_container.h"
 
 static float _lerp_fade(int total, int fade, float position) {

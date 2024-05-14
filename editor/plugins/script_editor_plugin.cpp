@@ -1206,7 +1206,7 @@ void ScriptEditor::_menu_option(int p_option) {
 
 				es->_run();
 
-				//EditorNode::get_undo_redo()->clear_history();
+				EditorNode::get_undo_redo()->clear_history();
 			} break;
 			case FILE_CLOSE: {
 				if (current->is_unsaved()) {

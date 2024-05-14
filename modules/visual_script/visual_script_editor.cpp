@@ -38,7 +38,6 @@
 #include "editor/editor_node.h"
 #include "editor/editor_resource_preview.h"
 #include "editor/editor_scale.h"
-#include "editor/editor_undo_redo_manager.h"
 #include "scene/main/viewport.h"
 #include "visual_script_expression.h"
 #include "visual_script_flow_control.h"
@@ -52,7 +51,7 @@ class VisualScriptEditorSignalEdit : public Object {
 	StringName sig;
 
 public:
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 	Ref<VisualScript> script;
 
 protected:
@@ -175,6 +174,8 @@ public:
 		sig = p_sig;
 		_change_notify();
 	}
+
+	VisualScriptEditorSignalEdit() { undo_redo = nullptr; }
 };
 
 class VisualScriptEditorVariableEdit : public Object {
@@ -183,7 +184,7 @@ class VisualScriptEditorVariableEdit : public Object {
 	StringName var;
 
 public:
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 	Ref<VisualScript> script;
 
 protected:
@@ -332,6 +333,8 @@ public:
 		var = p_var;
 		_change_notify();
 	}
+
+	VisualScriptEditorVariableEdit() { undo_redo = nullptr; }
 };
 
 static Color _color_from_type(Variant::Type p_type, bool dark_theme = true) {

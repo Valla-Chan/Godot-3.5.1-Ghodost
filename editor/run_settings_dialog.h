@@ -36,7 +36,6 @@
 #include "scene/gui/file_dialog.h"
 #include "scene/gui/line_edit.h"
 
-class EditorUndoRedoManager;
 class RunSettingsDialog : public AcceptDialog {
 	GDCLASS(RunSettingsDialog, AcceptDialog);
 

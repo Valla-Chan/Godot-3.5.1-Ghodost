@@ -71,7 +71,7 @@ class RoomEditorPlugin : public EditorPlugin {
 	Room *_room;
 	ToolButton *button_generate;
 	EditorNode *editor;
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 
 	void _generate_points();
 
@@ -122,7 +122,7 @@ class OccluderEditorPlugin : public EditorPlugin {
 	Occluder *_occluder;
 	ToolButton *button_center;
 	EditorNode *editor;
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 
 	void _center();
 

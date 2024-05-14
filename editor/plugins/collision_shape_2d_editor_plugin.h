@@ -35,7 +35,6 @@
 #include "core/os/keyboard.h"
 #include "editor/editor_node.h"
 #include "editor/editor_plugin.h"
-class EditorUndoRedoManager;
 
 #include "scene/2d/collision_shape_2d.h"
 
@@ -67,7 +66,7 @@ class CollisionShape2DEditor : public Control {
 	};
 
 	EditorNode *editor;
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 	CanvasItemEditor *canvas_item_editor;
 	CollisionShape2D *node;
 

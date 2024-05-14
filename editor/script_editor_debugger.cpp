@@ -2761,8 +2761,8 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 	msgdialog = memnew(AcceptDialog);
 	add_child(msgdialog);
 
-	//p_editor->get_undo_redo()->set_method_notify_callback(_method_changeds, this);
-	//p_editor->get_undo_redo()->set_property_notify_callback(_property_changeds, this);
+	p_editor->get_undo_redo()->set_method_notify_callback(_method_changeds, this);
+	p_editor->get_undo_redo()->set_property_notify_callback(_property_changeds, this);
 	live_debug = true;
 	camera_override = OVERRIDE_NONE;
 	last_path_id = false;

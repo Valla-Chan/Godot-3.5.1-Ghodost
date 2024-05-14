@@ -30,7 +30,6 @@
 
 #include "dictionary_property_edit.h"
 #include "editor_node.h"
-#include "editor/editor_undo_redo_manager.h"
 
 void DictionaryPropertyEdit::_notif_change() {
 	_change_notify();
@@ -124,7 +123,7 @@ bool DictionaryPropertyEdit::_set(const StringName &p_name, const Variant &p_val
 		int index = pn.substr(0, slash).to_int();
 		if (type == "key" && index < keys.size()) {
 			const Variant &key = keys[index];
-			Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
+			UndoRedo *ur = EditorNode::get_undo_redo();
 
 			ur->create_action(TTR("Change Dictionary Key"));
 			ur->add_do_method(this, "_set_key", key, p_value);
@@ -138,7 +137,7 @@ bool DictionaryPropertyEdit::_set(const StringName &p_name, const Variant &p_val
 			const Variant &key = keys[index];
 			if (dict.has(key)) {
 				Variant value = dict[key];
-				Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
+				UndoRedo *ur = EditorNode::get_undo_redo();
 
 				ur->create_action(TTR("Change Dictionary Value"));
 				ur->add_do_method(this, "_set_value", key, p_value);

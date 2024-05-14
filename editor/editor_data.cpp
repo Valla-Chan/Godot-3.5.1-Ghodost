@@ -36,7 +36,6 @@
 #include "core/project_settings.h"
 #include "editor_node.h"
 #include "editor_settings.h"
-#include "editor/editor_undo_redo_manager.h"
 #include "scene/resources/packed_scene.h"
 
 void EditorHistory::cleanup_history() {
@@ -409,13 +408,13 @@ void EditorData::restore_editor_global_states() {
 
 void EditorData::paste_object_params(Object *p_object) {
 	ERR_FAIL_NULL(p_object);
-	undo_redo_manager->create_action(TTR("Paste Params"));
+	undo_redo.create_action(TTR("Paste Params"));
 	for (List<PropertyData>::Element *E = clipboard.front(); E; E = E->next()) {
 		String name = E->get().name;
-		undo_redo_manager->add_do_property(p_object, name, E->get().value);
-		undo_redo_manager->add_undo_property(p_object, name, p_object->get(name));
+		undo_redo.add_do_property(p_object, name, E->get().value);
+		undo_redo.add_undo_property(p_object, name, p_object->get(name));
 	}
-	undo_redo_manager->commit_action();
+	undo_redo.commit_action();
 }
 
 bool EditorData::call_build() {
@@ -428,58 +427,17 @@ bool EditorData::call_build() {
 	return result;
 }
 
-void EditorData::set_scene_as_saved(int p_idx) {
-	if (p_idx == -1) {
-		p_idx = current_edited_scene;
-	}
-	ERR_FAIL_INDEX(p_idx, edited_scene.size());
-
-	get_undo_redo()->set_history_as_saved(edited_scene[p_idx].history_id);
-}
-
-bool EditorData::is_scene_changed(int p_idx) {
-	if (p_idx == -1) {
-		p_idx = current_edited_scene;
-	}
-	ERR_FAIL_INDEX_V(p_idx, edited_scene.size(), false);
-
-	uint64_t current_scene_version = get_undo_redo()->get_or_create_history(edited_scene[p_idx].history_id).undo_redo->get_version();
-	bool is_changed = edited_scene[p_idx].last_checked_version != current_scene_version;
-	edited_scene.write[p_idx].last_checked_version = current_scene_version;
-	return is_changed;
-}
-
-int EditorData::get_scene_history_id_from_path(const String &p_path) const {
-	for (int i = 0; i < edited_scene.size(); i++) {
-		if (edited_scene[i].path == p_path) {
-			return edited_scene[i].history_id;
-		}
-	}
-	return 0;
-}
-
-int EditorData::get_current_edited_scene_history_id() const {
-	if (current_edited_scene != -1) {
-		return edited_scene[current_edited_scene].history_id;
-	}
-	return 0;
-}
-
-int EditorData::get_scene_history_id(int p_idx) const {
-	return edited_scene[p_idx].history_id;
-}
-
-Ref<EditorUndoRedoManager> &EditorData::get_undo_redo() {
-	return undo_redo_manager;
+UndoRedo &EditorData::get_undo_redo() {
+	return undo_redo;
 }
 
 void EditorData::remove_editor_plugin(EditorPlugin *p_plugin) {
-	p_plugin->undo_redo = Ref<EditorUndoRedoManager>();
+	p_plugin->undo_redo = nullptr;
 	editor_plugins.erase(p_plugin);
 }
 
 void EditorData::add_editor_plugin(EditorPlugin *p_plugin) {
-	p_plugin->undo_redo = undo_redo_manager;
+	p_plugin->undo_redo = &undo_redo;
 	editor_plugins.push_back(p_plugin);
 }
 
@@ -548,7 +506,7 @@ int EditorData::add_edited_scene(int p_at_pos) {
 	es.path = String();
 	es.file_modified_time = 0;
 	es.history_current = -1;
-	es.history_id = last_created_scene++;
+	es.version = 0;
 	es.live_edit_root = NodePath(String("/root"));
 
 	if (p_at_pos == edited_scene.size()) {
@@ -590,7 +548,6 @@ void EditorData::remove_scene(int p_idx) {
 		ScriptEditor::get_singleton()->close_builtin_scripts_from_scene(edited_scene[p_idx].path);
 	}
 
-	undo_redo_manager->discard_history(edited_scene[p_idx].history_id);
 	edited_scene.remove(p_idx);
 }
 
@@ -724,6 +681,25 @@ Vector<EditorData::EditedScene> EditorData::get_edited_scenes() const {
 	}
 
 	return out_edited_scenes_list;
+}
+
+void EditorData::set_edited_scene_version(uint64_t version, int p_scene_idx) {
+	ERR_FAIL_INDEX(current_edited_scene, edited_scene.size());
+	if (p_scene_idx < 0) {
+		edited_scene.write[current_edited_scene].version = version;
+	} else {
+		ERR_FAIL_INDEX(p_scene_idx, edited_scene.size());
+		edited_scene.write[p_scene_idx].version = version;
+	}
+}
+
+uint64_t EditorData::get_edited_scene_version() const {
+	ERR_FAIL_INDEX_V(current_edited_scene, edited_scene.size(), 0);
+	return edited_scene[current_edited_scene].version;
+}
+uint64_t EditorData::get_scene_version(int p_idx) const {
+	ERR_FAIL_INDEX_V(p_idx, edited_scene.size(), 0);
+	return edited_scene[p_idx].version;
 }
 
 void EditorData::set_scene_modified_time(int p_idx, uint64_t p_time) {
@@ -1059,7 +1035,7 @@ void EditorData::script_class_load_icon_paths() {
 EditorData::EditorData() {
 	current_edited_scene = -1;
 
-	undo_redo_manager.instance();
+	//load_imported_scenes_from_globals();
 	script_class_load_icon_paths();
 }
 

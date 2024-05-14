@@ -33,7 +33,6 @@
 #include "core/os/keyboard.h"
 #include "scene/resources/curve.h"
 #include "spatial_editor_plugin.h"
-#include "editor/editor_undo_redo_manager.h"
 
 String PathSpatialGizmo::get_handle_name(int p_idx) const {
 	Ref<Curve3D> c = path->get_curve();
@@ -160,7 +159,7 @@ void PathSpatialGizmo::commit_handle(int p_idx, const Variant &p_restore, bool p
 		return;
 	}
 
-	Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
+	UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
 
 	if (p_idx < c->get_point_count()) {
 		if (p_cancel) {
@@ -372,7 +371,7 @@ bool PathEditorPlugin::forward_spatial_gui_input(Camera *p_camera, const Ref<Inp
 				}
 			}
 
-			Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
+			UndoRedo *ur = editor->get_undo_redo();
 			if (closest_seg != -1) {
 				//subdivide
 
@@ -414,21 +413,21 @@ bool PathEditorPlugin::forward_spatial_gui_input(Camera *p_camera, const Ref<Inp
 				// Find the offset and point index of the place to break up.
 				// Also check for the control points.
 				if (dist_to_p < click_dist) {
-					Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
+					UndoRedo *ur = editor->get_undo_redo();
 					ur->create_action(TTR("Remove Path Point"));
 					ur->add_do_method(c.ptr(), "remove_point", i);
 					ur->add_undo_method(c.ptr(), "add_point", c->get_point_position(i), c->get_point_in(i), c->get_point_out(i), i);
 					ur->commit_action();
 					return true;
 				} else if (dist_to_p_out < click_dist) {
-					Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
+					UndoRedo *ur = editor->get_undo_redo();
 					ur->create_action(TTR("Remove Out-Control Point"));
 					ur->add_do_method(c.ptr(), "set_point_out", i, Vector3());
 					ur->add_undo_method(c.ptr(), "set_point_out", i, c->get_point_out(i));
 					ur->commit_action();
 					return true;
 				} else if (dist_to_p_in < click_dist) {
-					Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
+					UndoRedo *ur = editor->get_undo_redo();
 					ur->create_action(TTR("Remove In-Control Point"));
 					ur->add_do_method(c.ptr(), "set_point_in", i, Vector3());
 					ur->add_undo_method(c.ptr(), "set_point_in", i, c->get_point_in(i));
@@ -507,7 +506,7 @@ void PathEditorPlugin::_close_curve() {
 	if (c->get_point_position(0) == c->get_point_position(c->get_point_count() - 1)) {
 		return;
 	}
-	Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
+	UndoRedo *ur = editor->get_undo_redo();
 	ur->create_action(TTR("Close Curve"));
 	ur->add_do_method(c.ptr(), "add_point", c->get_point_position(0), c->get_point_in(0), c->get_point_out(0), -1);
 	ur->add_undo_method(c.ptr(), "remove_point", c->get_point_count());

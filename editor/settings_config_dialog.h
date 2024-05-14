@@ -55,7 +55,7 @@ class EditorSettingsDialog : public AcceptDialog {
 
 	Timer *timer;
 
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 	Tree *shortcuts;
 
 	ConfirmationDialog *press_a_key;

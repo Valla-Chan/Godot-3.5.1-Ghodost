@@ -37,7 +37,6 @@
 #include "scene/gui/tool_button.h"
 
 class CanvasItemEditor;
-class EditorUndoRedoManager;
 
 class AbstractPolygon2DEditor : public HBoxContainer {
 	GDCLASS(AbstractPolygon2DEditor, HBoxContainer);
@@ -95,7 +94,7 @@ protected:
 
 	int mode;
 
-	Ref<EditorUndoRedoManager> undo_redo;
+	UndoRedo *undo_redo;
 
 	virtual void _menu_option(int p_option);
 	void _wip_changed();

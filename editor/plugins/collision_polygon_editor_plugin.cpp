@@ -37,7 +37,6 @@
 #include "editor/editor_settings.h"
 #include "scene/3d/camera.h"
 #include "spatial_editor_plugin.h"
-#include "editor/editor_undo_redo_manager.h"
 
 void Polygon3DEditor::_notification(int p_what) {
 	switch (p_what) {
