@@ -44,6 +44,8 @@ Size2 Tabs::get_minimum_size() const {
 	Size2 ms(0, MAX(MAX(tab_bg->get_minimum_size().height, tab_fg->get_minimum_size().height), tab_disabled->get_minimum_size().height) + font->get_height());
 
 	for (int i = 0; i < tabs.size(); i++) {
+		if (tabs[i].hidden)
+			continue;
 		Ref<Texture> tex = tabs[i].icon;
 		if (tex.is_valid()) {
 			ms.height = MAX(ms.height, tex->get_size().height);
@@ -54,7 +56,8 @@ Size2 Tabs::get_minimum_size() const {
 
 		ms.width += Math::ceil(font->get_string_size(tabs[i].xl_text).width);
 
-		if (tabs[i].disabled) {
+		if (tabs[i].hidden) {
+		} else if (tabs[i].disabled) {
 			ms.width += tab_disabled->get_minimum_size().width;
 		} else if (current == i) {
 			ms.width += tab_fg->get_minimum_size().width;
@@ -202,7 +205,7 @@ void Tabs::_gui_input(const Ref<InputEvent> &p_event) {
 				}
 
 				if (pos.x >= tabs[i].ofs_cache && pos.x < tabs[i].ofs_cache + tabs[i].size_cache) {
-					if (!tabs[i].disabled) {
+					if (!tabs[i].disabled && !tabs[i].hidden) {
 						found = i;
 					}
 					break;
@@ -245,10 +248,14 @@ void Tabs::_notification(int p_what) {
 			Ref<Texture> close = get_icon("close");
 
 			int h = get_size().height;
+			// width and min width
 			int w = 0;
 			int mw = 0;
 
 			for (int i = 0; i < tabs.size(); i++) {
+				if (tabs[i].hidden) {
+					continue;
+				}
 				tabs.write[i].ofs_cache = mw;
 				mw += get_tab_width(i);
 			}
@@ -274,6 +281,10 @@ void Tabs::_notification(int p_what) {
 
 			for (int i = 0; i < tabs.size(); i++) {
 				if (i < offset) {
+					continue;
+				}
+
+				if (tabs[i].hidden) {
 					continue;
 				}
 
@@ -356,7 +367,7 @@ void Tabs::_notification(int p_what) {
 					cb_rect.position.x = w;
 					cb_rect.position.y = sb->get_margin(MARGIN_TOP) + ((sb_rect.size.y - sb_ms.y) - (cb_rect.size.y)) / 2;
 
-					if (!tabs[i].disabled && cb_hover == i) {
+					if (!tabs[i].disabled && !tabs[i].hidden && cb_hover == i) {
 						if (cb_pressing) {
 							get_stylebox("button_pressed")->draw(ci, cb_rect);
 						} else {
@@ -397,6 +408,16 @@ void Tabs::_notification(int p_what) {
 
 int Tabs::get_tab_count() const {
 	return tabs.size();
+}
+
+int Tabs::get_visible_tab_count() const {
+	int size = tabs.size();
+	for (int i = 0; i < tabs.size(); i++) {
+		if (tabs[i].hidden) {
+			size -= 1;
+		}
+	}
+	return size;
 }
 
 void Tabs::set_current_tab(int p_current) {
@@ -465,10 +486,22 @@ void Tabs::set_tab_disabled(int p_tab, bool p_disabled) {
 	tabs.write[p_tab].disabled = p_disabled;
 	update();
 }
-bool Tabs::get_tab_disabled(int p_tab) const {
+bool Tabs::is_tab_disabled(int p_tab) const {
 	ERR_FAIL_INDEX_V(p_tab, tabs.size(), false);
 	return tabs[p_tab].disabled;
 }
+
+void Tabs::set_tab_hidden(int p_tab, bool p_hidden) {
+	ERR_FAIL_INDEX(p_tab, tabs.size());
+	tabs.write[p_tab].hidden = p_hidden;
+	update();
+}
+bool Tabs::is_tab_hidden(int p_tab) const {
+	ERR_FAIL_INDEX_V(p_tab, tabs.size(), false);
+	return tabs[p_tab].hidden;
+}
+
+
 
 void Tabs::set_tab_right_button(int p_tab, const Ref<Texture> &p_right_button) {
 	ERR_FAIL_INDEX(p_tab, tabs.size());
@@ -505,7 +538,7 @@ void Tabs::_update_hover() {
 			cb_hover = -1;
 			hover_buttons = i;
 			break;
-		} else if (!tabs[i].disabled && tabs[i].cb_rect.has_point(pos)) {
+		} else if (!tabs[i].disabled && !tabs[i].hidden && tabs[i].cb_rect.has_point(pos)) {
 			cb_hover = i;
 			rb_hover = -1;
 			hover_buttons = i;
@@ -602,6 +635,7 @@ void Tabs::add_tab(const String &p_str, const Ref<Texture> &p_icon) {
 	t.xl_text = tr(p_str);
 	t.icon = p_icon;
 	t.disabled = false;
+	t.hidden = false;
 	t.ofs_cache = 0;
 	t.size_cache = 0;
 
@@ -947,6 +981,7 @@ void Tabs::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_gui_input"), &Tabs::_gui_input);
 	ClassDB::bind_method(D_METHOD("_update_hover"), &Tabs::_update_hover);
 	ClassDB::bind_method(D_METHOD("_on_mouse_exited"), &Tabs::_on_mouse_exited);
+	ClassDB::bind_method(D_METHOD("get_visible_tab_count"), &Tabs::get_visible_tab_count);
 	ClassDB::bind_method(D_METHOD("get_tab_count"), &Tabs::get_tab_count);
 	ClassDB::bind_method(D_METHOD("set_current_tab", "tab_idx"), &Tabs::set_current_tab);
 	ClassDB::bind_method(D_METHOD("get_current_tab"), &Tabs::get_current_tab);
@@ -958,7 +993,7 @@ void Tabs::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_tab_button_icon", "tab_idx", "icon"), &Tabs::set_tab_right_button);
 	ClassDB::bind_method(D_METHOD("get_tab_button_icon", "tab_idx"), &Tabs::get_tab_right_button);
 	ClassDB::bind_method(D_METHOD("set_tab_disabled", "tab_idx", "disabled"), &Tabs::set_tab_disabled);
-	ClassDB::bind_method(D_METHOD("get_tab_disabled", "tab_idx"), &Tabs::get_tab_disabled);
+	ClassDB::bind_method(D_METHOD("is_tab_disabled", "tab_idx"), &Tabs::is_tab_disabled);
 	ClassDB::bind_method(D_METHOD("remove_tab", "tab_idx"), &Tabs::remove_tab);
 	ClassDB::bind_method(D_METHOD("add_tab", "title", "icon"), &Tabs::add_tab, DEFVAL(""), DEFVAL(Ref<Texture>()));
 	ClassDB::bind_method(D_METHOD("set_tab_align", "align"), &Tabs::set_tab_align);
@@ -1005,6 +1040,7 @@ void Tabs::_bind_methods() {
 }
 
 Tabs::Tabs() {
+	missing_right = false;
 	current = 0;
 	previous = 0;
 	tab_align = ALIGN_CENTER;

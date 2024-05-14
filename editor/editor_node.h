@@ -391,6 +391,7 @@ private:
 	HBoxContainer *tabbar_container;
 	ToolButton *distraction_free;
 	ToolButton *scene_tab_add;
+	OptionButton *scene_tabs_sort;
 
 	bool scene_distraction;
 	bool script_distraction;
@@ -500,6 +501,7 @@ private:
 	void _set_scene_metadata(const String &p_file, int p_idx = -1);
 	void _get_scene_metadata(const String &p_file);
 	void _update_title();
+
 	void _update_scene_tabs();
 	void _version_control_menu_option(int p_idx);
 	void _close_messages();
@@ -552,6 +554,7 @@ private:
 
 	Map<String, Ref<Texture>> icon_type_cache;
 	Map<Ref<Script>, Ref<Texture>> script_icon_cache;
+	Map<String, Ref<Texture>> scene_icon_cache;
 	void _build_icon_type_cache();
 
 	bool _initializing_addons;
@@ -605,6 +608,8 @@ private:
 	void _dock_pre_popup(int p_which);
 	void _dock_split_dragged(int ofs);
 	void _dock_popup_exit();
+
+	void _scene_tabs_filter_changed(const int item);
 	void _scene_tab_changed(int p_tab);
 	void _scene_tab_closed(int p_tab, int option = SCENE_TAB_CLOSE);
 	void _scene_tab_hover(int p_tab);

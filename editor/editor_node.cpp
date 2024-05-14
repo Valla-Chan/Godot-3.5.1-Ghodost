@@ -307,17 +307,42 @@ void EditorNode::_update_scene_tabs() {
 	disambiguate_filenames(full_path_names, disambiguated_scene_names);
 
 	scene_tabs->clear_tabs();
+
+	// Get scene's base item to use for the tab icon
 	Ref<Texture> script_icon = gui_base->get_icon("Script", "EditorIcons");
 	for (int i = 0; i < editor_data.get_edited_scene_count(); i++) {
+
 		Node *type_node = editor_data.get_edited_scene_root(i);
 		Ref<Texture> icon;
-		if (type_node) {
+		if (scene_icon_cache.has(disambiguated_scene_names[i]) && scene_icon_cache[disambiguated_scene_names[i]].is_valid()) {
+			icon = scene_icon_cache[disambiguated_scene_names[i]];
+		} else if (type_node) {
 			icon = EditorNode::get_singleton()->get_object_icon(type_node, "Node");
 		}
 
 		int current = editor_data.get_edited_scene();
 		bool unsaved = (i == current) ? saved_version != editor_data.get_undo_redo().get_version() : editor_data.get_scene_version(i) != 0;
 		scene_tabs->add_tab(disambiguated_scene_names[i] + (unsaved ? "(*)" : ""), icon);
+
+		if (full_path_names[i] != "") {
+			switch (scene_tabs_sort->get_selected()) {
+				// maps
+				case 0: {
+					if (full_path_names[i].to_lower().find("/scenes/") < 0) {
+						//continue;
+						scene_tabs->set_tab_hidden(i, true);
+					}
+				} break;
+				// ents
+				case 1: {
+					if (full_path_names[i].to_lower().find("/ents/") < 0) {
+						///continue;
+						scene_tabs->set_tab_hidden(i, true);
+					}
+				} break;
+			}
+		}
+		
 
 		OS::get_singleton()->global_menu_add_item("_dock", editor_data.get_scene_title(i) + (unsaved ? "(*)" : ""), GLOBAL_SCENE, i);
 
@@ -2373,6 +2398,7 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 				if (current_option != FILE_CLOSE_ALL) {
 					current_option = -1;
 				} else {
+					scene_icon_cache.clear();
 					_scene_tab_closed(editor_data.get_edited_scene());
 				}
 			}
@@ -4585,7 +4611,7 @@ void EditorNode::_update_dock_slots_visibility() {
 		for (int i = 0; i < DOCK_SLOT_MAX; i++) {
 			int tabs_visible = 0;
 			for (int j = 0; j < dock_slot[i]->get_tab_count(); j++) {
-				if (!dock_slot[i]->get_tab_hidden(j)) {
+				if (!dock_slot[i]->is_tab_hidden(j)) {
 					tabs_visible++;
 				}
 			}
@@ -5067,9 +5093,13 @@ void EditorNode::_thumbnail_done(const String &p_path, const Ref<Texture> &p_pre
 	}
 }
 
+void EditorNode::_scene_tabs_filter_changed(const int item) {
+	_update_scene_tabs();
+}
+
 void EditorNode::_scene_tab_changed(int p_tab) {
 	tab_preview_panel->hide();
-
+	
 	bool unsaved = (saved_version != editor_data.get_undo_redo().get_version());
 
 	if (p_tab == editor_data.get_edited_scene()) {
@@ -5717,6 +5747,7 @@ void EditorNode::_feature_profile_changed() {
 }
 
 void EditorNode::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("_scene_tabs_filter_changed", "item"), &EditorNode::_scene_tabs_filter_changed, DEFVAL(0));
 	ClassDB::bind_method("_menu_option", &EditorNode::_menu_option);
 	ClassDB::bind_method("_tool_menu_option", &EditorNode::_tool_menu_option);
 	ClassDB::bind_method("_menu_confirm_current", &EditorNode::_menu_confirm_current);
@@ -6305,7 +6336,17 @@ EditorNode::EditorNode() {
 	scene_tabs_context_menu->connect("id_pressed", this, "_menu_option");
 	scene_tabs_context_menu->set_hide_on_window_lose_focus(true);
 
+	scene_tabs_sort = memnew(OptionButton);
+	scene_tabs_sort->add_item("Maps");
+	scene_tabs_sort->add_item("Ents");
+	scene_tabs_sort->add_item("All");
+	scene_tabs_sort->set_text_align(Button::ALIGN_CENTER);
+	scene_tabs_sort->set_custom_minimum_size(scene_tabs_sort->get_size_for_text(TTR("Maps")));
+	scene_tabs_sort->select(2);
+	scene_tabs_sort->connect("item_selected", this, "_scene_tabs_filter_changed");
+
 	srt->add_child(tabbar_container);
+	tabbar_container->add_child(scene_tabs_sort);
 	tabbar_container->add_child(scene_tabs);
 	distraction_free = memnew(ToolButton);
 #ifdef OSX_ENABLED

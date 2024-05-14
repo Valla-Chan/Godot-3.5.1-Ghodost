@@ -130,12 +130,12 @@ void TabContainer::_gui_input(const Ref<InputEvent> &p_event) {
 		// Activate the clicked tab.
 		pos.x -= tabs_ofs_cache;
 		for (int i = first_tab_cache; i <= last_tab_cache; i++) {
-			if (get_tab_hidden(i)) {
+			if (is_tab_hidden(i)) {
 				continue;
 			}
 			int tab_width = _get_tab_width(i);
 			if (pos.x < tab_width) {
-				if (!get_tab_disabled(i)) {
+				if (!is_tab_disabled(i)) {
 					set_current_tab(i);
 				}
 				break;
@@ -294,7 +294,7 @@ void TabContainer::_notification(int p_what) {
 			// Check if all tabs would fit into the header area.
 			int all_tabs_width = 0;
 			for (int i = 0; i < tabs.size(); i++) {
-				if (get_tab_hidden(i)) {
+				if (is_tab_hidden(i)) {
 					continue;
 				}
 				int tab_width = _get_tab_width(i);
@@ -322,7 +322,7 @@ void TabContainer::_notification(int p_what) {
 			all_tabs_width = 0;
 			Vector<int> tab_widths;
 			for (int i = first_tab_cache; i < tabs.size(); i++) {
-				if (get_tab_hidden(i)) {
+				if (is_tab_hidden(i)) {
 					tab_widths.push_back(0);
 					continue;
 				}
@@ -358,14 +358,14 @@ void TabContainer::_notification(int p_what) {
 			int index = 0;
 			for (int i = 0; i < tab_widths.size(); i++) {
 				index = i + first_tab_cache;
-				if (get_tab_hidden(index)) {
+				if (is_tab_hidden(index)) {
 					continue;
 				}
 
 				int tab_width = tab_widths[i];
 				if (index == current) {
 					x_current = x;
-				} else if (get_tab_disabled(index)) {
+				} else if (is_tab_disabled(index)) {
 					_draw_tab(tab_disabled, font_color_disabled, index, tabs_ofs_cache + x);
 				} else {
 					_draw_tab(tab_bg, font_color_bg, index, tabs_ofs_cache + x);
@@ -382,7 +382,7 @@ void TabContainer::_notification(int p_what) {
 
 			// Draw selected tab in front. Only draw selected tab when it's in visible range.
 			if (tabs.size() > 0 && current - first_tab_cache < tab_widths.size() && current >= first_tab_cache) {
-				Ref<StyleBox> current_style_box = get_tab_disabled(current) ? tab_disabled : tab_fg;
+				Ref<StyleBox> current_style_box = is_tab_disabled(current) ? tab_disabled : tab_fg;
 				_draw_tab(current_style_box, font_color_fg, current, tabs_ofs_cache + x_current);
 			}
 
@@ -497,7 +497,7 @@ void TabContainer::_on_mouse_exited() {
 int TabContainer::_get_tab_width(int p_index) const {
 	ERR_FAIL_INDEX_V(p_index, get_tab_count(), 0);
 	Control *control = get_tab_control(p_index);
-	if (!control || get_tab_hidden(p_index)) {
+	if (!control || is_tab_hidden(p_index)) {
 		return 0;
 	}
 
@@ -521,7 +521,7 @@ int TabContainer::_get_tab_width(int p_index) const {
 	Ref<StyleBox> tab_bg = get_stylebox("tab_bg");
 	Ref<StyleBox> tab_fg = get_stylebox("tab_fg");
 	Ref<StyleBox> tab_disabled = get_stylebox("tab_disabled");
-	if (get_tab_disabled(p_index)) {
+	if (is_tab_disabled(p_index)) {
 		width += tab_disabled->get_minimum_size().width;
 	} else if (p_index == current) {
 		width += tab_fg->get_minimum_size().width;
@@ -890,7 +890,7 @@ void TabContainer::set_tab_disabled(int p_tab, bool p_disabled) {
 	update();
 }
 
-bool TabContainer::get_tab_disabled(int p_tab) const {
+bool TabContainer::is_tab_disabled(int p_tab) const {
 	Control *child = get_tab_control(p_tab);
 	ERR_FAIL_COND_V(!child, false);
 	if (child->has_meta("_tab_disabled")) {
@@ -907,7 +907,7 @@ void TabContainer::set_tab_hidden(int p_tab, bool p_hidden) {
 	update();
 	for (int i = 0; i < get_tab_count(); i++) {
 		int try_tab = (p_tab + 1 + i) % get_tab_count();
-		if (get_tab_disabled(try_tab) || get_tab_hidden(try_tab)) {
+		if (is_tab_disabled(try_tab) || is_tab_hidden(try_tab)) {
 			continue;
 		}
 
@@ -919,7 +919,7 @@ void TabContainer::set_tab_hidden(int p_tab, bool p_hidden) {
 	child->hide();
 }
 
-bool TabContainer::get_tab_hidden(int p_tab) const {
+bool TabContainer::is_tab_hidden(int p_tab) const {
 	Control *child = get_tab_control(p_tab);
 	ERR_FAIL_COND_V(!child, false);
 	if (child->has_meta("_tab_hidden")) {
@@ -1042,9 +1042,9 @@ void TabContainer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_tab_icon", "tab_idx", "icon"), &TabContainer::set_tab_icon);
 	ClassDB::bind_method(D_METHOD("get_tab_icon", "tab_idx"), &TabContainer::get_tab_icon);
 	ClassDB::bind_method(D_METHOD("set_tab_disabled", "tab_idx", "disabled"), &TabContainer::set_tab_disabled);
-	ClassDB::bind_method(D_METHOD("get_tab_disabled", "tab_idx"), &TabContainer::get_tab_disabled);
+	ClassDB::bind_method(D_METHOD("is_tab_disabled", "tab_idx"), &TabContainer::is_tab_disabled);
 	ClassDB::bind_method(D_METHOD("set_tab_hidden", "tab_idx", "hidden"), &TabContainer::set_tab_hidden);
-	ClassDB::bind_method(D_METHOD("get_tab_hidden", "tab_idx"), &TabContainer::get_tab_hidden);
+	ClassDB::bind_method(D_METHOD("is_tab_hidden", "tab_idx"), &TabContainer::is_tab_hidden);
 	ClassDB::bind_method(D_METHOD("get_tab_idx_at_point", "point"), &TabContainer::get_tab_idx_at_point);
 	ClassDB::bind_method(D_METHOD("set_popup", "popup"), &TabContainer::set_popup);
 	ClassDB::bind_method(D_METHOD("get_popup"), &TabContainer::get_popup);

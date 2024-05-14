@@ -60,6 +60,7 @@ private:
 		Ref<Texture> icon;
 		int ofs_cache;
 		bool disabled;
+		bool hidden;
 		int size_cache;
 		int size_text;
 		int x_cache;
@@ -122,7 +123,10 @@ public:
 	Ref<Texture> get_tab_icon(int p_tab) const;
 
 	void set_tab_disabled(int p_tab, bool p_disabled);
-	bool get_tab_disabled(int p_tab) const;
+	bool is_tab_disabled(int p_tab) const;
+
+	void set_tab_hidden(int p_tab, bool p_hidden);
+	bool is_tab_hidden(int p_tab) const;
 
 	void set_tab_right_button(int p_tab, const Ref<Texture> &p_right_button);
 	Ref<Texture> get_tab_right_button(int p_tab) const;
@@ -136,6 +140,7 @@ public:
 	CloseButtonDisplayPolicy get_tab_close_display_policy() const;
 
 	int get_tab_count() const;
+	int get_visible_tab_count() const;
 	void set_current_tab(int p_current);
 	int get_current_tab() const;
 	int get_previous_tab() const;
