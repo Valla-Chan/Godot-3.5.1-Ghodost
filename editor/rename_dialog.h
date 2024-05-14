@@ -46,6 +46,8 @@
 @author Blazej Floch
 */
 
+class EditorUndoRedoManager;
+
 class RenameDialog : public ConfirmationDialog {
 	GDCLASS(RenameDialog, ConfirmationDialog);
 
@@ -66,7 +68,7 @@ class RenameDialog : public ConfirmationDialog {
 	static void _error_handler(void *p_self, const char *p_func, const char *p_file, int p_line, const char *p_error, const char *p_errorexp, ErrorHandlerType p_type);
 
 	SceneTreeEditor *scene_tree_editor;
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	int global_count;
 
 	LineEdit *lne_search;
@@ -113,7 +115,7 @@ public:
 	void reset();
 	void rename();
 
-	RenameDialog(SceneTreeEditor *p_scene_tree_editor, UndoRedo *p_undo_redo = nullptr);
+	RenameDialog(SceneTreeEditor *p_scene_tree_editor, Ref<EditorUndoRedoManager> p_undo_redo = Ref<EditorUndoRedoManager>());
 	~RenameDialog(){};
 };
 

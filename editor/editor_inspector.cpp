@@ -1312,7 +1312,7 @@ void EditorInspector::cleanup_plugins() {
 	inspector_plugin_count = 0;
 }
 
-void EditorInspector::set_undo_redo(UndoRedo *p_undo_redo) {
+void EditorInspector::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
 	undo_redo = p_undo_redo;
 }
 
@@ -2025,7 +2025,7 @@ void EditorInspector::_edit_set(const String &p_name, const Variant &p_value, bo
 		}
 	}
 
-	if (!undo_redo || bool(object->call("_dont_undo_redo"))) {
+	if (!undo_redo.is_valid() || bool(object->call("_dont_undo_redo"))) {
 		object->set(p_name, p_value);
 		if (p_refresh_all) {
 			_edit_request_change(object, "");
@@ -2180,7 +2180,7 @@ void EditorInspector::_property_pinned(const String &p_path, bool p_pinned) {
 	Node *node = Object::cast_to<Node>(object);
 	ERR_FAIL_COND(!node);
 
-	if (undo_redo) {
+	if (undo_redo.is_valid()) {
 		undo_redo->create_action(vformat(p_pinned ? TTR("Pinned %s") : TTR("Unpinned %s"), p_path));
 		undo_redo->add_do_method(node, "_set_property_pinned", p_path, p_pinned);
 		undo_redo->add_undo_method(node, "_set_property_pinned", p_path, !p_pinned);
@@ -2371,7 +2371,6 @@ void EditorInspector::_bind_methods() {
 
 EditorInspector::EditorInspector() {
 	object = nullptr;
-	undo_redo = nullptr;
 	main_vbox = memnew(VBoxContainer);
 	main_vbox->set_h_size_flags(SIZE_EXPAND_FILL);
 	main_vbox->add_constant_override("separation", 0);

@@ -40,6 +40,8 @@
 #include "scene/gui/tree.h"
 #include "scene/resources/visual_shader.h"
 
+class EditorUndoRedoManager;
+
 class VisualShaderNodePlugin : public Reference {
 	GDCLASS(VisualShaderNodePlugin, Reference);
 
@@ -74,7 +76,7 @@ class VisualShaderEditor : public VBoxContainer {
 	TextEdit *preview_text;
 	Label *error_text;
 
-	UndoRedo *undo_redo;
+	Ref<EditorUndoRedoManager> undo_redo;
 	Point2 saved_node_pos;
 	bool saved_node_pos_dirty;
 

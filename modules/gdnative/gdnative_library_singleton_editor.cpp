@@ -196,7 +196,7 @@ void GDNativeLibrarySingletonEditor::_bind_methods() {
 }
 
 GDNativeLibrarySingletonEditor::GDNativeLibrarySingletonEditor() {
-	undo_redo = EditorNode::get_singleton()->get_undo_redo();
+	undo_redo = EditorNode::get_undo_redo();
 	libraries = memnew(Tree);
 	libraries->set_columns(2);
 	libraries->set_column_titles_visible(true);

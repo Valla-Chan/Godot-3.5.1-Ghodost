@@ -39,6 +39,7 @@
 #include "core/project_settings.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "scene/3d/sprite_3d.h"
 #include "scene/gui/center_container.h"
 #include "scene/gui/margin_container.h"
@@ -1275,6 +1276,10 @@ void SpriteFramesEditor::edit(SpriteFrames *p_frames) {
 	}
 }
 
+void SpriteFramesEditor::set_undo_redo(Ref<EditorUndoRedoManager> p_undo_redo) {
+	undo_redo = p_undo_redo;
+}
+
 Variant SpriteFramesEditor::get_drag_data_fw(const Point2 &p_point, Control *p_from) {
 	if (!frames->has_animation(edited_anim)) {
 		return false;
@@ -1863,7 +1868,7 @@ void SpriteFramesEditorPlugin::edit_current_object() {
 
 
 void SpriteFramesEditorPlugin::edit(Object *p_object) {
-	frames_editor->set_undo_redo(&get_undo_redo());
+	frames_editor->set_undo_redo(get_undo_redo());
 
 	if (edited_object && (edited_object->is_class("AnimatedTextureRect") || edited_object->is_class("AnimatedSprite") || edited_object->is_class("AnimatedSprite3D"))) {
 		if (edited_object->is_connected("frames_resource_changed", this, "edit_current_object")) {

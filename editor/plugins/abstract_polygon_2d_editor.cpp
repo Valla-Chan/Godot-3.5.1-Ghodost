@@ -32,6 +32,7 @@
 
 #include "canvas_item_editor_plugin.h"
 #include "core/os/keyboard.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor/editor_scale.h"
 
 AbstractPolygon2DEditor::Vertex::Vertex() :

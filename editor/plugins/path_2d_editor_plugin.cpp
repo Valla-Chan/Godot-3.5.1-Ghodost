@@ -35,6 +35,7 @@
 #include "core/os/keyboard.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
+#include "editor/editor_undo_redo_manager.h"
 
 void Path2DEditor::_notification(int p_what) {
 	switch (p_what) {

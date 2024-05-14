@@ -292,7 +292,7 @@ public:
 	}
 
 	template <class M>
-	static MethodBind *bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info = MethodInfo(), const Vector<Variant> &p_default_args = Vector<Variant>(), bool p_return_nil_is_variant = true) {
+	static MethodBind *bind_vararg_method(uint32_t p_flags, const StringName &p_name, M p_method, const MethodInfo &p_info = MethodInfo(), const Vector<Variant> &p_default_args = Vector<Variant>(), bool p_return_nil_is_variant = true) {
 		GLOBAL_LOCK_FUNCTION;
 
 		MethodBind *bind = create_vararg_method_bind(p_method, p_info, p_return_nil_is_variant);
@@ -300,6 +300,9 @@ public:
 
 		bind->set_name(p_name);
 		bind->set_default_arguments(p_default_args);
+		//if constexpr (std::is_same<typename member_function_traits<M>::return_type, Object *>::value) {
+		//	bind->set_return_type_is_raw_object_ptr(true);
+		//}
 
 		String instance_type = bind->get_instance_class();
 

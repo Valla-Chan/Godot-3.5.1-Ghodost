@@ -34,6 +34,7 @@
 #include "editor/editor_resource_picker.h"
 #include "editor/editor_scale.h"
 #include "editor/progress_dialog.h"
+#include "editor/editor_undo_redo_manager.h"
 
 void ThemeItemImportTree::_update_items_tree() {
 	import_items_tree->clear();
@@ -1412,7 +1413,14 @@ void ThemeItemEditorDialog::_item_tree_button_pressed(Object *p_item, int p_colu
 		case ITEMS_TREE_REMOVE_ITEM: {
 			String item_name = item->get_text(0);
 			int data_type = item->get_parent()->get_metadata(0);
-			edited_theme->clear_theme_item((Theme::DataType)data_type, item_name, edited_item_type);
+			Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
+			ur->create_action(TTR("Remove Theme Item"));
+			ur->add_do_method(*edited_theme, "clear_theme_item", (Theme::DataType)data_type, item_name, edited_item_type);
+			ur->add_undo_method(*edited_theme, "set_theme_item", (Theme::DataType)data_type, item_name, edited_item_type, edited_theme->get_theme_item((Theme::DataType)data_type, item_name, edited_item_type));
+			ur->add_do_method(this, "_update_edit_item_tree", edited_item_type);
+			ur->add_undo_method(this, "_update_edit_item_tree", edited_item_type);
+			ur->commit_action();
+			//edited_theme->clear_theme_item((Theme::DataType)data_type, item_name, edited_item_type);
 		} break;
 		case ITEMS_TREE_REMOVE_DATA_TYPE: {
 			int data_type = item->get_metadata(0);
@@ -1427,7 +1435,7 @@ void ThemeItemEditorDialog::_add_theme_type(const String &p_new_text) {
 	const String new_type = edit_add_type_value->get_text().strip_edges();
 	edit_add_type_value->clear();
 
-	UndoRedo *ur = EditorNode::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 
 	ur->create_action(TTR("Add Theme Type"));
 	ur->add_do_method(*edited_theme, "add_type", new_type);
@@ -1442,7 +1450,7 @@ void ThemeItemEditorDialog::_remove_theme_type(const String &p_theme_type) {
 	Ref<Theme> old_snapshot = edited_theme->duplicate();
 	Ref<Theme> new_snapshot = edited_theme->duplicate();
 
-	UndoRedo *ur = EditorNode::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 	ur->create_action(TTR("Remove Theme Type"));
 
 	new_snapshot->remove_type(p_theme_type);

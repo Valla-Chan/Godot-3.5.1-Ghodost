@@ -44,6 +44,7 @@
 #include "scene/main/viewport.h"
 #include "scene/resources/visual_shader_nodes.h"
 #include "servers/visual/shader_types.h"
+#include "editor/editor_undo_redo_manager.h"
 
 Control *VisualShaderNodePlugin::create_editor(const Ref<Resource> &p_parent_resource, const Ref<VisualShaderNode> &p_node) {
 	if (get_script_instance()) {
@@ -2040,7 +2041,7 @@ void VisualShaderEditor::_input_select_item(Ref<VisualShaderNodeInput> input, St
 
 	bool type_changed = input->get_input_type_by_name(name) != input->get_input_type_by_name(prev_name);
 
-	UndoRedo *undo_redo = EditorNode::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> undo_redo = EditorNode::get_undo_redo();
 	undo_redo->create_action(TTR("Visual Shader Input Type Changed"));
 
 	undo_redo->add_do_method(input.ptr(), "set_input_name", name);
@@ -2074,7 +2075,7 @@ void VisualShaderEditor::_uniform_select_item(Ref<VisualShaderNodeUniformRef> p_
 
 	bool type_changed = p_uniform_ref->get_uniform_type_by_name(p_name) != p_uniform_ref->get_uniform_type_by_name(prev_name);
 
-	UndoRedo *undo_redo = EditorNode::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> undo_redo = EditorNode::get_undo_redo();
 	undo_redo->create_action(TTR("UniformRef Name Changed"));
 
 	undo_redo->add_do_method(p_uniform_ref.ptr(), "set_uniform_name", p_name);
@@ -2888,7 +2889,7 @@ VisualShaderEditor::VisualShaderEditor() {
 	error_label->set_text("eh");
 	error_panel->hide();
 
-	undo_redo = EditorNode::get_singleton()->get_undo_redo();
+	undo_redo = EditorNode::get_undo_redo();
 
 	Ref<VisualShaderNodePluginDefault> default_plugin;
 	default_plugin.instance();
@@ -3049,7 +3050,7 @@ public:
 			return;
 		}
 
-		UndoRedo *undo_redo = EditorNode::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> undo_redo = EditorNode::get_undo_redo();
 
 		updating = true;
 		undo_redo->create_action(TTR("Edit Visual Property:") + " " + prop, UndoRedo::MERGE_ENDS);
@@ -3224,7 +3225,7 @@ void EditorPropertyShaderMode::_option_selected(int p_which) {
 		return;
 	}
 
-	UndoRedo *undo_redo = EditorNode::get_singleton()->get_undo_redo();
+	Ref<EditorUndoRedoManager> undo_redo = EditorNode::get_undo_redo();
 	undo_redo->create_action(TTR("Visual Shader Mode Changed"));
 	//do is easy
 	undo_redo->add_do_method(visual_shader.ptr(), "set_mode", p_which);

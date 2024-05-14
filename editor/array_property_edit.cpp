@@ -29,7 +29,7 @@
 /**************************************************************************/
 
 #include "array_property_edit.h"
-
+#include "editor/editor_undo_redo_manager.h"
 #include "core/io/marshalls.h"
 #include "editor_node.h"
 
@@ -90,7 +90,7 @@ bool ArrayPropertyEdit::_set(const StringName &p_name, const Variant &p_value) {
 				return true;
 			}
 
-			UndoRedo *ur = EditorNode::get_undo_redo();
+			Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 			ur->create_action(TTR("Resize Array"));
 			ur->add_do_method(this, "_set_size", newsize);
 			ur->add_undo_method(this, "_set_size", size);
@@ -136,7 +136,7 @@ bool ArrayPropertyEdit::_set(const StringName &p_name, const Variant &p_value) {
 			if (value.get_type() != type && type >= 0 && type < Variant::VARIANT_MAX) {
 				Variant::CallError ce;
 				Variant new_value = Variant::construct(Variant::Type(type), nullptr, 0, ce);
-				UndoRedo *ur = EditorNode::get_undo_redo();
+				Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 
 				ur->create_action(TTR("Change Array Value Type"));
 				ur->add_do_method(this, "_set_value", idx, new_value);
@@ -152,7 +152,7 @@ bool ArrayPropertyEdit::_set(const StringName &p_name, const Variant &p_value) {
 			Variant arr = get_array();
 
 			Variant value = arr.get(idx);
-			UndoRedo *ur = EditorNode::get_undo_redo();
+			Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 
 			ur->create_action(TTR("Change Array Value"));
 			ur->add_do_method(this, "_set_value", idx, p_value);

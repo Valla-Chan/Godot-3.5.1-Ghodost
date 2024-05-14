@@ -347,7 +347,7 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 	}
 	//item->set_visible(!p_node->is_vis_hidden());
 
-	if (can_open_instance && undo_redo) { //Show buttons only when necessary(SceneTreeDock) to avoid crashes
+	if (can_open_instance && undo_redo.is_valid()) { //Show buttons only when necessary(SceneTreeDock) to avoid crashes
 
 		if (!p_node->is_connected("script_changed", this, "_node_script_changed")) {
 			p_node->connect("script_changed", this, "_node_script_changed", varray(p_node));
@@ -894,7 +894,7 @@ void SceneTreeEditor::_renamed() {
 		return;
 	}
 
-	if (!undo_redo) {
+	if (!undo_redo.is_valid()) {
 		n->set_name(new_name);
 		which->set_metadata(0, n->get_path());
 		emit_signal("node_renamed");

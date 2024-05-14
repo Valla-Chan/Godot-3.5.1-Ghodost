@@ -159,7 +159,7 @@ Transform OccluderShapeSphere::center_node(const Transform &p_global_xform, cons
 
 #ifdef TOOLS_ENABLED
 	if (Engine::get_singleton()->is_editor_hint()) {
-		UndoRedo *undo_redo = EditorNode::get_undo_redo();
+		Ref<EditorUndoRedoManager> undo_redo = EditorNode::get_undo_redo();
 
 		undo_redo->create_action(TTR("OccluderShapeSphere Set Spheres"));
 		undo_redo->add_do_method(this, "set_spheres", spheres_world_space);

@@ -28,7 +28,9 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#include "editor/editor_node.h"
 #include "csg_gizmos.h"
+#include "editor/editor_undo_redo_manager.h"
 
 ///////////
 
@@ -222,7 +224,7 @@ void CSGShapeSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, int 
 			return;
 		}
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		ur->create_action(TTR("Change Sphere Shape Radius"));
 		ur->add_do_method(s, "set_radius", s->get_radius());
 		ur->add_undo_method(s, "set_radius", p_restore);
@@ -246,7 +248,7 @@ void CSGShapeSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, int 
 			return;
 		}
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		ur->create_action(TTR("Change Box Shape Extents"));
 		static const char *method[3] = { "set_width", "set_height", "set_depth" };
 		float current = 0;
@@ -278,7 +280,7 @@ void CSGShapeSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, int 
 			return;
 		}
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		if (p_idx == 0) {
 			ur->create_action(TTR("Change Cylinder Radius"));
 			ur->add_do_method(s, "set_radius", s->get_radius());
@@ -303,7 +305,7 @@ void CSGShapeSpatialGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, int 
 			return;
 		}
 
-		UndoRedo *ur = SpatialEditor::get_singleton()->get_undo_redo();
+		Ref<EditorUndoRedoManager> &ur = EditorNode::get_undo_redo();
 		if (p_idx == 0) {
 			ur->create_action(TTR("Change Torus Inner Radius"));
 			ur->add_do_method(s, "set_inner_radius", s->get_inner_radius());

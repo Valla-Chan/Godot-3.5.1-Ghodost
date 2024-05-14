@@ -35,11 +35,12 @@
 #include "scene/2d/ray_cast_2d.h"
 
 class CanvasItemEditor;
+class EditorUndoRedoManager;
 
 class RayCast2DEditor : public Control {
 	GDCLASS(RayCast2DEditor, Control);
 
-	UndoRedo *undo_redo = nullptr;
+	Ref<EditorUndoRedoManager> undo_redo;
 	CanvasItemEditor *canvas_item_editor = nullptr;
 	RayCast2D *node = nullptr;
 
