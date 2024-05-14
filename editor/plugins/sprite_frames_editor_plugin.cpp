@@ -326,7 +326,6 @@ void SpriteFramesEditor::_sheet_zoom_auto() {
 
 void SpriteFramesEditor::_sheet_zoom_in() {
 	_sheet_zoom_on_position(scale_ratio, Vector2());
-	print_line(vformat("%d", split_sheet_preview->get_custom_minimum_size().x));
 }
 
 void SpriteFramesEditor::_sheet_zoom_out() {
