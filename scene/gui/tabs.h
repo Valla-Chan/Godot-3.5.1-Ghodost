@@ -141,6 +141,7 @@ public:
 
 	int get_tab_count() const;
 	int get_visible_tab_count() const;
+	Array get_visible_tab_array() const;
 	void set_current_tab(int p_current);
 	int get_current_tab() const;
 	int get_previous_tab() const;

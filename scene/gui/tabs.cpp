@@ -43,37 +43,38 @@ Size2 Tabs::get_minimum_size() const {
 
 	Size2 ms(0, MAX(MAX(tab_bg->get_minimum_size().height, tab_fg->get_minimum_size().height), tab_disabled->get_minimum_size().height) + font->get_height());
 
-	for (int i = 0; i < tabs.size(); i++) {
-		if (tabs[i].hidden)
+	Array visible_tabs = get_visible_tab_array();
+	for (int i = 0; i < get_visible_tab_count(); i++) {
+		if (tabs[visible_tabs[i]].hidden)
 			continue;
-		Ref<Texture> tex = tabs[i].icon;
+		Ref<Texture> tex = tabs[visible_tabs[i]].icon;
 		if (tex.is_valid()) {
 			ms.height = MAX(ms.height, tex->get_size().height);
-			if (tabs[i].text != "") {
+			if (tabs[visible_tabs[i]].text != "") {
 				ms.width += get_constant("hseparation");
 			}
 		}
 
-		ms.width += Math::ceil(font->get_string_size(tabs[i].xl_text).width);
+		ms.width += Math::ceil(font->get_string_size(tabs[visible_tabs[i]].xl_text).width);
 
-		if (tabs[i].hidden) {
-		} else if (tabs[i].disabled) {
+		if (tabs[visible_tabs[i]].hidden) {
+		} else if (tabs[visible_tabs[i]].disabled) {
 			ms.width += tab_disabled->get_minimum_size().width;
-		} else if (current == i) {
+		} else if (current == (int)visible_tabs[i]) {
 			ms.width += tab_fg->get_minimum_size().width;
 		} else {
 			ms.width += tab_bg->get_minimum_size().width;
 		}
 
-		if (tabs[i].right_button.is_valid()) {
-			Ref<Texture> rb = tabs[i].right_button;
+		if (tabs[visible_tabs[i]].right_button.is_valid()) {
+			Ref<Texture> rb = tabs[visible_tabs[i]].right_button;
 			Size2 bms = rb->get_size();
 			bms.width += get_constant("hseparation");
 			ms.width += bms.width;
 			ms.height = MAX(bms.height + tab_bg->get_minimum_size().height, ms.height);
 		}
 
-		if (cb_displaypolicy == CLOSE_BUTTON_SHOW_ALWAYS || (cb_displaypolicy == CLOSE_BUTTON_SHOW_ACTIVE_ONLY && i == current)) {
+		if (cb_displaypolicy == CLOSE_BUTTON_SHOW_ALWAYS || (cb_displaypolicy == CLOSE_BUTTON_SHOW_ACTIVE_ONLY && (int)visible_tabs[i] == current)) {
 			Ref<Texture> cb = get_icon("close");
 			Size2 bms = cb->get_size();
 			bms.width += get_constant("hseparation");
@@ -205,7 +206,7 @@ void Tabs::_gui_input(const Ref<InputEvent> &p_event) {
 				}
 
 				if (pos.x >= tabs[i].ofs_cache && pos.x < tabs[i].ofs_cache + tabs[i].size_cache) {
-					if (!tabs[i].disabled && !tabs[i].hidden) {
+					if (!tabs[i].disabled) {
 						found = i;
 					}
 					break;
@@ -420,6 +421,16 @@ int Tabs::get_visible_tab_count() const {
 	return size;
 }
 
+Array Tabs::get_visible_tab_array() const {
+	Array tab_indices;
+	for (int i = 0; i < tabs.size(); i++) {
+		if (!tabs[i].hidden) {
+			tab_indices.push_back(i);
+		}
+	}
+	return tab_indices;
+}
+
 void Tabs::set_current_tab(int p_current) {
 	if (current == p_current) {
 		return;
@@ -427,13 +438,18 @@ void Tabs::set_current_tab(int p_current) {
 	ERR_FAIL_INDEX(p_current, get_tab_count());
 
 	previous = current;
-	current = p_current;
+	if (p_current < get_visible_tab_count()) {
+		current = get_visible_tab_array()[p_current];
+	} else {
+		current = p_current;
+	}
+	
 
 	_change_notify("current_tab");
 	_update_cache();
 	update();
 
-	emit_signal("tab_changed", p_current);
+	emit_signal("tab_changed", current);
 }
 
 int Tabs::get_current_tab() const {
@@ -841,7 +857,10 @@ int Tabs::get_tab_width(int p_idx) const {
 
 	x += Math::ceil(font->get_string_size(tabs[p_idx].xl_text).width);
 
-	if (tabs[p_idx].disabled) {
+	if (tabs[p_idx].hidden) {
+		return 0;
+	}
+	else if (tabs[p_idx].disabled) {
 		x += tab_disabled->get_minimum_size().width;
 	} else if (current == p_idx) {
 		x += tab_fg->get_minimum_size().width;

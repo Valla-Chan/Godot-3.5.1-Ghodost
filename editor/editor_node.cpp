@@ -322,7 +322,14 @@ void EditorNode::_update_scene_tabs() {
 
 		int current = editor_data.get_edited_scene();
 		bool unsaved = (i == current) ? saved_version != editor_data.get_undo_redo().get_version() : editor_data.get_scene_version(i) != 0;
-		scene_tabs->add_tab(disambiguated_scene_names[i] + (unsaved ? "(*)" : ""), icon);
+		// if ending in number or not
+		const String last = disambiguated_scene_names[i].last();
+		if (vformat("%d", last.to_int()) == last) {
+			scene_tabs->add_tab("[" + last + "]" + disambiguated_scene_names[i] + (unsaved ? "(*)" : ""), icon);
+		} else {
+			scene_tabs->add_tab(disambiguated_scene_names[i] + (unsaved ? "(*)" : ""), icon);
+		}
+		
 
 		if (full_path_names[i] != "") {
 			switch (scene_tabs_sort->get_selected()) {
