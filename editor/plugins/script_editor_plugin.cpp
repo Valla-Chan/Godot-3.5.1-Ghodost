@@ -1835,7 +1835,7 @@ void ScriptEditor::_update_script_names() {
 			Ref<Script> script = se->get_edited_resource();
 
 			// has cached icon
-			if (script_icon_cache.has(script) && script_icon_cache[script].is_valid()) {
+			if (script_icon_cache.has(script)) {
 				icon = script_icon_cache[script];
 			} else {
 				icon = EditorNode::get_singleton()->get_object_icon(*se->get_edited_resource(), "Node");
