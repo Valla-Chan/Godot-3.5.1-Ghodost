@@ -840,6 +840,10 @@ void Tabs::move_tab(int from, int to) {
 int Tabs::get_tab_width(int p_idx) const {
 	ERR_FAIL_INDEX_V(p_idx, tabs.size(), 0);
 
+	if (tabs[p_idx].hidden) {
+		return 0;
+	}
+
 	Ref<StyleBox> tab_bg = get_stylebox("tab_bg");
 	Ref<StyleBox> tab_fg = get_stylebox("tab_fg");
 	Ref<StyleBox> tab_disabled = get_stylebox("tab_disabled");
@@ -857,10 +861,7 @@ int Tabs::get_tab_width(int p_idx) const {
 
 	x += Math::ceil(font->get_string_size(tabs[p_idx].xl_text).width);
 
-	if (tabs[p_idx].hidden) {
-		return 0;
-	}
-	else if (tabs[p_idx].disabled) {
+	if (tabs[p_idx].disabled) {
 		x += tab_disabled->get_minimum_size().width;
 	} else if (current == p_idx) {
 		x += tab_fg->get_minimum_size().width;
