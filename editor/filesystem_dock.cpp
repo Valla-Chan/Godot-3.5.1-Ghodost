@@ -144,7 +144,7 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 							searched_string = ".";
 						}
 						if (file_name.to_lower().find(searched_string) >= 0 || (lpath.to_lower().find(searched_string) >= 0 )) {
-							if (lpath.to_lower().find("ents/") >= 0) {
+							if (lpath.to_lower().find("ents/") >= 0 || (lpath.to_lower().find("/scenes/") >= 0 && lpath.to_lower().find("/objects/") >= 0)) {
 								parent_should_expand = true;
 							}
 						} else {
