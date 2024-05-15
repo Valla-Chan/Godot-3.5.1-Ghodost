@@ -392,7 +392,7 @@ void ConnectDialog::_advanced_pressed() {
 		set_custom_minimum_size(Size2(600, 500) * EDSCALE);
 		set_size(Size2());
 		connect_to_label->set_text(TTR("Connect to Script:"));
-		tree->set_connect_to_script_mode(true);
+		tree->set_connect_to_script_mode(false);
 
 		vbc_right->hide();
 		error_label->set_visible(!_find_first_script(get_tree()->get_edited_scene_root(), get_tree()->get_edited_scene_root()));
@@ -512,7 +512,7 @@ ConnectDialog::ConnectDialog() {
 	tree->set_v_size_flags(Control::SIZE_FILL | Control::SIZE_EXPAND);
 	tree->get_scene_tree()->connect("item_activated", this, "_ok");
 	tree->connect("node_selected", this, "_tree_node_selected");
-	tree->set_connect_to_script_mode(true);
+	tree->set_connect_to_script_mode(false);
 
 	//Node *mc = vbc_left->add_margin_child(TTR("Connect to Script:"), tree, true);
 	HBoxContainer *hbc_filter = memnew(HBoxContainer);
