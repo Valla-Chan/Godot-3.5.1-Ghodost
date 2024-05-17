@@ -384,7 +384,7 @@ void ConnectDialog::_advanced_pressed() {
 	if (advanced->is_pressed()) {
 		set_custom_minimum_size(Size2(900, 500) * EDSCALE);
 		connect_to_label->set_text(TTR("Connect to Node:"));
-		tree->set_connect_to_script_mode(false);
+		//tree->set_connect_to_script_mode(false);
 
 		vbc_right->show();
 		error_label->hide();
@@ -392,7 +392,7 @@ void ConnectDialog::_advanced_pressed() {
 		set_custom_minimum_size(Size2(600, 500) * EDSCALE);
 		set_size(Size2());
 		connect_to_label->set_text(TTR("Connect to Script:"));
-		tree->set_connect_to_script_mode(false);
+		//tree->set_connect_to_script_mode(false);
 
 		vbc_right->hide();
 		error_label->set_visible(!_find_first_script(get_tree()->get_edited_scene_root(), get_tree()->get_edited_scene_root()));
