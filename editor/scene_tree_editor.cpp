@@ -1165,6 +1165,8 @@ bool SceneTreeEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_d
 
 	return String(d["type"]) == "nodes" && filter == String();
 }
+
+// Handles dropping items into the scene tree
 void SceneTreeEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
 	if (!can_drop_data_fw(p_point, p_data, p_from)) {
 		return;

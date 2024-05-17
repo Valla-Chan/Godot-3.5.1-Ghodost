@@ -168,6 +168,7 @@ class SceneTreeDock : public VBoxContainer {
 
 	bool first_enter;
 
+	Node *_create_node(Node *p_parent, const String p_class);
 	void _create();
 	void _do_create(Node *p_parent);
 	Node *scene_root;

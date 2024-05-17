@@ -1307,7 +1307,16 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 
 void SceneTreeDock::_property_selected(int p_idx) {
 	ERR_FAIL_NULL(property_drop_node);
-	_perform_property_drop(property_drop_node, menu_properties->get_item_metadata(p_idx), ResourceLoader::load(resource_drop_path));
+	String meta = (String)menu_properties->get_item_metadata(p_idx);
+	if (!meta.begins_with("New")) {
+		_perform_property_drop(property_drop_node, menu_properties->get_item_metadata(p_idx), ResourceLoader::load(resource_drop_path));
+	}
+	else {
+		if (meta.find("Sprite") > 0) {
+			Node *sprite = _create_node(property_drop_node, "Sprite");
+			_perform_property_drop(sprite, "texture", ResourceLoader::load(resource_drop_path));
+		}
+	}
 	property_drop_node = nullptr;
 }
 
@@ -2313,6 +2322,40 @@ Node *SceneTreeDock::_get_selection_group_tail(Node *p_node, List<Node *> p_list
 	return tail;
 }
 
+// create any node
+Node *SceneTreeDock::_create_node(Node *p_parent, const String p_class) {
+	ERR_FAIL_NULL_V(edited_scene,nullptr);
+	Object *c = ClassDB::instance(p_class);
+	ERR_FAIL_NULL_V(c, nullptr);
+	Node *child = Object::cast_to<Node>(c);
+	ERR_FAIL_NULL_V(child, nullptr);
+
+	editor_data->get_undo_redo().create_action(TTR("Create Node"));
+
+	editor_data->get_undo_redo().add_do_method(p_parent, "add_child", child);
+	editor_data->get_undo_redo().add_do_method(child, "set_owner", edited_scene);
+	editor_data->get_undo_redo().add_do_method(editor_selection, "clear");
+	editor_data->get_undo_redo().add_do_method(editor_selection, "add_node", child);
+	editor_data->get_undo_redo().add_do_reference(child);
+	editor_data->get_undo_redo().add_undo_method(p_parent, "remove_child", child);
+
+	String new_name = p_parent->validate_child_name(child);
+	ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
+	editor_data->get_undo_redo().add_do_method(sed, "live_debug_create_node", edited_scene->get_path_to(p_parent), child->get_class(), new_name);
+	editor_data->get_undo_redo().add_undo_method(sed, "live_debug_remove_node", NodePath(String(edited_scene->get_path_to(p_parent)).plus_file(new_name)));
+
+	editor_data->get_undo_redo().commit_action();
+
+	_push_item(c);
+	editor_selection->clear();
+	editor_selection->add_node(child);
+	scene_tree->get_scene_tree()->grab_focus();
+
+	emit_signal("node_created", c);
+	return child;
+}
+
+// create node from dialogue
 void SceneTreeDock::_do_create(Node *p_parent) {
 	Variant c = create_dialog->instance_selected();
 
@@ -2705,6 +2748,7 @@ void SceneTreeDock::_normalize_drop(Node *&to_node, int &to_pos, int p_type) {
 	}
 }
 
+// VALLA NOTES: dropping files onto a node in the scene tree
 void SceneTreeDock::_files_dropped(Vector<String> p_files, NodePath p_to, int p_type) {
 	Node *node = get_node(p_to);
 	ERR_FAIL_COND(!node);
@@ -2719,6 +2763,11 @@ void SceneTreeDock::_files_dropped(Vector<String> p_files, NodePath p_to, int p_
 		StringName res_type = EditorFileSystem::get_singleton()->get_file_type(res_path);
 		List<String> valid_properties;
 
+		// manually add in an option here to create a new sprite if the dragged item is a texture
+		if (res_type == "StreamTexture") {
+			valid_properties.push_back("New Sprite...");
+		}
+
 		List<PropertyInfo> pinfo;
 		node->get_property_list(&pinfo);
 
@@ -2728,6 +2777,7 @@ void SceneTreeDock::_files_dropped(Vector<String> p_files, NodePath p_to, int p_
 			if (!(p.usage & PROPERTY_USAGE_EDITOR) || !(p.usage & PROPERTY_USAGE_STORAGE) || p.hint != PROPERTY_HINT_RESOURCE_TYPE) {
 				continue;
 			}
+
 			Vector<String> valid_types = p.hint_string.split(",");
 
 			for (int i = 0; i < valid_types.size(); i++) {
@@ -2739,7 +2789,8 @@ void SceneTreeDock::_files_dropped(Vector<String> p_files, NodePath p_to, int p_
 			}
 		}
 
-		if (valid_properties.size() > 1) {
+		// multiple options of properties to drag in, show popup
+		if (valid_properties.size() > 1 || valid_properties.find("New Sprite...")>0) {
 			property_drop_node = node;
 			resource_drop_path = res_path;
 
