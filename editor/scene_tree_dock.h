@@ -134,6 +134,7 @@ class SceneTreeDock : public VBoxContainer {
 	void _tool_selected(int p_tool, bool p_confirm_override = false);
 	void _property_selected(int p_idx);
 	void _node_collapsed(Object *p_obj);
+	void _drop_new_node(const String p_class, const String p_property);
 
 	Node *property_drop_node = nullptr;
 	String resource_drop_path;
@@ -168,6 +169,8 @@ class SceneTreeDock : public VBoxContainer {
 
 	bool first_enter;
 
+	Node *_instance_node(const String p_class);
+	Node *_add_node_to_tree(Node *p_parent, Node *p_child);
 	Node *_create_node(Node *p_parent, const String p_class);
 	void _create();
 	void _do_create(Node *p_parent);

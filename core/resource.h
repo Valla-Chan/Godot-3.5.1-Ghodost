@@ -96,6 +96,7 @@ public:
 
 	virtual void set_path(const String &p_path, bool p_take_over = false);
 	String get_path() const;
+	String get_filename() const;
 	_FORCE_INLINE_ bool is_built_in() const { return path_cache.empty() || path_cache.contains("::") || path_cache.begins_with("local://"); }
 
 	void set_subindex(int p_sub_index);

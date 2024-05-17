@@ -1313,11 +1313,20 @@ void SceneTreeDock::_property_selected(int p_idx) {
 	}
 	else {
 		if (meta.find("Sprite") > 0) {
-			Node *sprite = _create_node(property_drop_node, "Sprite");
-			_perform_property_drop(sprite, "texture", ResourceLoader::load(resource_drop_path));
+			_drop_new_node("Sprite", "texture");
+		} else if (meta.find("AudioPlayer") > 0) {
+			_drop_new_node("AudioStreamPlayer", "stream");
 		}
 	}
 	property_drop_node = nullptr;
+}
+
+void SceneTreeDock::_drop_new_node(const String p_class, const String p_property) {
+	Node *new_node = _instance_node(p_class);
+	RES resource = ResourceLoader::load(resource_drop_path);
+	new_node->set_name(resource_drop_path.get_file().get_basename());
+	new_node->set(p_property, resource);
+	Node *sprite = _add_node_to_tree(property_drop_node, new_node);
 }
 
 void SceneTreeDock::_perform_property_drop(Node *p_node, String p_property, RES p_res) {
@@ -2322,14 +2331,56 @@ Node *SceneTreeDock::_get_selection_group_tail(Node *p_node, List<Node *> p_list
 	return tail;
 }
 
+Node *SceneTreeDock::_instance_node(const String p_class) {
+	Object *c = ClassDB::instance(p_class);
+	ERR_FAIL_NULL_V(c, nullptr);
+	Node *node = Object::cast_to<Node>(c);
+	ERR_FAIL_NULL_V(node, nullptr);
+	return node;
+}
+
+Node *SceneTreeDock::_add_node_to_tree(Node *p_parent, Node *p_child) {
+	ERR_FAIL_NULL_V(edited_scene, nullptr);
+	ERR_FAIL_NULL_V(p_child, nullptr);
+	ERR_FAIL_NULL_V(p_parent, nullptr);
+
+	editor_data->get_undo_redo().create_action(TTR("Create Node"));
+
+	editor_data->get_undo_redo().add_do_method(p_parent, "add_child", p_child);
+	editor_data->get_undo_redo().add_do_method(p_child, "set_owner", edited_scene);
+	editor_data->get_undo_redo().add_do_method(editor_selection, "clear");
+	editor_data->get_undo_redo().add_do_method(editor_selection, "add_node", p_child);
+	editor_data->get_undo_redo().add_do_reference(p_child);
+	editor_data->get_undo_redo().add_undo_method(p_parent, "remove_child", p_child);
+
+	String new_name = p_parent->validate_child_name(p_child);
+	ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
+	editor_data->get_undo_redo().add_do_method(sed, "live_debug_create_node", edited_scene->get_path_to(p_parent), p_child->get_class(), new_name);
+	editor_data->get_undo_redo().add_undo_method(sed, "live_debug_remove_node", NodePath(String(edited_scene->get_path_to(p_parent)).plus_file(new_name)));
+
+	editor_data->get_undo_redo().commit_action();
+
+	_push_item(p_child);
+	editor_selection->clear();
+	editor_selection->add_node(p_child);
+	scene_tree->get_scene_tree()->grab_focus();
+
+	emit_signal("node_created", p_child);
+	return p_child;
+}
+
 // create any node
 Node *SceneTreeDock::_create_node(Node *p_parent, const String p_class) {
 	ERR_FAIL_NULL_V(edited_scene,nullptr);
+	ERR_FAIL_NULL_V(p_parent, nullptr);
 	Object *c = ClassDB::instance(p_class);
 	ERR_FAIL_NULL_V(c, nullptr);
 	Node *child = Object::cast_to<Node>(c);
 	ERR_FAIL_NULL_V(child, nullptr);
 
+	return _add_node_to_tree(p_parent,child);
+
+	/*
 	editor_data->get_undo_redo().create_action(TTR("Create Node"));
 
 	editor_data->get_undo_redo().add_do_method(p_parent, "add_child", child);
@@ -2353,6 +2404,7 @@ Node *SceneTreeDock::_create_node(Node *p_parent, const String p_class) {
 
 	emit_signal("node_created", c);
 	return child;
+	*/
 }
 
 // create node from dialogue
@@ -2763,9 +2815,14 @@ void SceneTreeDock::_files_dropped(Vector<String> p_files, NodePath p_to, int p_
 		StringName res_type = EditorFileSystem::get_singleton()->get_file_type(res_path);
 		List<String> valid_properties;
 
+		bool custom_props = false;
 		// manually add in an option here to create a new sprite if the dragged item is a texture
 		if (res_type == "StreamTexture") {
 			valid_properties.push_back("New Sprite...");
+			custom_props = true;
+		} else if (res_type == "AudioStreamSample") {
+			valid_properties.push_back("New AudioPlayer...");
+			custom_props = true;
 		}
 
 		List<PropertyInfo> pinfo;
@@ -2790,7 +2847,7 @@ void SceneTreeDock::_files_dropped(Vector<String> p_files, NodePath p_to, int p_
 		}
 
 		// multiple options of properties to drag in, show popup
-		if (valid_properties.size() > 1 || valid_properties.find("New Sprite...")>0) {
+		if (valid_properties.size() > 1 || custom_props) {
 			property_drop_node = node;
 			resource_drop_path = res_path;
 
