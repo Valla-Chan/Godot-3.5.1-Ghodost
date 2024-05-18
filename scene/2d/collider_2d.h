@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  collision_shape_2d.h                                                  */
+/*  collision_polygon_2d.h                                                */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,28 +28,37 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef COLLISION_SHAPE_2D_H
-#define COLLISION_SHAPE_2D_H
+#ifndef COLLIDER_2D_H
+#define COLLIDER_2D_H
 
-#include "collider_2d.h"
+#include "scene/2d/node_2d.h"
+#include "collision_object_2d.h"
+#include "scene/resources/shape_2d.h"
+#include "editor/plugins/canvas_item_editor_plugin.h"
 
-class CollisionObject2D;
+class Collider2D;
 
-class CollisionShape2D : public Collider2D {
-	GDCLASS(CollisionShape2D, Collider2D);
-	Ref<Shape2D> shape;
-	Rect2 rect;
-	void _shape_changed();
+class Collider2D : public Node2D {
+	GDCLASS(Collider2D, Node2D);
 
 protected:
-	void _notification(int p_what);
+	uint32_t owner_id;
+	CollisionObject2D *parent;
+	bool disabled;
+	bool one_way_collision;
+	bool use_override_color;
+	Color override_color;
+	float one_way_collision_margin;
+
+	void _update_in_shape_owner(bool p_xform_only = false);
+
+protected:
 	static void _bind_methods();
 
 public:
-	virtual bool _edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const;
 
-	void set_shape(const Ref<Shape2D> &p_shape);
-	Ref<Shape2D> get_shape() const;
+	void set_disabled(bool p_disabled);
+	bool is_disabled() const;
 
 	void set_one_way_collision(bool p_enable);
 	bool is_one_way_collision_enabled() const;
@@ -64,9 +73,8 @@ public:
 	Color get_override_color() const;
 	//
 
-	virtual String get_configuration_warning() const;
-
-	CollisionShape2D();
+	Collider2D();
+	
 };
 
-#endif // COLLISION_SHAPE_2D_H
+#endif // COLLIDER_2D_H

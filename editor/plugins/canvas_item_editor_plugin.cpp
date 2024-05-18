@@ -4216,8 +4216,7 @@ void CanvasItemEditor::set_show_colliders(bool p_show) {
 	scene->call("update");
 
 	Vector<StringName> classes;
-	classes.push_back("CollisionShape2D");
-	classes.push_back("CollisionPolygon2D");
+	classes.push_back("Collider2D");
 	_update_all_of_class(scene, classes);
 }
 

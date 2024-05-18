@@ -40,6 +40,7 @@
 #include "scene/2d/camera_2d.h"
 #include "scene/2d/canvas_item.h"
 #include "scene/2d/canvas_modulate.h"
+#include "scene/2d/collider_2d.h"
 #include "scene/2d/collision_polygon_2d.h"
 #include "scene/2d/collision_shape_2d.h"
 #include "scene/2d/cpu_particles_2d.h"
@@ -489,6 +490,7 @@ void register_scene_types() {
 	ClassDB::register_class<VehicleWheel>();
 	ClassDB::register_class<Area>();
 	ClassDB::register_class<ProximityGroup>();
+	ClassDB::register_virtual_class<Collider2D>();
 	ClassDB::register_class<CollisionShape>();
 	ClassDB::register_class<CollisionPolygon>();
 	ClassDB::register_class<RayCast>();

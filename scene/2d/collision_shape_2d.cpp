@@ -30,7 +30,6 @@
 
 #include "collision_shape_2d.h"
 
-#include "collision_object_2d.h"
 #include "core/engine.h"
 #include "scene/2d/area_2d.h"
 #include "scene/resources/capsule_shape_2d.h"
@@ -43,16 +42,6 @@
 
 void CollisionShape2D::_shape_changed() {
 	update();
-}
-
-void CollisionShape2D::_update_in_shape_owner(bool p_xform_only) {
-	parent->shape_owner_set_transform(owner_id, get_transform());
-	if (p_xform_only) {
-		return;
-	}
-	parent->shape_owner_set_disabled(owner_id, disabled);
-	parent->shape_owner_set_one_way_collision(owner_id, one_way_collision);
-	parent->shape_owner_set_one_way_collision_margin(owner_id, one_way_collision_margin);
 }
 
 void CollisionShape2D::_notification(int p_what) {
@@ -219,95 +208,17 @@ String CollisionShape2D::get_configuration_warning() const {
 	return warning;
 }
 
-void CollisionShape2D::set_disabled(bool p_disabled) {
-	disabled = p_disabled;
-	update();
-	if (parent) {
-		parent->shape_owner_set_disabled(owner_id, p_disabled);
-	}
-}
-
-bool CollisionShape2D::is_disabled() const {
-	return disabled;
-}
-
-void CollisionShape2D::set_one_way_collision(bool p_enable) {
-	one_way_collision = p_enable;
-	update();
-	if (parent) {
-		parent->shape_owner_set_one_way_collision(owner_id, p_enable);
-	}
-	update_configuration_warning();
-}
-
-bool CollisionShape2D::is_one_way_collision_enabled() const {
-	return one_way_collision;
-}
-
-void CollisionShape2D::set_one_way_collision_margin(float p_margin) {
-	one_way_collision_margin = p_margin;
-	if (parent) {
-		parent->shape_owner_set_one_way_collision_margin(owner_id, one_way_collision_margin);
-	}
-}
-
-float CollisionShape2D::get_one_way_collision_margin() const {
-	return one_way_collision_margin;
-}
-
-// VALLA EDITS
-void CollisionShape2D::set_use_override_color(const bool p_enable) {
-	if (use_override_color == p_enable) {
-		return;
-	}
-
-	use_override_color = p_enable;
-	update();
-}
-bool CollisionShape2D::get_use_override_color() const {
-	return use_override_color;
-}
-
-void CollisionShape2D::set_override_color(const Color p_override_color) {
-	if (override_color == p_override_color) {
-		return;
-	}
-
-	override_color = p_override_color;
-	update();
-}
-Color CollisionShape2D::get_override_color() const {
-	return override_color;
-}
-//
 void CollisionShape2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_shape", "shape"), &CollisionShape2D::set_shape);
 	ClassDB::bind_method(D_METHOD("get_shape"), &CollisionShape2D::get_shape);
-	ClassDB::bind_method(D_METHOD("set_disabled", "disabled"), &CollisionShape2D::set_disabled);
-	ClassDB::bind_method(D_METHOD("is_disabled"), &CollisionShape2D::is_disabled);
-	ClassDB::bind_method(D_METHOD("set_one_way_collision", "enabled"), &CollisionShape2D::set_one_way_collision);
-	ClassDB::bind_method(D_METHOD("is_one_way_collision_enabled"), &CollisionShape2D::is_one_way_collision_enabled);
-	ClassDB::bind_method(D_METHOD("set_one_way_collision_margin", "margin"), &CollisionShape2D::set_one_way_collision_margin);
-	ClassDB::bind_method(D_METHOD("get_one_way_collision_margin"), &CollisionShape2D::get_one_way_collision_margin);
 	ClassDB::bind_method(D_METHOD("_shape_changed"), &CollisionShape2D::_shape_changed);
 
-	ClassDB::bind_method(D_METHOD("set_use_override_color"), &CollisionShape2D::set_use_override_color);
-	ClassDB::bind_method(D_METHOD("get_use_override_color"), &CollisionShape2D::get_use_override_color);
-	ClassDB::bind_method(D_METHOD("set_override_color"), &CollisionShape2D::set_override_color);
-	ClassDB::bind_method(D_METHOD("get_override_color"), &CollisionShape2D::get_override_color);
-
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "shape", PROPERTY_HINT_RESOURCE_TYPE, "Shape2D"), "set_shape", "get_shape");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "disabled"), "set_disabled", "is_disabled");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "one_way_collision"), "set_one_way_collision", "is_one_way_collision_enabled");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "one_way_collision_margin", PROPERTY_HINT_RANGE, "0,128,0.1"), "set_one_way_collision_margin", "get_one_way_collision_margin");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_override_color"), "set_use_override_color", "get_use_override_color");
-	ADD_PROPERTY(PropertyInfo(Variant::COLOR, "override_color"), "set_override_color", "get_override_color");
 }
 
 CollisionShape2D::CollisionShape2D() {
 	rect = Rect2(-Point2(10, 10), Point2(20, 20));
 	set_notify_local_transform(true);
-	//CanvasItemEditor::get_singleton()->connect("update_show_colliders", this, "update");
 	owner_id = 0;
 	parent = nullptr;
 	disabled = false;
