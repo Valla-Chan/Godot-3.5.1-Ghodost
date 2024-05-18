@@ -235,6 +235,9 @@ bool CollisionPolygon2D::_edit_use_rect() const {
 }
 
 bool CollisionPolygon2D::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
+	if (!CanvasItemEditor::get_singleton()->get_show_colliders()) {
+		return false;
+	}
 	return Geometry::is_point_in_polygon(p_point, Variant(polygon));
 }
 #endif

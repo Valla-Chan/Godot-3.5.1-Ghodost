@@ -169,6 +169,10 @@ Ref<Shape2D> CollisionShape2D::get_shape() const {
 }
 
 bool CollisionShape2D::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
+	if (!CanvasItemEditor::get_singleton()->get_show_colliders()) {
+		return false;
+	}
+
 	if (!shape.is_valid()) {
 		return false;
 	}
