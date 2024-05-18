@@ -105,6 +105,10 @@ void CollisionShape2D::_notification(int p_what) {
 				break;
 			}
 
+			if (!CanvasItemEditor::get_singleton()->get_show_colliders()) {
+				break;
+			}
+
 			rect = Rect2();
 
 			Color draw_col = get_tree()->get_debug_collisions_color();
@@ -303,6 +307,7 @@ void CollisionShape2D::_bind_methods() {
 CollisionShape2D::CollisionShape2D() {
 	rect = Rect2(-Point2(10, 10), Point2(20, 20));
 	set_notify_local_transform(true);
+	//CanvasItemEditor::get_singleton()->connect("update_show_colliders", this, "update");
 	owner_id = 0;
 	parent = nullptr;
 	disabled = false;

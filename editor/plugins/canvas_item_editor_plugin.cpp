@@ -4205,6 +4205,54 @@ void CanvasItemEditor::_draw_viewport() {
 	_draw_hover();
 }
 
+
+void CanvasItemEditor::set_show_colliders(bool p_show) {
+	if (show_colliders == p_show) {
+		return;
+	}
+	show_colliders = p_show;
+
+	Node *scene = editor->get_edited_scene();
+	scene->call("update");
+
+	Vector<StringName> classes;
+	classes.push_back("CollisionShape2D");
+	classes.push_back("CollisionPolygon2D");
+	_update_all_of_class(scene, classes);
+}
+
+void CanvasItemEditor::_update_all_of_class(Node *p_node, Vector<StringName> p_classes) {
+	if (!p_node) {
+		return;
+	}
+	for (int i = 0; i < p_node->get_child_count(); i++) {
+		CanvasItem *child = cast_to<CanvasItem>(p_node->get_child(i));
+		if (!child) {
+			continue;
+		}
+
+		// check node classes
+		if (p_classes.size() == 0) {
+			child->update();
+		} else {
+			for (int j = 0; j < p_classes.size(); j++) {
+				StringName classname = child->get_class_name();
+				if (classname == p_classes[j] || ClassDB::is_parent_class(classname, p_classes[j])) {
+					child->update();
+				}
+			}
+		}
+
+		if (child->get_child_count() > 0) {
+			_update_all_of_class(child, p_classes);
+		}
+	}
+}
+
+bool CanvasItemEditor::get_show_colliders() const {
+	return show_colliders;
+}
+
 void CanvasItemEditor::update_viewport() {
 	_update_scrollbars();
 	viewport->update();
@@ -5136,6 +5184,13 @@ void CanvasItemEditor::_popup_callback(int p_op) {
 			view_menu->get_popup()->set_item_checked(idx, show_guides);
 			viewport->update();
 		} break;
+		case SHOW_COLLIDERS: {
+			set_show_colliders(!show_colliders);
+			int idx = view_menu->get_popup()->get_item_index(SHOW_COLLIDERS);
+			view_menu->get_popup()->set_item_checked(idx, show_colliders);
+			_update_scrollbars();
+			viewport->update();
+		} break;
 		case LOCK_SELECTED: {
 			undo_redo->create_action(TTR("Lock Selected"));
 
@@ -5690,6 +5745,7 @@ Dictionary CanvasItemEditor::get_state() const {
 	state["show_rulers"] = show_rulers;
 	state["show_guides"] = show_guides;
 	state["show_helpers"] = show_helpers;
+	state["show_colliders"] = show_colliders;
 	state["show_zoom_control"] = zoom_hb->is_visible();
 	state["show_edit_locks"] = show_edit_locks;
 	state["snap_rotation"] = snap_rotation;
@@ -5807,6 +5863,12 @@ void CanvasItemEditor::set_state(const Dictionary &p_state) {
 		int idx = view_menu->get_popup()->get_item_index(SHOW_RULERS);
 		view_menu->get_popup()->set_item_checked(idx, show_rulers);
 		update_scrollbars = true;
+	}
+
+	if (state.has("show_colliders")) {
+		show_colliders = state["show_colliders"];
+		int idx = view_menu->get_popup()->get_item_index(SHOW_COLLIDERS);
+		view_menu->get_popup()->set_item_checked(idx, show_colliders);
 	}
 
 	if (state.has("show_guides")) {
@@ -5953,6 +6015,7 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 	show_rulers = true;
 	show_guides = true;
 	show_edit_locks = true;
+	show_colliders = true;
 	zoom = 1.0 / MAX(1, EDSCALE);
 	view_offset = Point2(-150 - RULER_WIDTH, -95 - RULER_WIDTH);
 	previous_update_view_offset = view_offset; // Moves the view a little bit to the left so that (0,0) is visible. The values a relative to a 16/10 screen
@@ -6316,6 +6379,7 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 	p->add_child(grid_menu);
 	p->add_submenu_item(TTR("Grid"), "GridMenu");
 
+	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/show_colliders", TTR("Show Colliders")), SHOW_COLLIDERS);
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/show_helpers", TTR("Show Helpers"), KEY_H), SHOW_HELPERS);
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/show_rulers", TTR("Show Rulers")), SHOW_RULERS);
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/show_guides", TTR("Show Guides"), KEY_Y), SHOW_GUIDES);

@@ -115,6 +115,7 @@ private:
 		SNAP_RELATIVE,
 		SNAP_CONFIGURE,
 		SNAP_USE_PIXEL,
+		SHOW_COLLIDERS,
 		SHOW_HELPERS,
 		SHOW_RULERS,
 		SHOW_GUIDES,
@@ -260,6 +261,7 @@ private:
 	bool show_viewport;
 	bool show_helpers;
 	bool show_edit_locks;
+	bool show_colliders;
 	float zoom;
 	Point2 view_offset;
 	Point2 previous_update_view_offset;
@@ -660,6 +662,11 @@ public:
 	Control *get_controls_container() { return controls_vb; }
 
 	void update_viewport();
+
+	void set_show_colliders(bool p_show);
+	bool get_show_colliders() const;
+
+	void _update_all_of_class(Node *p_node, Vector<StringName> p_classes);
 
 	Tool get_current_tool() { return tool; }
 	void set_current_tool(Tool p_tool);

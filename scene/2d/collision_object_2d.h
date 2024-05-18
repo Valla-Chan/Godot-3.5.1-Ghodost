@@ -33,6 +33,7 @@
 
 #include "scene/2d/node_2d.h"
 #include "scene/resources/shape_2d.h"
+#include "editor/plugins/canvas_item_editor_plugin.h"
 
 class CollisionObject2D : public Node2D {
 	GDCLASS(CollisionObject2D, Node2D);

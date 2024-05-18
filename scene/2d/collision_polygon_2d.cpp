@@ -139,6 +139,10 @@ void CollisionPolygon2D::_notification(int p_what) {
 				break;
 			}
 
+			if (!CanvasItemEditor::get_singleton()->get_show_colliders()) {
+				break;
+			}
+
 			int polygon_count = polygon.size();
 			for (int i = 0; i < polygon_count; i++) {
 				Vector2 p = polygon[i];
@@ -378,6 +382,7 @@ CollisionPolygon2D::CollisionPolygon2D() {
 	aabb = Rect2(-10, -10, 20, 20);
 	build_mode = BUILD_SOLIDS;
 	set_notify_local_transform(true);
+	//CanvasItemEditor::get_singleton()->connect("update_show_colliders", this, "update");
 	parent = nullptr;
 	owner_id = 0;
 	disabled = false;
