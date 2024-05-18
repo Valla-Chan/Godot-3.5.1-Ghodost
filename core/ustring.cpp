@@ -2500,6 +2500,59 @@ int String::find(const String &p_str, int p_from) const {
 	return -1;
 }
 
+bool String::has_numerals(bool p_include_unicode) const {
+	if (find("0") > 0 || to_int() > 0) {
+		return true;
+	} else if (p_include_unicode) {
+		Vector<String> unicode_nums;
+		unicode_nums.push_back("０");
+		unicode_nums.push_back("１");
+		unicode_nums.push_back("２");
+		unicode_nums.push_back("３");
+		unicode_nums.push_back("４");
+		unicode_nums.push_back("５");
+		unicode_nums.push_back("６");
+		unicode_nums.push_back("７");
+		unicode_nums.push_back("８");
+		unicode_nums.push_back("９");
+		for (int i = 0; i < 10; i++) {
+			if (find(unicode_nums[i]) > 0)
+				return true;
+		}
+	}
+	return false;
+}
+
+bool String::has_special_chars() const {
+	if (empty()) {
+		return false;
+	}
+	CharString charstr = utf8();
+
+	PoolByteArray retval;
+	size_t len = charstr.length();
+	retval.resize(len);
+	PoolByteArray::Write w = retval.write();
+	memcpy(w.ptr(), charstr.ptr(), len);
+	w.release();
+
+
+	for (int i = 0; i < retval.size(); i++) {
+		char curchar = retval[i];
+		
+		if (curchar != 32 && (curchar < 48 ||
+			(curchar > 90 && curchar < 97) ||
+			(curchar > 122 && curchar < 128) ||
+			(curchar > 154 && curchar < 160) ||
+			(curchar > 165 && curchar < 209) ||
+			(curchar > 212 && curchar < 224) ||
+			(curchar > 237))) {
+			return true;
+		}
+	}
+	return false;
+}
+
 int String::find(const char *p_str, int p_from) const {
 	if (p_from < 0) {
 		return -1;

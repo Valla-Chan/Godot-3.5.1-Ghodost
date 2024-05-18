@@ -252,6 +252,8 @@ struct _VariantCall {
 	VCALL_LOCALMEM0R(String, last);
 	//
 	VCALL_LOCALMEM2R(String, get_slice);
+	VCALL_LOCALMEM1R(String, has_numerals);
+	VCALL_LOCALMEM0R(String, has_special_chars);
 	VCALL_LOCALMEM2R(String, find);
 	VCALL_LOCALMEM1R(String, find_last);
 	VCALL_LOCALMEM2R(String, findn);
@@ -1713,6 +1715,8 @@ void register_variant_methods() {
 	ADDFUNC0R(STRING, STRING, String, last, varray());
 
 	ADDFUNC2R(STRING, INT, String, find, STRING, "what", INT, "from", varray(0));
+	ADDFUNC1R(STRING, BOOL, String, has_numerals, BOOL, "unicode", varray(false));
+	ADDFUNC0R(STRING, BOOL, String, has_special_chars, varray());
 
 	ADDFUNC3R(STRING, INT, String, count, STRING, "what", INT, "from", INT, "to", varray(0, 0));
 	ADDFUNC3R(STRING, INT, String, countn, STRING, "what", INT, "from", INT, "to", varray(0, 0));

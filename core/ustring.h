@@ -206,6 +206,8 @@ public:
 	// Valla edits
 	String first() const;
 	String last() const;
+	bool has_numerals(bool p_include_unicode) const;
+	bool has_special_chars() const;
 	int find(const String &p_str, int p_from = 0) const; ///< return <0 if failed
 	int find(const char *p_str, int p_from = 0) const; ///< return <0 if failed
 	int find_char(const CharType &p_char, int p_from = 0) const; ///< return <0 if failed
