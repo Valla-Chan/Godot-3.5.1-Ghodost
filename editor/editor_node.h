@@ -165,6 +165,7 @@ private:
 
 		RUN_STOP,
 		RUN_PLAY_SCENE,
+		RUN_PLAY_LAST_SCENE,
 		RUN_PLAY_NATIVE,
 		RUN_PLAY_CUSTOM_SCENE,
 		RUN_SCENE_SETTINGS,
@@ -294,6 +295,7 @@ private:
 	ToolButton *stop_button;
 	ToolButton *run_settings_button;
 	ToolButton *play_scene_button;
+	ToolButton *play_last_scene_button;
 	ToolButton *play_custom_scene_button;
 	ToolButton *search_button;
 	TextureProgress *audio_vu;
@@ -405,6 +407,7 @@ private:
 
 	bool _playing_edited;
 	String run_custom_filename;
+	String last_run_scene;
 	bool reference_resource_mem;
 	bool save_external_resources_mem;
 	uint64_t saved_version;
@@ -903,6 +906,7 @@ public:
 
 	void run_play();
 	void run_play_current();
+	void run_play_last();
 	void run_play_custom(const String &p_custom);
 	void run_stop();
 	bool is_run_playing() const;

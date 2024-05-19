@@ -641,6 +641,7 @@ void EditorNode::_notification(int p_what) {
 
 			play_button->set_icon(gui_base->get_icon("MainPlay", "EditorIcons"));
 			play_scene_button->set_icon(gui_base->get_icon("PlayScene", "EditorIcons"));
+			play_last_scene_button->set_icon(gui_base->get_icon("PlayLastScene", "EditorIcons"));
 			play_custom_scene_button->set_icon(gui_base->get_icon("PlayCustom", "EditorIcons"));
 			pause_button->set_icon(gui_base->get_icon("Pause", "EditorIcons"));
 			stop_button->set_icon(gui_base->get_icon("Stop", "EditorIcons"));
@@ -2239,6 +2240,8 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 	play_button->set_icon(gui_base->get_icon("MainPlay", "EditorIcons"));
 	play_scene_button->set_pressed(false);
 	play_scene_button->set_icon(gui_base->get_icon("PlayScene", "EditorIcons"));
+	play_last_scene_button->set_pressed(false);
+	play_last_scene_button->set_icon(gui_base->get_icon("PlayLastScene", "EditorIcons"));
 	play_custom_scene_button->set_pressed(false);
 	play_custom_scene_button->set_icon(gui_base->get_icon("PlayCustom", "EditorIcons"));
 
@@ -2314,19 +2317,28 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 		return;
 	}
 
+	// TODO: gray out new custom button?
+
 	if (p_current) {
 		play_scene_button->set_pressed(true);
 		play_scene_button->set_icon(gui_base->get_icon("Reload", "EditorIcons"));
 	} else if (p_custom != "") {
-		run_custom_filename = p_custom;
-		play_custom_scene_button->set_pressed(true);
-		play_custom_scene_button->set_icon(gui_base->get_icon("Reload", "EditorIcons"));
+		if (run_filename != last_run_scene) {
+			run_custom_filename = p_custom;
+			play_custom_scene_button->set_pressed(true);
+			play_custom_scene_button->set_icon(gui_base->get_icon("Reload", "EditorIcons"));
+		} else {
+			play_last_scene_button->set_pressed(true);
+			play_last_scene_button->set_icon(gui_base->get_icon("Reload", "EditorIcons"));
+		}
+		
 	} else {
 		play_button->set_pressed(true);
 		play_button->set_icon(gui_base->get_icon("Reload", "EditorIcons"));
 	}
 	stop_button->set_disabled(false);
 
+	last_run_scene = run_filename;
 	_playing_edited = p_current;
 }
 
@@ -2723,6 +2735,9 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 		case RUN_PLAY_SCENE: {
 			run_play_current();
 
+		} break;
+		case RUN_PLAY_LAST_SCENE: {
+			run_play_last();
 		} break;
 		case RUN_PLAY_NATIVE: {
 			bool autosave = EDITOR_GET("run/auto_save/save_before_running");
@@ -4874,6 +4889,16 @@ void EditorNode::run_play_current() {
 	_run(true);
 }
 
+void EditorNode::run_play_last() {
+	_save_default_environment();
+	_menu_option_confirm(RUN_STOP, true);
+	if (!last_run_scene.empty()) {
+		_run(false, last_run_scene);
+	} else {
+		_run(true);
+	}
+}
+
 void EditorNode::run_play_custom(const String &p_custom) {
 	_menu_option_confirm(RUN_STOP, true);
 	_run(false, p_custom);
@@ -6733,6 +6758,19 @@ EditorNode::EditorNode() {
 	run_native = memnew(EditorRunNative);
 	play_hb->add_child(run_native);
 	run_native->connect("native_run", this, "_menu_option", varray(RUN_PLAY_NATIVE));
+
+	play_last_scene_button = memnew(ToolButton);
+	play_hb->add_child(play_last_scene_button);
+	play_last_scene_button->set_toggle_mode(true);
+	play_last_scene_button->set_focus_mode(Control::FOCUS_NONE);
+	play_last_scene_button->set_icon(gui_base->get_icon("PlayLastScene", "EditorIcons"));
+	play_last_scene_button->connect("pressed", this, "_menu_option", make_binds(RUN_PLAY_LAST_SCENE));
+	play_last_scene_button->set_tooltip(TTR("Play the last played edited scene."));
+#ifdef OSX_ENABLED
+	play_last_scene_button->set_shortcut(ED_SHORTCUT("editor/play_last_scene", TTR("Play Last Scene"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_R));
+#else
+	play_last_scene_button->set_shortcut(ED_SHORTCUT("editor/play_last_scene", TTR("Play Last Scene"), KEY_F7));
+#endif
 
 	play_scene_button = memnew(ToolButton);
 	play_hb->add_child(play_scene_button);
