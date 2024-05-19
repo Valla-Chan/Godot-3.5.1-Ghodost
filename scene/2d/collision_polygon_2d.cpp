@@ -34,7 +34,7 @@
 #include "scene/2d/area_2d.h"
 #include "scene/resources/concave_polygon_shape_2d.h"
 #include "scene/resources/convex_polygon_shape_2d.h"
-
+#include "editor/plugins/canvas_item_editor_plugin.h"
 #include "thirdparty/misc/triangulator.h"
 
 void CollisionPolygon2D::_build_polygon() {
@@ -128,9 +128,11 @@ void CollisionPolygon2D::_notification(int p_what) {
 				break;
 			}
 
+#ifdef TOOLS_ENABLED
 			if (!CanvasItemEditor::get_singleton()->get_show_colliders()) {
 				break;
 			}
+#endif
 
 			int polygon_count = polygon.size();
 			for (int i = 0; i < polygon_count; i++) {
@@ -238,6 +240,7 @@ bool CollisionPolygon2D::_edit_is_selected_on_click(const Point2 &p_point, doubl
 	if (!CanvasItemEditor::get_singleton()->get_show_colliders()) {
 		return false;
 	}
+
 	return Geometry::is_point_in_polygon(p_point, Variant(polygon));
 }
 #endif

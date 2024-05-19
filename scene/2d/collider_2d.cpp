@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  collision_polygon_2d.cpp                                              */
+/*  collider_2d.cpp													      */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -29,7 +29,6 @@
 /**************************************************************************/
 
 #include "collider_2d.h"
-
 
 void Collider2D::_update_in_shape_owner(bool p_xform_only) {
 	parent->shape_owner_set_transform(owner_id, get_transform());

@@ -39,6 +39,7 @@
 #include "scene/resources/line_shape_2d.h"
 #include "scene/resources/rectangle_shape_2d.h"
 #include "scene/resources/segment_shape_2d.h"
+#include "editor/plugins/canvas_item_editor_plugin.h"
 
 void CollisionShape2D::_shape_changed() {
 	update();
@@ -94,9 +95,11 @@ void CollisionShape2D::_notification(int p_what) {
 				break;
 			}
 
+#ifdef TOOLS_ENABLED
 			if (!CanvasItemEditor::get_singleton()->get_show_colliders()) {
 				break;
 			}
+#endif
 
 			rect = Rect2();
 
@@ -169,9 +172,11 @@ Ref<Shape2D> CollisionShape2D::get_shape() const {
 }
 
 bool CollisionShape2D::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
+#ifdef TOOLS_ENABLED
 	if (!CanvasItemEditor::get_singleton()->get_show_colliders()) {
 		return false;
 	}
+#endif
 
 	if (!shape.is_valid()) {
 		return false;

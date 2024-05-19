@@ -34,7 +34,8 @@
 #include "scene/2d/node_2d.h"
 #include "collision_object_2d.h"
 #include "scene/resources/shape_2d.h"
-#include "editor/plugins/canvas_item_editor_plugin.h"
+//#include "editor/plugins/canvas_item_editor_plugin.h"
+
 
 class Collider2D;
 
