@@ -345,11 +345,12 @@ void EditorData::set_editor_states(const Dictionary &p_states) {
 	List<Variant> keys;
 	p_states.get_key_list(&keys);
 
+	int plugins_size = editor_plugins.size();
 	List<Variant>::Element *E = keys.front();
 	for (; E; E = E->next()) {
 		String name = E->get();
 		int idx = -1;
-		for (int i = 0; i < editor_plugins.size(); i++) {
+		for (int i = 0; i < plugins_size; i++) {
 			if (editor_plugins[i]->get_name() == name) {
 				idx = i;
 				break;

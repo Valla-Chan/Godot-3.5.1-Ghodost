@@ -2131,20 +2131,23 @@ void EditorNode::_edit_current(bool p_skip_foreign) {
 		scene_tree_dock->set_selected(nullptr);
 		node_dock->set_node(nullptr);
 		inspector_dock->update(nullptr);
-		EditorNode::get_singleton()->get_import_dock()->set_edit_path(current_res->get_path());
 
-		int subr_idx = current_res->get_path().find("::");
+		String current_res_path = current_res->get_path();
+		EditorNode::get_singleton()->get_import_dock()->set_edit_path(current_res_path);
+
+		int subr_idx = current_res_path.find("::");
 		if (subr_idx != -1) {
-			String base_path = current_res->get_path().substr(0, subr_idx);
+			String base_path = current_res_path.substr(0, subr_idx);
 			if (FileAccess::exists(base_path + ".import")) {
 				editable_warning = TTR("This resource belongs to a scene that was imported, so it's not editable.\nPlease read the documentation relevant to importing scenes to better understand this workflow.");
 			} else {
-				if ((!get_edited_scene() || get_edited_scene()->get_filename() != base_path) && ResourceLoader::get_resource_type(base_path) == "PackedScene") {
+				Node *edited_scene = get_edited_scene();
+				if ((!edited_scene || edited_scene->get_filename() != base_path) && ResourceLoader::get_resource_type(base_path) == "PackedScene") {
 					editable_warning = TTR("This resource belongs to a scene that was instanced or inherited.\nChanges to it won't be kept when saving the current scene.");
 				}
 			}
-		} else if (current_res->get_path().is_resource_file()) {
-			if (FileAccess::exists(current_res->get_path() + ".import")) {
+		} else if (current_res_path.is_resource_file()) {
+			if (FileAccess::exists(current_res_path + ".import")) {
 				editable_warning = TTR("This resource was imported, so it's not editable. Change its settings in the import panel and then re-import.");
 			}
 		}
@@ -2166,10 +2169,14 @@ void EditorNode::_edit_current(bool p_skip_foreign) {
 			inspector_dock->update(nullptr);
 		}
 
-		if (get_edited_scene() && get_edited_scene()->get_filename() != String()) {
-			String source_scene = get_edited_scene()->get_filename();
-			if (FileAccess::exists(source_scene + ".import")) {
-				editable_warning = TTR("This scene was imported, so changes to it won't be kept.\nInstancing it or inheriting will allow making changes to it.\nPlease read the documentation relevant to importing scenes to better understand this workflow.");
+		Node *edited_scene = get_edited_scene();
+		if (edited_scene) {
+			String source_scene = edited_scene->get_filename();
+			if (source_scene != String())
+			{
+				if (FileAccess::exists(source_scene + ".import")) {
+					editable_warning = TTR("This scene was imported, so changes to it won't be kept.\nInstancing it or inheriting will allow making changes to it.\nPlease read the documentation relevant to importing scenes to better understand this workflow.");
+				}
 			}
 		}
 
@@ -2180,14 +2187,14 @@ void EditorNode::_edit_current(bool p_skip_foreign) {
 			editable_warning = TTR("This is a remote object, so changes to it won't be kept.\nPlease read the documentation relevant to debugging to better understand this workflow.");
 			disable_folding = true;
 		} else if (current_obj->is_class("MultiNodeEdit")) {
-			Node *scene = get_edited_scene();
-			if (scene) {
+			Node *edited_scene = get_edited_scene();
+			if (edited_scene) {
 				MultiNodeEdit *multi_node_edit = Object::cast_to<MultiNodeEdit>(current_obj);
 				int node_count = multi_node_edit->get_node_count();
 				if (node_count > 0) {
 					List<Node *> multi_nodes;
 					for (int node_index = 0; node_index < node_count; ++node_index) {
-						Node *node = scene->get_node(multi_node_edit->get_node(node_index));
+						Node *node = edited_scene->get_node(multi_node_edit->get_node(node_index));
 						if (node) {
 							multi_nodes.push_back(node);
 						}
@@ -2237,11 +2244,15 @@ void EditorNode::_edit_current(bool p_skip_foreign) {
 		if (main_plugin && !skip_main_plugin) {
 			// special case if use of external editor is true
 			Resource *current_res = Object::cast_to<Resource>(current_obj);
-			if (main_plugin->get_name() == "Script" && current_obj->get_class_name() != StringName("VisualScript") && current_res && !current_res->get_path().empty() && current_res->get_path().find("::") == -1 && (bool(EditorSettings::get_singleton()->get("text_editor/external/use_external_editor")) || overrides_external_editor(current_obj))) {
-				if (!changing_scene) {
-					main_plugin->edit(current_obj);
+			if (current_res) {
+				String current_res_path = current_res->get_path();
+				if (main_plugin->get_name() == "Script" && current_obj->get_class_name() != StringName("VisualScript") && !current_res_path.empty() && current_res_path.find("::") == -1 && (bool(EditorSettings::get_singleton()->get("text_editor/external/use_external_editor")) || overrides_external_editor(current_obj))) {
+					if (!changing_scene) {
+						main_plugin->edit(current_obj);
+					}
 				}
 			}
+			
 
 			else if (main_plugin != editor_plugin_screen && (!ScriptEditor::get_singleton() || !ScriptEditor::get_singleton()->is_visible_in_tree() || ScriptEditor::get_singleton()->can_take_away_focus())) {
 				// update screen main_plugin
@@ -3555,31 +3566,39 @@ Dictionary EditorNode::_get_main_scene_state() {
 	return state;
 }
 
+int editor_plugin_screen_idx_last = 0;
 void EditorNode::_set_main_scene_state(Dictionary p_state, Node *p_for_scene) {
-	if (get_edited_scene() != p_for_scene && p_for_scene != nullptr) {
+	Node *edited_scene = get_edited_scene();
+	if (edited_scene != p_for_scene && p_for_scene != nullptr) {
 		return; //not for this scene
 	}
 
 	changing_scene = false;
 
 	int current = -1;
-	for (int i = 0; i < editor_table.size(); i++) {
-		if (editor_plugin_screen == editor_table[i]) {
-			current = i;
-			break;
+	if (editor_plugin_screen != editor_table[editor_plugin_screen_idx_last]) {
+		for (int i = 0; i < editor_table.size(); i++) {
+			if (editor_plugin_screen == editor_table[i]) {
+				current = i;
+				editor_plugin_screen_idx_last = current;
+				break;
+			}
 		}
+	} else {
+		current = editor_plugin_screen_idx_last;
 	}
+	
 
 	if (p_state.has("editor_index")) {
 		int index = p_state["editor_index"];
 		if (current < 2) { //if currently in spatial/2d, only switch to spatial/2d. if currently in script, stay there
-			if (index < 2 || !get_edited_scene()) {
+			if (index < 2 || !edited_scene) {
 				_editor_select(index);
 			}
 		}
 	}
 
-	if (get_edited_scene()) {
+	if (edited_scene) {
 		if (current < 2) {
 			//use heuristic instead
 			int n2d = 0, n3d = 0;
@@ -3606,7 +3625,9 @@ void EditorNode::_set_main_scene_state(Dictionary p_state, Node *p_for_scene) {
 	//this should only happen at the very end
 
 	ScriptEditor::get_singleton()->get_debugger()->update_live_edit_root();
-	ScriptEditor::get_singleton()->set_scene_root_script(editor_data.get_scene_root_script(editor_data.get_edited_scene()));
+
+	Ref<Script> root_script = editor_data.get_scene_root_script(editor_data.get_edited_scene());
+	ScriptEditor::get_singleton()->set_scene_root_script(root_script);
 	editor_data.notify_edited_scene_changed();
 }
 

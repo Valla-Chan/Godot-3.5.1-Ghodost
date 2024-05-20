@@ -3078,7 +3078,10 @@ void ScriptEditor::set_scene_root_script(Ref<Script> p_script) {
 	const bool open_dominant = EditorSettings::get_singleton()->get("text_editor/files/open_dominant_script_on_scene_change");
 
 	if (open_dominant && !use_external_editor && p_script.is_valid()) {
-		edit(p_script);
+		// do not set script in editor if it is something generic.
+		if (!String(p_script->get_path().get_file()).begins_with("scn_")) {
+			edit(p_script);
+		}
 	}
 }
 
