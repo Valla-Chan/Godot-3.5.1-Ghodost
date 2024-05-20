@@ -64,6 +64,7 @@ public:
 	void operator=(const Array &p_array);
 
 	void push_back(const Variant &p_value);
+	void swap(int p_idx1, int p_idx2);
 	_FORCE_INLINE_ void append(const Variant &p_value) { push_back(p_value); } //for python compatibility
 	void append_unique(const Variant &p_value);
 	void append_array(const Array &p_array);

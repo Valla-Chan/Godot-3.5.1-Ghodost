@@ -131,6 +131,16 @@ void Array::push_back(const Variant &p_value) {
 	_p->array.push_back(p_value);
 }
 
+// VALLA EDITS: swap 2 indices. thx roy! :3
+void Array::swap(int p_idx1, int p_idx2) {
+	ERR_FAIL_COND_V_MSG((_p->array.size() < p_idx1 - 1 || _p->array.size() < p_idx2 - 1) || (p_idx1 < 0 || p_idx2 < 0), , "Values must be within range of array.");
+
+	Variant item1 = operator[](p_idx1);
+	_p->array.set(p_idx1, operator[](p_idx2));
+	_p->array.set(p_idx2, item1);
+
+}
+
 // VALLA EDITS: only append if not existing
 void Array::append_unique(const Variant &p_value) {
 	if (_p->array.find(p_value, 0) == -1) {
