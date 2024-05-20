@@ -588,6 +588,7 @@ bool EditorData::_find_updated_instances(Node *p_root, Node *p_node, Set<String>
 	return false;
 }
 
+// return true after done updating, return false if no update performed.
 bool EditorData::check_and_update_scene(int p_idx) {
 	ERR_FAIL_INDEX_V(p_idx, edited_scene.size(), false);
 	if (!edited_scene[p_idx].root) {

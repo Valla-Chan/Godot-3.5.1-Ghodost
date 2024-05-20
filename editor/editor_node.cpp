@@ -2383,6 +2383,7 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 	stop_button->set_disabled(false);
 
 	last_run_scene = run_filename;
+	play_last_scene_button->set_tooltip(TTR("Replay the last played scene:\n" + last_run_scene));
 	_playing_edited = p_current;
 }
 
@@ -3624,12 +3625,12 @@ void EditorNode::_clear_undo_history() {
 
 void EditorNode::set_current_scene(int p_idx) {
 	//Save the folding in case the scene gets reloaded.
-	if (editor_data.get_scene_path(p_idx) != "" && editor_data.get_edited_scene_root(p_idx)) {
+	if (!editor_data.get_scene_path(p_idx).empty() && editor_data.get_edited_scene_root(p_idx)) {
 		editor_folding.save_scene_folding(editor_data.get_edited_scene_root(p_idx), editor_data.get_scene_path(p_idx));
 	}
 
 	if (editor_data.check_and_update_scene(p_idx)) {
-		if (editor_data.get_scene_path(p_idx) != "") {
+		if (!editor_data.get_scene_path(p_idx).empty()) {
 			editor_folding.load_scene_folding(editor_data.get_edited_scene_root(p_idx), editor_data.get_scene_path(p_idx));
 		}
 
@@ -6809,19 +6810,6 @@ EditorNode::EditorNode() {
 	play_hb->add_child(run_native);
 	run_native->connect("native_run", this, "_menu_option", varray(RUN_PLAY_NATIVE));
 
-	play_last_scene_button = memnew(ToolButton);
-	play_hb->add_child(play_last_scene_button);
-	play_last_scene_button->set_toggle_mode(true);
-	play_last_scene_button->set_focus_mode(Control::FOCUS_NONE);
-	play_last_scene_button->set_icon(gui_base->get_icon("PlayLastScene", "EditorIcons"));
-	play_last_scene_button->connect("pressed", this, "_menu_option", make_binds(RUN_PLAY_LAST_SCENE));
-	play_last_scene_button->set_tooltip(TTR("Replay the last played scene."));
-#ifdef OSX_ENABLED
-	play_last_scene_button->set_shortcut(ED_SHORTCUT("editor/play_last_scene", TTR("Play Last Scene"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_R));
-#else
-	play_last_scene_button->set_shortcut(ED_SHORTCUT("editor/play_last_scene", TTR("Play Last Scene"), KEY_F7));
-#endif
-
 	play_scene_button = memnew(ToolButton);
 	play_hb->add_child(play_scene_button);
 	play_scene_button->set_toggle_mode(true);
@@ -6846,6 +6834,19 @@ EditorNode::EditorNode() {
 	play_custom_scene_button->set_shortcut(ED_SHORTCUT("editor/play_custom_scene", TTR("Play Custom Scene"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_R));
 #else
 	play_custom_scene_button->set_shortcut(ED_SHORTCUT("editor/play_custom_scene", TTR("Play Custom Scene"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_F5));
+#endif
+
+	play_last_scene_button = memnew(ToolButton);
+	play_hb->add_child(play_last_scene_button);
+	play_last_scene_button->set_toggle_mode(true);
+	play_last_scene_button->set_focus_mode(Control::FOCUS_NONE);
+	play_last_scene_button->set_icon(gui_base->get_icon("PlayLastScene", "EditorIcons"));
+	play_last_scene_button->connect("pressed", this, "_menu_option", make_binds(RUN_PLAY_LAST_SCENE));
+	play_last_scene_button->set_tooltip(TTR("Replay the last played scene."));
+#ifdef OSX_ENABLED
+	play_last_scene_button->set_shortcut(ED_SHORTCUT("editor/play_last_scene", TTR("Play Last Scene"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_R));
+#else
+	play_last_scene_button->set_shortcut(ED_SHORTCUT("editor/play_last_scene", TTR("Play Last Scene"), KEY_F7));
 #endif
 
 	HBoxContainer *right_menu_hb = memnew(HBoxContainer);
