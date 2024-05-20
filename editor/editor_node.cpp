@@ -2244,12 +2244,9 @@ void EditorNode::_edit_current(bool p_skip_foreign) {
 		if (main_plugin && !skip_main_plugin) {
 			// special case if use of external editor is true
 			Resource *current_res = Object::cast_to<Resource>(current_obj);
-			if (current_res) {
-				String current_res_path = current_res->get_path();
-				if (main_plugin->get_name() == "Script" && current_obj->get_class_name() != StringName("VisualScript") && !current_res_path.empty() && current_res_path.find("::") == -1 && (bool(EditorSettings::get_singleton()->get("text_editor/external/use_external_editor")) || overrides_external_editor(current_obj))) {
-					if (!changing_scene) {
-						main_plugin->edit(current_obj);
-					}
+			if (main_plugin->get_name() == "Script" && current_obj->get_class_name() != StringName("VisualScript") && current_res && !current_res->get_path().empty() && current_res->get_path().find("::") == -1 && (bool(EditorSettings::get_singleton()->get("text_editor/external/use_external_editor")) || overrides_external_editor(current_obj))) {
+				if (!changing_scene) {
+					main_plugin->edit(current_obj);
 				}
 			}
 			
