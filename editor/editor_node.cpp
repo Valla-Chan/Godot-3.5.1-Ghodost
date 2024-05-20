@@ -1638,6 +1638,12 @@ void EditorNode::save_all_scenes() {
 	_save_all_scenes();
 }
 
+void EditorNode::quick_save_all_scenes() {
+	_menu_option_confirm(RUN_STOP, true);
+	_quick_save_all_scenes();
+}
+
+
 void EditorNode::save_scene_list(Vector<String> p_scene_filenames) {
 	for (int i = 0; i < editor_data.get_edited_scene_count(); i++) {
 		Node *scene = editor_data.get_edited_scene_root(i);
@@ -1682,18 +1688,56 @@ void EditorNode::restart_editor() {
 
 void EditorNode::_save_all_scenes() {
 	bool all_saved = true;
+	int current = editor_data.get_edited_scene();
 	for (int i = 0; i < editor_data.get_edited_scene_count(); i++) {
 		Node *scene = editor_data.get_edited_scene_root(i);
 		if (scene) {
-			if (scene->get_filename() != "" && DirAccess::exists(scene->get_filename().get_base_dir())) {
-				if (i != editor_data.get_edited_scene()) {
-					_save_scene(scene->get_filename(), i);
+			String filename = scene->get_filename();
+			if (!filename.empty()) {
+				if (DirAccess::exists(filename.get_base_dir())) {
+					if (i != current) {
+						_save_scene(filename, i);
+					} else {
+						_save_scene_with_preview(filename);
+					}
 				} else {
-					_save_scene_with_preview(scene->get_filename());
+					all_saved = false;
 				}
-			} else if (scene->get_filename() != "") {
-				all_saved = false;
 			}
+		}
+	}
+
+	if (!all_saved) {
+		show_warning(TTR("Could not save one or more scenes!"), TTR("Save All Scenes"));
+	}
+	_save_default_environment();
+}
+
+// save all edited scenes, and without previews.
+// TODO: do we want to check when the game instance has run to do a real save after?
+void EditorNode::_quick_save_all_scenes() {
+	bool all_saved = true;
+	int current = editor_data.get_edited_scene();
+	for (int i = 0; i < editor_data.get_edited_scene_count(); i++) {
+		bool unsaved = (i == current) ? saved_version != editor_data.get_undo_redo().get_version() : editor_data.get_scene_version(i) != 0;
+		Node *scene = editor_data.get_edited_scene_root(i);
+		if (scene) {
+			String filename = scene->get_filename();
+			if (!filename.empty()) {
+				if (DirAccess::exists(filename.get_base_dir())) {
+					if (unsaved) {
+						if (i != editor_data.get_edited_scene()) {
+							_save_scene(scene->get_filename(), i);
+						} else {
+							_save_scene_with_preview(scene->get_filename());
+						}
+					}
+				}
+				else {
+					all_saved = false;
+				}
+			}
+
 		}
 	}
 
@@ -2249,15 +2293,16 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 	String args;
 	bool skip_breakpoints;
 
-	if (p_current || (editor_data.get_edited_scene_root() && p_custom != String() && p_custom == editor_data.get_edited_scene_root()->get_filename())) {
-		Node *scene = editor_data.get_edited_scene_root();
+	Node *scene = editor_data.get_edited_scene_root();
+	if (p_current || (scene && p_custom != String() && p_custom == scene->get_filename())) {
 
 		if (!scene) {
 			show_accept(TTR("There is no defined scene to run."), TTR("OK"));
 			return;
 		}
 
-		if (scene->get_filename() == "") {
+		run_filename = scene->get_filename();
+		if (run_filename == "") {
 			current_option = -1;
 			_menu_option(FILE_SAVE_AS_SCENE);
 			// Set the option to save and run so when the dialog is accepted, the scene runs.
@@ -2266,10 +2311,10 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 			return;
 		}
 
-		run_filename = scene->get_filename();
 	} else if (p_custom != "") {
 		run_filename = p_custom;
 	}
+	scene = nullptr;
 
 	if (run_filename == "") {
 		//evidently, run the scene
@@ -2286,7 +2331,8 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 				_save_scene_with_preview(scene->get_filename());
 			}
 		}
-		_menu_option(FILE_SAVE_ALL_SCENES);
+		//_menu_option(FILE_SAVE_ALL_SCENES);
+		//_menu_option(FILE_QUICK_SAVE_ALL_SCENES);
 		editor_data.save_editor_external_data();
 	}
 
@@ -2316,8 +2362,6 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 		show_accept(TTR("Could not start subprocess!"), TTR("OK"));
 		return;
 	}
-
-	// TODO: gray out new custom button?
 
 	if (p_current) {
 		play_scene_button->set_pressed(true);
@@ -2555,6 +2599,10 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 			_save_all_scenes();
 		} break;
 
+		case FILE_QUICK_SAVE_ALL_SCENES: {
+			_quick_save_all_scenes();
+		} break;
+
 		case FILE_EXPORT_PROJECT: {
 			project_export->popup_export();
 		} break;
@@ -2707,6 +2755,8 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 			run_custom_filename.clear();
 			play_button->set_pressed(false);
 			play_button->set_icon(gui_base->get_icon("MainPlay", "EditorIcons"));
+			play_last_scene_button->set_pressed(false);
+			play_last_scene_button->set_icon(gui_base->get_icon("PlayLastScene", "EditorIcons"));
 			play_scene_button->set_pressed(false);
 			play_scene_button->set_icon(gui_base->get_icon("PlayScene", "EditorIcons"));
 			play_custom_scene_button->set_pressed(false);
@@ -6765,7 +6815,7 @@ EditorNode::EditorNode() {
 	play_last_scene_button->set_focus_mode(Control::FOCUS_NONE);
 	play_last_scene_button->set_icon(gui_base->get_icon("PlayLastScene", "EditorIcons"));
 	play_last_scene_button->connect("pressed", this, "_menu_option", make_binds(RUN_PLAY_LAST_SCENE));
-	play_last_scene_button->set_tooltip(TTR("Play the last played edited scene."));
+	play_last_scene_button->set_tooltip(TTR("Replay the last played scene."));
 #ifdef OSX_ENABLED
 	play_last_scene_button->set_shortcut(ED_SHORTCUT("editor/play_last_scene", TTR("Play Last Scene"), KEY_MASK_CMD | KEY_MASK_CTRL | KEY_R));
 #else
