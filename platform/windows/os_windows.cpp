@@ -3184,6 +3184,12 @@ void OS_Windows::set_icon(const Ref<Image> &p_icon) {
 
 	/* Set the icon in the task manager (should we do this?) */
 	SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hicon);
+
+	icon = p_icon;
+}
+
+Ref<Image> OS_Windows::get_icon() const {
+	return icon;
 }
 
 bool OS_Windows::has_environment(const String &p_var) const {

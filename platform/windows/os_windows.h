@@ -536,6 +536,7 @@ public:
 
 	void set_native_icon(const String &p_filename);
 	void set_icon(const Ref<Image> &p_icon);
+	Ref<Image> get_icon() const;
 
 	virtual String get_executable_path() const;
 

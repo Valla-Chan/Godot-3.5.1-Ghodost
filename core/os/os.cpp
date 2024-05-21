@@ -502,6 +502,10 @@ void OS::set_native_icon(const String &p_filename) {
 void OS::set_icon(const Ref<Image> &p_icon) {
 }
 
+Ref<Image> OS::get_icon() const {
+	return Ref<Image>();
+}
+
 String OS::get_model_name() const {
 	return "GenericDevice";
 }

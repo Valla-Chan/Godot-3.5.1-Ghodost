@@ -82,6 +82,7 @@ protected:
 
 public:
 	String title;
+	Ref<Image> icon;
 	typedef void (*ImeCallback)(void *p_inp, String p_text, Point2 p_selection);
 	typedef bool (*HasServerFeatureCallback)(const String &p_feature);
 
@@ -528,6 +529,7 @@ public:
 
 	virtual void set_native_icon(const String &p_filename);
 	virtual void set_icon(const Ref<Image> &p_icon);
+	virtual Ref<Image> get_icon() const;
 
 	virtual int get_exit_code() const;
 	virtual void set_exit_code(int p_code);

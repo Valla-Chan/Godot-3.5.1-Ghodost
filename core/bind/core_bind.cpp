@@ -722,6 +722,10 @@ void _OS::set_icon(const Ref<Image> &p_icon) {
 	OS::get_singleton()->set_icon(p_icon);
 }
 
+Ref<Image> _OS::get_icon() const {
+	return OS::get_singleton()->get_icon();
+}
+
 int _OS::get_exit_code() const {
 	return OS::get_singleton()->get_exit_code();
 }
@@ -1375,6 +1379,7 @@ void _OS::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_native_icon", "filename"), &_OS::set_native_icon);
 	ClassDB::bind_method(D_METHOD("set_icon", "icon"), &_OS::set_icon);
+	ClassDB::bind_method(D_METHOD("get_icon"), &_OS::get_icon);
 
 	ClassDB::bind_method(D_METHOD("get_exit_code"), &_OS::get_exit_code);
 	ClassDB::bind_method(D_METHOD("set_exit_code", "code"), &_OS::set_exit_code);
