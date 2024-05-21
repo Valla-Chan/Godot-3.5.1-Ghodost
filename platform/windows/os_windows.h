@@ -444,6 +444,7 @@ public:
 	void update_real_mouse_position();
 	virtual int get_mouse_button_state() const;
 	virtual void set_window_title(const String &p_title);
+	virtual String get_window_title() const;
 	virtual void set_window_mouse_passthrough(const PoolVector2Array &p_region);
 
 	virtual void set_video_mode(const VideoMode &p_video_mode, int p_screen = 0);

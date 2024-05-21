@@ -1880,7 +1880,12 @@ int OS_Windows::get_mouse_button_state() const {
 }
 
 void OS_Windows::set_window_title(const String &p_title) {
+	title = p_title;
 	SetWindowTextW(hWnd, p_title.c_str());
+}
+
+String OS_Windows::get_window_title() const {
+	return title;
 }
 
 void OS_Windows::set_window_mouse_passthrough(const PoolVector2Array &p_region) {

@@ -81,6 +81,7 @@ protected:
 	void _set_logger(CompositeLogger *p_logger);
 
 public:
+	String title;
 	typedef void (*ImeCallback)(void *p_inp, String p_text, Point2 p_selection);
 	typedef bool (*HasServerFeatureCallback)(const String &p_feature);
 
@@ -176,6 +177,7 @@ public:
 	virtual Point2 get_mouse_position() const = 0;
 	virtual int get_mouse_button_state() const = 0;
 	virtual void set_window_title(const String &p_title) = 0;
+	virtual String get_window_title() const = 0;
 	virtual void set_window_mouse_passthrough(const PoolVector2Array &p_region){};
 
 	virtual void set_clipboard(const String &p_text);

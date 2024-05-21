@@ -159,6 +159,7 @@ public:
 
 	Point2 get_mouse_position() const;
 	void set_window_title(const String &p_title);
+	String get_window_title() const;
 	void set_window_mouse_passthrough(const PoolVector2Array &p_region);
 	int get_mouse_button_state() const;
 

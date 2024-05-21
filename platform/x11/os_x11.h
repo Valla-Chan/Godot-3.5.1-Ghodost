@@ -266,6 +266,7 @@ public:
 	virtual Point2 get_mouse_position() const;
 	virtual int get_mouse_button_state() const;
 	virtual void set_window_title(const String &p_title);
+	virtual String get_window_title() const;
 	virtual void set_window_mouse_passthrough(const PoolVector2Array &p_region);
 
 	virtual void set_icon(const Ref<Image> &p_icon);
