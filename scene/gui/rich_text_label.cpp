@@ -35,6 +35,7 @@
 #include "core/os/os.h"
 #include "label.h"
 #include "scene/scene_string_names.h"
+#include "scene/resources/dynamic_font.h"
 
 #ifdef TOOLS_ENABLED
 #include "editor/editor_scale.h"
@@ -2392,7 +2393,7 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 				}
 			}
 
-			Ref<Font> font;
+			Ref<DynamicFont> font;
 			if (!fnt.empty()) {
 				font = ResourceLoader::load(fnt, "Font");
 			}
