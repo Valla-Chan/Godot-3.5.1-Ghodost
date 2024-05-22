@@ -2374,10 +2374,28 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			pos = brk_end + 1;
 			tag_stack.push_front("color");
 
-		} else if (tag.begins_with("font=")) {
-			String fnt = tag.substr(5, tag.length());
+		} else if (tag.begins_with("font")) {
+			int size = 0;
+			String fnt;
+			if (tag.begins_with("font=")) {
+				fnt = tag.substr(5, tag.length()).split(" ")[0];
+			}
 
-			Ref<Font> font = ResourceLoader::load(fnt, "Font");
+			if (split_tag_block.size() > 1) {
+				split_tag_block.remove(0);
+				for (int i = 0; i < split_tag_block.size(); i++) {
+					String expr = split_tag_block[i];
+					if (expr.begins_with("size=")) {
+						String start_str = expr.substr(5, expr.length());
+						size = start_str.to_int();
+					}
+				}
+			}
+
+			Ref<Font> font;
+			if (!fnt.empty()) {
+				font = ResourceLoader::load(fnt, "Font");
+			}
 			if (font.is_valid()) {
 				push_font(font);
 			} else {
