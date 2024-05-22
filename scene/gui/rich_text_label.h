@@ -263,10 +263,14 @@ private:
 	};
 
 	struct ItemWave : public ItemFX {
+		float x;
+		float y;
 		float frequency;
 		float amplitude;
 
 		ItemWave() {
+			x = 0.0;
+			y = 1.0;
 			frequency = 1.0f;
 			amplitude = 1.0f;
 			type = ITEM_WAVE;
@@ -440,7 +444,7 @@ public:
 	void push_table(int p_columns);
 	void push_fade(int p_start_index, int p_length);
 	void push_shake(int p_strength, float p_rate);
-	void push_wave(float p_frequency, float p_amplitude);
+	void push_wave(float p_frequency, float p_amplitude, float p_x, float p_y);
 	void push_tornado(float p_frequency, float p_radius);
 	void push_rainbow(float p_saturation, float p_value, float p_frequency);
 	void push_customfx(Ref<RichTextEffect> p_custom_effect, Dictionary p_environment);

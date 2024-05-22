@@ -564,7 +564,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 										ItemWave *item_wave = static_cast<ItemWave *>(item_fx);
 
 										double value = Math::sin(item_wave->frequency * item_wave->elapsed_time + ((p_ofs.x + pofs) / 50)) * (item_wave->amplitude / 10.0f);
-										fx_offset += Point2(0, 1) * value;
+										fx_offset += Point2(item_wave->x, item_wave->y) * value;
 									} else if (item_fx->type == ITEM_TORNADO) {
 										ItemTornado *item_tornado = static_cast<ItemTornado *>(item_fx);
 
@@ -1954,10 +1954,12 @@ void RichTextLabel::push_shake(int p_strength = 10, float p_rate = 24.0f) {
 	_add_item(item, true);
 }
 
-void RichTextLabel::push_wave(float p_frequency = 1.0f, float p_amplitude = 10.0f) {
+void RichTextLabel::push_wave(float p_frequency = 1.0f, float p_amplitude = 10.0f, float p_x = 0.0, float p_y = 1.0) {
 	ItemWave *item = memnew(ItemWave);
 	item->frequency = p_frequency;
 	item->amplitude = p_amplitude;
+	item->x = p_x;
+	item->y = p_y;
 	_add_item(item, true);
 }
 
@@ -2431,6 +2433,8 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 		} else if (bbcode == "wave") {
 			float amplitude = 20.0f;
 			float period = 5.0f;
+			float x = 0.0f;
+			float y = 1.0f;
 
 			if (split_tag_block.size() > 1) {
 				split_tag_block.remove(0);
@@ -2442,11 +2446,18 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 					} else if (expr.begins_with("freq=")) {
 						String period_str = expr.substr(5, expr.length());
 						period = period_str.to_float();
+					} else if (expr.begins_with("x=")) {
+						String x_str = expr.substr(2, expr.length());
+						x = x_str.to_float();
+					} else if (expr.begins_with("y=")) {
+						String y_str = expr.substr(2, expr.length());
+						y = y_str.to_float();
 					}
+
 				}
 			}
 
-			push_wave(period, amplitude);
+			push_wave(period, amplitude, x, y);
 			pos = brk_end + 1;
 			tag_stack.push_front("wave");
 			set_process_internal(true);
