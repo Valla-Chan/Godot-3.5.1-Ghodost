@@ -1019,17 +1019,21 @@ void RichTextLabel::_notification(int p_what) {
 		} break;
 		case NOTIFICATION_RESIZED:
 		case NOTIFICATION_THEME_CHANGED: {
+			if (Engine::get_singleton()->is_editor_hint() && !edited_fonts.empty() && !bbcode.empty()) {
+				set_bbcode(bbcode);
+			}
 			main->first_invalid_line = 0; //invalidate ALL
 			update();
 		} break;
 		case NOTIFICATION_ENTER_TREE: {
-			if (bbcode != "") {
+			if (!bbcode.empty()) {
 				set_bbcode(bbcode);
 			}
 			main->first_invalid_line = 0; //invalidate ALL
 			update();
 		} break;
 		case NOTIFICATION_DRAW: {
+
 			_validate_line_caches(main);
 			_update_scroll();
 
@@ -2129,6 +2133,7 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 	bool in_italics = false;
 
 	set_process_internal(false);
+	edited_fonts.clear();
 
 	while (pos < p_bbcode.length()) {
 		int brk_pos = p_bbcode.find("[", pos);
@@ -2387,8 +2392,8 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 				for (int i = 0; i < split_tag_block.size(); i++) {
 					String expr = split_tag_block[i];
 					if (expr.begins_with("size=")) {
-						String start_str = expr.substr(5, expr.length());
-						size = start_str.to_int();
+						String size_str = expr.substr(5, expr.length());
+						size = size_str.to_int();
 					}
 				}
 			}
@@ -2396,12 +2401,17 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			Ref<DynamicFont> font;
 			if (!fnt.empty()) {
 				font = ResourceLoader::load(fnt, "Font");
-			}
-			if (font.is_valid()) {
-				push_font(font);
 			} else {
-				push_font(normal_font);
+				font = normal_font;
 			}
+
+			if (size > 0) {
+				font = font->duplicate();
+				font->set_size(size);
+				edited_fonts.push_back(font);
+			}
+
+			push_font(font);
 
 			pos = brk_end + 1;
 			tag_stack.push_front("font");
@@ -2729,7 +2739,7 @@ void RichTextLabel::deselect() {
 void RichTextLabel::selection_copy() {
 	String text = get_selected_text();
 
-	if (text != "") {
+	if (!text.empty()) {
 		OS::get_singleton()->set_clipboard(text);
 	}
 }
@@ -2815,7 +2825,7 @@ void RichTextLabel::set_effects(const Vector<Variant> &effects) {
 		custom_effects.push_back(effect);
 	}
 
-	if ((bbcode != "") && use_bbcode) {
+	if ((!bbcode.empty()) && use_bbcode) {
 		parse_bbcode(bbcode);
 	}
 }
@@ -2834,7 +2844,7 @@ void RichTextLabel::install_effect(const Variant effect) {
 
 	if (rteffect.is_valid()) {
 		custom_effects.push_back(effect);
-		if ((bbcode != "") && use_bbcode) {
+		if ((!bbcode.empty()) && use_bbcode) {
 			parse_bbcode(bbcode);
 		}
 	}

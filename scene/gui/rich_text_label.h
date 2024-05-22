@@ -346,6 +346,7 @@ private:
 	Variant current_meta;
 
 	Vector<Ref<RichTextEffect>> custom_effects;
+	Vector<Ref<Font>> edited_fonts;
 
 	void _invalidate_current_line(ItemFrame *p_frame);
 	void _validate_line_caches(ItemFrame *p_frame);

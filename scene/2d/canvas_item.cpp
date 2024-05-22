@@ -629,7 +629,7 @@ void CanvasItem::update() {
 	}
 
 	pending_update = true;
-
+	
 	MessageQueue::get_singleton()->push_call(this, "_update_callback");
 }
 
