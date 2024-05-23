@@ -36,16 +36,9 @@
 class Text : public Control {
 	GDCLASS(Text, Control);
 
-public:
-
-private:
-	String text;
-
 protected:
 	int visible_characters;
 	float percent_visible;
-
-	virtual void _notification(int p_what);
 
 	static void _bind_methods();
 	// bind helpers
@@ -53,7 +46,6 @@ public:
 
 	virtual void set_text(const String &p_string);
 	virtual String get_text() const;
-
 	virtual void clear();
 
 	virtual void set_visible_characters(int p_amount);

@@ -33,9 +33,6 @@
 #include "core/project_settings.h"
 #include "core/translation.h"
 
-void Text::_notification(int p_what) {
-}
-
 int Text::get_line_count() const {
 	return 0;
 }
