@@ -31,20 +31,13 @@
 #ifndef LINE_EDIT_H
 #define LINE_EDIT_H
 
-#include "scene/gui/control.h"
+#include "scene/gui/text.h"
 #include "scene/gui/popup_menu.h"
 
-class LineEdit : public Control {
-	GDCLASS(LineEdit, Control);
+class LineEdit : public Text {
+	GDCLASS(LineEdit, Text);
 
 public:
-	enum Align {
-
-		ALIGN_LEFT,
-		ALIGN_CENTER,
-		ALIGN_RIGHT,
-		ALIGN_FILL
-	};
 
 	enum MenuItems {
 		MENU_CUT,
@@ -264,7 +257,6 @@ public:
 	~LineEdit();
 };
 
-VARIANT_ENUM_CAST(LineEdit::Align);
 VARIANT_ENUM_CAST(LineEdit::MenuItems);
 
 #endif // LINE_EDIT_H

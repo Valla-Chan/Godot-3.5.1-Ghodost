@@ -1966,8 +1966,8 @@ void LineEdit::_bind_methods() {
 
 	ClassDB::bind_method("_editor_settings_changed", &LineEdit::_editor_settings_changed);
 
-	ClassDB::bind_method(D_METHOD("set_align", "align"), &LineEdit::set_align);
-	ClassDB::bind_method(D_METHOD("get_align"), &LineEdit::get_align);
+	//ClassDB::bind_method(D_METHOD("set_align", "align"), &LineEdit::set_align);
+	//ClassDB::bind_method(D_METHOD("get_align"), &LineEdit::get_align);
 
 	ClassDB::bind_method(D_METHOD("_gui_input"), &LineEdit::_gui_input);
 	ClassDB::bind_method(D_METHOD("clear"), &LineEdit::clear);
