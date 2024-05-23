@@ -48,6 +48,9 @@ protected:
 	static void _bind_methods();
 
 public:
+	virtual void set_align(Align p_align);
+	virtual Align get_align() const;
+
 	Text();
 	~Text();
 };

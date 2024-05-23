@@ -2927,11 +2927,6 @@ void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_visible_characters", "amount"), &RichTextLabel::set_visible_characters);
 	ClassDB::bind_method(D_METHOD("get_visible_characters"), &RichTextLabel::get_visible_characters);
 
-	//valla edits
-	ClassDB::bind_method(D_METHOD("set_align", "align_default"), &RichTextLabel::set_align);
-	ClassDB::bind_method(D_METHOD("get_align"), &RichTextLabel::get_align);
-	//
-
 	ClassDB::bind_method(D_METHOD("set_percent_visible", "percent_visible"), &RichTextLabel::set_percent_visible);
 	ClassDB::bind_method(D_METHOD("get_percent_visible"), &RichTextLabel::get_percent_visible);
 
@@ -2987,11 +2982,6 @@ void RichTextLabel::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("meta_hover_started", PropertyInfo(Variant::NIL, "meta", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT)));
 	ADD_SIGNAL(MethodInfo("meta_hover_ended", PropertyInfo(Variant::NIL, "meta", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT)));
 
-	//BIND_ENUM_CONSTANT(ALIGN_LEFT);
-	//BIND_ENUM_CONSTANT(ALIGN_CENTER);
-	//BIND_ENUM_CONSTANT(ALIGN_RIGHT);
-	//BIND_ENUM_CONSTANT(ALIGN_FILL);
-
 	BIND_ENUM_CONSTANT(INLINE_ALIGN_TOP);
 	BIND_ENUM_CONSTANT(INLINE_ALIGN_CENTER);
 	BIND_ENUM_CONSTANT(INLINE_ALIGN_BASELINE);
@@ -3027,6 +3017,11 @@ void RichTextLabel::set_align(Align p_align) {
 	ERR_FAIL_INDEX((int)p_align, 4);
 	default_align = p_align;
 	_change_notify("default_align");
+	if (!bbcode.empty() && use_bbcode) {
+		set_bbcode(bbcode);
+	} else if (get_text().empty()) {
+		set_text(get_text());
+	}
 	//_notification(NOTIFICATION_DRAW);
 	minimum_size_changed();
 	update();

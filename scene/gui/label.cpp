@@ -688,8 +688,6 @@ int Label::get_total_character_count() const {
 }
 
 void Label::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_align", "align"), &Label::set_align);
-	ClassDB::bind_method(D_METHOD("get_align"), &Label::get_align);
 	ClassDB::bind_method(D_METHOD("set_valign", "valign"), &Label::set_valign);
 	ClassDB::bind_method(D_METHOD("get_valign"), &Label::get_valign);
 	ClassDB::bind_method(D_METHOD("set_text", "text"), &Label::set_text);
@@ -716,11 +714,6 @@ void Label::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_lines_skipped"), &Label::get_lines_skipped);
 	ClassDB::bind_method(D_METHOD("set_max_lines_visible", "lines_visible"), &Label::set_max_lines_visible);
 	ClassDB::bind_method(D_METHOD("get_max_lines_visible"), &Label::get_max_lines_visible);
-
-	//BIND_ENUM_CONSTANT(ALIGN_LEFT);
-	//BIND_ENUM_CONSTANT(ALIGN_CENTER);
-	//BIND_ENUM_CONSTANT(ALIGN_RIGHT);
-	//BIND_ENUM_CONSTANT(ALIGN_FILL);
 
 	BIND_ENUM_CONSTANT(VALIGN_TOP);
 	BIND_ENUM_CONSTANT(VALIGN_CENTER);
