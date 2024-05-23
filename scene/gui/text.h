@@ -36,30 +36,22 @@
 class Text : public Control {
 	GDCLASS(Text, Control);
 
-protected:
-	int visible_characters;
-	float percent_visible;
-
-	static void _bind_methods();
-	// bind helpers
 public:
+	enum Align {
+		ALIGN_LEFT,
+		ALIGN_CENTER,
+		ALIGN_RIGHT,
+		ALIGN_FILL
+	};
 
-	virtual void set_text(const String &p_string);
-	virtual String get_text() const;
-	virtual void clear();
+protected:
+	static void _bind_methods();
 
-	virtual void set_visible_characters(int p_amount);
-	int get_visible_characters() const;
-	virtual int get_total_character_count() const;
-
-	virtual void set_percent_visible(float p_percent);
-	float get_percent_visible() const;
-
-	virtual int get_line_count() const;
-	virtual int get_visible_line_count() const;
-
-	Text(const String &p_text = String());
+public:
+	Text();
 	~Text();
 };
+
+VARIANT_ENUM_CAST(Text::Align);
 
 #endif // TEXT_H

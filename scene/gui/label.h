@@ -31,20 +31,12 @@
 #ifndef LABEL_H
 #define LABEL_H
 
-#include "scene/gui/control.h"
+#include "scene/gui/text.h"
 
-class Label : public Control {
-	GDCLASS(Label, Control);
+class Label : public Text {
+	GDCLASS(Label, Text);
 
 public:
-	enum Align {
-
-		ALIGN_LEFT,
-		ALIGN_CENTER,
-		ALIGN_RIGHT,
-		ALIGN_FILL
-	};
-
 	enum VAlign {
 
 		VALIGN_TOP,
@@ -149,7 +141,6 @@ public:
 	~Label();
 };
 
-VARIANT_ENUM_CAST(Label::Align);
 VARIANT_ENUM_CAST(Label::VAlign);
 
 #endif // LABEL_H

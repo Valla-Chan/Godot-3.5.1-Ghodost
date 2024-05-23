@@ -31,20 +31,14 @@
 #ifndef RICH_TEXT_LABEL_H
 #define RICH_TEXT_LABEL_H
 
+#include "text.h"
 #include "rich_text_effect.h"
 #include "scene/gui/scroll_bar.h"
 
-class RichTextLabel : public Control {
-	GDCLASS(RichTextLabel, Control);
+class RichTextLabel : public Text {
+	GDCLASS(RichTextLabel, Text);
 
 public:
-	enum Align {
-
-		ALIGN_LEFT,
-		ALIGN_CENTER,
-		ALIGN_RIGHT,
-		ALIGN_FILL
-	};
 
 	enum InlineAlign {
 
@@ -511,7 +505,7 @@ public:
 
 	//valla edits
 	void set_align(Align p_align);
-	int get_align() const;
+	Align get_align() const;
 	//
 
 	void set_visible_characters(int p_visible);
@@ -533,7 +527,6 @@ public:
 	~RichTextLabel();
 };
 
-VARIANT_ENUM_CAST(RichTextLabel::Align);
 VARIANT_ENUM_CAST(RichTextLabel::InlineAlign);
 VARIANT_ENUM_CAST(RichTextLabel::ListType);
 VARIANT_ENUM_CAST(RichTextLabel::ItemType);

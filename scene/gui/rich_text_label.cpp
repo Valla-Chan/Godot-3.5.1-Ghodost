@@ -1461,7 +1461,7 @@ int RichTextLabel::_find_margin(Item *p_item, const Ref<Font> &p_base_font) {
 	return margin;
 }
 
-RichTextLabel::Align RichTextLabel::_find_align(Item *p_item) {
+Text::Align RichTextLabel::_find_align(Item *p_item) {
 	Item *item = p_item;
 
 	while (item) {
@@ -2987,10 +2987,10 @@ void RichTextLabel::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("meta_hover_started", PropertyInfo(Variant::NIL, "meta", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT)));
 	ADD_SIGNAL(MethodInfo("meta_hover_ended", PropertyInfo(Variant::NIL, "meta", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT)));
 
-	BIND_ENUM_CONSTANT(ALIGN_LEFT);
-	BIND_ENUM_CONSTANT(ALIGN_CENTER);
-	BIND_ENUM_CONSTANT(ALIGN_RIGHT);
-	BIND_ENUM_CONSTANT(ALIGN_FILL);
+	//BIND_ENUM_CONSTANT(ALIGN_LEFT);
+	//BIND_ENUM_CONSTANT(ALIGN_CENTER);
+	//BIND_ENUM_CONSTANT(ALIGN_RIGHT);
+	//BIND_ENUM_CONSTANT(ALIGN_FILL);
 
 	BIND_ENUM_CONSTANT(INLINE_ALIGN_TOP);
 	BIND_ENUM_CONSTANT(INLINE_ALIGN_CENTER);
@@ -3032,7 +3032,7 @@ void RichTextLabel::set_align(Align p_align) {
 	update();
 }
 
-int RichTextLabel::get_align() const {
+Text::Align RichTextLabel::get_align() const {
 	return default_align;
 }
 

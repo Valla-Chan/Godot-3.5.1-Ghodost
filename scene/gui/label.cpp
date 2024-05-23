@@ -575,7 +575,7 @@ void Label::set_align(Align p_align) {
 	update();
 }
 
-Label::Align Label::get_align() const {
+Text::Align Label::get_align() const {
 	return align;
 }
 
@@ -717,10 +717,10 @@ void Label::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_max_lines_visible", "lines_visible"), &Label::set_max_lines_visible);
 	ClassDB::bind_method(D_METHOD("get_max_lines_visible"), &Label::get_max_lines_visible);
 
-	BIND_ENUM_CONSTANT(ALIGN_LEFT);
-	BIND_ENUM_CONSTANT(ALIGN_CENTER);
-	BIND_ENUM_CONSTANT(ALIGN_RIGHT);
-	BIND_ENUM_CONSTANT(ALIGN_FILL);
+	//BIND_ENUM_CONSTANT(ALIGN_LEFT);
+	//BIND_ENUM_CONSTANT(ALIGN_CENTER);
+	//BIND_ENUM_CONSTANT(ALIGN_RIGHT);
+	//BIND_ENUM_CONSTANT(ALIGN_FILL);
 
 	BIND_ENUM_CONSTANT(VALIGN_TOP);
 	BIND_ENUM_CONSTANT(VALIGN_CENTER);
