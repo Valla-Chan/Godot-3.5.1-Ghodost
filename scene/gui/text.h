@@ -45,11 +45,22 @@ public:
 	};
 
 protected:
+	mutable Map<String,Ref<Font>> font_scaled_cache;
 	static void _bind_methods();
 
 public:
+	int font_size_override = 0;
+	float font_scale = 1.0;
+
 	virtual void set_align(Align p_align);
 	virtual Align get_align() const;
+
+
+	void set_font_size_override(int p_size);
+	int get_font_size_override() const;
+	void set_font_scale(float p_scale);
+	float get_font_scale() const;
+	Ref<Font> get_font_scaled(const String &p_font) const;
 
 	Text();
 	~Text();

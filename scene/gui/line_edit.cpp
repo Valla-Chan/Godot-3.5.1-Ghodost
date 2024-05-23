@@ -618,7 +618,7 @@ void LineEdit::_gui_input(Ref<InputEvent> p_event) {
 							menu->set_item_disabled(menu->get_item_index(MENU_REDO), !has_redo());
 						}
 
-						Point2 pos = Point2(get_cursor_pixel_pos(), (get_size().y + get_font("font")->get_height()) / 2);
+						Point2 pos = Point2(get_cursor_pixel_pos(), (get_size().y + get_font_scaled("font")->get_height()) / 2);
 						menu->set_position(get_global_transform().xform(pos));
 						menu->set_size(Vector2(1, 1));
 						menu->set_scale(get_global_transform().get_scale());
@@ -810,7 +810,7 @@ void LineEdit::_notification(int p_what) {
 				draw_caret = false;
 			}
 
-			Ref<Font> font = get_font("font");
+			Ref<Font> font = get_font_scaled("font");
 
 			style->draw(ci, Rect2(Point2(), size));
 
@@ -1188,7 +1188,7 @@ void LineEdit::shift_selection_check_post(bool p_shift) {
 }
 
 void LineEdit::set_cursor_at_pixel_pos(int p_x) {
-	Ref<Font> font = get_font("font");
+	Ref<Font> font = get_font_scaled("font");
 	int ofs = scroll_offset;
 	Ref<StyleBox> style = get_stylebox("normal");
 	int pixel_ofs = 0;
@@ -1239,7 +1239,7 @@ void LineEdit::set_cursor_at_pixel_pos(int p_x) {
 }
 
 int LineEdit::get_cursor_pixel_pos() {
-	Ref<Font> font = get_font("font");
+	Ref<Font> font = get_font_scaled("font");
 	int ofs = scroll_offset;
 	Ref<StyleBox> style = get_stylebox("normal");
 	int pixel_ofs = 0;
@@ -1332,7 +1332,7 @@ void LineEdit::delete_char() {
 		return;
 	}
 
-	Ref<Font> font = get_font("font");
+	Ref<Font> font = get_font_scaled("font");
 	if (font != nullptr) {
 		cached_width -= font->get_char_size(pass ? secret_character[0] : text[cursor_pos - 1]).width;
 	}
@@ -1352,7 +1352,7 @@ void LineEdit::delete_text(int p_from_column, int p_to_column) {
 	ERR_FAIL_COND_MSG(p_from_column < 0 || p_from_column > p_to_column || p_to_column > text.length(),
 			vformat("Positional parameters (from: %d, to: %d) are inverted or outside the text length (%d).", p_from_column, p_to_column, text.length()));
 	if (text.size() > 0) {
-		Ref<Font> font = get_font("font");
+		Ref<Font> font = get_font_scaled("font");
 		if (font != nullptr) {
 			for (int i = p_from_column; i < p_to_column; i++) {
 				cached_width -= font->get_char_size(pass ? secret_character[0] : text[i]).width;
@@ -1459,7 +1459,7 @@ void LineEdit::set_cursor_position(int p_pos) {
 	}
 
 	Ref<StyleBox> style = get_stylebox("normal");
-	Ref<Font> font = get_font("font");
+	Ref<Font> font = get_font_scaled("font");
 
 	if (cursor_pos <= scroll_offset) {
 		// Adjust window if cursor goes too much to the left.
@@ -1551,7 +1551,7 @@ void LineEdit::clear_internal() {
 
 Size2 LineEdit::get_minimum_size() const {
 	Ref<StyleBox> style = get_stylebox("normal");
-	Ref<Font> font = get_font("font");
+	Ref<Font> font = get_font_scaled("font");
 
 	Size2 min_size;
 
@@ -1888,7 +1888,7 @@ void LineEdit::_emit_text_change() {
 }
 
 void LineEdit::update_cached_width() {
-	Ref<Font> font = get_font("font");
+	Ref<Font> font = get_font_scaled("font");
 	cached_width = 0;
 	if (font != nullptr) {
 		String text = get_text();
@@ -1899,7 +1899,7 @@ void LineEdit::update_cached_width() {
 }
 
 void LineEdit::update_placeholder_width() {
-	Ref<Font> font = get_font("font");
+	Ref<Font> font = get_font_scaled("font");
 	cached_placeholder_width = 0;
 	if (font != nullptr) {
 		for (int i = 0; i < placeholder_translated.length(); i++) {

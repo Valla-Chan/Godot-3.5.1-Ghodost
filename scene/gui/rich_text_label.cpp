@@ -1068,7 +1068,7 @@ void RichTextLabel::_notification(int p_what) {
 				break; //nothing to draw
 			}
 			int y = (main->lines[from_line].height_accum_cache - main->lines[from_line].height_cache) - ofs;
-			Ref<Font> base_font = get_font("normal_font");
+			Ref<Font> base_font = get_font_scaled("normal_font");
 			Color base_color = get_color("default_color");
 			Color font_color_shadow = get_color("font_color_shadow");
 			bool use_outline = get_constant("shadow_as_outline");
@@ -1126,7 +1126,7 @@ void RichTextLabel::_find_click(ItemFrame *p_frame, const Point2i &p_click, Item
 	}
 
 	int y = (p_frame->lines[from_line].height_accum_cache - p_frame->lines[from_line].height_cache) - ofs;
-	Ref<Font> base_font = get_font("normal_font");
+	Ref<Font> base_font = get_font_scaled("normal_font");
 	Color base_color = get_color("default_color");
 
 	while (y < text_rect.get_size().height && from_line < p_frame->lines.size()) {
@@ -1316,13 +1316,13 @@ void RichTextLabel::_gui_input(Ref<InputEvent> p_event) {
 				} break;
 				case KEY_UP: {
 					if (vscroll->is_visible_in_tree()) {
-						vscroll->set_value(vscroll->get_value() - get_font("normal_font")->get_height());
+						vscroll->set_value(vscroll->get_value() - get_font_scaled("normal_font")->get_height());
 						handled = true;
 					}
 				} break;
 				case KEY_DOWN: {
 					if (vscroll->is_visible_in_tree()) {
-						vscroll->set_value(vscroll->get_value() + get_font("normal_font")->get_height());
+						vscroll->set_value(vscroll->get_value() + get_font_scaled("normal_font")->get_height());
 						handled = true;
 					}
 				} break;
@@ -1598,7 +1598,7 @@ void RichTextLabel::_validate_line_caches(ItemFrame *p_frame) {
 	bool use_outline = get_constant("shadow_as_outline");
 	Point2 shadow_ofs(get_constant("shadow_offset_x"), get_constant("shadow_offset_y"));
 
-	Ref<Font> base_font = get_font("normal_font");
+	Ref<Font> base_font = get_font_scaled("normal_font");
 
 	for (int i = p_frame->first_invalid_line; i < p_frame->lines.size(); i++) {
 		int y = 0;
@@ -1841,35 +1841,35 @@ void RichTextLabel::push_font(const Ref<Font> &p_font) {
 }
 
 void RichTextLabel::push_normal() {
-	Ref<Font> normal_font = get_font("normal_font");
+	Ref<Font> normal_font = get_font_scaled("normal_font");
 	ERR_FAIL_COND(normal_font.is_null());
 
 	push_font(normal_font);
 }
 
 void RichTextLabel::push_bold() {
-	Ref<Font> bold_font = get_font("bold_font");
+	Ref<Font> bold_font = get_font_scaled("bold_font");
 	ERR_FAIL_COND(bold_font.is_null());
 
 	push_font(bold_font);
 }
 
 void RichTextLabel::push_bold_italics() {
-	Ref<Font> bold_italics_font = get_font("bold_italics_font");
+	Ref<Font> bold_italics_font = get_font_scaled("bold_italics_font");
 	ERR_FAIL_COND(bold_italics_font.is_null());
 
 	push_font(bold_italics_font);
 }
 
 void RichTextLabel::push_italics() {
-	Ref<Font> italics_font = get_font("italics_font");
+	Ref<Font> italics_font = get_font_scaled("italics_font");
 	ERR_FAIL_COND(italics_font.is_null());
 
 	push_font(italics_font);
 }
 
 void RichTextLabel::push_mono() {
-	Ref<Font> mono_font = get_font("mono_font");
+	Ref<Font> mono_font = get_font_scaled("mono_font");
 	ERR_FAIL_COND(mono_font.is_null());
 
 	push_font(mono_font);
@@ -2119,11 +2119,11 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 	int pos = 0;
 
 	List<String> tag_stack;
-	Ref<Font> normal_font = get_font("normal_font");
-	Ref<Font> bold_font = get_font("bold_font");
-	Ref<Font> italics_font = get_font("italics_font");
-	Ref<Font> bold_italics_font = get_font("bold_italics_font");
-	Ref<Font> mono_font = get_font("mono_font");
+	Ref<Font> normal_font = get_font_scaled("normal_font");
+	Ref<Font> bold_font = get_font_scaled("bold_font");
+	Ref<Font> italics_font = get_font_scaled("italics_font");
+	Ref<Font> bold_italics_font = get_font_scaled("bold_italics_font");
+	Ref<Font> mono_font = get_font_scaled("mono_font");
 
 	Color base_color = get_color("default_color");
 
@@ -2407,7 +2407,7 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 
 			if (size > 0) {
 				font = font->duplicate();
-				font->set_size(size);
+				font->set_size(size * font_scale);
 				edited_fonts.push_back(font);
 			}
 
@@ -2587,7 +2587,7 @@ int RichTextLabel::get_paragraph_count() const {
 }
 
 int RichTextLabel::get_line_count() const {
-	return get_content_height() / get_font("font")->get_height();
+	return get_content_height() / get_font_scaled("font")->get_height();
 }
 
 int RichTextLabel::get_visible_line_count() const {
@@ -2662,7 +2662,7 @@ bool RichTextLabel::search(const String &p_string, bool p_from_selection, bool p
 
 				_validate_line_caches(main);
 
-				int fh = _find_font(t).is_valid() ? _find_font(t)->get_height() : get_font("normal_font")->get_height();
+				int fh = _find_font(t).is_valid() ? _find_font(t)->get_height() : get_font_scaled("normal_font")->get_height();
 
 				float offset = 0;
 
@@ -3022,7 +3022,6 @@ void RichTextLabel::set_align(Align p_align) {
 	} else if (get_text().empty()) {
 		set_text(get_text());
 	}
-	//_notification(NOTIFICATION_DRAW);
 	minimum_size_changed();
 	update();
 }

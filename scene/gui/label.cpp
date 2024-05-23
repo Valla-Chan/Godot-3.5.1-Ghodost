@@ -60,7 +60,7 @@ bool Label::is_uppercase() const {
 }
 
 int Label::get_line_height() const {
-	return get_font("font")->get_height();
+	return get_font_scaled("font")->get_height();
 }
 
 void Label::_notification(int p_what) {
@@ -89,7 +89,7 @@ void Label::_notification(int p_what) {
 		Size2 string_size;
 		Size2 size = get_size();
 		Ref<StyleBox> style = get_stylebox("normal");
-		Ref<Font> font = get_font("font");
+		Ref<Font> font = get_font_scaled("font");
 		Color font_color = get_color("font_color");
 		Color font_color_shadow = get_color("font_color_shadow");
 		bool use_outline = get_constant("shadow_as_outline");
@@ -290,7 +290,7 @@ Size2 Label::get_minimum_size() const {
 
 	//VALLA EDITS
 	if (float(extra_spacing.height) > 0) {
-		Ref<Font> font = get_font("font");
+		Ref<Font> font = get_font_scaled("font");
 		min_style += Size2(0,font->get_char_size(' ').width) * float(extra_spacing.height)*0.3f;
 	}
 
@@ -311,7 +311,7 @@ Size2 Label::get_minimum_size() const {
 }
 
 int Label::get_longest_line_width() const {
-	Ref<Font> font = get_font("font");
+	Ref<Font> font = get_font_scaled("font");
 	real_t max_line_width = 0;
 	real_t line_width = 0;
 
@@ -360,7 +360,7 @@ int Label::get_line_count() const {
 
 int Label::get_visible_line_count() const {
 	int line_spacing = get_constant("line_spacing");
-	int font_h = get_font("font")->get_height() + line_spacing;
+	int font_h = get_font_scaled("font")->get_height() + line_spacing;
 	int lines_visible = (get_size().height - get_stylebox("normal")->get_minimum_size().height + line_spacing) / font_h;
 
 	if (lines_visible > line_count) {
@@ -389,7 +389,7 @@ void Label::regenerate_word_cache() {
 		width = get_longest_line_width();
 	}
 
-	Ref<Font> font = get_font("font");
+	Ref<Font> font = get_font_scaled("font");
 
 	real_t current_word_size = 0;
 	int word_pos = 0;
