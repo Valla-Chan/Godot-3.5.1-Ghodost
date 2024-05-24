@@ -72,6 +72,7 @@ public:
 		ITEM_FADE,
 		ITEM_SHAKE,
 		ITEM_WAVE,
+		ITEM_PULSE,
 		ITEM_TORNADO,
 		ITEM_RAINBOW,
 		ITEM_META,
@@ -230,10 +231,12 @@ private:
 	struct ItemShake : public ItemFX {
 		int strength;
 		float rate;
+		int style; //what to shake separately:  0 = char  1 = word  2 = line  3 = all together
 		uint64_t _current_rng;
 		uint64_t _previous_rng;
 
 		ItemShake() {
+			style = 1;
 			strength = 0;
 			rate = 0.0f;
 			_current_rng = 0;
@@ -261,6 +264,7 @@ private:
 		float y;
 		float frequency;
 		float amplitude;
+		float offset;
 
 		ItemWave() {
 			x = 0.0;
@@ -268,17 +272,35 @@ private:
 			frequency = 1.0f;
 			amplitude = 1.0f;
 			type = ITEM_WAVE;
+			offset = 1.0;
+		}
+	};
+
+	struct ItemPulse : public ItemFX {
+		float frequency;
+		float amount;
+		Color color;
+		float offset;
+
+		ItemPulse() {
+			color = Color(1.0f,1.0f,1.0f,0.0f);
+			frequency = 1.0f;
+			amount = 1.0f;
+			type = ITEM_PULSE;
+			offset = 0.0f;
 		}
 	};
 
 	struct ItemTornado : public ItemFX {
 		float radius;
 		float frequency;
+		float offset;
 
 		ItemTornado() {
 			radius = 1.0f;
 			frequency = 1.0f;
 			type = ITEM_TORNADO;
+			offset = 0.0f;
 		}
 	};
 
@@ -286,12 +308,14 @@ private:
 		float saturation;
 		float value;
 		float frequency;
+		float offset;
 
 		ItemRainbow() {
 			saturation = 0.8f;
 			value = 0.8f;
 			frequency = 1.0f;
 			type = ITEM_RAINBOW;
+			offset = 0.0f;
 		}
 	};
 
@@ -438,10 +462,11 @@ public:
 	void push_meta(const Variant &p_meta);
 	void push_table(int p_columns);
 	void push_fade(int p_start_index, int p_length);
-	void push_shake(int p_strength, float p_rate);
-	void push_wave(float p_frequency, float p_amplitude, float p_x, float p_y);
-	void push_tornado(float p_frequency, float p_radius);
-	void push_rainbow(float p_saturation, float p_value, float p_frequency);
+	void push_shake(int p_strength, float p_rate, int p_style);
+	void push_wave(float p_frequency, float p_amplitude, float p_x, float p_y, float p_offset);
+	void push_pulse(const Color &p_color, float p_frequency, float p_alpha, float p_offset);
+	void push_tornado(float p_frequency, float p_radius, float p_offset);
+	void push_rainbow(float p_saturation, float p_value, float p_frequency, float p_offset);
 	void push_customfx(Ref<RichTextEffect> p_custom_effect, Dictionary p_environment);
 	void set_table_column_expand(int p_column, bool p_expand, int p_ratio = 1);
 	int get_current_table_column() const;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="RichTextLabel" inherits="Control" version="3.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
+<class name="RichTextLabel" inherits="Text" version="3.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
 	<brief_description>
 		Label that displays rich text.
 	</brief_description>
@@ -252,6 +252,9 @@
 		</method>
 	</methods>
 	<members>
+		<member name="default_align" type="int" setter="set_align" getter="get_align" enum="Label.Align" default="0">
+			Controls the text's default horizontal align when not influenced by a bbcode tag.
+		</member>
 		<member name="bbcode_enabled" type="bool" setter="set_use_bbcode" getter="is_using_bbcode" default="false">
 			If [code]true[/code], the label uses BBCode formatting.
 			[b]Note:[/b] Trying to alter the [RichTextLabel]'s text with [method add_text] will reset this to [code]false[/code]. Use instead [method append_bbcode] to preserve BBCode formatting.
@@ -387,13 +390,15 @@
 		</constant>
 		<constant name="ITEM_WAVE" value="14" enum="ItemType">
 		</constant>
-		<constant name="ITEM_TORNADO" value="15" enum="ItemType">
+		<constant name="ITEM_PULSE" value="15" enum="ItemType">
 		</constant>
-		<constant name="ITEM_RAINBOW" value="16" enum="ItemType">
+		<constant name="ITEM_TORNADO" value="16" enum="ItemType">
 		</constant>
-		<constant name="ITEM_CUSTOMFX" value="18" enum="ItemType">
+		<constant name="ITEM_RAINBOW" value="17" enum="ItemType">
 		</constant>
-		<constant name="ITEM_META" value="17" enum="ItemType">
+		<constant name="ITEM_CUSTOMFX" value="19" enum="ItemType">
+		</constant>
+		<constant name="ITEM_META" value="18" enum="ItemType">
 		</constant>
 	</constants>
 	<theme_items>

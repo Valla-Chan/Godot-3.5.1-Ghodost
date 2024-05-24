@@ -391,6 +391,27 @@ bool Color::html_is_valid(const String &p_color) {
 	return true;
 }
 
+
+bool Color::has_named(const String &p_name) const {
+	if (_named_colors.empty()) {
+		_populate_named_colors(); // from color_names.inc
+	}
+	String name = p_name;
+	// Normalize name
+	name = name.replace(" ", "");
+	name = name.replace("-", "");
+	name = name.replace("_", "");
+	name = name.replace("'", "");
+	name = name.replace(".", "");
+	name = name.to_lower();
+
+	const Map<String, Color>::Element *color = _named_colors.find(name);
+	if (color) {
+		return true;
+	}
+	return false;
+}
+
 Color Color::named(const String &p_name) {
 	if (_named_colors.empty()) {
 		_populate_named_colors(); // from color_names.inc
@@ -446,6 +467,61 @@ Color Color::from_hsv(float p_h, float p_s, float p_v, float p_a) const {
 	Color c;
 	c.set_hsv(p_h, p_s, p_v, p_a);
 	return c;
+}
+
+Color Color::from_string(const String &p_string) const {
+	return from_string(p_string,true);
+}
+
+Color Color::from_string(const String &p_string, bool p_warn) const {
+	Color color;
+
+	if (p_string.begins_with("#")) {
+		color = Color::html(p_string);
+	}
+	// construct color from float string
+	else if ((p_string.begins_with("Color(") || p_string.begins_with("(")) && p_string.ends_with(")")) {
+		Vector<String> chunks = p_string.trim_prefix("Color").trim_prefix("(").trim_suffix(")").split(",");
+		Vector<float> colorparams;
+		for (int i = 0; i < chunks.size(); i++) {
+			colorparams.push_back(chunks[i].strip_edges().to_float());
+		}
+		if (colorparams.size() == 3) {
+			color = Color(colorparams[0], colorparams[1], colorparams[2]);
+		} else if (colorparams.size() == 4) {
+			color = Color(colorparams[0], colorparams[1], colorparams[2], colorparams[3]);
+		} else if (colorparams.size() == 1) {
+			color = Color(colorparams[0], colorparams[0], colorparams[0]);
+		} else if (p_warn) {
+			ERR_FAIL_V_MSG(Color(), "Invalid color string: " + p_string + ".");
+		}
+	}
+	// construct color from int string (255 format)
+	else if ((p_string.begins_with("Clr255(") || p_string.begins_with("Color255(") || p_string.begins_with("255(")) && p_string.ends_with(")")) {
+		Vector<String> chunks = p_string.trim_prefix("Color").trim_prefix("Clr").trim_prefix("255(").trim_suffix(")").split(",");
+		Vector<float> colorparams;
+		for (int i = 0; i < chunks.size(); i++) {
+			colorparams.push_back(chunks[i].strip_edges().to_float()/255.0);
+		}
+		if (colorparams.size() == 3) {
+			color = Color(colorparams[0], colorparams[1], colorparams[2]);
+		} else if (colorparams.size() == 4) {
+			color = Color(colorparams[0], colorparams[1], colorparams[2], colorparams[3]);
+		} else if (colorparams.size() == 1) {
+			color = Color(colorparams[0], colorparams[0], colorparams[0]);
+		} else if (p_warn) {
+			ERR_FAIL_V_MSG(Color(), "Invalid color string: " + p_string + ".");
+		}
+
+	} else if (has_named(p_string)) {
+		color = named(p_string);
+	}
+	else if (!p_string.contains("(") && (p_string.length() == 6 || p_string.length() == 8)) {
+		color = Color::html(p_string);
+	} else if (p_warn) {
+		ERR_FAIL_V_MSG(Color(), "Invalid color string: " + p_string + ".");
+	}
+	return color;
 }
 
 // FIXME: Remove once Godot 3.1 has been released

@@ -547,8 +547,17 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 									} else if (item_fx->type == ITEM_SHAKE) {
 										ItemShake *item_shake = static_cast<ItemShake *>(item_fx);
 
-										uint64_t char_current_rand = item_shake->offset_random(c_item_offset);
 										uint64_t char_previous_rand = item_shake->offset_previous_random(c_item_offset);
+										uint64_t char_current_rand = char_previous_rand;
+
+										if (item_shake->style == 0) {
+											char_current_rand = item_shake->offset_random(c_item_offset);
+										} else if (item_shake->style == 1 && (c[i] == ' ' || c[i] == '\n')) {
+											char_current_rand = item_shake->offset_random(c_item_offset);
+										} else if (item_shake->style == 2 && (c[i] == '\n')) {
+											char_current_rand = item_shake->offset_random(c_item_offset);
+										}
+										
 										uint64_t max_rand = 2147483647;
 										double current_offset = Math::range_lerp(char_current_rand % max_rand, 0, max_rand, 0.0f, 2.f * (float)Math_PI);
 										double previous_offset = Math::range_lerp(char_previous_rand % max_rand, 0, max_rand, 0.0f, 2.f * (float)Math_PI);
@@ -564,18 +573,23 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 									} else if (item_fx->type == ITEM_WAVE) {
 										ItemWave *item_wave = static_cast<ItemWave *>(item_fx);
 
-										double value = Math::sin(item_wave->frequency * item_wave->elapsed_time + ((p_ofs.x + pofs) / 50)) * (item_wave->amplitude / 10.0f);
+										double value = Math::sin(item_wave->frequency * item_wave->elapsed_time + ((p_ofs.x + pofs) / 50 * item_wave->offset)) * (item_wave->amplitude / 10.0f);
 										fx_offset += Point2(item_wave->x, item_wave->y) * value;
+									} else if (item_fx->type == ITEM_PULSE) {
+										ItemPulse *item_pulse = static_cast<ItemPulse *>(item_fx);
+
+										double value = Math::sin(item_pulse->frequency * item_pulse->elapsed_time + ((p_ofs.x + pofs) / 50 * item_pulse->offset)) * (item_pulse->amount);
+										fx_color = fx_color.linear_interpolate(item_pulse->color, value);
 									} else if (item_fx->type == ITEM_TORNADO) {
 										ItemTornado *item_tornado = static_cast<ItemTornado *>(item_fx);
 
-										double torn_x = Math::sin(item_tornado->frequency * item_tornado->elapsed_time + ((p_ofs.x + pofs) / 50)) * (item_tornado->radius);
-										double torn_y = Math::cos(item_tornado->frequency * item_tornado->elapsed_time + ((p_ofs.x + pofs) / 50)) * (item_tornado->radius);
+										double torn_x = Math::sin(item_tornado->frequency * item_tornado->elapsed_time + ((p_ofs.x + pofs) / 50 * item_tornado->offset)) * (item_tornado->radius);
+										double torn_y = Math::cos(item_tornado->frequency * item_tornado->elapsed_time + ((p_ofs.x + pofs) / 50 * item_tornado->offset)) * (item_tornado->radius);
 										fx_offset += Point2(torn_x, torn_y);
 									} else if (item_fx->type == ITEM_RAINBOW) {
 										ItemRainbow *item_rainbow = static_cast<ItemRainbow *>(item_fx);
 
-										fx_color = fx_color.from_hsv(item_rainbow->frequency * (item_rainbow->elapsed_time + ((p_ofs.x + pofs) / 50)),
+										fx_color = fx_color.from_hsv(item_rainbow->frequency * (item_rainbow->elapsed_time + ((p_ofs.x + pofs) / 50 * item_rainbow->offset)),
 												item_rainbow->saturation,
 												item_rainbow->value,
 												fx_color.a);
@@ -599,6 +613,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 									line_length += current_char_width;
 
 									const Color char_color = selected && override_selected_font_color ? selection_fg : fx_color;
+									//const Color outline_color = outline && selected && override_selected_font_color ? selection_fg : fx_color;
 									const Color shadow_color = p_font_color_shadow * Color(1, 1, 1, char_color.a);
 
 									if (shadow_color.a > 0) {
@@ -972,7 +987,7 @@ void RichTextLabel::_update_fx(RichTextLabel::ItemFrame *p_frame, float p_delta_
 	while (it) {
 		ItemFX *ifx = nullptr;
 
-		if (it->type == ITEM_CUSTOMFX || it->type == ITEM_SHAKE || it->type == ITEM_WAVE || it->type == ITEM_TORNADO || it->type == ITEM_RAINBOW) {
+		if (it->type == ITEM_CUSTOMFX || it->type == ITEM_SHAKE || it->type == ITEM_WAVE || it->type == ITEM_PULSE || it->type == ITEM_TORNADO || it->type == ITEM_RAINBOW) {
 			ifx = static_cast<ItemFX *>(it);
 		}
 
@@ -1536,7 +1551,7 @@ bool RichTextLabel::_find_by_type(Item *p_item, ItemType p_type) {
 void RichTextLabel::_fetch_item_fx_stack(Item *p_item, Vector<ItemFX *> &r_stack) {
 	Item *item = p_item;
 	while (item) {
-		if (item->type == ITEM_CUSTOMFX || item->type == ITEM_SHAKE || item->type == ITEM_WAVE || item->type == ITEM_TORNADO || item->type == ITEM_RAINBOW) {
+		if (item->type == ITEM_CUSTOMFX || item->type == ITEM_SHAKE || item->type == ITEM_WAVE || item->type == ITEM_PULSE || item->type == ITEM_TORNADO || item->type == ITEM_RAINBOW) {
 			r_stack.push_back(static_cast<ItemFX *>(item));
 		}
 
@@ -1952,34 +1967,47 @@ void RichTextLabel::push_fade(int p_start_index, int p_length) {
 	_add_item(item, true);
 }
 
-void RichTextLabel::push_shake(int p_strength = 10, float p_rate = 24.0f) {
+void RichTextLabel::push_shake(int p_strength = 10, float p_rate = 24.0f, int p_style = 1) {
 	ItemShake *item = memnew(ItemShake);
 	item->strength = p_strength;
 	item->rate = p_rate;
+	item->style = p_style;
 	_add_item(item, true);
 }
 
-void RichTextLabel::push_wave(float p_frequency = 1.0f, float p_amplitude = 10.0f, float p_x = 0.0, float p_y = 1.0) {
+void RichTextLabel::push_wave(float p_frequency = 1.0f, float p_amplitude = 10.0f, float p_x = 0.0, float p_y = 1.0, float p_offset = 1.0f) {
 	ItemWave *item = memnew(ItemWave);
 	item->frequency = p_frequency;
 	item->amplitude = p_amplitude;
 	item->x = p_x;
 	item->y = p_y;
+	item->offset = p_offset;
 	_add_item(item, true);
 }
 
-void RichTextLabel::push_tornado(float p_frequency = 1.0f, float p_radius = 10.0f) {
+void RichTextLabel::push_pulse(const Color &p_color, float p_frequency = 1.0f, float p_alpha = 1.0f, float p_offset = 0.0f) {
+	ItemPulse *item = memnew(ItemPulse);
+	item->frequency = p_frequency;
+	item->amount = p_alpha;
+	item->color = p_color;
+	item->offset = p_offset;
+	_add_item(item, true);
+}
+
+void RichTextLabel::push_tornado(float p_frequency = 1.0f, float p_radius = 10.0f, float p_offset = 1.0f) {
 	ItemTornado *item = memnew(ItemTornado);
 	item->frequency = p_frequency;
 	item->radius = p_radius;
+	item->offset = p_offset;
 	_add_item(item, true);
 }
 
-void RichTextLabel::push_rainbow(float p_saturation, float p_value, float p_frequency) {
+void RichTextLabel::push_rainbow(float p_saturation, float p_value, float p_frequency, float p_offset = 1.0f) {
 	ItemRainbow *item = memnew(ItemRainbow);
 	item->frequency = p_frequency;
 	item->saturation = p_saturation;
 	item->value = p_value;
+	item->offset = p_offset;
 	_add_item(item, true);
 }
 
@@ -2336,43 +2364,9 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			tag_stack.push_front("img");
 		} else if (tag.begins_with("color=")) {
 			String col = tag.substr(6, tag.length());
-			Color color;
-
-			if (col.begins_with("#")) {
-				color = Color::html(col);
-			} else if (col == "aqua") {
-				color = Color(0, 1, 1);
-			} else if (col == "black") {
-				color = Color(0, 0, 0);
-			} else if (col == "blue") {
-				color = Color(0, 0, 1);
-			} else if (col == "fuchsia") {
-				color = Color(1, 0, 1);
-			} else if (col == "gray" || col == "grey") {
-				color = Color(0.5, 0.5, 0.5);
-			} else if (col == "green") {
-				color = Color(0, 0.5, 0);
-			} else if (col == "lime") {
-				color = Color(0, 1, 0);
-			} else if (col == "maroon") {
-				color = Color(0.5, 0, 0);
-			} else if (col == "navy") {
-				color = Color(0, 0, 0.5);
-			} else if (col == "olive") {
-				color = Color(0.5, 0.5, 0);
-			} else if (col == "purple") {
-				color = Color(0.5, 0, 0.5);
-			} else if (col == "red") {
-				color = Color(1, 0, 0);
-			} else if (col == "silver") {
-				color = Color(0.75, 0.75, 0.75);
-			} else if (col == "teal") {
-				color = Color(0, 0.5, 0.5);
-			} else if (col == "white") {
-				color = Color(1, 1, 1);
-			} else if (col == "yellow") {
-				color = Color(1, 1, 0);
-			} else {
+			Color color = color.from_string(col,false);
+			
+			if (color == Color()) {
 				color = base_color;
 			}
 
@@ -2440,6 +2434,7 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 		} else if (bbcode == "shake") {
 			int strength = 5;
 			float rate = 20.0f;
+			int style = 1;
 
 			if (split_tag_block.size() > 1) {
 				split_tag_block.remove(0);
@@ -2451,11 +2446,14 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 					} else if (expr.begins_with("rate=")) {
 						String rate_str = expr.substr(5, expr.length());
 						rate = rate_str.to_float();
+					} else if (expr.begins_with("style=")) {
+						String style_str = expr.substr(6, expr.length());
+						style = style_str.to_int();
 					}
 				}
 			}
 
-			push_shake(strength, rate);
+			push_shake(strength, rate, style);
 			pos = brk_end + 1;
 			tag_stack.push_front("shake");
 			set_process_internal(true);
@@ -2464,6 +2462,7 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			float period = 5.0f;
 			float x = 0.0f;
 			float y = 1.0f;
+			float offset = 1.0f;
 
 			if (split_tag_block.size() > 1) {
 				split_tag_block.remove(0);
@@ -2481,18 +2480,52 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 					} else if (expr.begins_with("y=")) {
 						String y_str = expr.substr(2, expr.length());
 						y = y_str.to_float();
+					} else if (expr.begins_with("offset=")) {
+						String offset_str = expr.substr(7, expr.length());
+						offset = offset_str.to_float();
 					}
 
 				}
 			}
 
-			push_wave(period, amplitude, x, y);
+			push_wave(period, amplitude, x, y, offset);
 			pos = brk_end + 1;
 			tag_stack.push_front("wave");
+			set_process_internal(true);
+		} else if (bbcode == "pulse") {
+			float alpha = 1.0f; // how much to blend the color
+			float period = 5.0f;
+			float offset = 0.0f;
+			Color color = Color(1.0f, 1.0f, 1.0f, 0.0f);
+
+			if (split_tag_block.size() > 1) {
+				split_tag_block.remove(0);
+				for (int i = 0; i < split_tag_block.size(); i++) {
+					String expr = split_tag_block[i];
+					if (expr.begins_with("amount=")) {
+						String alpha_str = expr.substr(4, expr.length());
+						alpha = alpha_str.to_float();
+					} else if (expr.begins_with("freq=")) {
+						String period_str = expr.substr(5, expr.length());
+						period = period_str.to_float();
+					} else if (expr.begins_with("color=")) {
+						String color_str = expr.substr(6, expr.length());
+						color = color.from_string(color_str,false);
+					} else if (expr.begins_with("offset=")) {
+						String offset_str = expr.substr(7, expr.length());
+						offset = offset_str.to_float();
+					}
+				}
+			}
+
+			push_pulse(color, period, alpha, offset);
+			pos = brk_end + 1;
+			tag_stack.push_front("pulse");
 			set_process_internal(true);
 		} else if (bbcode == "tornado") {
 			float radius = 10.0f;
 			float frequency = 1.0f;
+			float offset = 1.0f;
 
 			if (split_tag_block.size() > 1) {
 				split_tag_block.remove(0);
@@ -2504,11 +2537,14 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 					} else if (expr.begins_with("freq=")) {
 						String period_str = expr.substr(5, expr.length());
 						frequency = period_str.to_float();
+					} else if (expr.begins_with("offset=")) {
+						String offset_str = expr.substr(7, expr.length());
+						offset = offset_str.to_float();
 					}
 				}
 			}
 
-			push_tornado(frequency, radius);
+			push_tornado(frequency, radius, offset);
 			pos = brk_end + 1;
 			tag_stack.push_front("tornado");
 			set_process_internal(true);
@@ -2516,6 +2552,7 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			float saturation = 0.8f;
 			float value = 0.8f;
 			float frequency = 1.0f;
+			float offset = 1.0f;
 
 			if (split_tag_block.size() > 1) {
 				split_tag_block.remove(0);
@@ -2530,11 +2567,14 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 					} else if (expr.begins_with("freq=")) {
 						String freq_str = expr.substr(5, expr.length());
 						frequency = freq_str.to_float();
+					} else if (expr.begins_with("offset=")) {
+						String offset_str = expr.substr(7, expr.length());
+						offset = offset_str.to_float();
 					}
 				}
 			}
 
-			push_rainbow(saturation, value, frequency);
+			push_rainbow(saturation, value, frequency, offset);
 			pos = brk_end + 1;
 			tag_stack.push_front("rainbow");
 			set_process_internal(true);
@@ -3006,6 +3046,7 @@ void RichTextLabel::_bind_methods() {
 	BIND_ENUM_CONSTANT(ITEM_FADE);
 	BIND_ENUM_CONSTANT(ITEM_SHAKE);
 	BIND_ENUM_CONSTANT(ITEM_WAVE);
+	BIND_ENUM_CONSTANT(ITEM_PULSE);
 	BIND_ENUM_CONSTANT(ITEM_TORNADO);
 	BIND_ENUM_CONSTANT(ITEM_RAINBOW);
 	BIND_ENUM_CONSTANT(ITEM_CUSTOMFX);

@@ -111,6 +111,13 @@
 				[/codeblock]
 			</description>
 		</method>
+		<method name="from_string">
+			<return type="Color" />
+			<argument index="0" name="string" type="string" />
+			<description>
+				Constructs a color from a string. Supports presets, hex format, and vectors in Color(), (), Color255, and 255() formats.
+			</description>
+		</method>
 		<method name="get_luminance">
 			<return type="float" />
 			<description>

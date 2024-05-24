@@ -27,6 +27,7 @@ static void _populate_named_colors() {
 	_named_colors.insert("cornsilk", Color::hex(0xFFF8DCFF));
 	_named_colors.insert("crimson", Color::hex(0xDC143CFF));
 	_named_colors.insert("cyan", Color::hex(0x00FFFFFF));
+	_named_colors.insert("dandelion", Color::hex(0xFFB756FF));
 	_named_colors.insert("darkblue", Color::hex(0x00008BFF));
 	_named_colors.insert("darkcyan", Color::hex(0x008B8BFF));
 	_named_colors.insert("darkgoldenrod", Color::hex(0xB8860BFF));

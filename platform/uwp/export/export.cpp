@@ -713,7 +713,7 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 			"aliceBlue", "antiqueWhite", "aqua", "aquamarine", "azure", "beige",
 			"bisque", "black", "blanchedAlmond", "blue", "blueViolet", "brown",
 			"burlyWood", "cadetBlue", "chartreuse", "chocolate", "coral", "cornflowerBlue",
-			"cornsilk", "crimson", "cyan", "darkBlue", "darkCyan", "darkGoldenrod",
+			"cornsilk", "crimson", "cyan", "dandelion", "darkBlue", "darkCyan", "darkGoldenrod",
 			"darkGray", "darkGreen", "darkKhaki", "darkMagenta", "darkOliveGreen", "darkOrange",
 			"darkOrchid", "darkRed", "darkSalmon", "darkSeaGreen", "darkSlateBlue", "darkSlateGray",
 			"darkTurquoise", "darkViolet", "deepPink", "deepSkyBlue", "dimGray", "dodgerBlue",
