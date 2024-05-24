@@ -200,6 +200,10 @@ private:
 
 	Node *_get_child_by_name(const StringName &p_name) const;
 
+	Array get_native_children() const;
+	Array get_foreign_children() const;
+	Node *get_foreign_child(int p_index) const;
+
 	void _replace_connections_target(Node *p_new_target);
 
 	void _validate_child_name(Node *p_child, bool p_force_human_readable = false);

@@ -1457,6 +1457,35 @@ Node *Node::_get_child_by_name(const StringName &p_name) const {
 	return nullptr;
 }
 
+// get children owned by this node
+Array Node::get_native_children() const {
+	Array children;
+	for (int i = 0; i < data.children.size(); i++) {
+		if (data.children[i]->get_owner() == this)
+			children.push_back(data.children[i]);
+	}
+	return children;
+}
+
+// get children not owned by this node
+Array Node::get_foreign_children() const {
+	Array children;
+	for (int i = 0; i < data.children.size(); i++) {
+		if (data.children[i]->get_owner() != this)
+			children.push_back(data.children[i]);
+	}
+	return children;
+}
+
+// get child node from foreign child pool
+Node *Node::get_foreign_child(int p_index) const {
+	ERR_FAIL_INDEX_V(p_index, get_foreign_children().size(), nullptr);
+
+	return get_foreign_children()[p_index];
+}
+
+
+
 void Node::queue_free_all_children() const {
 	int cc = data.children.size();
 	Node *const *cd = data.children.ptr();
@@ -3099,6 +3128,7 @@ void Node::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_name", "name"), &Node::set_name);
 	ClassDB::bind_method(D_METHOD("get_name"), &Node::get_name);
+
 	ClassDB::bind_method(D_METHOD("add_child", "node", "legible_unique_name"), &Node::add_child, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("reparent_child", "node", "legible_unique_name"), &Node::reparent_child, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("remove_child", "node"), &Node::remove_child);
@@ -3106,7 +3136,11 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_children"), &Node::_get_children);
 	ClassDB::bind_method(D_METHOD("get_child", "idx"), &Node::get_child);
 	ClassDB::bind_method(D_METHOD("get_child_by_name", "name"), &Node::_get_child_by_name);
+	ClassDB::bind_method(D_METHOD("get_native_children"), &Node::get_native_children);
+	ClassDB::bind_method(D_METHOD("get_foreign_children"), &Node::get_foreign_children);
+	ClassDB::bind_method(D_METHOD("get_foreign_child", "idx"), &Node::get_foreign_child);
 	ClassDB::bind_method(D_METHOD("queue_free_all_children"), &Node::queue_free_all_children);
+
 	ClassDB::bind_method(D_METHOD("has_node", "path"), &Node::has_node);
 	ClassDB::bind_method(D_METHOD("get_node", "path"), &Node::get_node);
 	ClassDB::bind_method(D_METHOD("get_node_or_null", "path"), &Node::get_node_or_null);
