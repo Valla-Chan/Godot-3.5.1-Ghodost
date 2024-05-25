@@ -160,7 +160,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 	int line_ofs = 0;
 	float margin = _find_margin(it, p_base_font);
-	Align align = _find_align(it);
+	Align current_align = _find_align(it);
 	int line = 0;
 	int spaces = 0;
 
@@ -221,11 +221,11 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 			if (line < l.offset_caches.size())                                                                                                                              \
 				line_ofs = l.offset_caches[line];                                                                                                                           \
 			wofs = margin;                                                                                                                                                  \
-			if (align != ALIGN_FILL)                                                                                                                                        \
+			if (current_align != ALIGN_FILL)                                                                                                                                \
 				wofs += line_ofs;                                                                                                                                           \
 		} else {                                                                                                                                                            \
 			float used = wofs - margin;                                                                                                                                     \
-			switch (align) {                                                                                                                                                \
+			switch (current_align) {                                                                                                                                        \
 				case ALIGN_LEFT:                                                                                                                                            \
 					l.offset_caches.push_back(0);                                                                                                                           \
 					break;                                                                                                                                                  \
@@ -256,7 +256,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 			lh = line < l.height_caches.size() ? l.height_caches[line] : 1;                                                                                                 \
 			line_ascent = line < l.ascent_caches.size() ? l.ascent_caches[line] : 1;                                                                                        \
 			line_descent = line < l.descent_caches.size() ? l.descent_caches[line] : 1;                                                                                     \
-			if (align != ALIGN_FILL) {                                                                                                                                      \
+			if (current_align != ALIGN_FILL) {                                                                                                                              \
 				if (line < l.offset_caches.size()) {                                                                                                                        \
 					wofs = margin + l.offset_caches[line];                                                                                                                  \
 				}                                                                                                                                                           \
@@ -335,7 +335,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 			case ITEM_ALIGN: {
 				ItemAlign *align_it = static_cast<ItemAlign *>(it);
 
-				align = align_it->align;
+				current_align = align_it->align;
 
 			} break;
 			case ITEM_INDENT: {
@@ -361,6 +361,12 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 				const CharType *cf = c;
 				int ascent = font->get_ascent();
 				int descent = font->get_descent();
+
+				int vbegin = 0, vsep = 0;
+				Size2 size = get_size();
+				int line_spacing = get_constant("line_spacing");
+				int font_h = font->get_height() + line_spacing;
+				Ref<StyleBox> style = get_stylebox("normal");
 
 				Color color;
 				Color font_color_shadow;
@@ -453,10 +459,45 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 					line_descent = MAX(line_descent, descent);
 					fh = line_ascent + line_descent;
 
+					float total_h = 0;
+					total_h += visible_line_count * line_descent;
+					//total_h += style->get_margin(MARGIN_TOP) + style->get_margin(MARGIN_BOTTOM);
+					if (visible_line_count > 0) {
+						switch (valign) {
+							case VALIGN_TOP: {
+								//nothing
+							} break;
+							case VALIGN_CENTER: {
+								vbegin = (size.y - (total_h - line_spacing)) / 2;
+								vsep = 0;
+
+							} break;
+							case VALIGN_BOTTOM: {
+								vbegin = size.y - (total_h - line_spacing);
+								vsep = 0;
+
+							} break;
+							case VALIGN_FILL: {
+								vbegin = 0;
+								if (visible_line_count > 1) {
+									vsep = (size.y - (total_h - line_spacing)) / (visible_line_count - 1);
+								} else {
+									vsep = 0;
+								}
+
+							} break;
+						}
+					}
+
+					float y_ofs = style->get_offset().y;
+					y_ofs += line * font_h + font->get_ascent();
+					y_ofs += vbegin + line * vsep;
+					line_descent += vbegin + vsep;
+
 					float align_spacing = 0.0f;
 					bool is_at_line_wrap = false;
 					if (end && c[end - 1] == ' ') {
-						if (align == ALIGN_FILL && p_mode != PROCESS_CACHE) {
+						if (current_align == ALIGN_FILL && p_mode != PROCESS_CACHE) {
 							int ln = MIN(l.offset_caches.size() - 1, line);
 							if (l.space_caches[ln]) {
 								align_spacing = l.offset_caches[ln] / l.space_caches[ln];
@@ -1488,7 +1529,7 @@ Text::Align RichTextLabel::_find_align(Item *p_item) {
 		item = item->parent;
 	}
 
-	return default_align;
+	return align;
 }
 
 Color RichTextLabel::_find_color(Item *p_item, const Color &p_default_color) {
@@ -2902,12 +2943,19 @@ int RichTextLabel::get_content_height() const {
 void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_gui_input"), &RichTextLabel::_gui_input);
 	ClassDB::bind_method(D_METHOD("_scroll_changed"), &RichTextLabel::_scroll_changed);
+
 	ClassDB::bind_method(D_METHOD("get_text"), &RichTextLabel::get_text);
 	ClassDB::bind_method(D_METHOD("add_text", "text"), &RichTextLabel::add_text);
 	ClassDB::bind_method(D_METHOD("set_text", "text"), &RichTextLabel::set_text);
+	ClassDB::bind_method(D_METHOD("clear"), &RichTextLabel::clear);
+
+	ClassDB::bind_method(D_METHOD("set_valign", "valign"), &RichTextLabel::set_valign);
+	ClassDB::bind_method(D_METHOD("get_valign"), &RichTextLabel::get_valign);
+
 	ClassDB::bind_method(D_METHOD("add_image", "image", "width", "height", "align"), &RichTextLabel::add_image, DEFVAL(0), DEFVAL(0), DEFVAL(INLINE_ALIGN_BASELINE));
 	ClassDB::bind_method(D_METHOD("newline"), &RichTextLabel::add_newline);
 	ClassDB::bind_method(D_METHOD("remove_line", "line"), &RichTextLabel::remove_line);
+
 	ClassDB::bind_method(D_METHOD("push_font", "font"), &RichTextLabel::push_font);
 	ClassDB::bind_method(D_METHOD("push_normal"), &RichTextLabel::push_normal);
 	ClassDB::bind_method(D_METHOD("push_bold"), &RichTextLabel::push_bold);
@@ -2926,7 +2974,6 @@ void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("push_cell"), &RichTextLabel::push_cell);
 	ClassDB::bind_method(D_METHOD("pop"), &RichTextLabel::pop);
 
-	ClassDB::bind_method(D_METHOD("clear"), &RichTextLabel::clear);
 	ClassDB::bind_method(D_METHOD("get_selected_text"), &RichTextLabel::get_selected_text);
 	ClassDB::bind_method(D_METHOD("deselect"), &RichTextLabel::deselect);
 
@@ -2943,7 +2990,6 @@ void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_scroll_following"), &RichTextLabel::is_scroll_following);
 
 	ClassDB::bind_method(D_METHOD("get_v_scroll"), &RichTextLabel::get_v_scroll);
-
 	ClassDB::bind_method(D_METHOD("scroll_to_line", "line"), &RichTextLabel::scroll_to_line);
 
 	ClassDB::bind_method(D_METHOD("set_tab_size", "spaces"), &RichTextLabel::set_tab_size);
@@ -2966,13 +3012,8 @@ void RichTextLabel::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_visible_characters", "amount"), &RichTextLabel::set_visible_characters);
 	ClassDB::bind_method(D_METHOD("get_visible_characters"), &RichTextLabel::get_visible_characters);
-
 	ClassDB::bind_method(D_METHOD("set_percent_visible", "percent_visible"), &RichTextLabel::set_percent_visible);
 	ClassDB::bind_method(D_METHOD("get_percent_visible"), &RichTextLabel::get_percent_visible);
-
-	//valla edit
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "default_align", PROPERTY_HINT_ENUM, "Left,Center,Right,Fill"), "set_align", "get_align");
-	//
 
 	ClassDB::bind_method(D_METHOD("get_total_character_count"), &RichTextLabel::get_total_character_count);
 
@@ -2990,6 +3031,11 @@ void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_effects", "effects"), &RichTextLabel::set_effects);
 	ClassDB::bind_method(D_METHOD("get_effects"), &RichTextLabel::get_effects);
 	ClassDB::bind_method(D_METHOD("install_effect", "effect"), &RichTextLabel::install_effect);
+
+	//valla edit
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "align", PROPERTY_HINT_ENUM, "Left,Center,Right,Fill"), "set_align", "get_align");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "valign", PROPERTY_HINT_ENUM, "Top,Center,Bottom,Fill"), "set_valign", "get_valign");
+	//
 
 	ADD_GROUP("BBCode", "bbcode_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bbcode_enabled"), "set_use_bbcode", "is_using_bbcode");
@@ -3056,8 +3102,8 @@ void RichTextLabel::_bind_methods() {
 //valla edits
 void RichTextLabel::set_align(Align p_align) {
 	ERR_FAIL_INDEX((int)p_align, 4);
-	default_align = p_align;
-	_change_notify("default_align");
+	align = p_align;
+	_change_notify("align");
 	if (!bbcode.empty() && use_bbcode) {
 		set_bbcode(bbcode);
 	} else if (get_text().empty()) {
@@ -3068,7 +3114,23 @@ void RichTextLabel::set_align(Align p_align) {
 }
 
 Text::Align RichTextLabel::get_align() const {
-	return default_align;
+	return align;
+}
+
+void RichTextLabel::set_valign(VAlign p_align) {
+	ERR_FAIL_INDEX((int)p_align, 4);
+	_change_notify("valign");
+	if (!bbcode.empty() && use_bbcode) {
+		set_bbcode(bbcode);
+	} else if (get_text().empty()) {
+		set_text(get_text());
+	}
+	valign = p_align;
+	update();
+}
+
+Text::VAlign RichTextLabel::get_valign() const {
+	return valign;
 }
 
 void RichTextLabel::set_visible_characters(int p_visible) {
@@ -3197,7 +3259,8 @@ RichTextLabel::RichTextLabel() {
 	main->first_invalid_line = 0;
 	current_frame = main;
 	tab_size = 4;
-	default_align = ALIGN_LEFT;
+	align = ALIGN_LEFT;
+	valign = VALIGN_TOP;
 	underline_meta = true;
 	meta_hovering = nullptr;
 	override_selected_font_color = false;
