@@ -358,8 +358,7 @@ private:
 	bool underline_meta;
 	bool override_selected_font_color;
 
-	Align align;
-	VAlign valign;
+	Align default_align;
 
 	ItemMeta *meta_hovering;
 	Variant current_meta;
@@ -532,8 +531,6 @@ public:
 	//valla edits
 	void set_align(Align p_align);
 	Align get_align() const;
-	void set_valign(VAlign p_align);
-	VAlign get_valign() const;
 	//
 
 	void set_visible_characters(int p_visible);
