@@ -44,6 +44,14 @@ public:
 		ALIGN_FILL
 	};
 
+	enum VAlign {
+
+		VALIGN_TOP,
+		VALIGN_CENTER,
+		VALIGN_BOTTOM,
+		VALIGN_FILL
+	};
+
 protected:
 	mutable Map<String,Ref<Font>> font_scaled_cache;
 	static void _bind_methods();
@@ -67,5 +75,6 @@ public:
 };
 
 VARIANT_ENUM_CAST(Text::Align);
+VARIANT_ENUM_CAST(Text::VAlign);
 
 #endif // TEXT_H

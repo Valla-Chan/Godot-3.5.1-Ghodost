@@ -54,6 +54,7 @@ void Text::set_font_size_override(int p_size) {
 	//minimum_size_changed();
 	//set_size(get_size());
 	_notification(NOTIFICATION_THEME_CHANGED);
+	_notification(NOTIFICATION_RESIZED);
 }
 
 void Text::set_font_scale(float p_scale) {
@@ -68,6 +69,7 @@ void Text::set_font_scale(float p_scale) {
 	//minimum_size_changed();
 	//set_size(get_size());
 	_notification(NOTIFICATION_THEME_CHANGED);
+	_notification(NOTIFICATION_RESIZED);
 }
 
 int Text::get_font_size_override() const {
@@ -109,13 +111,18 @@ void Text::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_font_size_override"), &Text::get_font_size_override);
 	ClassDB::bind_method(D_METHOD("get_font_scale"), &Text::get_font_scale);
 
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "font_size_override", PROPERTY_HINT_RANGE, "0,128,0"), "set_font_size_override", "get_font_size_override");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "font_scale", PROPERTY_HINT_RANGE, "0.001,3,1"), "set_font_scale", "get_font_scale");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "font_size_override", PROPERTY_HINT_RANGE, "0,128,1,false"), "set_font_size_override", "get_font_size_override");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "font_scale", PROPERTY_HINT_RANGE, "0.001,3,0.1,false"), "set_font_scale", "get_font_scale");
 
 	BIND_ENUM_CONSTANT(ALIGN_LEFT);
 	BIND_ENUM_CONSTANT(ALIGN_CENTER);
 	BIND_ENUM_CONSTANT(ALIGN_RIGHT);
 	BIND_ENUM_CONSTANT(ALIGN_FILL);
+
+	BIND_ENUM_CONSTANT(VALIGN_TOP);
+	BIND_ENUM_CONSTANT(VALIGN_CENTER);
+	BIND_ENUM_CONSTANT(VALIGN_BOTTOM);
+	BIND_ENUM_CONSTANT(VALIGN_FILL);
 }
 
 Text::Text() {

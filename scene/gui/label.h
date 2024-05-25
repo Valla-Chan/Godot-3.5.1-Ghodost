@@ -37,13 +37,6 @@ class Label : public Text {
 	GDCLASS(Label, Text);
 
 public:
-	enum VAlign {
-
-		VALIGN_TOP,
-		VALIGN_CENTER,
-		VALIGN_BOTTOM,
-		VALIGN_FILL
-	};
 
 private:
 	Align align;
@@ -140,7 +133,5 @@ public:
 	Label(const String &p_text = String());
 	~Label();
 };
-
-VARIANT_ENUM_CAST(Label::VAlign);
 
 #endif // LABEL_H

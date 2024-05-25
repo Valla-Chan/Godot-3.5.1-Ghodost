@@ -585,7 +585,7 @@ void Label::set_valign(VAlign p_align) {
 	update();
 }
 
-Label::VAlign Label::get_valign() const {
+Text::VAlign Label::get_valign() const {
 	return valign;
 }
 
@@ -714,11 +714,6 @@ void Label::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_lines_skipped"), &Label::get_lines_skipped);
 	ClassDB::bind_method(D_METHOD("set_max_lines_visible", "lines_visible"), &Label::set_max_lines_visible);
 	ClassDB::bind_method(D_METHOD("get_max_lines_visible"), &Label::get_max_lines_visible);
-
-	BIND_ENUM_CONSTANT(VALIGN_TOP);
-	BIND_ENUM_CONSTANT(VALIGN_CENTER);
-	BIND_ENUM_CONSTANT(VALIGN_BOTTOM);
-	BIND_ENUM_CONSTANT(VALIGN_FILL);
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "text", PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT_INTL), "set_text", "get_text");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "align", PROPERTY_HINT_ENUM, "Left,Center,Right,Fill"), "set_align", "get_align");
