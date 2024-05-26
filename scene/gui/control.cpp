@@ -1224,7 +1224,11 @@ void Control::_size_changed() {
 	bool size_changed = new_size_cache != data.size_cache;
 
 	data.pos_cache = new_pos_cache;
-	data.size_cache = new_size_cache;
+	if (data.size_locked == true && data.size_cache != Vector2(0, 0)) {
+		size_changed = false;
+	} else {
+		data.size_cache = new_size_cache;
+	}
 
 	if (is_inside_tree()) {
 		if (size_changed) {
@@ -1237,6 +1241,8 @@ void Control::_size_changed() {
 		}
 
 		if (pos_changed && !size_changed) {
+			if (data.size_locked == true && data.size_cache != Vector2(0, 0))
+				set_position(new_pos_cache);
 			_update_canvas_item_transform(); //move because it won't be updated
 		}
 	}
@@ -1642,11 +1648,20 @@ void Control::set_position(const Size2 &p_point, bool p_keep_margins) {
 	_size_changed();
 }
 
+void Control::set_size_locked(bool p_locked) {
+	data.size_locked = p_locked;
+}
+
+bool Control::is_size_locked() const {
+	return data.size_locked;
+}
+
 void Control::_set_size(const Size2 &p_size) {
 	set_size(p_size);
 }
 
 void Control::set_size(const Size2 &p_size, bool p_keep_margins) {
+		
 	Size2 new_size = p_size;
 	Size2 min = get_combined_minimum_size();
 	if (new_size.x < min.x) {
@@ -1655,15 +1670,20 @@ void Control::set_size(const Size2 &p_size, bool p_keep_margins) {
 	if (new_size.y < min.y) {
 		new_size.y = min.y;
 	}
+	if (data.size_locked && data.size_cache != Vector2(0,0)) {
+		new_size = data.size_cache;
+	}
 
-	if (p_keep_margins) {
-		_compute_anchors(Rect2(data.pos_cache, new_size), data.margin, data.anchor);
-		_change_notify("anchor_left");
-		_change_notify("anchor_right");
-		_change_notify("anchor_top");
-		_change_notify("anchor_bottom");
-	} else {
-		_compute_margins(Rect2(data.pos_cache, new_size), data.anchor, data.margin);
+	if (!data.size_locked || data.size_cache == Vector2(0, 0)) {
+		if (p_keep_margins) {
+			_compute_anchors(Rect2(data.pos_cache, new_size), data.margin, data.anchor);
+			_change_notify("anchor_left");
+			_change_notify("anchor_right");
+			_change_notify("anchor_top");
+			_change_notify("anchor_bottom");
+		} else {
+			_compute_margins(Rect2(data.pos_cache, new_size), data.anchor, data.margin);
+		}
 	}
 	_size_changed();
 }
@@ -2647,10 +2667,14 @@ void Control::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_anchor_and_margin", "margin", "anchor", "offset", "push_opposite_anchor"), &Control::set_anchor_and_margin, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("set_begin", "position"), &Control::set_begin);
 	ClassDB::bind_method(D_METHOD("set_end", "position"), &Control::set_end);
+
 	ClassDB::bind_method(D_METHOD("set_position", "position", "keep_margins"), &Control::set_position, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("_set_position", "margin"), &Control::_set_position);
 	ClassDB::bind_method(D_METHOD("set_size", "size", "keep_margins"), &Control::set_size, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("_set_size", "size"), &Control::_set_size);
+	ClassDB::bind_method(D_METHOD("set_size_locked", "locked"), &Control::set_size_locked);
+	ClassDB::bind_method(D_METHOD("is_size_locked"), &Control::is_size_locked);
+
 	ClassDB::bind_method(D_METHOD("set_custom_minimum_size", "size"), &Control::set_custom_minimum_size);
 	ClassDB::bind_method(D_METHOD("set_global_position", "position", "keep_margins"), &Control::set_global_position, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("_set_global_position", "position"), &Control::_set_global_position);
@@ -2816,6 +2840,7 @@ void Control::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_position", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR), "_set_position", "get_position");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_global_position", PROPERTY_HINT_NONE, "", 0), "_set_global_position", "get_global_position");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_size", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR), "_set_size", "get_size");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "rect_lock_size"), "set_size_locked", "is_size_locked");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_min_size"), "set_custom_minimum_size", "get_custom_minimum_size");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "rect_rotation", PROPERTY_HINT_RANGE, "-360,360,0.1,or_lesser,or_greater"), "set_rotation_degrees", "get_rotation_degrees");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_scale"), "set_scale", "get_scale");
@@ -2934,6 +2959,7 @@ void Control::_bind_methods() {
 }
 
 Control::Control() {
+	data.size_locked = false;
 	data.parent = nullptr;
 
 	data.mouse_filter = MOUSE_FILTER_STOP;

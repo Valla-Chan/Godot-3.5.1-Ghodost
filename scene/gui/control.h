@@ -141,6 +141,7 @@ private:
 	};
 
 	struct Data {
+		bool size_locked;
 		Point2 pos_cache;
 		Size2 size_cache;
 		Size2 minimum_size_cache;
@@ -213,6 +214,8 @@ private:
 	void _set_position(const Point2 &p_point);
 	void _set_global_position(const Point2 &p_point);
 	void _set_size(const Size2 &p_size);
+	void set_size_locked(bool p_locked);
+	bool is_size_locked() const;
 
 	void _propagate_theme_changed(CanvasItem *p_at, Control *p_owner, bool p_assign = true);
 	void _theme_changed();

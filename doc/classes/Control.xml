@@ -513,6 +513,12 @@
 				Best used with [constant Node.NOTIFICATION_DRAG_END].
 			</description>
 		</method>
+		<method name="is_size_locked">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if the rect size can be changed.
+			</description>
+		</method>
 		<method name="minimum_size_changed">
 			<return type="void" />
 			<description>
@@ -728,6 +734,13 @@
 				If [code]keep_margins[/code] is [code]true[/code], control's anchors will be updated instead of margins.
 			</description>
 		</method>
+		<method name="set_size_locked">
+			<return type="void" />
+			<argument index="0" name="lock" type="bool" />
+			<description>
+				Sets whether the rect size can change.
+			</description>
+		</method>
 		<method name="show_modal">
 			<return type="void" />
 			<argument index="0" name="exclusive" type="bool" default="false" />
@@ -849,6 +862,9 @@
 			[b]Note:[/b] If the Control node is a child of a [Container] node, the scale will be reset to [code]Vector2(1, 1)[/code] when the scene is instanced. To set the Control's scale when it's instanced, wait for one frame using [code]yield(get_tree(), "idle_frame")[/code] then set its [member rect_scale] property.
 		</member>
 		<member name="rect_size" type="Vector2" setter="_set_size" getter="get_size" default="Vector2( 0, 0 )">
+			The size of the node's bounding rectangle, in pixels. [Container] nodes update this property automatically.
+		</member>
+		<member name="lock_size" type="bool" setter="set_size_locked" getter="is_size_locked" default="false">
 			The size of the node's bounding rectangle, in pixels. [Container] nodes update this property automatically.
 		</member>
 		<member name="size_flags_horizontal" type="int" setter="set_h_size_flags" getter="get_h_size_flags" default="1">
