@@ -159,6 +159,7 @@ private:
 		float rotation;
 		Vector2 scale;
 		Vector2 pivot_offset;
+		bool pivot_lock_center;
 
 		bool pending_resize;
 
@@ -376,6 +377,9 @@ public:
 
 	void set_pivot_offset(const Vector2 &p_pivot);
 	Vector2 get_pivot_offset() const;
+	void set_pivot_center_locked(bool p_centered);
+	bool is_pivot_center_locked() const;
+
 
 	void set_scale(const Vector2 &p_scale);
 	Vector2 get_scale() const;

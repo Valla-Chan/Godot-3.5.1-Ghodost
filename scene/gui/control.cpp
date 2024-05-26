@@ -76,7 +76,9 @@ void Control::_edit_set_state(const Dictionary &p_state) {
 
 	set_rotation(state["rotation"]);
 	set_scale(state["scale"]);
-	set_pivot_offset(state["pivot"]);
+	if (!data.pivot_lock_center) {
+		set_pivot_offset(state["pivot"]);
+	}
 	Array anchors = state["anchors"];
 	data.anchor[MARGIN_LEFT] = anchors[0];
 	data.anchor[MARGIN_TOP] = anchors[1];
@@ -152,7 +154,9 @@ void Control::_edit_set_pivot(const Point2 &p_pivot) {
 	Vector2 delta_pivot = p_pivot - get_pivot_offset();
 	Vector2 move = Vector2((cos(data.rotation) - 1.0) * delta_pivot.x - sin(data.rotation) * delta_pivot.y, sin(data.rotation) * delta_pivot.x + (cos(data.rotation) - 1.0) * delta_pivot.y);
 	set_position(get_position() + move);
-	set_pivot_offset(p_pivot);
+	if (!data.pivot_lock_center) {
+		set_pivot_offset(p_pivot);
+	}
 }
 
 Point2 Control::_edit_get_pivot() const {
@@ -2510,7 +2514,22 @@ void Control::_override_changed() {
 	minimum_size_changed(); // overrides are likely to affect minimum size
 }
 
+void Control::set_pivot_center_locked(bool p_centered) {
+	//data.pivot_offset = get_size() / 2;
+	data.pivot_lock_center = p_centered;
+	update();
+	_notify_transform();
+	_change_notify("rect_pivot_offset");
+}
+
+bool Control::is_pivot_center_locked() const {
+	return data.pivot_lock_center;
+}
+
+
 void Control::set_pivot_offset(const Vector2 &p_pivot) {
+	if (data.pivot_lock_center)
+		return;
 	data.pivot_offset = p_pivot;
 	update();
 	_notify_transform();
@@ -2518,7 +2537,12 @@ void Control::set_pivot_offset(const Vector2 &p_pivot) {
 }
 
 Vector2 Control::get_pivot_offset() const {
-	return data.pivot_offset;
+	if (!data.pivot_lock_center) {
+		return data.pivot_offset;
+	} else {
+		return get_size() / 2;
+	}
+	
 }
 
 void Control::set_scale(const Vector2 &p_scale) {
@@ -2681,7 +2705,6 @@ void Control::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_rotation", "radians"), &Control::set_rotation);
 	ClassDB::bind_method(D_METHOD("set_rotation_degrees", "degrees"), &Control::set_rotation_degrees);
 	ClassDB::bind_method(D_METHOD("set_scale", "scale"), &Control::set_scale);
-	ClassDB::bind_method(D_METHOD("set_pivot_offset", "pivot_offset"), &Control::set_pivot_offset);
 	ClassDB::bind_method(D_METHOD("get_margin", "margin"), &Control::get_margin);
 	ClassDB::bind_method(D_METHOD("get_begin"), &Control::get_begin);
 	ClassDB::bind_method(D_METHOD("get_end"), &Control::get_end);
@@ -2690,7 +2713,6 @@ void Control::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_rotation"), &Control::get_rotation);
 	ClassDB::bind_method(D_METHOD("get_rotation_degrees"), &Control::get_rotation_degrees);
 	ClassDB::bind_method(D_METHOD("get_scale"), &Control::get_scale);
-	ClassDB::bind_method(D_METHOD("get_pivot_offset"), &Control::get_pivot_offset);
 	ClassDB::bind_method(D_METHOD("get_custom_minimum_size"), &Control::get_custom_minimum_size);
 	ClassDB::bind_method(D_METHOD("get_parent_area_size"), &Control::get_parent_area_size);
 	ClassDB::bind_method(D_METHOD("get_global_position"), &Control::get_global_position);
@@ -2705,6 +2727,11 @@ void Control::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("find_prev_valid_focus"), &Control::find_prev_valid_focus);
 	ClassDB::bind_method(D_METHOD("find_next_valid_focus"), &Control::find_next_valid_focus);
 	ClassDB::bind_method(D_METHOD("get_focus_owner"), &Control::get_focus_owner);
+
+	ClassDB::bind_method(D_METHOD("set_pivot_offset", "pivot_offset"), &Control::set_pivot_offset);
+	ClassDB::bind_method(D_METHOD("get_pivot_offset"), &Control::get_pivot_offset);
+	ClassDB::bind_method(D_METHOD("set_pivot_center_locked", "centered"), &Control::set_pivot_center_locked);
+	ClassDB::bind_method(D_METHOD("is_pivot_center_locked"), &Control::is_pivot_center_locked);
 
 	ClassDB::bind_method(D_METHOD("set_h_size_flags", "flags"), &Control::set_h_size_flags);
 	ClassDB::bind_method(D_METHOD("get_h_size_flags"), &Control::get_h_size_flags);
@@ -2845,6 +2872,7 @@ void Control::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "rect_rotation", PROPERTY_HINT_RANGE, "-360,360,0.1,or_lesser,or_greater"), "set_rotation_degrees", "get_rotation_degrees");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_scale"), "set_scale", "get_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_pivot_offset"), "set_pivot_offset", "get_pivot_offset");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "rect_lock_pivot_to_center"), "set_pivot_center_locked", "is_pivot_center_locked");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "rect_clip_content"), "set_clip_contents", "is_clipping_contents");
 
 	ADD_GROUP("Hint", "hint_");
@@ -2960,6 +2988,8 @@ void Control::_bind_methods() {
 
 Control::Control() {
 	data.size_locked = false;
+	data.pivot_lock_center = true;
+
 	data.parent = nullptr;
 
 	data.mouse_filter = MOUSE_FILTER_STOP;
