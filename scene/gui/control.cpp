@@ -2988,7 +2988,7 @@ void Control::_bind_methods() {
 
 Control::Control() {
 	data.size_locked = false;
-	data.pivot_lock_center = true;
+	data.pivot_lock_center = false;
 
 	data.parent = nullptr;
 
