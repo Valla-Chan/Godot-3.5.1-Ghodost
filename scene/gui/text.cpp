@@ -34,15 +34,15 @@
 #include "core/translation.h"
 #include "scene/resources/dynamic_font.h"
 
-void Text::set_align(Align p_align) {
+void TextBase::set_align(Align p_align) {
 }
 
-Text::Align Text::get_align() const {
+TextBase::Align TextBase::get_align() const {
 	return Align(0);
 }
 
 
-void Text::set_font_size_override(int p_size) {
+void TextBase::set_font_size_override(int p_size) {
 	if (p_size < 0 ){
 		p_size = 0;
 	}
@@ -57,7 +57,7 @@ void Text::set_font_size_override(int p_size) {
 	_notification(NOTIFICATION_RESIZED);
 }
 
-void Text::set_font_scale(float p_scale) {
+void TextBase::set_font_scale(float p_scale) {
 	if (p_scale < 0) {
 		p_scale = 0;
 	}
@@ -72,16 +72,16 @@ void Text::set_font_scale(float p_scale) {
 	_notification(NOTIFICATION_RESIZED);
 }
 
-int Text::get_font_size_override() const {
+int TextBase::get_font_size_override() const {
 	return font_size_override;
 }
 
-float Text::get_font_scale() const {
+float TextBase::get_font_scale() const {
 	return font_scale;
 }
 
 // return a scaled version of the main font
-Ref<Font> Text::get_font_scaled(const String &p_font = "font") const {
+Ref<Font> TextBase::get_font_scaled(const String &p_font = "font") const {
 	Ref<Font> font = get_font("font");
 	Ref<DynamicFont> dynfont = font;
 	if (font_size_override > 0 || (font_scale != 1.0 && font_scale > 0)) {
@@ -102,14 +102,12 @@ Ref<Font> Text::get_font_scaled(const String &p_font = "font") const {
 }
 
 
-void Text::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_align", "align"), &Text::set_align);
-	ClassDB::bind_method(D_METHOD("get_align"), &Text::get_align);
+void TextBase::_bind_methods() {
 
-	ClassDB::bind_method(D_METHOD("set_font_size_override", "size"), &Text::set_font_size_override);
-	ClassDB::bind_method(D_METHOD("set_font_scale", "scale"), &Text::set_font_scale);
-	ClassDB::bind_method(D_METHOD("get_font_size_override"), &Text::get_font_size_override);
-	ClassDB::bind_method(D_METHOD("get_font_scale"), &Text::get_font_scale);
+	ClassDB::bind_method(D_METHOD("set_font_size_override", "size"), &TextBase::set_font_size_override);
+	ClassDB::bind_method(D_METHOD("set_font_scale", "scale"), &TextBase::set_font_scale);
+	ClassDB::bind_method(D_METHOD("get_font_size_override"), &TextBase::get_font_size_override);
+	ClassDB::bind_method(D_METHOD("get_font_scale"), &TextBase::get_font_scale);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "font_size_override", PROPERTY_HINT_RANGE, "0,128,1,false"), "set_font_size_override", "get_font_size_override");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "font_scale", PROPERTY_HINT_RANGE, "0.001,3,0.1,false"), "set_font_scale", "get_font_scale");
@@ -125,8 +123,8 @@ void Text::_bind_methods() {
 	BIND_ENUM_CONSTANT(VALIGN_FILL);
 }
 
-Text::Text() {
+TextBase::TextBase() {
 }
 
-Text::~Text() {
+TextBase::~TextBase() {
 }

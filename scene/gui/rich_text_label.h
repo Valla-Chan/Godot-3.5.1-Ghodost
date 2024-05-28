@@ -35,8 +35,8 @@
 #include "rich_text_effect.h"
 #include "scene/gui/scroll_bar.h"
 
-class RichTextLabel : public Text {
-	GDCLASS(RichTextLabel, Text);
+class RichTextLabel : public TextBase {
+	GDCLASS(RichTextLabel, TextBase);
 
 public:
 

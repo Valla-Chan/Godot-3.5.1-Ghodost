@@ -1476,7 +1476,7 @@ int RichTextLabel::_find_margin(Item *p_item, const Ref<Font> &p_base_font) {
 	return margin;
 }
 
-Text::Align RichTextLabel::_find_align(Item *p_item) {
+TextBase::Align RichTextLabel::_find_align(Item *p_item) {
 	Item *item = p_item;
 
 	while (item) {
@@ -2900,6 +2900,8 @@ int RichTextLabel::get_content_height() const {
 }
 
 void RichTextLabel::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("set_align", "align"), &RichTextLabel::set_align);
+	ClassDB::bind_method(D_METHOD("get_align"), &RichTextLabel::get_align);
 	ClassDB::bind_method(D_METHOD("_gui_input"), &RichTextLabel::_gui_input);
 	ClassDB::bind_method(D_METHOD("_scroll_changed"), &RichTextLabel::_scroll_changed);
 	ClassDB::bind_method(D_METHOD("get_text"), &RichTextLabel::get_text);
@@ -3067,7 +3069,7 @@ void RichTextLabel::set_align(Align p_align) {
 	update();
 }
 
-Text::Align RichTextLabel::get_align() const {
+TextBase::Align RichTextLabel::get_align() const {
 	return default_align;
 }
 

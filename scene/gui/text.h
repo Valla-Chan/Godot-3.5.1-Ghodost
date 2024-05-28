@@ -28,13 +28,13 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef TEXT_H
-#define TEXT_H
+#ifndef TEXTBASE_H
+#define TEXTBASE_H
 
 #include "scene/gui/control.h"
 
-class Text : public Control {
-	GDCLASS(Text, Control);
+class TextBase : public Control {
+	GDCLASS(TextBase, Control);
 
 public:
 	enum Align {
@@ -70,11 +70,11 @@ public:
 	float get_font_scale() const;
 	Ref<Font> get_font_scaled(const String &p_font) const;
 
-	Text();
-	~Text();
+	TextBase();
+	~TextBase();
 };
 
-VARIANT_ENUM_CAST(Text::Align);
-VARIANT_ENUM_CAST(Text::VAlign);
+VARIANT_ENUM_CAST(TextBase::Align);
+VARIANT_ENUM_CAST(TextBase::VAlign);
 
-#endif // TEXT_H
+#endif // TEXTBASE_H

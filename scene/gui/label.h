@@ -33,8 +33,8 @@
 
 #include "scene/gui/text.h"
 
-class Label : public Text {
-	GDCLASS(Label, Text);
+class Label : public TextBase {
+	GDCLASS(Label, TextBase);
 
 public:
 

@@ -34,8 +34,8 @@
 #include "scene/gui/text.h"
 #include "scene/gui/popup_menu.h"
 
-class LineEdit : public Text {
-	GDCLASS(LineEdit, Text);
+class LineEdit : public TextBase {
+	GDCLASS(LineEdit, TextBase);
 
 public:
 

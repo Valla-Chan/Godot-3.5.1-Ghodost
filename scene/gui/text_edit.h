@@ -31,15 +31,15 @@
 #ifndef TEXT_EDIT_H
 #define TEXT_EDIT_H
 
-#include "scene/gui/control.h"
+#include "scene/gui/text.h"
 #include "scene/gui/popup_menu.h"
 #include "scene/gui/scroll_bar.h"
 #include "scene/main/timer.h"
 
 class SyntaxHighlighter;
 
-class TextEdit : public Control {
-	GDCLASS(TextEdit, Control);
+class TextEdit : public TextBase {
+	GDCLASS(TextEdit, TextBase);
 
 public:
 	struct HighlighterInfo {

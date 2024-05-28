@@ -575,7 +575,7 @@ void Label::set_align(Align p_align) {
 	update();
 }
 
-Text::Align Label::get_align() const {
+TextBase::Align Label::get_align() const {
 	return align;
 }
 
@@ -585,7 +585,7 @@ void Label::set_valign(VAlign p_align) {
 	update();
 }
 
-Text::VAlign Label::get_valign() const {
+TextBase::VAlign Label::get_valign() const {
 	return valign;
 }
 
@@ -688,6 +688,8 @@ int Label::get_total_character_count() const {
 }
 
 void Label::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("set_align", "align"), &Label::set_align);
+	ClassDB::bind_method(D_METHOD("get_align"), &Label::get_align);
 	ClassDB::bind_method(D_METHOD("set_valign", "valign"), &Label::set_valign);
 	ClassDB::bind_method(D_METHOD("get_valign"), &Label::get_valign);
 	ClassDB::bind_method(D_METHOD("set_text", "text"), &Label::set_text);
