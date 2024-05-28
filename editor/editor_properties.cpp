@@ -83,9 +83,40 @@ void EditorPropertyText::set_placeholder(const String &p_string) {
 	text->set_placeholder(p_string);
 }
 
+
+bool EditorPropertyText::can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const {
+	return !is_read_only() && is_drop_valid(p_data);
+}
+
+void EditorPropertyText::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
+	ERR_FAIL_COND(!is_drop_valid(p_data));
+	Dictionary data = p_data;
+	if (data["type"] == "nodes") {
+		Array nodes = data["nodes"];
+		Node *node = get_tree()->get_edited_scene_root()->get_node(nodes[0]);
+
+		text->set_text(text->get_text() + node->get_name());
+	} else if (data["type"] == "files") {
+		text->set_text(data["files"].get(0));
+	}
+}
+
+bool EditorPropertyText::is_drop_valid(const Dictionary &p_drag_data) const {
+	if (p_drag_data["type"] == "nodes") {
+		Array nodes = p_drag_data["nodes"];
+		return nodes.size() == 1;
+	} else if (p_drag_data["type"] == "files") {
+		Array files = p_drag_data["files"];
+		return files.size() == 1;
+	}
+	return false;
+}
+
 void EditorPropertyText::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_text_changed", "txt"), &EditorPropertyText::_text_changed);
 	ClassDB::bind_method(D_METHOD("_text_entered", "txt"), &EditorPropertyText::_text_entered);
+	ClassDB::bind_method(D_METHOD("can_drop_data_fw", "position", "data", "from"), &EditorPropertyText::can_drop_data_fw);
+	ClassDB::bind_method(D_METHOD("drop_data_fw", "position", "data", "from"), &EditorPropertyText::drop_data_fw);
 }
 
 EditorPropertyText::EditorPropertyText() {
@@ -94,6 +125,7 @@ EditorPropertyText::EditorPropertyText() {
 	add_focusable(text);
 	text->connect("text_changed", this, "_text_changed");
 	text->connect("text_entered", this, "_text_entered");
+	text->set_drag_forwarding(this);
 
 	updating = false;
 }
@@ -148,10 +180,40 @@ void EditorPropertyMultilineText::_notification(int p_what) {
 	}
 }
 
+bool EditorPropertyMultilineText::can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const {
+	return !is_read_only() && is_drop_valid(p_data);
+}
+
+void EditorPropertyMultilineText::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
+	ERR_FAIL_COND(!is_drop_valid(p_data));
+	Dictionary data = p_data;
+	if (data["type"] == "nodes") {
+		Array nodes = data["nodes"];
+		Node *node = get_tree()->get_edited_scene_root()->get_node(nodes[0]);
+
+		text->set_text(text->get_text() + node->get_name());
+	} else if (data["type"] == "files") {
+		text->set_text(data["files"].get(0));
+	}
+}
+
+bool EditorPropertyMultilineText::is_drop_valid(const Dictionary &p_drag_data) const {
+	if (p_drag_data["type"] == "nodes") {
+		Array nodes = p_drag_data["nodes"];
+		return nodes.size() == 1;
+	} else if (p_drag_data["type"] == "files") {
+		Array files = p_drag_data["files"];
+		return files.size() == 1;
+	}
+	return false;
+}
+
 void EditorPropertyMultilineText::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_text_changed"), &EditorPropertyMultilineText::_text_changed);
 	ClassDB::bind_method(D_METHOD("_big_text_changed"), &EditorPropertyMultilineText::_big_text_changed);
 	ClassDB::bind_method(D_METHOD("_open_big_text"), &EditorPropertyMultilineText::_open_big_text);
+	ClassDB::bind_method(D_METHOD("can_drop_data_fw", "position", "data", "from"), &EditorPropertyMultilineText::can_drop_data_fw);
+	ClassDB::bind_method(D_METHOD("drop_data_fw", "position", "data", "from"), &EditorPropertyMultilineText::drop_data_fw);
 }
 
 EditorPropertyMultilineText::EditorPropertyMultilineText() {
@@ -159,12 +221,15 @@ EditorPropertyMultilineText::EditorPropertyMultilineText() {
 	hb->add_constant_override("separation", 0);
 	add_child(hb);
 	set_bottom_editor(hb);
+
 	text = memnew(TextEdit);
 	text->connect("text_changed", this, "_text_changed");
 	text->set_wrap_enabled(true);
+	text->set_drag_forwarding(this);
 	add_focusable(text);
 	hb->add_child(text);
 	text->set_h_size_flags(SIZE_EXPAND_FILL);
+
 	open_big_text = memnew(ToolButton);
 	open_big_text->connect("pressed", this, "_open_big_text");
 	hb->add_child(open_big_text);

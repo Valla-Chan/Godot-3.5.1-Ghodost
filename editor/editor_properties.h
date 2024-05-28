@@ -57,6 +57,10 @@ class EditorPropertyText : public EditorProperty {
 	void _text_changed(const String &p_string);
 	void _text_entered(const String &p_string);
 
+	bool can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const;
+	void drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from);
+	bool is_drop_valid(const Dictionary &p_drag_data) const;
+
 protected:
 	static void _bind_methods();
 
@@ -77,6 +81,10 @@ class EditorPropertyMultilineText : public EditorProperty {
 	void _big_text_changed();
 	void _text_changed();
 	void _open_big_text();
+
+	bool can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const;
+	void drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from);
+	bool is_drop_valid(const Dictionary &p_drag_data) const;
 
 protected:
 	void _notification(int p_what);
