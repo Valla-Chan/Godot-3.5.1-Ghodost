@@ -324,7 +324,10 @@ protected:
 public:
 	bool move_and_collide(const Vector2 &p_motion, bool p_infinite_inertia, Collision &r_collision, bool p_exclude_raycast_shapes = true, bool p_test_only = false, bool p_cancel_sliding = true, const Set<RID> &p_exclude = Set<RID>());
 
+	float get_move_safe_fraction(const Transform2D &p_from, const Vector2 &p_motion, bool p_infinite_inertia = true);
+	float get_move_safe_fraction_to(const Vector2 &p_location, bool p_infinite_inertia = true);
 	bool test_move(const Transform2D &p_from, const Vector2 &p_motion, bool p_infinite_inertia = true);
+	bool test_move_to(const Vector2 &p_location, bool p_infinite_inertia = true);
 
 	bool separate_raycast_shapes(bool p_infinite_inertia, Collision &r_collision);
 

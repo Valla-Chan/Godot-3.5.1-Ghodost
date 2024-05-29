@@ -1205,6 +1205,8 @@ Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_veloci
 				}
 
 				if (sliding_enabled || !on_floor) {
+					// body has begun sliding
+					//emit_signal("body_began_sliding");
 					motion = collision.remainder.slide(collision.normal);
 					body_velocity = body_velocity.slide(collision.normal);
 				} else {
@@ -1324,6 +1326,23 @@ KinematicBody2D::MovingPlatformApplyVelocityOnLeave KinematicBody2D::get_moving_
 	return moving_platform_apply_velocity_on_leave;
 }
 
+// get how far the body could move before hitting a collision
+float KinematicBody2D::get_move_safe_fraction(const Transform2D &p_from, const Vector2 &p_motion, bool p_infinite_inertia) {
+	ERR_FAIL_COND_V(!is_inside_tree(), false);
+
+	Physics2DServer::MotionResult result;
+	Physics2DServer::get_singleton()->body_test_motion(get_rid(), p_from, p_motion, p_infinite_inertia, margin, &result);
+
+	return result.collision_safe_fraction;
+}
+
+// start from current transform, get how far the body could move before hitting a collision
+float KinematicBody2D::get_move_safe_fraction_to(const Vector2 &p_location, bool p_infinite_inertia) {
+	Vector2 motion = get_position().direction_to(p_location) * get_position().distance_to(p_location);
+	return get_move_safe_fraction(get_transform(), motion, p_infinite_inertia);
+}
+
+// check body can go to specified pos
 bool KinematicBody2D::test_move(const Transform2D &p_from, const Vector2 &p_motion, bool p_infinite_inertia) {
 	ERR_FAIL_COND_V(!is_inside_tree(), false);
 
@@ -1336,6 +1355,12 @@ bool KinematicBody2D::test_move(const Transform2D &p_from, const Vector2 &p_moti
 	} else {
 		return false;
 	}
+}
+
+// start from current transform, check body can go to specified pos
+bool KinematicBody2D::test_move_to(const Vector2 &p_location, bool p_infinite_inertia) {
+	Vector2 motion = get_position().direction_to(p_location) * get_position().distance_to(p_location);
+	return test_move(get_transform(), motion, p_infinite_inertia);
 }
 
 void KinematicBody2D::set_safe_margin(float p_margin) {
@@ -1445,7 +1470,10 @@ void KinematicBody2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("move_and_slide", "linear_velocity", "up_direction", "stop_on_slope", "max_slides", "floor_max_angle", "infinite_inertia"), &KinematicBody2D::move_and_slide, DEFVAL(Vector2(0, 0)), DEFVAL(false), DEFVAL(4), DEFVAL(Math::deg2rad((float)45)), DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("move_and_slide_with_snap", "linear_velocity", "snap", "up_direction", "stop_on_slope", "max_slides", "floor_max_angle", "infinite_inertia"), &KinematicBody2D::move_and_slide_with_snap, DEFVAL(Vector2(0, 0)), DEFVAL(false), DEFVAL(4), DEFVAL(Math::deg2rad((float)45)), DEFVAL(true));
 
+	ClassDB::bind_method(D_METHOD("get_move_safe_fraction", "from", "rel_vec", "infinite_inertia"), &KinematicBody2D::get_move_safe_fraction, DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("get_move_safe_fraction_to", "position", "infinite_inertia"), &KinematicBody2D::get_move_safe_fraction_to, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("test_move", "from", "rel_vec", "infinite_inertia"), &KinematicBody2D::test_move, DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("test_move_to", "position", "infinite_inertia"), &KinematicBody2D::test_move_to, DEFVAL(true));
 
 	ClassDB::bind_method(D_METHOD("is_on_floor"), &KinematicBody2D::is_on_floor);
 	ClassDB::bind_method(D_METHOD("is_on_ceiling"), &KinematicBody2D::is_on_ceiling);
@@ -1473,6 +1501,8 @@ void KinematicBody2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "motion/sync_to_physics"), "set_sync_to_physics", "is_sync_to_physics_enabled");
 	ADD_GROUP("Moving Platform", "moving_platform");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "moving_platform_apply_velocity_on_leave", PROPERTY_HINT_ENUM, "Always,Upward Only,Never", PROPERTY_USAGE_DEFAULT), "set_moving_platform_apply_velocity_on_leave", "get_moving_platform_apply_velocity_on_leave");
+
+	//ADD_SIGNAL(MethodInfo("body_began_sliding"));
 
 	BIND_ENUM_CONSTANT(PLATFORM_VEL_ON_LEAVE_ALWAYS);
 	BIND_ENUM_CONSTANT(PLATFORM_VEL_ON_LEAVE_UPWARD_ONLY);
