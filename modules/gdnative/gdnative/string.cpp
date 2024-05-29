@@ -574,7 +574,7 @@ godot_int GDAPI godot_string_to_int(const godot_string *p_self) {
 	return self->to_int();
 }
 
-godot_string GDAPI godot_string_capitalize(const godot_string *p_self, godot_bool replace_underscores) {
+godot_string GDAPI godot_string_capitalize(const godot_string *p_self) {
 	const String *self = (const String *)p_self;
 	godot_string result;
 	memnew_placement(&result, String(self->capitalize()));

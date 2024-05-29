@@ -154,7 +154,7 @@ godot_int GDAPI godot_string_to_int(const godot_string *p_self);
 
 godot_string GDAPI godot_string_camelcase_to_underscore(const godot_string *p_self);
 godot_string GDAPI godot_string_camelcase_to_underscore_lowercased(const godot_string *p_self);
-godot_string GDAPI godot_string_capitalize(const godot_string *p_self, godot_bool replace_underscores);
+godot_string GDAPI godot_string_capitalize(const godot_string *p_self);
 double GDAPI godot_string_char_to_double(const char *p_what);
 godot_int GDAPI godot_string_char_to_int(const char *p_what);
 int64_t GDAPI godot_string_wchar_to_int(const wchar_t *p_str);
