@@ -121,7 +121,7 @@ bool SpriteBase::is_flipped_v() const {
 }
 
 // set the flipped mode without updating
-void SpriteBase::queue_set_flipped(bool p_flip_h = -1, bool p_flip_v = -1) {
+void SpriteBase::queue_set_flipped(int p_flip_h = -1, int p_flip_v = -1) {
 	if (p_flip_h == -1) {
 		p_flip_h = hflip;
 	}
@@ -129,8 +129,8 @@ void SpriteBase::queue_set_flipped(bool p_flip_h = -1, bool p_flip_v = -1) {
 		p_flip_v = vflip;
 	}
 
-	hflip = p_flip_h;
-	vflip = p_flip_v;
+	hflip = bool(p_flip_h);
+	vflip = bool(p_flip_v);
 }
 
 bool SpriteBase::is_pixel_opaque(const Point2 &p_point) const {
