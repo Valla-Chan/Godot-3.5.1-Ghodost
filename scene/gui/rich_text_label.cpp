@@ -2899,6 +2899,11 @@ int RichTextLabel::get_content_height() const {
 	return total_height;
 }
 
+void RichTextLabel::_update_font_scale() {
+	_notification(NOTIFICATION_THEME_CHANGED);
+	_notification(NOTIFICATION_RESIZED);
+}
+
 void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_align", "align"), &RichTextLabel::set_align);
 	ClassDB::bind_method(D_METHOD("get_align"), &RichTextLabel::get_align);

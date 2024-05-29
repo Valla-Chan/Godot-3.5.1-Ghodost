@@ -63,6 +63,11 @@ int Label::get_line_height() const {
 	return get_font_scaled("font")->get_height();
 }
 
+void Label::_update_font_scale() {
+	_notification(NOTIFICATION_THEME_CHANGED);
+	_notification(NOTIFICATION_RESIZED);
+}
+
 void Label::_notification(int p_what) {
 	if (p_what == NOTIFICATION_TRANSLATION_CHANGED) {
 		String new_text = tr(text);

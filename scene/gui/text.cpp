@@ -51,10 +51,7 @@ void TextBase::set_font_size_override(int p_size) {
 	}
 	font_size_override = p_size;
 
-	//minimum_size_changed();
-	//set_size(get_size());
-	_notification(NOTIFICATION_THEME_CHANGED);
-	_notification(NOTIFICATION_RESIZED);
+	_update_font_scale();
 }
 
 void TextBase::set_font_scale(float p_scale) {
@@ -66,10 +63,7 @@ void TextBase::set_font_scale(float p_scale) {
 	}
 	font_scale = p_scale;
 
-	//minimum_size_changed();
-	//set_size(get_size());
-	_notification(NOTIFICATION_THEME_CHANGED);
-	_notification(NOTIFICATION_RESIZED);
+	_update_font_scale();
 }
 
 int TextBase::get_font_size_override() const {
@@ -101,6 +95,10 @@ Ref<Font> TextBase::get_font_scaled(const String &p_font = "font") const {
 	return font;
 }
 
+void TextBase::_update_font_scale() {
+	_notification(NOTIFICATION_THEME_CHANGED);
+	_notification(NOTIFICATION_RESIZED);
+}
 
 void TextBase::_bind_methods() {
 

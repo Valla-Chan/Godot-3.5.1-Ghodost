@@ -85,6 +85,7 @@ private:
 
 protected:
 	void _notification(int p_what);
+	void _update_font_scale();
 
 	static void _bind_methods();
 	// bind helpers

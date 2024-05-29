@@ -80,6 +80,7 @@ public:
 	};
 
 protected:
+	void _update_font_scale();
 	static void _bind_methods();
 
 private:

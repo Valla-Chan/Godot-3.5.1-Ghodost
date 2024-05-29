@@ -561,6 +561,7 @@ protected:
 	void _remove_text(int p_from_line, int p_from_column, int p_to_line, int p_to_column);
 	void _insert_text_at_cursor(const String &p_text);
 	void _gui_input(const Ref<InputEvent> &p_gui_input);
+	void _update_font_scale();
 	void _notification(int p_what);
 
 	void _consume_pair_symbol(CharType ch);

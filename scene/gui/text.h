@@ -55,6 +55,7 @@ public:
 protected:
 	mutable Map<String,Ref<Font>> font_scaled_cache;
 	static void _bind_methods();
+	virtual void _update_font_scale();
 
 public:
 	int font_size_override = 0;

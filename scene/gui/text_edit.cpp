@@ -615,6 +615,11 @@ void TextEdit::_update_minimap_drag() {
 	v_scroll->set_as_ratio(minimap_scroll_ratio + diff);
 }
 
+void TextEdit::_update_font_scale() {
+	_notification(NOTIFICATION_THEME_CHANGED);
+	_notification(NOTIFICATION_RESIZED);
+}
+
 void TextEdit::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE: {
@@ -5420,7 +5425,7 @@ void TextEdit::_update_caches() {
 	cache.completion_selected_color = get_color("completion_selected_color");
 	cache.completion_existing_color = get_color("completion_existing_color");
 	cache.completion_font_color = get_color("completion_font_color");
-	cache.font = get_font("font");
+	cache.font = get_font_scaled("font");
 	cache.caret_color = get_color("caret_color");
 	cache.caret_background_color = get_color("caret_background_color");
 	cache.line_number_color = get_color("line_number_color");
