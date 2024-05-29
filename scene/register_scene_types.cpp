@@ -43,6 +43,7 @@
 #include "scene/2d/collider_2d.h"
 #include "scene/2d/collision_polygon_2d.h"
 #include "scene/2d/collision_shape_2d.h"
+#include "scene/2d/draw_shape_2d.h"
 #include "scene/2d/cpu_particles_2d.h"
 #include "scene/2d/joints_2d.h"
 #include "scene/2d/light_2d.h"
@@ -614,6 +615,7 @@ void register_scene_types() {
 	ClassDB::register_class<KinematicBody2D>();
 	ClassDB::register_class<KinematicCollision2D>();
 	ClassDB::register_class<Area2D>();
+	ClassDB::register_class<DrawShape2D>();
 	ClassDB::register_class<CollisionShape2D>();
 	ClassDB::register_class<CollisionPolygon2D>();
 	ClassDB::register_class<RayCast2D>();

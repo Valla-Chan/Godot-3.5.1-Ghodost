@@ -116,6 +116,8 @@ void Collider2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_override_color"), &Collider2D::get_override_color);
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "disabled"), "set_disabled", "is_disabled");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_override_color"), "set_use_override_color", "get_use_override_color");
+	ADD_PROPERTY(PropertyInfo(Variant::COLOR, "override_color"), "set_override_color", "get_override_color");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "one_way_collision"), "set_one_way_collision", "is_one_way_collision_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "one_way_collision_margin", PROPERTY_HINT_RANGE, "0,128,0.1"), "set_one_way_collision_margin", "get_one_way_collision_margin");
 }

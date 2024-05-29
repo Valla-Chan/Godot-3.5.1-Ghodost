@@ -37,6 +37,7 @@
 #include "editor/editor_plugin.h"
 
 #include "scene/2d/collision_shape_2d.h"
+#include "scene/2d/draw_shape_2d.h"
 
 class CanvasItemEditor;
 
@@ -68,7 +69,10 @@ class CollisionShape2DEditor : public Control {
 	EditorNode *editor;
 	UndoRedo *undo_redo;
 	CanvasItemEditor *canvas_item_editor;
-	CollisionShape2D *node;
+
+	Node2D *node;
+	CollisionShape2D *node_collisionshape;
+	DrawShape2D *node_drawshape;
 
 	Vector<Point2> handles;
 
