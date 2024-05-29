@@ -373,6 +373,34 @@ public:
 	DEFAULT_PROJECT_RANGE_CAST
 };
 
+class RoundedRectShape2DSW : public Shape2DSW {
+	Vector2 extents;
+	real_t corner_radius;
+
+public:
+	_FORCE_INLINE_ const Vector2 &get_extents() const { return extents; }
+	_FORCE_INLINE_ const real_t &get_corner_radius() const { return corner_radius; }
+
+	virtual Physics2DServer::ShapeType get_type() const { return Physics2DServer::SHAPE_ROUND_RECTANGLE; }
+
+	virtual void project_rangev(const Vector2 &p_normal, const Transform2D &p_transform, real_t &r_min, real_t &r_max) const { project_range(p_normal, p_transform, r_min, r_max); }
+	virtual void get_supports(const Vector2 &p_normal, Vector2 *r_supports, int &r_amount) const;
+
+	virtual bool contains_point(const Vector2 &p_point) const;
+	virtual bool intersect_segment(const Vector2 &p_begin, const Vector2 &p_end, Vector2 &r_point, Vector2 &r_normal) const;
+	virtual real_t get_moment_of_inertia(real_t p_mass, const Size2 &p_scale) const;
+
+	virtual void set_data(const Variant &p_data);
+	virtual Variant get_data() const;
+
+	_FORCE_INLINE_ void project_range(const Vector2 &p_normal, const Transform2D &p_transform, real_t &r_min, real_t &r_max) const {
+		// Calculate projection range for rounded rectangle
+		// Implementation of project_range logic here
+	}
+
+	DEFAULT_PROJECT_RANGE_CAST
+};
+
 class CapsuleShape2DSW : public Shape2DSW {
 	real_t radius;
 	real_t height;

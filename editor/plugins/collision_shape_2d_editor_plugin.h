@@ -51,6 +51,7 @@ class CollisionShape2DEditor : public Control {
 		LINE_SHAPE,
 		RAY_SHAPE,
 		RECTANGLE_SHAPE,
+		ROUND_RECTANGLE_SHAPE,
 		SEGMENT_SHAPE
 	};
 

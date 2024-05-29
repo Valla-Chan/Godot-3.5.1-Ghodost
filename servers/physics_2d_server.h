@@ -220,8 +220,9 @@ public:
 		SHAPE_RAY, ///< float:"length"
 		SHAPE_SEGMENT, ///< float:"length"
 		SHAPE_CIRCLE, ///< float:"radius"
-		SHAPE_RECTANGLE, ///< vec3:"extents"
-		SHAPE_CAPSULE,
+		SHAPE_RECTANGLE, ///< vec2:"extents"
+		SHAPE_ROUND_RECTANGLE, ///DICT: {< vec2:"extents" , <float:"radius"}
+		SHAPE_CAPSULE, ///< vec2:("radius", "height")
 		SHAPE_CONVEX_POLYGON, ///< array of planes:"planes"
 		SHAPE_CONCAVE_POLYGON, ///< Vector2 array:"triangles" , or Dictionary with "indices" (int array) and "triangles" (Vector2 array)
 		SHAPE_CUSTOM, ///< Server-Implementation based custom shape, calling shape_create() with this value will result in an error
@@ -232,6 +233,7 @@ public:
 	virtual RID segment_shape_create() = 0;
 	virtual RID circle_shape_create() = 0;
 	virtual RID rectangle_shape_create() = 0;
+	virtual RID rounded_rect_shape_create() = 0;
 	virtual RID capsule_shape_create() = 0;
 	virtual RID convex_polygon_shape_create() = 0;
 	virtual RID concave_polygon_shape_create() = 0;

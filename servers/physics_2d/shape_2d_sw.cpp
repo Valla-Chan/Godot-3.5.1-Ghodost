@@ -370,6 +370,109 @@ Variant RectangleShape2DSW::get_data() const {
 /*********************************************************/
 /*********************************************************/
 
+
+void RoundedRectShape2DSW::get_supports(const Vector2 &p_normal, Vector2 *r_supports, int &r_amount) const {
+	r_amount = 0;
+	float width = get_extents().x * 2;
+	float height = get_extents().y * 2;
+	float radius = get_corner_radius();
+	Vector2 half_extents = get_extents();
+
+	for (int i = 0; i < 2; i++) {
+		Vector2 ag;
+		ag[i] = 1.0;
+		real_t dp = ag.dot(p_normal);
+		if (Math::abs(dp) < _SEGMENT_IS_VALID_SUPPORT_THRESHOLD) {
+			continue;
+		}
+
+		real_t sgn = dp > 0 ? 1.0 : -1.0;
+
+		r_amount = 2;
+
+		r_supports[0][i] = half_extents[i] * sgn;
+		r_supports[0][i ^ 1] = half_extents[i ^ 1] - radius;
+
+		r_supports[1][i] = half_extents[i] * sgn;
+		r_supports[1][i ^ 1] = -(half_extents[i ^ 1] - radius);
+
+		return;
+	}
+
+	// Use corner points
+	r_amount = 4;
+	r_supports[0] = Vector2(-half_extents.x + radius, half_extents.y - radius);
+	r_supports[1] = Vector2(half_extents.x - radius, half_extents.y - radius);
+	r_supports[2] = Vector2(half_extents.x - radius, -half_extents.y + radius);
+	r_supports[3] = Vector2(-half_extents.x + radius, -half_extents.y + radius);
+}
+
+bool RoundedRectShape2DSW::contains_point(const Vector2 &p_point) const {
+	float x = p_point.x;
+	float y = p_point.y;
+	float width = get_extents().x * 2;
+	float height = get_extents().y * 2;
+	float radius = get_corner_radius();
+
+	// Check central rectangle area
+	if (x >= -width / 2 + radius && x <= width / 2 - radius && y >= -height / 2 + radius && y <= height / 2 - radius) {
+		return true;
+	}
+
+	// Check corners
+	if (Vector2(x + width / 2 - radius, y + height / 2 - radius).length_squared() <= radius * radius)
+		return true;
+	if (Vector2(x - width / 2 + radius, y + height / 2 - radius).length_squared() <= radius * radius)
+		return true;
+	if (Vector2(x - width / 2 + radius, y - height / 2 + radius).length_squared() <= radius * radius)
+		return true;
+	if (Vector2(x + width / 2 - radius, y - height / 2 + radius).length_squared() <= radius * radius)
+		return true;
+
+	return false;
+}
+
+bool RoundedRectShape2DSW::intersect_segment(const Vector2 &p_begin, const Vector2 &p_end, Vector2 &r_point, Vector2 &r_normal) const {
+	// Use AABB intersection for a rough check
+	if (!get_aabb().intersects_segment(p_begin, p_end, &r_point, &r_normal)) {
+		return false;
+	}
+
+	// Check detailed intersections
+	// TODO: Implement detailed intersection logic for rounded rectangle
+
+	return false; // Placeholder, needs detailed implementation
+}
+
+real_t RoundedRectShape2DSW::get_moment_of_inertia(real_t p_mass, const Size2 &p_scale) const {
+	Vector2 he2 = get_extents() * 2 * p_scale;
+	return p_mass * he2.dot(he2) / 12.0;
+}
+
+void RoundedRectShape2DSW::set_data(const Variant &p_data) {
+	ERR_FAIL_COND(p_data.get_type() != Variant::DICTIONARY);
+
+	Dictionary dict = p_data;
+	ERR_FAIL_COND(!dict.has("extents"));
+	ERR_FAIL_COND(!dict.has("corner_radius"));
+
+	extents = dict["extents"];
+	corner_radius = dict["corner_radius"];
+
+	configure(Rect2(-extents, extents * 2.0)); // Assuming `configure` sets up the shape
+}
+
+Variant RoundedRectShape2DSW::get_data() const {
+	Dictionary dict;
+	dict["extents"] = extents;
+	dict["corner_radius"] = corner_radius;
+	return dict;
+}
+
+/*********************************************************/
+/*********************************************************/
+/*********************************************************/
+
 void CapsuleShape2DSW::get_supports(const Vector2 &p_normal, Vector2 *r_supports, int &r_amount) const {
 	Vector2 n = p_normal;
 
