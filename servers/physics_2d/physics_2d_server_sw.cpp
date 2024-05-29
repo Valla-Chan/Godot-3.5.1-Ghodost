@@ -58,9 +58,6 @@ RID Physics2DServerSW::_shape_create(ShapeType p_shape) {
 		case SHAPE_RECTANGLE: {
 			shape = memnew(RectangleShape2DSW);
 		} break;
-		case SHAPE_ROUND_RECTANGLE: {
-			shape = memnew(RoundedRectShape2DSW);
-		} break;
 		case SHAPE_CAPSULE: {
 			shape = memnew(CapsuleShape2DSW);
 		} break;
@@ -98,10 +95,6 @@ RID Physics2DServerSW::circle_shape_create() {
 RID Physics2DServerSW::rectangle_shape_create() {
 	return _shape_create(SHAPE_RECTANGLE);
 }
-RID Physics2DServerSW::rounded_rect_shape_create() {
-	return _shape_create(SHAPE_ROUND_RECTANGLE);
-}
-
 RID Physics2DServerSW::capsule_shape_create() {
 	return _shape_create(SHAPE_CAPSULE);
 }

@@ -37,7 +37,6 @@
 #include "scene/resources/convex_polygon_shape_2d.h"
 #include "scene/resources/line_shape_2d.h"
 #include "scene/resources/rectangle_shape_2d.h"
-#include "scene/resources/rounded_rect_shape_2d.h"
 #include "scene/resources/segment_shape_2d.h"
 
 void CollisionShape2DEditor::_node_removed(Node *p_node) {
@@ -202,18 +201,6 @@ void CollisionShape2DEditor::set_handle(int idx, Point2 &p_point) {
 
 		} break;
 
-		case ROUND_RECTANGLE_SHAPE: {
-			Ref<RoundedRectShape2D> round_rect = node->get_shape();
-
-			if (idx == 0) {
-				round_rect->set_extents(p_point.abs());
-			} else if (idx == 1) {
-				round_rect->set_corner_radius(p_point.length());
-			}
-
-			canvas_item_editor->update_viewport();
-		} break;
-
 		case SEGMENT_SHAPE: {
 			if (edit_handle < 2) {
 				Ref<SegmentShape2D> seg = node->get_shape();
@@ -308,22 +295,6 @@ void CollisionShape2DEditor::commit_handle(int idx, Variant &p_org) {
 			undo_redo->add_undo_method(node, "set_global_transform", original_transform);
 			undo_redo->add_undo_method(canvas_item_editor, "update_viewport");
 
-		} break;
-
-		case ROUND_RECTANGLE_SHAPE: {
-			Ref<RoundedRectShape2D> round_rect = node->get_shape();
-
-			if (idx == 0) {
-				undo_redo->add_do_method(round_rect.ptr(), "set_extents", round_rect->get_extents());
-				undo_redo->add_do_method(canvas_item_editor, "update_viewport");
-				undo_redo->add_undo_method(round_rect.ptr(), "set_extents", p_org);
-				undo_redo->add_undo_method(canvas_item_editor, "update_viewport");
-			} else if (idx == 1) {
-				undo_redo->add_do_method(round_rect.ptr(), "set_corner_radius", round_rect->get_corner_radius());
-				undo_redo->add_do_method(canvas_item_editor, "update_viewport");
-				undo_redo->add_undo_method(round_rect.ptr(), "set_corner_radius", p_org);
-				undo_redo->add_undo_method(canvas_item_editor, "update_viewport");
-			}
 		} break;
 
 		case SEGMENT_SHAPE: {
@@ -463,8 +434,6 @@ void CollisionShape2DEditor::_get_current_shape_type() {
 		shape_type = RAY_SHAPE;
 	} else if (Object::cast_to<RectangleShape2D>(*s)) {
 		shape_type = RECTANGLE_SHAPE;
-	} else if (Object::cast_to<RoundedRectShape2D>(*s)) {
-		shape_type = ROUND_RECTANGLE_SHAPE;
 	} else if (Object::cast_to<SegmentShape2D>(*s)) {
 		shape_type = SEGMENT_SHAPE;
 	} else {
@@ -561,29 +530,6 @@ void CollisionShape2DEditor::forward_canvas_draw_over_viewport(Control *p_overla
 			Vector2 ext = shape->get_extents();
 			for (int i = 0; i < handles.size(); i++) {
 				handles.write[i] = RECT_HANDLES[i] * ext;
-				p_overlay->draw_texture(h, gt.xform(handles[i]) - size);
-			}
-		} break;
-
-		case ROUND_RECTANGLE_SHAPE: {
-			Ref<RoundedRectShape2D> shape = node->get_shape();
-
-			handles.resize(8);
-			Vector2 extents = shape->get_extents();
-			float radius = shape->get_corner_radius();
-
-			// Define the handle positions for the round rectangle
-			handles.write[0] = Point2(-extents.x, -extents.y + radius);
-			handles.write[1] = Point2(-extents.x, extents.y - radius);
-			handles.write[2] = Point2(extents.x, -extents.y + radius);
-			handles.write[3] = Point2(extents.x, extents.y - radius);
-
-			handles.write[4] = Point2(-extents.x + radius, -extents.y);
-			handles.write[5] = Point2(-extents.x + radius, extents.y);
-			handles.write[6] = Point2(extents.x - radius, -extents.y);
-			handles.write[7] = Point2(extents.x - radius, extents.y);
-
-			for (int i = 0; i < handles.size(); i++) {
 				p_overlay->draw_texture(h, gt.xform(handles[i]) - size);
 			}
 		} break;

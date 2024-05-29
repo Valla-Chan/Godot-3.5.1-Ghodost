@@ -88,7 +88,6 @@ public:
 	virtual RID segment_shape_create();
 	virtual RID circle_shape_create();
 	virtual RID rectangle_shape_create();
-	virtual RID rounded_rect_shape_create();
 	virtual RID capsule_shape_create();
 	virtual RID convex_polygon_shape_create();
 	virtual RID concave_polygon_shape_create();
