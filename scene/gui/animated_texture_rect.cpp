@@ -534,7 +534,7 @@ void AnimatedTextureRect::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "animation_locked"), "set_animation_locked", "is_animation_locked");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "frame"), "set_frame", "get_frame");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "speed_scale"), "set_speed_scale", "get_speed_scale");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "reversed"), "set_reversed", "is_reversed");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "reversed"), "set_reversed", "is_reversed");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "playing"), "set_playing", "is_playing");
 	//
 
