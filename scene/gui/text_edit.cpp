@@ -6012,6 +6012,10 @@ void TextEdit::_cursor_changed_emit() {
 void TextEdit::_text_changed_emit() {
 	emit_signal("text_changed");
 	text_changed_dirty = false;
+	if (expand_to_text_height) {
+		minimum_size_changed();
+		update();
+	}
 }
 
 void TextEdit::set_line_as_marked(int p_line, bool p_marked) {
