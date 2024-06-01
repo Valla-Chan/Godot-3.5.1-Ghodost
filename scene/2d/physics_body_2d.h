@@ -300,6 +300,7 @@ private:
 	bool on_ceiling;
 	bool on_wall;
 	bool sync_to_physics;
+	bool body_sliding;
 	MovingPlatformApplyVelocityOnLeave moving_platform_apply_velocity_on_leave = PLATFORM_VEL_ON_LEAVE_ALWAYS;
 
 	Vector<Collision> colliders;
@@ -339,6 +340,7 @@ public:
 	bool is_on_floor() const;
 	bool is_on_wall() const;
 	bool is_on_ceiling() const;
+	bool is_sliding() const;
 	Vector2 get_floor_normal() const;
 	real_t get_floor_angle(const Vector2 &p_up_direction = Vector2(0.0, -1.0)) const;
 	Vector2 get_floor_velocity() const;

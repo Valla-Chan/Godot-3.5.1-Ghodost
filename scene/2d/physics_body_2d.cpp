@@ -1162,6 +1162,7 @@ Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_veloci
 	on_floor_body = RID();
 	Vector2 motion = body_velocity * delta;
 
+	bool is_sliding_current = false;
 	// No sliding on first attempt to keep floor motion stable when possible,
 	// when stop on slope is enabled.
 	bool sliding_enabled = !p_stop_on_slope;
@@ -1207,6 +1208,7 @@ Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_veloci
 				if (sliding_enabled || !on_floor) {
 					// body has begun sliding
 					//emit_signal("body_began_sliding");
+					is_sliding_current = true;
 					motion = collision.remainder.slide(collision.normal);
 					body_velocity = body_velocity.slide(collision.normal);
 				} else {
@@ -1256,6 +1258,7 @@ Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_veloci
 		}
 	}
 
+	body_sliding = is_sliding_current;
 	if (moving_platform_apply_velocity_on_leave != PLATFORM_VEL_ON_LEAVE_NEVER) {
 		// Add last platform velocity when just left a moving platform.
 		if (!on_floor) {
@@ -1303,6 +1306,10 @@ bool KinematicBody2D::is_on_wall() const {
 }
 bool KinematicBody2D::is_on_ceiling() const {
 	return on_ceiling;
+}
+
+bool KinematicBody2D::is_sliding() const {
+	return body_sliding;
 }
 
 Vector2 KinematicBody2D::get_floor_normal() const {
@@ -1481,6 +1488,8 @@ void KinematicBody2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_floor_normal"), &KinematicBody2D::get_floor_normal);
 	ClassDB::bind_method(D_METHOD("get_floor_angle", "up_direction"), &KinematicBody2D::get_floor_angle, DEFVAL(Vector2(0.0, -1.0)));
 	ClassDB::bind_method(D_METHOD("get_floor_velocity"), &KinematicBody2D::get_floor_velocity);
+
+	ClassDB::bind_method(D_METHOD("is_sliding"), &KinematicBody2D::is_sliding);
 
 	ClassDB::bind_method(D_METHOD("set_safe_margin", "pixels"), &KinematicBody2D::set_safe_margin);
 	ClassDB::bind_method(D_METHOD("get_safe_margin"), &KinematicBody2D::get_safe_margin);
