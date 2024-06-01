@@ -4453,7 +4453,7 @@ Size2 TextEdit::get_minimum_size() const {
 		Size2 min_size;
 
 		min_size.width = cache.style_normal->get_minimum_size().x;
-		min_size.height = MAX(cache.style_normal->get_minimum_size().y, get_line_height() * get_total_visible_rows());
+		min_size.height = MAX(cache.style_normal->get_minimum_size().y, get_line_height() * get_total_visible_rows() + cache.line_spacing );
 
 		return min_size;
 	}
