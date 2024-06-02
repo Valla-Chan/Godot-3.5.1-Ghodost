@@ -523,6 +523,12 @@ void EditorPlugin::remove_control_from_container(CustomControlContainer p_locati
 	}
 }
 
+Vector2 EditorPlugin::get_grid_snapped_point(Vector2 p_point) const {
+	return CanvasItemEditor::get_singleton()->snap_point(p_point, CanvasItemEditor::SNAP_GRID | CanvasItemEditor::SNAP_PIXEL);
+}
+
+
+
 void EditorPlugin::add_tool_menu_item(const String &p_name, Object *p_handler, const String &p_callback, const Variant &p_ud) {
 	EditorNode::get_singleton()->add_tool_menu_item(p_name, p_handler, p_callback, p_ud);
 }
@@ -853,6 +859,8 @@ void EditorPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("remove_tool_menu_item", "name"), &EditorPlugin::remove_tool_menu_item);
 	ClassDB::bind_method(D_METHOD("add_custom_type", "type", "base", "script", "icon"), &EditorPlugin::add_custom_type);
 	ClassDB::bind_method(D_METHOD("remove_custom_type", "type"), &EditorPlugin::remove_custom_type);
+
+	ClassDB::bind_method(D_METHOD("get_grid_snapped_point", "point"), &EditorPlugin::get_grid_snapped_point, DEFVAL(Variant()));
 
 	ClassDB::bind_method(D_METHOD("add_autoload_singleton", "name", "path"), &EditorPlugin::add_autoload_singleton);
 	ClassDB::bind_method(D_METHOD("remove_autoload_singleton", "name"), &EditorPlugin::remove_autoload_singleton);
