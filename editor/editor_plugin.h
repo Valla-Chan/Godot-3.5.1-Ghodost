@@ -181,6 +181,8 @@ public:
 	void remove_control_from_bottom_panel(Control *p_control, bool p_reparent = true);
 
 	Vector2 get_grid_snapped_point(Vector2 p_point) const;
+	void set_snap_configuration(const Dictionary &configure_snap);
+	Dictionary get_snap_configuration();
 
 	void add_tool_menu_item(const String &p_name, Object *p_handler, const String &p_callback, const Variant &p_ud = Variant());
 	void add_tool_submenu_item(const String &p_name, Object *p_submenu);

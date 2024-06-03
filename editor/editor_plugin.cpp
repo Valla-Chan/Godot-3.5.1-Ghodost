@@ -523,10 +523,24 @@ void EditorPlugin::remove_control_from_container(CustomControlContainer p_locati
 	}
 }
 
-Vector2 EditorPlugin::get_grid_snapped_point(Vector2 p_point) const {
-	return CanvasItemEditor::get_singleton()->snap_point(p_point, CanvasItemEditor::SNAP_GRID | CanvasItemEditor::SNAP_PIXEL);
+//Vector2 EditorPlugin::get_grid_snapped_point(Vector2 p_point) const {
+//	return CanvasItemEditor::get_singleton()->snap_point(p_point, CanvasItemEditor::SNAP_GRID | CanvasItemEditor::SNAP_PIXEL);
+//}
+
+// Accessing Configure Snap
+void EditorPlugin::set_snap_configuration(const Dictionary &configure_snap) {
+	CanvasItemEditor::get_singleton()->set_state(configure_snap);
 }
 
+Dictionary EditorPlugin::get_snap_configuration() {
+	Dictionary item_state = CanvasItemEditor::get_singleton()->get_state();
+	String snap_settings[]{ "grid_offset", "grid_step", "primary_grid_steps", "snap_rotation_offset", "snap_rotation_step", "snap_scale_step" };
+	Dictionary configure_snap;
+	for (String key : snap_settings) {
+		configure_snap[key] = item_state[key];
+	}
+	return configure_snap;
+}
 
 
 void EditorPlugin::add_tool_menu_item(const String &p_name, Object *p_handler, const String &p_callback, const Variant &p_ud) {
@@ -860,7 +874,9 @@ void EditorPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("add_custom_type", "type", "base", "script", "icon"), &EditorPlugin::add_custom_type);
 	ClassDB::bind_method(D_METHOD("remove_custom_type", "type"), &EditorPlugin::remove_custom_type);
 
-	ClassDB::bind_method(D_METHOD("get_grid_snapped_point", "point"), &EditorPlugin::get_grid_snapped_point, DEFVAL(Variant()));
+	//ClassDB::bind_method(D_METHOD("get_grid_snapped_point", "point"), &EditorPlugin::get_grid_snapped_point, DEFVAL(Variant()));
+	ClassDB::bind_method(D_METHOD("set_snap_configuration", "configure_snap"), &EditorPlugin::set_snap_configuration);
+	ClassDB::bind_method(D_METHOD("get_snap_configuration"), &EditorPlugin::get_snap_configuration);
 
 	ClassDB::bind_method(D_METHOD("add_autoload_singleton", "name", "path"), &EditorPlugin::add_autoload_singleton);
 	ClassDB::bind_method(D_METHOD("remove_autoload_singleton", "name"), &EditorPlugin::remove_autoload_singleton);
