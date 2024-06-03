@@ -729,6 +729,10 @@ public:
 		return false;
 	}
 
+	static inline bool is_point_in_circle(const Vector2 &p_point, const Vector2 &p_circle_pos, real_t p_circle_radius) {
+		return p_point.distance_squared_to(p_circle_pos) <= p_circle_radius * p_circle_radius;
+	}
+
 	static real_t segment_intersects_circle(const Vector2 &p_from, const Vector2 &p_to, const Vector2 &p_circle_pos, real_t p_circle_radius) {
 		Vector2 line_vec = p_to - p_from;
 		Vector2 vec_to_line = p_from - p_circle_pos;
@@ -926,14 +930,6 @@ public:
 		return sum > 0.0f;
 	}
 
-	static inline bool is_point_in_circle(const Vector2 &p_point, const Vector2 &p_circle_pos, real_t p_circle_radius) {
-		return p_point.distance_squared_to(p_circle_pos) <= p_circle_radius * p_circle_radius;
-	}
-
-	static inline bool is_point_on_circle_edge(const Vector2 &p_point, const Vector2 &p_circle_pos, real_t p_circle_radius) {
-		return p_point.distance_squared_to(p_circle_pos) == p_circle_radius * p_circle_radius;
-	}
-
 	// Alternate implementation that should be faster.
 	static bool is_point_in_polygon(const Vector2 &p_point, const Vector<Vector2> &p_polygon) {
 		int c = p_polygon.size();
@@ -964,51 +960,6 @@ public:
 		}
 
 		return (intersections & 1);
-	}
-
-	static bool is_point_on_polygon_edge(const Vector2 &p_point, const Vector<Vector2> &p_polygon, float tolerance = 1e-2) {
-		int c = p_polygon.size();
-		if (c < 3) {
-			return false;
-		}
-		const Vector2 *p = p_polygon.ptr();
-
-		for (int i = 0; i < c; i++) {
-			const Vector2 &v1 = p[i];
-			const Vector2 &v2 = p[(i + 1) % c];
-			if (point_on_segment_2d(p_point, v1, v2, tolerance)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	// Helper function to check if a point is on or near a line segment
-	static bool point_on_segment_2d(const Vector2 &p, const Vector2 &v1, const Vector2 &v2, float tolerance) {
-		// Check if p is within the bounding box of the segment with tolerance
-		if (p.x < MIN(v1.x, v2.x) - tolerance || p.x > MAX(v1.x, v2.x) + tolerance ||
-				p.y < MIN(v1.y, v2.y) - tolerance || p.y > MAX(v1.y, v2.y) + tolerance) {
-			return false;
-		}
-
-		// Check if the point lies approximately on the line formed by v1 and v2
-		Vector2 v1_to_p = p - v1;
-		Vector2 v1_to_v2 = v2 - v1;
-		float cross_product = v1_to_p.x * v1_to_v2.y - v1_to_p.y * v1_to_v2.x;
-
-		// A small cross product within the tolerance means the point is near the line
-		if (abs(cross_product) > tolerance) {
-			return false;
-		}
-
-		// Check if the point is within the segment bounds (already done above, so this is redundant but ensures clarity)
-		float dot_product = v1_to_p.dot(v1_to_v2);
-		if (dot_product < 0 || dot_product > v1_to_v2.length_squared()) {
-			return false;
-		}
-
-		return true;
 	}
 
 	static PoolVector<PoolVector<Face3>> separate_objects(PoolVector<Face3> p_array);

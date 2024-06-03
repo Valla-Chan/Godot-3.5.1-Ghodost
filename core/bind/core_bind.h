@@ -444,14 +444,12 @@ public:
 	PoolVector<Vector3> segment_intersects_sphere(const Vector3 &p_from, const Vector3 &p_to, const Vector3 &p_sphere_pos, real_t p_sphere_radius);
 	PoolVector<Vector3> segment_intersects_cylinder(const Vector3 &p_from, const Vector3 &p_to, float p_height, float p_radius);
 	PoolVector<Vector3> segment_intersects_convex(const Vector3 &p_from, const Vector3 &p_to, const Vector<Plane> &p_planes);
+	bool is_point_in_circle(const Vector2 &p_point, const Vector2 &p_circle_pos, real_t p_circle_radius);
 	real_t segment_intersects_circle(const Vector2 &p_from, const Vector2 &p_to, const Vector2 &p_circle_pos, real_t p_circle_radius);
 	int get_uv84_normal_bit(const Vector3 &p_vector);
 
 	bool is_polygon_clockwise(const Vector<Vector2> &p_polygon);
-	bool is_point_in_circle(const Vector2 &p_point, const Vector2 &p_circle_pos, real_t p_circle_radius);
-	bool is_point_on_circle_edge(const Vector2 &p_point, const Vector2 &p_circle_pos, real_t p_circle_radius);
 	bool is_point_in_polygon(const Point2 &p_point, const Vector<Vector2> &p_polygon);
-	bool is_point_on_polygon_edge(const Point2 &p_point, const Vector<Vector2> &p_polygon);
 	Vector<int> triangulate_polygon(const Vector<Vector2> &p_polygon);
 	Vector<int> triangulate_delaunay_2d(const Vector<Vector2> &p_points);
 	Vector<Point2> convex_hull_2d(const Vector<Point2> &p_points);
