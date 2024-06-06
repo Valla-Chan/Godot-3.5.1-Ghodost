@@ -156,7 +156,7 @@ Ref<Texture> Sprite::get_texture() const {
 }
 
 Ref<Texture> Sprite::get_current_texture() const {
-	if (use_normal_as_texture) {
+	if (use_normal_as_texture && normal_map.is_valid()) {
 		return normal_map;
 	} else {
 		return texture;
