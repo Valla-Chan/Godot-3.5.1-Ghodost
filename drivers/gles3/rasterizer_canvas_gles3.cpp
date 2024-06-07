@@ -336,7 +336,18 @@ void RasterizerCanvasGLES3::_legacy_canvas_render_item(Item *p_ci, RenderItemSta
 		state.canvas_item_modulate = p_ci->final_modulate; // remove the canvas modulate
 
 		while (light) {
-			if (p_ci->light_mask & light->item_mask && r_ris.item_group_z >= light->z_min && r_ris.item_group_z <= light->z_max && p_ci->global_rect_cache.intersects_transformed(light->xform_cache, light->rect_cache)) {
+			if (r_ris.item_group_z >= light->z_min && r_ris.item_group_z <= light->z_max && p_ci->global_rect_cache.intersects_transformed(light->xform_cache, light->rect_cache)) {
+				if (light->object_mask.is_valid()) {
+					RID_Owner<Item> canvas_item_owner;
+					//VALLA EDITS: check if light is limited to single object.
+					if (canvas_item_owner.make_rid(p_ci) != light->object_mask)
+						continue;
+				}
+
+				if (!(p_ci->light_mask & light->item_mask))
+					continue;
+				
+
 				//intersects this light
 
 				if (!light_used || mode != light->mode) {

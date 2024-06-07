@@ -1075,6 +1075,12 @@ void VisualServerCanvas::canvas_light_set_item_cull_mask(RID p_light, int p_mask
 
 	clight->item_mask = p_mask;
 }
+void VisualServerCanvas::canvas_light_set_object_cull_mask(RID p_light, RID p_object) {
+	RasterizerCanvas::Light *clight = canvas_light_owner.get(p_light);
+	ERR_FAIL_COND(!clight);
+
+	clight->object_mask = p_object;
+}
 void VisualServerCanvas::canvas_light_set_item_shadow_cull_mask(RID p_light, int p_mask) {
 	RasterizerCanvas::Light *clight = canvas_light_owner.get(p_light);
 	ERR_FAIL_COND(!clight);

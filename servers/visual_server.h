@@ -1068,6 +1068,7 @@ public:
 	virtual void canvas_light_set_z_range(RID p_light, int p_min_z, int p_max_z) = 0;
 	virtual void canvas_light_set_layer_range(RID p_light, int p_min_layer, int p_max_layer) = 0;
 	virtual void canvas_light_set_item_cull_mask(RID p_light, int p_mask) = 0;
+	virtual void canvas_light_set_object_cull_mask(RID p_light, RID p_object) = 0;
 	virtual void canvas_light_set_item_shadow_cull_mask(RID p_light, int p_mask) = 0;
 
 	enum CanvasLightMode {

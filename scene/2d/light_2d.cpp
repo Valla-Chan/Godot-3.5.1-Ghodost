@@ -235,6 +235,24 @@ int Light2D::get_item_cull_mask() const {
 	return item_mask;
 }
 
+
+void Light2D::set_object_cull_mask_path(NodePath p_path) {
+	object_mask_path = p_path;
+	Node *object = get_node(p_path);
+	if (object) {
+		object_mask = object;
+	} else {
+		object_mask = nullptr;
+	}
+	RID_Owner<Object> node_owner;
+	VS::get_singleton()->canvas_light_set_object_cull_mask(canvas_light, node_owner.make_rid(object_mask));
+}
+
+NodePath Light2D::get_object_cull_mask_path() const {
+	return object_mask->get_path();
+}
+
+
 void Light2D::set_item_shadow_cull_mask(int p_mask) {
 	item_shadow_mask = p_mask;
 	VS::get_singleton()->canvas_light_set_item_shadow_cull_mask(canvas_light, item_shadow_mask);
@@ -377,6 +395,9 @@ void Light2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_item_cull_mask", "item_cull_mask"), &Light2D::set_item_cull_mask);
 	ClassDB::bind_method(D_METHOD("get_item_cull_mask"), &Light2D::get_item_cull_mask);
 
+	ClassDB::bind_method(D_METHOD("set_object_cull_mask_path", "object_cull_mask"), &Light2D::set_object_cull_mask_path);
+	ClassDB::bind_method(D_METHOD("get_object_cull_mask_path"), &Light2D::get_object_cull_mask_path);
+
 	ClassDB::bind_method(D_METHOD("set_item_shadow_cull_mask", "item_shadow_cull_mask"), &Light2D::set_item_shadow_cull_mask);
 	ClassDB::bind_method(D_METHOD("get_item_shadow_cull_mask"), &Light2D::get_item_shadow_cull_mask);
 
@@ -416,6 +437,7 @@ void Light2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "range_layer_min", PROPERTY_HINT_RANGE, "-512,512,1"), "set_layer_range_min", "get_layer_range_min");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "range_layer_max", PROPERTY_HINT_RANGE, "-512,512,1"), "set_layer_range_max", "get_layer_range_max");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "range_item_cull_mask", PROPERTY_HINT_LAYERS_2D_RENDER), "set_item_cull_mask", "get_item_cull_mask");
+	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "range_object_cull_mask_path"), "set_object_cull_mask_path", "get_object_cull_mask_path");
 
 	ADD_GROUP("Shadow", "shadow_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "shadow_enabled"), "set_shadow_enabled", "is_shadow_enabled");

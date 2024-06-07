@@ -641,6 +641,7 @@ public:
 	FUNC3(canvas_light_set_z_range, RID, int, int)
 	FUNC3(canvas_light_set_layer_range, RID, int, int)
 	FUNC2(canvas_light_set_item_cull_mask, RID, int)
+	FUNC2(canvas_light_set_object_cull_mask, RID, RID)
 	FUNC2(canvas_light_set_item_shadow_cull_mask, RID, int)
 
 	FUNC2(canvas_light_set_mode, RID, CanvasLightMode)

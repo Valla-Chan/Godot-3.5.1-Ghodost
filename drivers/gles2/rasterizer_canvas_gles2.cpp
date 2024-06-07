@@ -1480,7 +1480,16 @@ bool RasterizerCanvasGLES2::try_join_item(Item *p_ci, RenderItemState &r_ris, bo
 				uint64_t light_bit = 1ULL << light_count;
 
 				// note that as a cost of batching, the light culling will be less effective
-				if (p_ci->light_mask & light->item_mask && r_ris.item_group_z >= light->z_min && r_ris.item_group_z <= light->z_max) {
+				if (r_ris.item_group_z >= light->z_min && r_ris.item_group_z <= light->z_max) {
+					if (light->object_mask.is_valid()) {
+						RID_Owner<Item> canvas_item_owner;
+						//VALLA EDITS: check if light is limited to single object.
+						if (canvas_item_owner.make_rid(p_ci) != light->object_mask)
+							continue;
+					}
+
+					if (!(p_ci->light_mask & light->item_mask))
+						continue;
 					// Note that with the above test, it is possible to also include a bound check.
 					// Tests so far have indicated better performance without it, but there may be reason to change this at a later stage,
 					// so I leave the line here for reference:
