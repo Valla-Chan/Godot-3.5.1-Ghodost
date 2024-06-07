@@ -2207,7 +2207,6 @@ void VisualServer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("canvas_light_set_z_range", "light", "min_z", "max_z"), &VisualServer::canvas_light_set_z_range);
 	ClassDB::bind_method(D_METHOD("canvas_light_set_layer_range", "light", "min_layer", "max_layer"), &VisualServer::canvas_light_set_layer_range);
 	ClassDB::bind_method(D_METHOD("canvas_light_set_item_cull_mask", "light", "mask"), &VisualServer::canvas_light_set_item_cull_mask);
-	ClassDB::bind_method(D_METHOD("canvas_light_set_object_cull_mask", "light", "object"), &VisualServer::canvas_light_set_object_cull_mask);
 	ClassDB::bind_method(D_METHOD("canvas_light_set_item_shadow_cull_mask", "light", "mask"), &VisualServer::canvas_light_set_item_shadow_cull_mask);
 	ClassDB::bind_method(D_METHOD("canvas_light_set_mode", "light", "mode"), &VisualServer::canvas_light_set_mode);
 	ClassDB::bind_method(D_METHOD("canvas_light_set_shadow_enabled", "light", "enabled"), &VisualServer::canvas_light_set_shadow_enabled);

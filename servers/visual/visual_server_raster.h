@@ -739,7 +739,6 @@ public:
 	BIND3(canvas_light_set_z_range, RID, int, int)
 	BIND3(canvas_light_set_layer_range, RID, int, int)
 	BIND2(canvas_light_set_item_cull_mask, RID, int)
-	BIND2(canvas_light_set_object_cull_mask, RID, RID)
 	BIND2(canvas_light_set_item_shadow_cull_mask, RID, int)
 
 	BIND2(canvas_light_set_mode, RID, CanvasLightMode)

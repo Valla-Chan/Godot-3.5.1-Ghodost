@@ -734,7 +734,6 @@ public:
 		int z_max;
 		int layer_min;
 		int layer_max;
-		RID object_mask;
 		int item_mask;
 		int item_shadow_mask;
 		VS::CanvasLightMode mode;

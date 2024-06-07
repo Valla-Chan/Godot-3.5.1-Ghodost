@@ -67,8 +67,6 @@ private:
 	int z_max;
 	int layer_min;
 	int layer_max;
-	NodePath object_mask_path; // Valla edits: limit to single object
-	Node *object_mask; // Valla edits: limit to single object
 	int item_mask;
 	int item_shadow_mask;
 	int shadow_buffer_size;
@@ -139,10 +137,6 @@ public:
 
 	void set_item_cull_mask(int p_mask);
 	int get_item_cull_mask() const;
-
-	// VALLA EDITS: allow culling only 1 node
-	void set_object_cull_mask_path(NodePath p_object);
-	NodePath get_object_cull_mask_path() const;
 
 	void set_item_shadow_cull_mask(int p_mask);
 	int get_item_shadow_cull_mask() const;

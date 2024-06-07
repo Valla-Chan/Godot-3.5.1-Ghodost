@@ -229,7 +229,6 @@ public:
 	void canvas_light_set_z_range(RID p_light, int p_min_z, int p_max_z);
 	void canvas_light_set_layer_range(RID p_light, int p_min_layer, int p_max_layer);
 	void canvas_light_set_item_cull_mask(RID p_light, int p_mask);
-	void canvas_light_set_object_cull_mask(RID p_light, RID p_object);
 	void canvas_light_set_item_shadow_cull_mask(RID p_light, int p_mask);
 
 	void canvas_light_set_mode(RID p_light, VS::CanvasLightMode p_mode);
