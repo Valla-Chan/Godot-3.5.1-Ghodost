@@ -261,7 +261,7 @@ private:
 	bool show_viewport;
 	bool show_helpers;
 	bool show_edit_locks;
-	bool show_colliders;
+	bool show_colliders = true;
 	float zoom;
 	Point2 view_offset;
 	Point2 previous_update_view_offset;

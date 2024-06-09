@@ -4248,6 +4248,7 @@ void CanvasItemEditor::_update_all_of_class(Node *p_node, Vector<StringName> p_c
 	}
 }
 
+// TODO: why is this having errors now??
 bool CanvasItemEditor::get_show_colliders() const {
 	return show_colliders;
 }
