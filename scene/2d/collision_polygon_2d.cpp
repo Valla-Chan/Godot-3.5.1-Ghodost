@@ -129,7 +129,7 @@ void CollisionPolygon2D::_notification(int p_what) {
 			}
 
 #ifdef TOOLS_ENABLED
-			if (!CanvasItemEditor::get_singleton()->get_show_colliders()) {
+			if (Engine::get_singleton()->is_editor_hint() && !CanvasItemEditor::get_singleton()->get_show_colliders()) {
 				break;
 			}
 #endif
@@ -237,7 +237,7 @@ bool CollisionPolygon2D::_edit_use_rect() const {
 }
 
 bool CollisionPolygon2D::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
-	if (!CanvasItemEditor::get_singleton()->get_show_colliders()) {
+	if (Engine::get_singleton()->is_editor_hint() && !CanvasItemEditor::get_singleton()->get_show_colliders()) {
 		return false;
 	}
 

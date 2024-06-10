@@ -94,7 +94,7 @@ Ref<Shape2D> DrawShape2D::get_shape() const {
 
 bool DrawShape2D::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
 #ifdef TOOLS_ENABLED
-	if (!CanvasItemEditor::get_singleton()->get_show_colliders()) {
+	if (Engine::get_singleton()->is_editor_hint() && !CanvasItemEditor::get_singleton()->get_show_colliders()) {
 		return false;
 	}
 #endif
