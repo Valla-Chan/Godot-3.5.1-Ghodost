@@ -68,6 +68,23 @@ void ItemList::add_icon_item(const Ref<Texture> &p_item, bool p_selectable) {
 	shape_changed = true;
 }
 
+void ItemList::add_empty_item() {
+	Item item;
+	item.icon_transposed = false;
+	item.icon_region = Rect2i();
+	item.icon_modulate = Color(1, 1, 1, 1);
+	item.text = "";
+	item.selectable = false;
+	item.selected = false;
+	item.disabled = true;
+	item.tooltip_enabled = false;
+	item.custom_bg = Color(0, 0, 0, 0);
+	items.push_back(item);
+
+	update();
+	shape_changed = true;
+}
+
 void ItemList::set_item_text(int p_idx, const String &p_text) {
 	ERR_FAIL_INDEX(p_idx, items.size());
 
@@ -374,6 +391,34 @@ void ItemList::set_max_columns(int p_amount) {
 int ItemList::get_max_columns() const {
 	return max_columns;
 }
+
+
+void ItemList::set_show_all_text_on_select(bool p_show_lines) {
+	show_all_text_on_select = p_show_lines;
+	update();
+}
+bool ItemList::get_show_all_text_on_select() const {
+	return show_all_text_on_select;
+}
+
+
+void ItemList::set_show_separators(bool p_show) {
+	show_separators = p_show;
+	update();
+}
+bool ItemList::get_show_separators() const {
+	return show_separators;
+}
+
+void ItemList::set_show_tooltips(bool p_show) {
+	show_tooltips = p_show;
+	update();
+}
+bool ItemList::get_show_tooltips() const {
+	return show_tooltips;
+}
+
+
 
 void ItemList::set_select_mode(SelectMode p_mode) {
 	select_mode = p_mode;
@@ -774,9 +819,12 @@ void ItemList::_notification(int p_what) {
 		Vector<int> line_size_cache;
 		Vector<int> line_limit_cache;
 
-		if (max_text_lines) {
+		if (max_text_lines && !show_all_text_on_select) {
 			line_size_cache.resize(max_text_lines);
 			line_limit_cache.resize(max_text_lines);
+		} else if (max_text_lines && show_all_text_on_select) {
+			line_size_cache.resize(8);
+			line_limit_cache.resize(8);
 		}
 
 		if (has_focus()) {
@@ -981,6 +1029,7 @@ void ItemList::_notification(int p_what) {
 				r.position.x -= hseparation / 2;
 				r.size.x += hseparation;
 
+				// VALLA EDITS: TODO: make this extend to the end of the text!
 				draw_style_box(sbsel, r);
 			}
 			if (items[i].custom_bg.a > 0.001) {
@@ -1079,7 +1128,12 @@ void ItemList::_notification(int p_what) {
 							line_size_cache.write[line] = ofs;
 							line++;
 							ofs = 0;
-							if (line >= max_text_lines) {
+							if (show_all_text_on_select && items[i].selected) {
+								if (line >= 8) {
+									break;
+								}
+							}
+							else if (line >= max_text_lines) {
 								break;
 							}
 						} else {
@@ -1100,7 +1154,13 @@ void ItemList::_notification(int p_what) {
 						if (j == line_limit_cache[line]) {
 							line++;
 							ofs = 0;
-							if (line >= max_text_lines) {
+							// VALLA EDITS: add ability to show past this amount if focused
+							if (show_all_text_on_select && items[i].selected) {
+								if (line >= line_limit_cache.size()) {
+									break;
+								}
+							}
+							else if (line >= max_text_lines) {
 								break;
 							}
 						}
@@ -1139,30 +1199,33 @@ void ItemList::_notification(int p_what) {
 			}
 		}
 
-		int first_visible_separator = 0;
-		{
-			// do a binary search to find the first separator that is below clip_position.y
-			int lo = 0;
-			int hi = separators.size();
-			while (lo < hi) {
-				const int mid = (lo + hi) / 2;
-				if (separators[mid] < clip.position.y) {
-					lo = mid + 1;
-				} else {
-					hi = mid;
+		if (show_separators) {
+			int first_visible_separator = 0;
+			{
+				// do a binary search to find the first separator that is below clip_position.y
+				int lo = 0;
+				int hi = separators.size();
+				while (lo < hi) {
+					const int mid = (lo + hi) / 2;
+					if (separators[mid] < clip.position.y) {
+						lo = mid + 1;
+					} else {
+						hi = mid;
+					}
 				}
-			}
-			first_visible_separator = lo;
-		}
-
-		for (int i = first_visible_separator; i < separators.size(); i++) {
-			if (separators[i] > clip.position.y + clip.size.y) {
-				break; // done
+				first_visible_separator = lo;
 			}
 
-			const int y = base_ofs.y + separators[i];
-			draw_line(Vector2(bg->get_margin(MARGIN_LEFT), y), Vector2(width, y), guide_color);
+			for (int i = first_visible_separator; i < separators.size(); i++) {
+				if (separators[i] > clip.position.y + clip.size.y) {
+					break; // done
+				}
+
+				const int y = base_ofs.y + separators[i];
+				draw_line(Vector2(bg->get_margin(MARGIN_LEFT), y), Vector2(width, y), guide_color);
+			}
 		}
+		
 	}
 }
 
@@ -1218,7 +1281,7 @@ String ItemList::get_tooltip(const Point2 &p_pos) const {
 	int closest = get_item_at_position(p_pos, true);
 
 	if (closest != -1) {
-		if (!items[closest].tooltip_enabled) {
+		if (!items[closest].tooltip_enabled || !show_tooltips) {
 			return "";
 		}
 		if (items[closest].tooltip != "") {
@@ -1355,6 +1418,7 @@ bool ItemList::has_auto_height() const {
 void ItemList::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("add_item", "text", "icon", "selectable"), &ItemList::add_item, DEFVAL(Variant()), DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("add_icon_item", "icon", "selectable"), &ItemList::add_icon_item, DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("add_empty_item"), &ItemList::add_empty_item);
 
 	ClassDB::bind_method(D_METHOD("set_item_text", "idx", "text"), &ItemList::set_item_text);
 	ClassDB::bind_method(D_METHOD("get_item_text", "idx"), &ItemList::get_item_text);
@@ -1419,6 +1483,15 @@ void ItemList::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_max_columns", "amount"), &ItemList::set_max_columns);
 	ClassDB::bind_method(D_METHOD("get_max_columns"), &ItemList::get_max_columns);
 
+	ClassDB::bind_method(D_METHOD("set_show_all_text_on_select", "amount"), &ItemList::set_show_all_text_on_select);
+	ClassDB::bind_method(D_METHOD("get_show_all_text_on_select"), &ItemList::get_show_all_text_on_select);
+
+	ClassDB::bind_method(D_METHOD("set_show_separators", "show"), &ItemList::set_show_separators);
+	ClassDB::bind_method(D_METHOD("get_show_separators"), &ItemList::get_show_separators);
+	
+	ClassDB::bind_method(D_METHOD("set_show_tooltips", "show"), &ItemList::set_show_tooltips);
+	ClassDB::bind_method(D_METHOD("get_show_tooltips"), &ItemList::get_show_tooltips);
+
 	ClassDB::bind_method(D_METHOD("set_select_mode", "mode"), &ItemList::set_select_mode);
 	ClassDB::bind_method(D_METHOD("get_select_mode"), &ItemList::get_select_mode);
 
@@ -1461,10 +1534,13 @@ void ItemList::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "allow_rmb_select"), "set_allow_rmb_select", "get_allow_rmb_select");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "max_text_lines", PROPERTY_HINT_RANGE, "1,10,1,or_greater"), "set_max_text_lines", "get_max_text_lines");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_height"), "set_auto_height", "has_auto_height");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_all_text_on_select"), "set_show_all_text_on_select", "get_show_all_text_on_select");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_tooltips"), "set_show_tooltips", "get_show_tooltips");
 	ADD_GROUP("Columns", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "max_columns", PROPERTY_HINT_RANGE, "0,10,1,or_greater"), "set_max_columns", "get_max_columns");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "same_column_width"), "set_same_column_width", "is_same_column_width");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "fixed_column_width", PROPERTY_HINT_RANGE, "0,100,1,or_greater"), "set_fixed_column_width", "get_fixed_column_width");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_separators"), "set_show_separators", "get_show_separators");
 	ADD_GROUP("Icon", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "icon_mode", PROPERTY_HINT_ENUM, "Top,Left"), "set_icon_mode", "get_icon_mode");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "icon_scale"), "set_icon_scale", "get_icon_scale");
@@ -1497,8 +1573,12 @@ ItemList::ItemList() {
 	same_column_width = false;
 	max_text_lines = 1;
 	max_columns = 1;
+	show_all_text_on_select = false;
 	auto_height = false;
 	auto_height_value = 0.0f;
+
+	show_separators = true;
+	show_tooltips = true;
 
 	scroll_bar = memnew(VScrollBar);
 	add_child(scroll_bar);

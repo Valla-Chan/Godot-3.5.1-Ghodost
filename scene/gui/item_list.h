@@ -97,6 +97,10 @@ private:
 	int fixed_column_width;
 	int max_text_lines;
 	int max_columns;
+	bool show_all_text_on_select;
+
+	bool show_separators;
+	bool show_tooltips;
 
 	Size2 fixed_icon_size;
 
@@ -125,6 +129,7 @@ protected:
 public:
 	void add_item(const String &p_item, const Ref<Texture> &p_texture = Ref<Texture>(), bool p_selectable = true);
 	void add_icon_item(const Ref<Texture> &p_item, bool p_selectable = true);
+	void add_empty_item();
 
 	void set_item_text(int p_idx, const String &p_text);
 	String get_item_text(int p_idx) const;
@@ -193,6 +198,15 @@ public:
 
 	void set_max_columns(int p_amount);
 	int get_max_columns() const;
+
+	void set_show_all_text_on_select(bool p_show_lines);
+	bool get_show_all_text_on_select() const;
+	
+	void set_show_separators(bool p_show);
+	bool get_show_separators() const;
+	
+	void set_show_tooltips(bool p_show);
+	bool get_show_tooltips() const;
 
 	void set_select_mode(SelectMode p_mode);
 	SelectMode get_select_mode() const;
