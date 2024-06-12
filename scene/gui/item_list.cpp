@@ -1008,9 +1008,7 @@ void ItemList::_notification(int p_what) {
 		}
 
 
-		bool drawing_items = true;
-		bool has_drawn_icon = false;
-		while (drawing_items) {
+		for (int loop = 0; loop < 3; loop++) {
 			// Draw icon items
 			for (int i = first_item_visible; i < items.size(); i++) {
 				Rect2 rcache = items[i].rect_cache;
@@ -1027,7 +1025,7 @@ void ItemList::_notification(int p_what) {
 					rcache.size.width = width - rcache.position.x;
 				}
 
-				if (!has_drawn_icon) {
+				if (!show_all_text_on_select || loop == 0 || (loop == 1 && items [i].selected)) {
 					if (items[i].custom_bg.a > 0.001) {
 						Rect2 r = rcache;
 						r.position += base_ofs;
@@ -1069,7 +1067,7 @@ void ItemList::_notification(int p_what) {
 						text_ofs.x = icon_size.width + icon_margin;
 					}
 
-					if (!has_drawn_icon) {
+					if (!show_all_text_on_select || loop == 0 || (loop == 1 && items[i].selected)) {
 						Rect2 draw_rect = Rect2(pos, icon_size);
 
 						if (fixed_icon_size.x > 0 && fixed_icon_size.y > 0) {
@@ -1098,22 +1096,12 @@ void ItemList::_notification(int p_what) {
 					}
 				}
 
-				if (!has_drawn_icon) {
+				if (!show_all_text_on_select || loop == 0 || (loop == 1 && items[i].selected)) {
 					if (items[i].tag_icon.is_valid()) {
 						draw_texture(items[i].tag_icon, items[i].rect_cache.position + base_ofs);
 					}
 				}
 
-				bool draw_text = true;
-				// if show_all_text_on_select is set, we need to do a separate pass to draw the text.
-				if (show_all_text_on_select && !has_drawn_icon) {
-					draw_text = false;
-					//continue;
-				} else {
-					drawing_items = false;
-				}
-
-				bool drawn_selectbox = false;
 				// Calculate and draw text
 				int max_lines = 0;
 				if (items[i].text != "") {
@@ -1158,7 +1146,7 @@ void ItemList::_notification(int p_what) {
 						}
 
 						// Draw selection box
-						if (items[i].selected && !drawn_selectbox && !has_drawn_icon) {
+						if (items[i].selected && (!show_all_text_on_select || loop == 1)) {
 							Rect2 r = rcache;
 							r.position += base_ofs;
 							r.position.y -= vseparation / 2;
@@ -1169,7 +1157,6 @@ void ItemList::_notification(int p_what) {
 							r.size.x += hseparation;
 
 							draw_style_box(sbsel, r);
-							drawn_selectbox = true;
 						}
 
 						line = 0;
@@ -1180,7 +1167,7 @@ void ItemList::_notification(int p_what) {
 						text_ofs += base_ofs;
 						text_ofs += items[i].rect_cache.position;
 
-						if (draw_text) {
+						if (!show_all_text_on_select || loop == 2) {
 							FontDrawer drawer(font, Color(1, 1, 1));
 							for (int j = 0; j < ss; j++) {
 								if (j == line_limit_cache[line]) {
@@ -1206,7 +1193,7 @@ void ItemList::_notification(int p_what) {
 						//special multiline mode
 					} else {
 						// Draw selection box
-						if (items[i].selected && !drawn_selectbox && !has_drawn_icon) {
+						if (items[i].selected && (!show_all_text_on_select || loop == 1)) {
 							Rect2 r = rcache;
 							r.position += base_ofs;
 							r.position.y -= vseparation / 2;
@@ -1217,7 +1204,6 @@ void ItemList::_notification(int p_what) {
 							r.size.x += hseparation;
 
 							draw_style_box(sbsel, r);
-							drawn_selectbox = true;
 						}
 
 						if (fixed_column_width > 0) {
@@ -1239,7 +1225,7 @@ void ItemList::_notification(int p_what) {
 					}
 				} else {
 					// Draw selection box
-					if (items[i].selected && !drawn_selectbox && !has_drawn_icon) {
+					if (items[i].selected && (!show_all_text_on_select || loop == 1)) {
 						Rect2 r = rcache;
 						r.position += base_ofs;
 						r.position.y -= vseparation / 2;
@@ -1250,10 +1236,9 @@ void ItemList::_notification(int p_what) {
 						r.size.x += hseparation;
 
 						draw_style_box(sbsel, r);
-						drawn_selectbox = true;
 					}
 				}
-				if (!icon_args.empty() && !has_drawn_icon) {
+				if (!icon_args.empty() ){//&& ((!has_drawn_icon && loop == 0 && !items[i].selected) || (loop == 1 && items[i].selected))) {
 					draw_texture_rect_region(items[i].icon, icon_args[0], icon_args[1], icon_args[2], items[i].icon_transposed);
 				}
 				
@@ -1269,13 +1254,10 @@ void ItemList::_notification(int p_what) {
 				}
 				
 			}
-			if (has_drawn_icon == true) {
-				drawing_items = false;
+			if (!show_all_text_on_select) {
+				break;
 			}
-			has_drawn_icon = true;
 		}
-
-		// Draw text
 
 
 		if (show_separators) {
