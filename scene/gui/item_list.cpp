@@ -957,6 +957,7 @@ void ItemList::_notification(int p_what) {
 				}
 			}
 
+
 			minimum_size_changed();
 			shape_changed = false;
 		}
@@ -1006,198 +1007,276 @@ void ItemList::_notification(int p_what) {
 			first_item_visible = lo;
 		}
 
-		for (int i = first_item_visible; i < items.size(); i++) {
-			Rect2 rcache = items[i].rect_cache;
 
-			if (rcache.position.y > clip.position.y + clip.size.y) {
-				break; // done
-			}
+		bool drawing_items = true;
+		bool has_drawn_icon = false;
+		while (drawing_items) {
+			// Draw icon items
+			for (int i = first_item_visible; i < items.size(); i++) {
+				Rect2 rcache = items[i].rect_cache;
 
-			if (!clip.intersects(rcache)) {
-				continue;
-			}
-
-			if (current_columns == 1) {
-				rcache.size.width = width - rcache.position.x;
-			}
-
-			if (items[i].selected) {
-				Rect2 r = rcache;
-				r.position += base_ofs;
-				r.position.y -= vseparation / 2;
-				r.size.y += vseparation;
-				r.position.x -= hseparation / 2;
-				r.size.x += hseparation;
-
-				// VALLA EDITS: TODO: make this extend to the end of the text!
-				draw_style_box(sbsel, r);
-			}
-			if (items[i].custom_bg.a > 0.001) {
-				Rect2 r = rcache;
-				r.position += base_ofs;
-
-				// Size rect to make the align the temperature colors
-				r.position.y -= vseparation / 2;
-				r.size.y += vseparation;
-				r.position.x -= hseparation / 2;
-				r.size.x += hseparation;
-
-				draw_rect(r, items[i].custom_bg);
-			}
-
-			Vector2 text_ofs;
-			if (items[i].icon.is_valid()) {
-				Size2 icon_size;
-				//= _adjust_to_max_size(items[i].get_icon_size(),fixed_icon_size) * icon_scale;
-
-				if (fixed_icon_size.x > 0 && fixed_icon_size.y > 0) {
-					icon_size = fixed_icon_size * icon_scale;
-				} else {
-					icon_size = items[i].get_icon_size() * icon_scale;
+				if (rcache.position.y > clip.position.y + clip.size.y) {
+					break; // done
 				}
 
-				Vector2 icon_ofs;
-
-				Point2 pos = items[i].rect_cache.position + icon_ofs + base_ofs;
-
-				if (icon_mode == ICON_MODE_TOP) {
-					pos.x += Math::floor((items[i].rect_cache.size.width - icon_size.width) / 2);
-					pos.y += MIN(
-							Math::floor((items[i].rect_cache.size.height - icon_size.height) / 2),
-							items[i].rect_cache.size.height - items[i].min_rect_cache.size.height);
-					text_ofs.y = icon_size.height + icon_margin;
-					text_ofs.y += items[i].rect_cache.size.height - items[i].min_rect_cache.size.height;
-				} else {
-					pos.y += Math::floor((items[i].rect_cache.size.height - icon_size.height) / 2);
-					text_ofs.x = icon_size.width + icon_margin;
+				if (!clip.intersects(rcache)) {
+					continue;
 				}
 
-				Rect2 draw_rect = Rect2(pos, icon_size);
-
-				if (fixed_icon_size.x > 0 && fixed_icon_size.y > 0) {
-					Rect2 adj = _adjust_to_max_size(items[i].get_icon_size() * icon_scale, icon_size);
-					draw_rect.position += adj.position;
-					draw_rect.size = adj.size;
+				if (current_columns == 1) {
+					rcache.size.width = width - rcache.position.x;
 				}
 
-				Color modulate = items[i].icon_modulate;
-				if (items[i].disabled) {
-					modulate.a *= 0.5;
+				if (!has_drawn_icon) {
+					if (items[i].custom_bg.a > 0.001) {
+						Rect2 r = rcache;
+						r.position += base_ofs;
+
+						// Size rect to make the align the temperature colors
+						r.position.y -= vseparation / 2;
+						r.size.y += vseparation;
+						r.position.x -= hseparation / 2;
+						r.size.x += hseparation;
+
+						draw_rect(r, items[i].custom_bg);
+					}
 				}
 
-				// If the icon is transposed, we have to switch the size so that it is drawn correctly
-				if (items[i].icon_transposed) {
-					Size2 size_tmp = draw_rect.size;
-					draw_rect.size.x = size_tmp.y;
-					draw_rect.size.y = size_tmp.x;
-				}
+				Vector<Variant> icon_args;
+				Vector2 text_ofs;
+				if (items[i].icon.is_valid()) {
+					Size2 icon_size;
 
-				Rect2 region = (items[i].icon_region.size.x == 0 || items[i].icon_region.size.y == 0) ? Rect2(Vector2(), items[i].icon->get_size()) : Rect2(items[i].icon_region);
-				draw_texture_rect_region(items[i].icon, draw_rect, region, modulate, items[i].icon_transposed);
-			}
-
-			if (items[i].tag_icon.is_valid()) {
-				draw_texture(items[i].tag_icon, items[i].rect_cache.position + base_ofs);
-			}
-
-			if (items[i].text != "") {
-				int max_len = -1;
-
-				Vector2 size2 = font->get_string_size(items[i].text);
-				if (fixed_column_width) {
-					max_len = fixed_column_width;
-				} else if (same_column_width) {
-					max_len = items[i].rect_cache.size.x;
-				} else {
-					max_len = size2.x;
-				}
-
-				Color modulate = items[i].selected ? font_color_selected : (items[i].custom_fg != Color() ? items[i].custom_fg : font_color);
-				if (items[i].disabled) {
-					modulate.a *= 0.5;
-				}
-
-				if (icon_mode == ICON_MODE_TOP && max_text_lines > 0) {
-					int ss = items[i].text.length();
-					float ofs = 0;
-					int line = 0;
-					for (int j = 0; j <= ss; j++) {
-						int cs = j < ss ? font->get_char_size(items[i].text[j], items[i].text[j + 1]).x : 0;
-						if (ofs + cs > max_len || j == ss) {
-							line_limit_cache.write[line] = j;
-							line_size_cache.write[line] = ofs;
-							line++;
-							ofs = 0;
-							if (show_all_text_on_select && items[i].selected) {
-								if (line >= 8) {
-									break;
-								}
-							}
-							else if (line >= max_text_lines) {
-								break;
-							}
-						} else {
-							ofs += cs;
-						}
+					if (fixed_icon_size.x > 0 && fixed_icon_size.y > 0) {
+						icon_size = fixed_icon_size * icon_scale;
+					} else {
+						icon_size = items[i].get_icon_size() * icon_scale;
 					}
 
-					line = 0;
-					ofs = 0;
+					Vector2 icon_ofs;
 
-					text_ofs.y += font->get_ascent();
-					text_ofs = text_ofs.floor();
-					text_ofs += base_ofs;
-					text_ofs += items[i].rect_cache.position;
-
-					FontDrawer drawer(font, Color(1, 1, 1));
-					for (int j = 0; j < ss; j++) {
-						if (j == line_limit_cache[line]) {
-							line++;
-							ofs = 0;
-							// VALLA EDITS: add ability to show past this amount if focused
-							if (show_all_text_on_select && items[i].selected) {
-								if (line >= line_limit_cache.size()) {
-									break;
-								}
-							}
-							else if (line >= max_text_lines) {
-								break;
-							}
-						}
-						ofs += drawer.draw_char(get_canvas_item(), text_ofs + Vector2(ofs + (max_len - line_size_cache[line]) / 2, line * (font_height + line_separation)).floor(), items[i].text[j], items[i].text[j + 1], modulate);
-					}
-
-					//special multiline mode
-				} else {
-					if (fixed_column_width > 0) {
-						size2.x = MIN(size2.x, fixed_column_width);
-					}
+					Point2 pos = items[i].rect_cache.position + icon_ofs + base_ofs;
 
 					if (icon_mode == ICON_MODE_TOP) {
-						text_ofs.x += (items[i].rect_cache.size.width - size2.x) / 2;
+						pos.x += Math::floor((items[i].rect_cache.size.width - icon_size.width) / 2);
+						pos.y += MIN(
+								Math::floor((items[i].rect_cache.size.height - icon_size.height) / 2),
+								items[i].rect_cache.size.height - items[i].min_rect_cache.size.height);
+						text_ofs.y = icon_size.height + icon_margin;
+						text_ofs.y += items[i].rect_cache.size.height - items[i].min_rect_cache.size.height;
 					} else {
-						text_ofs.y += (items[i].rect_cache.size.height - size2.y) / 2;
+						pos.y += Math::floor((items[i].rect_cache.size.height - icon_size.height) / 2);
+						text_ofs.x = icon_size.width + icon_margin;
 					}
 
-					text_ofs.y += font->get_ascent();
-					text_ofs = text_ofs.floor();
-					text_ofs += base_ofs;
-					text_ofs += items[i].rect_cache.position;
+					if (!has_drawn_icon) {
+						Rect2 draw_rect = Rect2(pos, icon_size);
 
-					draw_string(font, text_ofs, items[i].text, modulate, max_len + 1);
+						if (fixed_icon_size.x > 0 && fixed_icon_size.y > 0) {
+							Rect2 adj = _adjust_to_max_size(items[i].get_icon_size() * icon_scale, icon_size);
+							draw_rect.position += adj.position;
+							draw_rect.size = adj.size;
+						}
+
+						Color modulate = items[i].icon_modulate;
+						if (items[i].disabled) {
+							modulate.a *= 0.5;
+						}
+
+						// If the icon is transposed, we have to switch the size so that it is drawn correctly
+						if (items[i].icon_transposed) {
+							Size2 size_tmp = draw_rect.size;
+							draw_rect.size.x = size_tmp.y;
+							draw_rect.size.y = size_tmp.x;
+						}
+
+						Rect2 region = (items[i].icon_region.size.x == 0 || items[i].icon_region.size.y == 0) ? Rect2(Vector2(), items[i].icon->get_size()) : Rect2(items[i].icon_region);
+						icon_args.push_back(draw_rect);
+						icon_args.push_back(region);
+						icon_args.push_back(modulate);
+						//draw_texture_rect_region(items[i].icon, draw_rect, region, modulate, items[i].icon_transposed);
+					}
 				}
-			}
 
-			if (select_mode == SELECT_MULTI && i == current) {
-				Rect2 r = rcache;
-				r.position += base_ofs;
-				r.position.y -= vseparation / 2;
-				r.size.y += vseparation;
-				r.position.x -= hseparation / 2;
-				r.size.x += hseparation;
-				draw_style_box(cursor, r);
+				if (!has_drawn_icon) {
+					if (items[i].tag_icon.is_valid()) {
+						draw_texture(items[i].tag_icon, items[i].rect_cache.position + base_ofs);
+					}
+				}
+
+				bool draw_text = true;
+				// if show_all_text_on_select is set, we need to do a separate pass to draw the text.
+				if (show_all_text_on_select && !has_drawn_icon) {
+					draw_text = false;
+					//continue;
+				} else {
+					drawing_items = false;
+				}
+
+				bool drawn_selectbox = false;
+				// Calculate and draw text
+				int max_lines = 0;
+				if (items[i].text != "") {
+					int line = 0;
+					int max_len = -1;
+
+					Vector2 size2 = font->get_string_size(items[i].text);
+					if (fixed_column_width) {
+						max_len = fixed_column_width;
+					} else if (same_column_width) {
+						max_len = items[i].rect_cache.size.x;
+					} else {
+						max_len = size2.x;
+					}
+
+					Color modulate = items[i].selected ? font_color_selected : (items[i].custom_fg != Color() ? items[i].custom_fg : font_color);
+					if (items[i].disabled) {
+						modulate.a *= 0.5;
+					}
+
+					if (icon_mode == ICON_MODE_TOP && max_text_lines > 0) {
+						int ss = items[i].text.length();
+						float ofs = 0;
+						for (int j = 0; j <= ss; j++) {
+							int cs = j < ss ? font->get_char_size(items[i].text[j], items[i].text[j + 1]).x : 0;
+							if (ofs + cs > max_len || j == ss) {
+								line_limit_cache.write[line] = j;
+								line_size_cache.write[line] = ofs;
+								line++;
+								max_lines++;
+								ofs = 0;
+								if (show_all_text_on_select && items[i].selected) {
+									if (line >= 8) {
+										break;
+									}
+								} else if (line >= max_text_lines) {
+									break;
+								}
+							} else {
+								ofs += cs;
+							}
+						}
+
+						// Draw selection box
+						if (items[i].selected && !drawn_selectbox && !has_drawn_icon) {
+							Rect2 r = rcache;
+							r.position += base_ofs;
+							r.position.y -= vseparation / 2;
+							r.size.y += vseparation;
+							// VALLA EDITS: make this extend to the end of the text!
+							r.size.y += ((max_lines - 1) * (font->get_height() + font->get_descent())) - font->get_descent() / 2;
+							r.position.x -= hseparation / 2;
+							r.size.x += hseparation;
+
+							draw_style_box(sbsel, r);
+							drawn_selectbox = true;
+						}
+
+						line = 0;
+						ofs = 0;
+
+						text_ofs.y += font->get_ascent();
+						text_ofs = text_ofs.floor();
+						text_ofs += base_ofs;
+						text_ofs += items[i].rect_cache.position;
+
+						if (draw_text) {
+							FontDrawer drawer(font, Color(1, 1, 1));
+							for (int j = 0; j < ss; j++) {
+								if (j == line_limit_cache[line]) {
+									line++;
+									ofs = 0;
+									// VALLA EDITS: add ability to show past this amount if focused
+									if (show_all_text_on_select && items[i].selected) {
+										if (line >= line_limit_cache.size()) {
+											break;
+										}
+									} else if (line >= max_text_lines) {
+										break;
+									}
+								}
+								ofs += drawer.draw_char(get_canvas_item(), text_ofs + Vector2(ofs + (max_len - line_size_cache[line]) / 2, line * (font_height + line_separation)).floor(), items[i].text[j], items[i].text[j + 1], modulate);
+							}
+							if (show_all_text_on_select) {
+								continue;
+							}
+							
+						}
+
+						//special multiline mode
+					} else {
+						// Draw selection box
+						if (items[i].selected && !drawn_selectbox && !has_drawn_icon) {
+							Rect2 r = rcache;
+							r.position += base_ofs;
+							r.position.y -= vseparation / 2;
+							r.size.y += vseparation;
+							// VALLA EDITS: make this extend to the end of the text!
+							r.size.y += (max_lines - 1) * (font->get_height() + font->get_descent()) - font->get_descent();
+							r.position.x -= hseparation / 2;
+							r.size.x += hseparation;
+
+							draw_style_box(sbsel, r);
+							drawn_selectbox = true;
+						}
+
+						if (fixed_column_width > 0) {
+							size2.x = MIN(size2.x, fixed_column_width);
+						}
+
+						if (icon_mode == ICON_MODE_TOP) {
+							text_ofs.x += (items[i].rect_cache.size.width - size2.x) / 2;
+						} else {
+							text_ofs.y += (items[i].rect_cache.size.height - size2.y) / 2;
+						}
+
+						text_ofs.y += font->get_ascent();
+						text_ofs = text_ofs.floor();
+						text_ofs += base_ofs;
+						text_ofs += items[i].rect_cache.position;
+
+						draw_string(font, text_ofs, items[i].text, modulate, max_len + 1);
+					}
+				} else {
+					// Draw selection box
+					if (items[i].selected && !drawn_selectbox && !has_drawn_icon) {
+						Rect2 r = rcache;
+						r.position += base_ofs;
+						r.position.y -= vseparation / 2;
+						r.size.y += vseparation;
+						// VALLA EDITS: make this extend to the end of the text!
+						r.size.y += ((max_lines - 1) * (font->get_height() + font->get_descent()) - font->get_descent() / 2);
+						r.position.x -= hseparation / 2;
+						r.size.x += hseparation;
+
+						draw_style_box(sbsel, r);
+						drawn_selectbox = true;
+					}
+				}
+				if (!icon_args.empty() && !has_drawn_icon) {
+					draw_texture_rect_region(items[i].icon, icon_args[0], icon_args[1], icon_args[2], items[i].icon_transposed);
+				}
+				
+
+				if (select_mode == SELECT_MULTI && i == current) {
+					Rect2 r = rcache;
+					r.position += base_ofs;
+					r.position.y -= vseparation / 2;
+					r.size.y += vseparation;
+					r.position.x -= hseparation / 2;
+					r.size.x += hseparation;
+					draw_style_box(cursor, r);
+				}
+				
 			}
+			if (has_drawn_icon == true) {
+				drawing_items = false;
+			}
+			has_drawn_icon = true;
 		}
+
+		// Draw text
+
 
 		if (show_separators) {
 			int first_visible_separator = 0;
