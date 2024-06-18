@@ -1705,6 +1705,42 @@ Array TileMap::get_used_cells_by_id(int p_id) const {
 	return a;
 }
 
+Array TileMap::get_used_cells_by_ids(PoolIntArray p_ids) const {
+	Array a;
+	for (Map<PosKey, Cell>::Element *E = tile_map.front(); E; E = E->next()) {
+		if (p_ids.find(E->value().id) > -1) {
+			Vector2 p(E->key().x, E->key().y);
+			a.push_back(p);
+		}
+	}
+
+	return a;
+}
+
+Array TileMap::get_used_cells_excluding_id(int p_id) const {
+	Array a;
+	for (Map<PosKey, Cell>::Element *E = tile_map.front(); E; E = E->next()) {
+		if (E->value().id != p_id) {
+			Vector2 p(E->key().x, E->key().y);
+			a.push_back(p);
+		}
+	}
+
+	return a;
+}
+
+Array TileMap::get_used_cells_excluding_ids(PoolIntArray p_ids) const {
+	Array a;
+	for (Map<PosKey, Cell>::Element *E = tile_map.front(); E; E = E->next()) {
+		if (p_ids.find(E->value().id) == -1) {
+			Vector2 p(E->key().x, E->key().y);
+			a.push_back(p);
+		}
+	}
+
+	return a;
+}
+
 Rect2 TileMap::get_used_rect() { // Not const because of cache
 
 	if (used_size_cache_dirty) {
@@ -1873,6 +1909,9 @@ void TileMap::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_used_cells"), &TileMap::get_used_cells);
 	ClassDB::bind_method(D_METHOD("get_used_cells_by_id", "id"), &TileMap::get_used_cells_by_id);
+	ClassDB::bind_method(D_METHOD("get_used_cells_by_ids", "ids"), &TileMap::get_used_cells_by_ids);
+	ClassDB::bind_method(D_METHOD("get_used_cells_excluding_id", "ids"), &TileMap::get_used_cells_excluding_id);
+	ClassDB::bind_method(D_METHOD("get_used_cells_excluding_ids", "ids"), &TileMap::get_used_cells_excluding_ids);
 	ClassDB::bind_method(D_METHOD("get_used_rect"), &TileMap::get_used_rect);
 
 	ClassDB::bind_method(D_METHOD("map_to_world", "map_position", "ignore_half_ofs"), &TileMap::map_to_world, DEFVAL(false));

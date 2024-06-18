@@ -340,6 +340,9 @@ public:
 
 	Array get_used_cells() const;
 	Array get_used_cells_by_id(int p_id) const;
+	Array get_used_cells_by_ids(PoolIntArray p_ids) const;
+	Array get_used_cells_excluding_id(int p_id) const;
+	Array get_used_cells_excluding_ids(PoolIntArray p_ids) const;
 	Rect2 get_used_rect(); // Not const because of cache
 
 	void set_occluder_light_mask(int p_mask);

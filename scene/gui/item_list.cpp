@@ -1152,7 +1152,9 @@ void ItemList::_notification(int p_what) {
 							r.position.y -= vseparation / 2;
 							r.size.y += vseparation;
 							// VALLA EDITS: make this extend to the end of the text!
-							r.size.y += ((max_lines - 1) * (font->get_height() + font->get_descent())) - font->get_descent() / 2;
+							if (show_all_text_on_select) {
+								r.size.y += ((max_lines - 1) * (font->get_height() + font->get_descent())) - font->get_descent() / 2;
+							}
 							r.position.x -= hseparation / 2;
 							r.size.x += hseparation;
 
@@ -1199,7 +1201,9 @@ void ItemList::_notification(int p_what) {
 							r.position.y -= vseparation / 2;
 							r.size.y += vseparation;
 							// VALLA EDITS: make this extend to the end of the text!
-							r.size.y += (max_lines - 1) * (font->get_height() + font->get_descent()) - font->get_descent();
+							if (show_all_text_on_select) {
+								r.size.y += (max_lines - 1) * (font->get_height() + font->get_descent()) - font->get_descent();
+							}
 							r.position.x -= hseparation / 2;
 							r.size.x += hseparation;
 
@@ -1231,7 +1235,9 @@ void ItemList::_notification(int p_what) {
 						r.position.y -= vseparation / 2;
 						r.size.y += vseparation;
 						// VALLA EDITS: make this extend to the end of the text!
-						r.size.y += ((max_lines - 1) * (font->get_height() + font->get_descent()) - font->get_descent() / 2);
+						if (show_all_text_on_select) {
+							r.size.y += ((max_lines - 1) * (font->get_height() + font->get_descent()) - font->get_descent() / 2);
+						}
 						r.position.x -= hseparation / 2;
 						r.size.x += hseparation;
 

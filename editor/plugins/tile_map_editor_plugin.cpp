@@ -509,6 +509,13 @@ void TileMapEditor::_update_palette() {
 		entries.sort();
 	}
 
+	if (entries.size() > 0) {
+		// add blank tile
+		palette->add_item("Empty");
+		palette->set_item_metadata(0, -1);
+	}
+	
+
 	for (int i = 0; i < entries.size(); i++) {
 		if (show_tile_names) {
 			palette->add_item(entries[i].name);
@@ -550,6 +557,11 @@ void TileMapEditor::_update_palette() {
 		}
 
 		palette->set_item_metadata(palette->get_item_count() - 1, entries[i].id);
+	}
+	if (entries.size() > 0) {
+		// set blank icon from first tile.
+		palette->set_item_icon(0, palette->get_item_icon(1));
+		palette->set_item_icon_modulate(0, Color(0, 0, 0, 0));
 	}
 
 	int sel_tile = selected.get(0);
@@ -656,7 +668,7 @@ PoolVector<Vector2> TileMapEditor::_bucket_fill(const Point2i &p_start, bool era
 	if (!erase) {
 		ids = get_selected_tiles();
 
-		if (ids.size() == 0 || ids[0] == TileMap::INVALID_CELL) {
+		if (ids.size() == 0 ){//|| ids[0] == TileMap::INVALID_CELL) {
 			return PoolVector<Vector2>();
 		}
 	} else if (prev_id == TileMap::INVALID_CELL) {
@@ -1245,7 +1257,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 				if (tool == TOOL_PAINTING) {
 					Vector<int> ids = get_selected_tiles();
 
-					if (ids.size() > 0 && ids[0] != TileMap::INVALID_CELL) {
+					if (ids.size() > 0 ) {//&& ids[0] != TileMap::INVALID_CELL) {
 						tool = TOOL_PAINTING;
 
 						_start_undo(TTR("Paint TileMap"));
@@ -1266,7 +1278,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 					if (tool == TOOL_PAINTING) {
 						Vector<int> ids = get_selected_tiles();
 
-						if (ids.size() > 0 && ids[0] != TileMap::INVALID_CELL) {
+						if (ids.size() > 0 ){//&& ids[0] != TileMap::INVALID_CELL) {
 							_set_cell(over_tile, ids, flip_h, flip_v, transpose);
 							_finish_undo();
 
@@ -1275,7 +1287,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 					} else if (tool == TOOL_LINE_PAINT) {
 						Vector<int> ids = get_selected_tiles();
 
-						if (ids.size() > 0 && ids[0] != TileMap::INVALID_CELL) {
+						if (ids.size() > 0 ){//&& ids[0] != TileMap::INVALID_CELL) {
 							_start_undo(TTR("Line Draw"));
 							for (Map<Point2i, CellOp>::Element *E = paint_undo.front(); E; E = E->next()) {
 								_set_cell(E->key(), ids, flip_h, flip_v, transpose);
@@ -1294,7 +1306,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 					} else if (tool == TOOL_RECTANGLE_PAINT) {
 						Vector<int> ids = get_selected_tiles();
 
-						if (ids.size() > 0 && ids[0] != TileMap::INVALID_CELL) {
+						if (ids.size() > 0 ){//&& ids[0] != TileMap::INVALID_CELL) {
 							_start_undo(TTR("Rectangle Paint"));
 							for (int i = rectangle.position.y; i <= rectangle.position.y + rectangle.size.y; i++) {
 								for (int j = rectangle.position.x; j <= rectangle.position.x + rectangle.size.x; j++) {
@@ -1527,7 +1539,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 
 			paint_undo.clear();
 
-			if (ids.size() > 0 && ids[0] != TileMap::INVALID_CELL) {
+			if (ids.size() > 0 ){//&& ids[0] != TileMap::INVALID_CELL) {
 				Vector<Point2i> points = line(rectangle_begin.x, over_tile.x, rectangle_begin.y, over_tile.y);
 
 				for (int i = 0; i < points.size(); i++) {
@@ -1817,9 +1829,10 @@ void TileMapEditor::forward_canvas_draw_over_viewport(Control *p_overlay) {
 
 			Vector<int> ids = get_selected_tiles();
 
+			/*
 			if (ids.size() == 1 && ids[0] == TileMap::INVALID_CELL) {
 				return;
-			}
+			}*/
 
 			// Making a Rect2i that encloses all the cells in paint_undo.
 			// I wonder if there is a cleaner way to do it.
@@ -1844,9 +1857,10 @@ void TileMapEditor::forward_canvas_draw_over_viewport(Control *p_overlay) {
 		} else if (tool == TOOL_RECTANGLE_PAINT) {
 			Vector<int> ids = get_selected_tiles();
 
+			/*
 			if (ids.size() == 1 && ids[0] == TileMap::INVALID_CELL) {
 				return;
-			}
+			}*/
 
 			_draw_grid(p_overlay, rectangle);
 
@@ -1896,9 +1910,10 @@ void TileMapEditor::forward_canvas_draw_over_viewport(Control *p_overlay) {
 		} else {
 			Vector<int> st = get_selected_tiles();
 
+			/*
 			if (st.size() == 1 && st[0] == TileMap::INVALID_CELL) {
 				return;
-			}
+			}*/
 
 			_draw_grid(p_overlay, Rect2(over_tile, Size2(1, 1)));
 			_draw_cell(p_overlay, st[0], over_tile, flip_h, flip_v, transpose, autotile_coord, xform);
