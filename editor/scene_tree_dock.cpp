@@ -131,6 +131,8 @@ void SceneTreeDock::_unhandled_key_input(Ref<InputEvent> p_event) {
 		_tool_selected(TOOL_ERASE, true);
 	} else if (ED_IS_SHORTCUT("scene_tree/copy_node_path", p_event)) {
 		_tool_selected(TOOL_COPY_NODE_PATH);
+	} else if (ED_IS_SHORTCUT("scene_tree/copy_node_name", p_event)) {
+		_tool_selected(TOOL_COPY_NODE_NAME);
 	} else if (ED_IS_SHORTCUT("scene_tree/delete", p_event)) {
 		_tool_selected(TOOL_ERASE);
 	}
@@ -1043,6 +1045,16 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 					Node *root = EditorNode::get_singleton()->get_edited_scene();
 					NodePath path = root->get_path().rel_path_to(node->get_path());
 					OS::get_singleton()->set_clipboard(path);
+				}
+			}
+		} break;
+		case TOOL_COPY_NODE_NAME: {
+			List<Node *> selection = editor_selection->get_selected_node_list();
+			List<Node *>::Element *e = selection.front();
+			if (e) {
+				Node *node = e->get();
+				if (node) {
+					OS::get_singleton()->set_clipboard(node->get_name());
 				}
 			}
 		} break;
@@ -3098,6 +3110,7 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 		if (full_selection.size() == 1) {
 			menu->add_separator();
 			menu->add_icon_shortcut(get_icon("CopyNodePath", "EditorIcons"), ED_GET_SHORTCUT("scene_tree/copy_node_path"), TOOL_COPY_NODE_PATH);
+			menu->add_icon_shortcut(get_icon("CopyNodePath", "EditorIcons"), ED_GET_SHORTCUT("scene_tree/copy_node_name"), TOOL_COPY_NODE_NAME);
 		}
 
 		bool is_external = (selection[0]->get_filename() != "");
@@ -3559,6 +3572,7 @@ SceneTreeDock::SceneTreeDock(EditorNode *p_editor, Node *p_scene_root, EditorSel
 	ED_SHORTCUT("scene_tree/merge_from_scene", TTR("Merge From Scene"));
 	ED_SHORTCUT("scene_tree/save_branch_as_scene", TTR("Save Branch as Scene"));
 	ED_SHORTCUT("scene_tree/copy_node_path", TTR("Copy Node Path"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_C);
+	ED_SHORTCUT("scene_tree/copy_node_name", TTR("Copy Node Name"));
 	ED_SHORTCUT("scene_tree/delete_no_confirm", TTR("Delete (No Confirm)"), KEY_MASK_SHIFT | KEY_DELETE);
 	ED_SHORTCUT("scene_tree/delete", TTR("Delete"), KEY_DELETE);
 

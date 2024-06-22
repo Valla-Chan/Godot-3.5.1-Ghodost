@@ -317,6 +317,7 @@ void ScriptEditorDebugger::_scene_tree_rmb_selected(const Vector2 &p_position) {
 	item_menu->clear();
 	item_menu->add_icon_item(get_icon("CreateNewSceneFrom", "EditorIcons"), TTR("Save Branch as Scene"), ITEM_MENU_SAVE_REMOTE_NODE);
 	item_menu->add_icon_item(get_icon("CopyNodePath", "EditorIcons"), TTR("Copy Node Path"), ITEM_MENU_COPY_NODE_PATH);
+	item_menu->add_icon_item(get_icon("CopyNodeName", "EditorIcons"), TTR("Copy Node Name"), ITEM_MENU_COPY_NODE_NAME);
 	item_menu->set_global_position(get_global_mouse_position());
 	item_menu->popup();
 }
@@ -2282,6 +2283,12 @@ void ScriptEditorDebugger::_item_menu_id_pressed(int p_option) {
 					text = ti->get_text(0) + "/" + text;
 				}
 			}
+
+			OS::get_singleton()->set_clipboard(text);
+		} break;
+		case ITEM_MENU_COPY_NODE_NAME: {
+			TreeItem *ti = inspect_scene_tree->get_selected();
+			String text = ti->get_text(0);
 
 			OS::get_singleton()->set_clipboard(text);
 		} break;
