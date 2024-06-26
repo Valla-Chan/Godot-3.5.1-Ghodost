@@ -624,6 +624,7 @@ private:
 	bool update_pending;
 	RID texture;
 	int width;
+	bool vertical;
 
 	void _queue_update();
 	void _update();
@@ -637,6 +638,9 @@ public:
 
 	void set_width(int p_width);
 	int get_width() const;
+
+	void set_vertical(bool p_vertical);
+	bool get_vertical() const;
 
 	virtual RID get_rid() const { return texture; }
 	virtual int get_height() const { return 1; }

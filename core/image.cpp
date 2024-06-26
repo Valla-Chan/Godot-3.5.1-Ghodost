@@ -1283,6 +1283,167 @@ void Image::crop(int p_width, int p_height) {
 	crop_from_point(0, 0, p_width, p_height);
 }
 
+void Image::rotate_90(int p_direction) {
+	if (p_direction < 0) {
+		p_direction = 0;
+	}
+	if (p_direction > 1) {
+		p_direction = 1;
+	} 
+	ERR_FAIL_COND_MSG(!_can_modify(format), "Cannot rotate in compressed or custom image formats.");
+	ERR_FAIL_COND_MSG(width <= 0, "The Image width specified (" + itos(width) + " pixels) must be greater than 0 pixels.");
+	ERR_FAIL_COND_MSG(height <= 0, "The Image height specified (" + itos(height) + " pixels) must be greater than 0 pixels.");
+
+	bool used_mipmaps = has_mipmaps();
+	if (used_mipmaps) {
+		clear_mipmaps();
+	}
+
+	// In-place 90 degrees rotation by following the permutation cycles.
+	{
+		// Explanation by example (clockwise):
+		//
+		//  abc      da
+		//  def  ->  eb
+		//           fc
+		//
+		// In memory:
+		//  012345    012345
+		//  abcdef -> daebfc
+		//
+		// Permutation cycles:
+		//  (0  --a-->  1  --b-->  3  --d-->  0)
+		//  (2  --c-->  5  --f-->  4  --e-->  2)
+		//
+		// Applying cycles (backwards):
+		//  0->s  s=a (store)
+		//  3->0  abcdef -> dbcdef
+		//  1->3  dbcdef -> dbcbef
+		//  s->1  dbcbef -> dacbef
+		//
+		//  2->s  s=c
+		//  4->2  dacbef -> daebef
+		//  5->4  daebef -> daebff
+		//  s->5  daebff -> daebfc
+
+		const int w = width;
+		const int h = height;
+		const int size = w * h;
+
+		PoolVector<uint8_t>::Write wp = data.write();
+		uint8_t *data_ptr = wp.ptr();
+		PoolVector<uint8_t>::Read r = data.read();
+		uint32_t pixel_size = get_format_pixel_size(format);
+
+		uint8_t single_pixel_buffer[16];
+
+#define PREV_INDEX_IN_CYCLE(index) (p_direction == CLOCKWISE) ? ((h - 1 - (index % h)) * w + (index / h)) : ((index % h) * w + (w - 1 - (index / h)))
+
+		if (w == h) { // Square case, 4-length cycles only (plus irrelevant thus skipped 1-length cycle in the middle for odd-sized squares).
+			for (int y = 0; y < h / 2; y++) {
+				for (int x = 0; x < (w + 1) / 2; x++) {
+					int current = y * w + x;
+					memcpy(single_pixel_buffer, data_ptr + current * pixel_size, pixel_size);
+					for (int i = 0; i < 3; i++) {
+						int prev = PREV_INDEX_IN_CYCLE(current);
+						memcpy(data_ptr + current * pixel_size, data_ptr + prev * pixel_size, pixel_size);
+						current = prev;
+					}
+					memcpy(data_ptr + current * pixel_size, single_pixel_buffer, pixel_size);
+				}
+			}
+		} else { // Rectangular case (w != h), kinda unpredictable cycles.
+			int permuted_pixels_count = 0;
+
+			for (int i = 0; i < size; i++) {
+				int prev = PREV_INDEX_IN_CYCLE(i);
+				if (prev == i) {
+					// 1-length cycle, pixel remains at the same index.
+					permuted_pixels_count++;
+					continue;
+				}
+
+				// Check whether we already processed this cycle.
+				// We iterate over it and if we'll find an index smaller than `i` then we already
+				// processed this cycle because we always start at the smallest index in the cycle.
+				// TODO: Improve this naive approach, can be done better.
+				while (prev > i) {
+					prev = PREV_INDEX_IN_CYCLE(prev);
+				}
+				if (prev < i) {
+					continue;
+				}
+
+				// Save the in-cycle pixel with the smallest index (`i`).
+				memcpy(single_pixel_buffer, data_ptr + i * pixel_size, pixel_size);
+
+				// Overwrite pixels one by one by the preceding pixel in the cycle.
+				int current = i;
+				prev = PREV_INDEX_IN_CYCLE(current);
+				while (prev != i) {
+					memcpy(data_ptr + current * pixel_size, data_ptr + prev * pixel_size, pixel_size);
+					permuted_pixels_count++;
+
+					current = prev;
+					prev = PREV_INDEX_IN_CYCLE(current);
+				};
+
+				// Overwrite the remaining pixel in the cycle by the saved pixel with the smallest index.
+				memcpy(data_ptr + current * pixel_size, single_pixel_buffer, pixel_size);
+				permuted_pixels_count++;
+
+				if (permuted_pixels_count == size) {
+					break;
+				}
+			}
+
+			width = h;
+			height = w;
+		}
+
+#undef PREV_INDEX_IN_CYCLE
+	}
+
+	if (used_mipmaps) {
+		generate_mipmaps();
+	}
+}
+
+void Image::rotate_180() {
+	ERR_FAIL_COND_MSG(!_can_modify(format), "Cannot rotate in compressed or custom image formats.");
+	ERR_FAIL_COND_MSG(width <= 0, "The Image width specified (" + itos(width) + " pixels) must be greater than 0 pixels.");
+	ERR_FAIL_COND_MSG(height <= 0, "The Image height specified (" + itos(height) + " pixels) must be greater than 0 pixels.");
+
+	bool used_mipmaps = has_mipmaps();
+	if (used_mipmaps) {
+		clear_mipmaps();
+	}
+
+	{
+		PoolVector<uint8_t>::Write wp = data.write();
+		uint8_t *data_ptr = wp.ptr();
+		uint32_t pixel_size = get_format_pixel_size(format);
+
+		uint8_t single_pixel_buffer[16];
+
+		uint8_t *from_begin_ptr = data_ptr;
+		uint8_t *from_end_ptr = data_ptr + (width * height - 1) * pixel_size;
+
+		while (from_begin_ptr < from_end_ptr) {
+			memcpy(single_pixel_buffer, from_begin_ptr, pixel_size);
+			memcpy(from_begin_ptr, from_end_ptr, pixel_size);
+			memcpy(from_end_ptr, single_pixel_buffer, pixel_size);
+
+			from_begin_ptr += pixel_size;
+			from_end_ptr -= pixel_size;
+		}
+	}
+
+	if (used_mipmaps) {
+		generate_mipmaps();
+	}
+}
+
 void Image::flip_y() {
 	ERR_FAIL_COND_MSG(!_can_modify(format), "Cannot flip_y in compressed or custom image formats.");
 
@@ -2936,6 +3097,9 @@ void Image::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("compress", "mode", "source", "lossy_quality"), &Image::compress);
 	ClassDB::bind_method(D_METHOD("decompress"), &Image::decompress);
 	ClassDB::bind_method(D_METHOD("is_compressed"), &Image::is_compressed);
+
+	ClassDB::bind_method(D_METHOD("rotate_90", "direction"), &Image::rotate_90, DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("rotate_180"), &Image::rotate_180);
 
 	ClassDB::bind_method(D_METHOD("fix_alpha_edges"), &Image::fix_alpha_edges);
 	ClassDB::bind_method(D_METHOD("premultiply_alpha"), &Image::premultiply_alpha);

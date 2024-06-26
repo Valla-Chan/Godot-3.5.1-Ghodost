@@ -1713,6 +1713,7 @@ CurveTexture::~CurveTexture() {
 GradientTexture::GradientTexture() {
 	update_pending = false;
 	width = 2048;
+	vertical = false;
 
 	texture = RID_PRIME(VS::get_singleton()->texture_create());
 	_queue_update();
@@ -1727,11 +1728,14 @@ void GradientTexture::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_gradient"), &GradientTexture::get_gradient);
 
 	ClassDB::bind_method(D_METHOD("set_width", "width"), &GradientTexture::set_width);
+	ClassDB::bind_method(D_METHOD("set_vertical", "vertical"), &GradientTexture::set_vertical);
+	ClassDB::bind_method(D_METHOD("get_vertical"), &GradientTexture::get_vertical);
 
 	ClassDB::bind_method(D_METHOD("_update"), &GradientTexture::_update);
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "gradient", PROPERTY_HINT_RESOURCE_TYPE, "Gradient"), "set_gradient", "get_gradient");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "width", PROPERTY_HINT_RANGE, "1,4096"), "set_width", "get_width");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "vertical"), "set_vertical", "get_vertical");
 }
 
 void GradientTexture::set_gradient(Ref<Gradient> p_gradient) {
@@ -1788,6 +1792,9 @@ void GradientTexture::_update() {
 
 	Ref<Image> image = memnew(Image(width, 1, false, Image::FORMAT_RGBA8, data));
 
+	if (vertical) {
+		image->rotate_90(ClockDirection::CLOCKWISE);
+	}
 	VS::get_singleton()->texture_allocate(texture, width, 1, 0, Image::FORMAT_RGBA8, VS::TEXTURE_TYPE_2D, VS::TEXTURE_FLAG_FILTER);
 	VS::get_singleton()->texture_set_data(texture, image);
 
@@ -1800,6 +1807,14 @@ void GradientTexture::set_width(int p_width) {
 }
 int GradientTexture::get_width() const {
 	return width;
+}
+
+void GradientTexture::set_vertical(bool p_vertical) {
+	vertical = p_vertical;
+	_queue_update();
+}
+bool GradientTexture::get_vertical() const {
+	return vertical;
 }
 
 Ref<Image> GradientTexture::get_data() const {

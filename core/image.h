@@ -244,6 +244,8 @@ public:
 
 	void flip_x();
 	void flip_y();
+	void rotate_90(int p_direction);
+	void rotate_180();
 
 	/**
 	 * Generate a mipmap to an image (creates an image 1/4 the size, with averaging of 4->1)
