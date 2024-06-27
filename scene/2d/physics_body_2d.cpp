@@ -1346,7 +1346,7 @@ float KinematicBody2D::get_move_safe_fraction(const Transform2D &p_from, const V
 // start from current transform, get how far the body could move before hitting a collision
 float KinematicBody2D::get_move_safe_fraction_to(const Vector2 &p_location, bool p_infinite_inertia) {
 	Vector2 motion = get_position().direction_to(p_location) * get_position().distance_to(p_location);
-	return get_move_safe_fraction(get_transform(), motion, p_infinite_inertia);
+	return get_move_safe_fraction(get_global_transform(), motion, p_infinite_inertia);
 }
 
 // check body can go to specified pos
@@ -1367,7 +1367,7 @@ bool KinematicBody2D::test_move(const Transform2D &p_from, const Vector2 &p_moti
 // start from current transform, check body can go to specified pos
 bool KinematicBody2D::test_move_to(const Vector2 &p_location, bool p_infinite_inertia) {
 	Vector2 motion = get_position().direction_to(p_location) * get_position().distance_to(p_location);
-	return test_move(get_transform(), motion, p_infinite_inertia);
+	return test_move(get_global_transform(), motion, p_infinite_inertia);
 }
 
 void KinematicBody2D::set_safe_margin(float p_margin) {
