@@ -1965,7 +1965,7 @@ void TileMap::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_used_cells_excluding_id", "ids"), &TileMap::get_used_cells_excluding_id);
 	ClassDB::bind_method(D_METHOD("get_used_cells_excluding_ids", "ids"), &TileMap::get_used_cells_excluding_ids);
 	ClassDB::bind_method(D_METHOD("get_all_cells_in_rect", "rect"), &TileMap::get_all_cells_in_rect);
-	ClassDB::bind_method(D_METHOD("get_all_cells_in_used_rect", "rect"), &TileMap::get_all_cells_in_used_rect);
+	ClassDB::bind_method(D_METHOD("get_all_cells_in_used_rect"), &TileMap::get_all_cells_in_used_rect);
 	ClassDB::bind_method(D_METHOD("get_unused_cells_in_rect", "rect"), &TileMap::get_unused_cells_in_rect);
 	ClassDB::bind_method(D_METHOD("get_unused_cells_in_used_rect"), &TileMap::get_unused_cells_in_used_rect);
 	ClassDB::bind_method(D_METHOD("get_used_rect"), &TileMap::get_used_rect);

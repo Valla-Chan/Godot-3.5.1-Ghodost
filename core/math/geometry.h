@@ -962,6 +962,44 @@ public:
 		return (intersections & 1);
 	}
 
+	// Helper function to check if a point is on a segment
+	static bool point_on_segment_2d(const Vector2 &v1, const Vector2 &v2, const Vector2 &p) {
+		float cross_product = (p.y - v1.y) * (v2.x - v1.x) - (p.x - v1.x) * (v2.y - v1.y);
+		if (abs(cross_product) > 1e-6) {
+			return false;
+		}
+
+		float dot_product = (p.x - v1.x) * (v2.x - v1.x) + (p.y - v1.y) * (v2.y - v1.y);
+		if (dot_product < 0) {
+			return false;
+		}
+
+		float squared_length_v2_v1 = (v2.x - v1.x) * (v2.x - v1.x) + (v2.y - v1.y) * (v2.y - v1.y);
+		if (dot_product > squared_length_v2_v1) {
+			return false;
+		}
+
+		return true;
+	}
+
+	static bool is_point_on_polygon_edge(const Vector2 &p_point, const Vector<Vector2> &p_polygon) {
+		int c = p_polygon.size();
+		if (c < 3) {
+			return false;
+		}
+		const Vector2 *p = p_polygon.ptr();
+
+		for (int i = 0; i < c; i++) {
+			const Vector2 &v1 = p[i];
+			const Vector2 &v2 = p[(i + 1) % c];
+			if (point_on_segment_2d(v1, v2, p_point)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	static PoolVector<PoolVector<Face3>> separate_objects(PoolVector<Face3> p_array);
 
 	// Create a "wrap" that encloses the given geometry.
