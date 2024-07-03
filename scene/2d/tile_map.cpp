@@ -906,6 +906,7 @@ void TileMap::set_cell(int p_x, int p_y, int p_tile, bool p_flip_x, bool p_flip_
 
 	Map<PosKey, Quadrant>::Element *Q = quadrant_map.find(qk);
 
+	bool changed = false;
 	if (!E) {
 		E = tile_map.insert(pk, Cell());
 		if (!Q) {
@@ -918,6 +919,8 @@ void TileMap::set_cell(int p_x, int p_y, int p_tile, bool p_flip_x, bool p_flip_
 
 		if (E->get().id == p_tile && E->get().flip_h == p_flip_x && E->get().flip_v == p_flip_y && E->get().transpose == p_transpose && E->get().autotile_coord_x == (uint16_t)p_autotile_coord.x && E->get().autotile_coord_y == (uint16_t)p_autotile_coord.y) {
 			return; //nothing changed
+		} else {
+			changed = true;
 		}
 	}
 
@@ -932,6 +935,9 @@ void TileMap::set_cell(int p_x, int p_y, int p_tile, bool p_flip_x, bool p_flip_
 
 	_make_quadrant_dirty(Q);
 	used_size_cache_dirty = true;
+	if (changed) {
+		emit_signal("tiles_changed");
+	}
 }
 
 int TileMap::get_cellv(const Vector2 &p_pos) const {
@@ -1960,6 +1966,7 @@ void TileMap::_bind_methods() {
 	ADD_PROPERTY_DEFAULT("format", FORMAT_1);
 
 	ADD_SIGNAL(MethodInfo("settings_changed"));
+	ADD_SIGNAL(MethodInfo("tiles_changed"));
 
 	BIND_CONSTANT(INVALID_CELL);
 
