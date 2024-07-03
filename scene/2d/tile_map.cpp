@@ -1754,6 +1754,23 @@ Array TileMap::get_used_cells_excluding_ids(PoolIntArray p_ids) const {
 
 // VALLA EDITS
 
+Array TileMap::get_all_cells_in_rect(Rect2 p_rect) const {
+	Array unused_cells;
+
+	// Iterate through each coordinate within the used_rect
+	for (int x = p_rect.position.x; x < p_rect.position.x + p_rect.size.x; ++x) {
+		for (int y = p_rect.position.y; y < p_rect.position.y + p_rect.size.y; ++y) {
+			PosKey pk(x, y);
+		}
+	}
+
+	return unused_cells;
+}
+
+Array TileMap::get_all_cells_in_used_rect() {
+	return get_all_cells_in_rect(get_used_rect());
+}
+
 Array TileMap::get_unused_cells_in_rect(Rect2 p_rect) const {
 	Array unused_cells;
 
@@ -1947,6 +1964,8 @@ void TileMap::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_used_cells_by_ids", "ids"), &TileMap::get_used_cells_by_ids);
 	ClassDB::bind_method(D_METHOD("get_used_cells_excluding_id", "ids"), &TileMap::get_used_cells_excluding_id);
 	ClassDB::bind_method(D_METHOD("get_used_cells_excluding_ids", "ids"), &TileMap::get_used_cells_excluding_ids);
+	ClassDB::bind_method(D_METHOD("get_all_cells_in_rect", "rect"), &TileMap::get_all_cells_in_rect);
+	ClassDB::bind_method(D_METHOD("get_all_cells_in_used_rect", "rect"), &TileMap::get_all_cells_in_used_rect);
 	ClassDB::bind_method(D_METHOD("get_unused_cells_in_rect", "rect"), &TileMap::get_unused_cells_in_rect);
 	ClassDB::bind_method(D_METHOD("get_unused_cells_in_used_rect"), &TileMap::get_unused_cells_in_used_rect);
 	ClassDB::bind_method(D_METHOD("get_used_rect"), &TileMap::get_used_rect);
