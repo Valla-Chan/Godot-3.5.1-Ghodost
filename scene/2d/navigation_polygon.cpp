@@ -328,10 +328,6 @@ void NavigationPolygon::make_polygons_from_outlines() {
 // VALLA EDITS
 // return true if the polygon composition is possible.
 bool NavigationPolygon::can_make_polygons_from_outlines() {
-	{
-		MutexLock lock(navmesh_generation);
-		navmesh.unref();
-	}
 	List<TriangulatorPoly> in_poly, out_poly;
 
 	Vector2 outside_point(-1e10, -1e10);
