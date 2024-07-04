@@ -325,6 +325,83 @@ void NavigationPolygon::make_polygons_from_outlines() {
 	emit_signal(CoreStringNames::get_singleton()->changed);
 }
 
+// VALLA EDITS
+// return true if the polygon composition is possible.
+bool NavigationPolygon::can_make_polygons_from_outlines() {
+	{
+		MutexLock lock(navmesh_generation);
+		navmesh.unref();
+	}
+	List<TriangulatorPoly> in_poly, out_poly;
+
+	Vector2 outside_point(-1e10, -1e10);
+
+	for (int i = 0; i < outlines.size(); i++) {
+		PoolVector<Vector2> ol = outlines[i];
+		int olsize = ol.size();
+		if (olsize < 3) {
+			continue;
+		}
+		PoolVector<Vector2>::Read r = ol.read();
+		for (int j = 0; j < olsize; j++) {
+			outside_point.x = MAX(r[j].x, outside_point.x);
+			outside_point.y = MAX(r[j].y, outside_point.y);
+		}
+	}
+
+	outside_point += Vector2(0.7239784, 0.819238); //avoid precision issues
+
+	for (int i = 0; i < outlines.size(); i++) {
+		PoolVector<Vector2> ol = outlines[i];
+		int olsize = ol.size();
+		if (olsize < 3) {
+			continue;
+		}
+		PoolVector<Vector2>::Read r = ol.read();
+
+		int interscount = 0;
+		//test if this is an outer outline
+		for (int k = 0; k < outlines.size(); k++) {
+			if (i == k) {
+				continue; //no self intersect
+			}
+
+			PoolVector<Vector2> ol2 = outlines[k];
+			int olsize2 = ol2.size();
+			if (olsize2 < 3) {
+				continue;
+			}
+			PoolVector<Vector2>::Read r2 = ol2.read();
+
+			for (int l = 0; l < olsize2; l++) {
+				if (Geometry::segment_intersects_segment_2d(r[0], outside_point, r2[l], r2[(l + 1) % olsize2], nullptr)) {
+					interscount++;
+				}
+			}
+		}
+
+		bool outer = (interscount % 2) == 0;
+
+		TriangulatorPoly tp;
+		tp.Init(olsize);
+		for (int j = 0; j < olsize; j++) {
+			tp[j] = r[j];
+		}
+
+		if (outer) {
+			tp.SetOrientation(TRIANGULATOR_CCW);
+		} else {
+			tp.SetOrientation(TRIANGULATOR_CW);
+			tp.SetHole(true);
+		}
+
+		in_poly.push_back(tp);
+	}
+
+	TriangulatorPartition tpart;
+	return (tpart.ConvexPartition_HM(&in_poly, &out_poly) != 0);
+}
+
 void NavigationPolygon::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_vertices", "vertices"), &NavigationPolygon::set_vertices);
 	ClassDB::bind_method(D_METHOD("get_vertices"), &NavigationPolygon::get_vertices);
@@ -343,6 +420,7 @@ void NavigationPolygon::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("remove_outline", "idx"), &NavigationPolygon::remove_outline);
 	ClassDB::bind_method(D_METHOD("clear_outlines"), &NavigationPolygon::clear_outlines);
 	ClassDB::bind_method(D_METHOD("make_polygons_from_outlines"), &NavigationPolygon::make_polygons_from_outlines);
+	ClassDB::bind_method(D_METHOD("can_make_polygons_from_outlines"), &NavigationPolygon::can_make_polygons_from_outlines);
 
 	ClassDB::bind_method(D_METHOD("_set_polygons", "polygons"), &NavigationPolygon::_set_polygons);
 	ClassDB::bind_method(D_METHOD("_get_polygons"), &NavigationPolygon::_get_polygons);

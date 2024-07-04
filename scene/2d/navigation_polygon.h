@@ -81,6 +81,7 @@ public:
 
 	void clear_outlines();
 	void make_polygons_from_outlines();
+	bool can_make_polygons_from_outlines();
 
 	Vector<int> get_polygon(int p_idx);
 	void clear_polygons();
