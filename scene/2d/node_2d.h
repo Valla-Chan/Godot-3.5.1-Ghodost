@@ -71,7 +71,7 @@ public:
 	virtual void _edit_set_rect(const Rect2 &p_edit_rect);
 #endif
 
-	void set_position(const Point2 &p_pos);
+	virtual void set_position(const Point2 &p_pos);
 	void set_rotation(float p_radians);
 	void set_rotation_degrees(float p_degrees);
 	void set_scale(const Size2 &p_scale);

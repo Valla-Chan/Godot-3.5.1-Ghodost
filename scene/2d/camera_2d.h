@@ -63,8 +63,11 @@ protected:
 	Vector2 offset;
 	Vector2 zoom;
 	AnchorMode anchor_mode;
+	Point2 pos_dirty; // save the position the camera wants to move to when unlocked.
 	bool rotating;
 	bool current;
+	bool frozen;
+	bool firstpos_set = false;
 	float smoothing;
 	bool smoothing_enabled;
 	bool smoothing_active; // smoothing can be enabled but not active in the editor
@@ -100,8 +103,13 @@ protected:
 	static void _bind_methods();
 
 public:
+	//void set_position(const Point2 &p_pos);
+
 	void set_offset(const Vector2 &p_offset);
 	Vector2 get_offset() const;
+
+	void set_frozen(bool p_frozen, bool p_keep_pos);
+	bool is_frozen() const;
 
 	void set_anchor_mode(AnchorMode p_anchor_mode);
 	AnchorMode get_anchor_mode() const;

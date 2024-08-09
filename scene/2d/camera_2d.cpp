@@ -366,6 +366,30 @@ Vector2 Camera2D::get_offset() const {
 	return offset;
 }
 
+/*
+void Camera2D::set_position(const Point2 &p_pos) {
+	pos_dirty = p_pos;
+	if (!Engine::get_singleton()->is_editor_hint()) {
+		if (!firstpos_set) {
+			firstpos_set = true;
+		} else if (frozen) {
+			return;
+		}
+	}
+	Node2D::set_position(p_pos);
+}*/
+
+void Camera2D::set_frozen(bool p_frozen, bool p_keep_pos) {
+	if (!p_keep_pos && frozen && !p_frozen) {
+		Node2D::set_position(pos_dirty);
+	}
+	frozen = p_frozen;
+}
+
+bool Camera2D::is_frozen() const {
+	return frozen;
+}
+
 void Camera2D::set_anchor_mode(AnchorMode p_anchor_mode) {
 	anchor_mode = p_anchor_mode;
 	_update_scroll();
@@ -645,6 +669,9 @@ void Camera2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_offset", "offset"), &Camera2D::set_offset);
 	ClassDB::bind_method(D_METHOD("get_offset"), &Camera2D::get_offset);
 
+	ClassDB::bind_method(D_METHOD("set_frozen", "frozen", "keep_pos"), &Camera2D::set_frozen, DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("is_frozen"), &Camera2D::is_frozen);
+
 	ClassDB::bind_method(D_METHOD("set_anchor_mode", "anchor_mode"), &Camera2D::set_anchor_mode);
 	ClassDB::bind_method(D_METHOD("get_anchor_mode"), &Camera2D::get_anchor_mode);
 
@@ -719,6 +746,7 @@ void Camera2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "zoom"), "set_zoom", "get_zoom");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "custom_viewport", PROPERTY_HINT_RESOURCE_TYPE, "Viewport", 0), "set_custom_viewport", "get_custom_viewport");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "process_callback", PROPERTY_HINT_ENUM, "Physics,Idle"), "set_process_callback", "get_process_callback");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "frozen"), "set_frozen", "is_frozen");
 
 	ADD_GROUP("Limit", "limit_");
 	ADD_PROPERTYI(PropertyInfo(Variant::INT, "limit_left"), "set_limit", "get_limit", MARGIN_LEFT);
@@ -760,6 +788,7 @@ Camera2D::Camera2D() {
 	anchor_mode = ANCHOR_MODE_DRAG_CENTER;
 	rotating = false;
 	current = false;
+	frozen = false;
 	limit[MARGIN_LEFT] = -10000000;
 	limit[MARGIN_TOP] = -10000000;
 	limit[MARGIN_RIGHT] = 10000000;
