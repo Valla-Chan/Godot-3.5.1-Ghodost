@@ -366,7 +366,7 @@ Vector2 Camera2D::get_offset() const {
 	return offset;
 }
 
-/*
+
 void Camera2D::set_position(const Point2 &p_pos) {
 	pos_dirty = p_pos;
 	if (!Engine::get_singleton()->is_editor_hint()) {
@@ -377,7 +377,7 @@ void Camera2D::set_position(const Point2 &p_pos) {
 		}
 	}
 	Node2D::set_position(p_pos);
-}*/
+}
 
 void Camera2D::set_frozen(bool p_frozen, bool p_keep_pos) {
 	if (!p_keep_pos && frozen && !p_frozen) {
@@ -746,7 +746,7 @@ void Camera2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "zoom"), "set_zoom", "get_zoom");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "custom_viewport", PROPERTY_HINT_RESOURCE_TYPE, "Viewport", 0), "set_custom_viewport", "get_custom_viewport");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "process_callback", PROPERTY_HINT_ENUM, "Physics,Idle"), "set_process_callback", "get_process_callback");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "frozen"), "set_frozen", "is_frozen");
+	//ADD_PROPERTY(PropertyInfo(Variant::BOOL, "frozen"), "set_frozen", "is_frozen");
 
 	ADD_GROUP("Limit", "limit_");
 	ADD_PROPERTYI(PropertyInfo(Variant::INT, "limit_left"), "set_limit", "get_limit", MARGIN_LEFT);

@@ -103,7 +103,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	//void set_position(const Point2 &p_pos);
+	void set_position(const Point2 &p_pos);
 
 	void set_offset(const Vector2 &p_offset);
 	Vector2 get_offset() const;
