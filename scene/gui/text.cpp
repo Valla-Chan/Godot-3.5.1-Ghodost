@@ -76,7 +76,7 @@ float TextBase::get_font_scale() const {
 
 // return a scaled version of the main font
 Ref<Font> TextBase::get_font_scaled(const String &p_font = "font") const {
-	Ref<Font> font = get_font("font");
+	Ref<Font> font = get_font(p_font);
 	Ref<DynamicFont> dynfont = font;
 	if (font_size_override > 0 || (font_scale != 1.0 && font_scale > 0)) {
 		if (font_scaled_cache.has(p_font) && font_scaled_cache[p_font].is_valid()) {
