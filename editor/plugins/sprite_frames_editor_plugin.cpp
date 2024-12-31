@@ -267,6 +267,9 @@ void SpriteFramesEditor::_sheet_add_frames() {
 	const Size2i offset = _get_offset();
 	const Size2i separation = _get_separation();
 
+	//if (!undo_redo) {
+	//	set_undo_redo(&get_undo_redo());
+	//}
 	undo_redo->create_action(TTR("Add Frame"));
 
 	int fc = frames->get_frame_count(edited_anim);
@@ -1817,7 +1820,7 @@ void SpriteFramesEditor::sync_anim_slot() {
 			AnimatedTextureRect *rect = Object::cast_to<AnimatedTextureRect>(selected_nodes[i]);
 			if (rect->get_sprite_frames() != nullptr && rect->get_sprite_frames()->reference() == frames->reference()) {
 				edited_anim = rect->get_animation();
-				if (frames->has_animation(edited_anim)) {
+				if (frames->has_animation(edited_anim) && animations_map.has(edited_anim)) {
 					animations->set_selected(animations_map[edited_anim]);
 				}
 				_update_library(false);
@@ -1830,7 +1833,7 @@ void SpriteFramesEditor::sync_anim_slot() {
 			AnimatedSprite *sprite = Object::cast_to<AnimatedSprite>(selected_nodes[i]);
 			if (sprite->get_sprite_frames() != nullptr && sprite->get_sprite_frames()->reference() == frames->reference()) {
 				edited_anim = sprite->get_animation();
-				if (frames->has_animation(edited_anim)) {
+				if (frames->has_animation(edited_anim) && animations_map.has(edited_anim)) {
 					animations->set_selected(animations_map[edited_anim]);
 				}
 				_update_library(false);
@@ -1843,7 +1846,7 @@ void SpriteFramesEditor::sync_anim_slot() {
 			AnimatedSprite3D *sprite = Object::cast_to<AnimatedSprite3D>(selected_nodes[i]);
 			if (sprite->get_sprite_frames() != nullptr && sprite->get_sprite_frames()->reference() == frames->reference()) {
 				edited_anim = sprite->get_animation();
-				if (frames->has_animation(edited_anim)) {
+				if (frames->has_animation(edited_anim) && animations_map.has(edited_anim)) {
 					animations->set_selected(animations_map[edited_anim]);
 				}
 				_update_library(false);
@@ -1905,11 +1908,19 @@ bool SpriteFramesEditorPlugin::handles(Object *p_object) const {
 	AnimatedSprite *animated_sprite = Object::cast_to<AnimatedSprite>(p_object);
 	AnimatedSprite3D *animated_sprite3d = Object::cast_to<AnimatedSprite3D>(p_object);
 	AnimatedTextureRect *animated_tex = Object::cast_to<AnimatedTextureRect>(p_object);
+	/*
 	if ((animated_sprite && *animated_sprite->get_sprite_frames()) || (animated_sprite3d && *animated_sprite3d->get_sprite_frames())) {
 		return true;
 	} else if (animated_tex && *animated_tex->get_sprite_frames()) {
 		return true;
-	} else {
+	}*/
+	if((animated_sprite) || (animated_sprite3d)) {
+		return true;
+	}
+	else if (animated_tex) {
+		return true;
+	}
+	else {
 		return p_object->is_class("SpriteFrames");
 	}
 }
