@@ -2232,7 +2232,8 @@ bool CanvasItemEditor::_is_object_selected(CanvasItem *p_object) {
 	List<CanvasItem *> selection = _get_edited_canvas_items(true,false);
 	// search for object in the selected nodes list
 	for (List<CanvasItem *>::Element *E = selection.front(); E; E = E->next()) {
-		print_line(vformat("%s %s", E->get(), p_object));
+		// valla edit: make item and child print to console.
+		//print_line(vformat("%s %s", E->get(), p_object));
 		if (E->get() == p_object) {
 			return true;
 		}
