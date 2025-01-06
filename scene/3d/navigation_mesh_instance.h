@@ -53,6 +53,7 @@ class NavigationMeshInstance : public Spatial {
 	Thread bake_thread;
 
 protected:
+	bool _is_valid() const;
 	void _notification(int p_what);
 	static void _bind_methods();
 	void _changed_callback(Object *p_changed, const char *p_prop);

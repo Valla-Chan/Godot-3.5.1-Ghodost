@@ -46,7 +46,7 @@ void NavigationMeshInstance::set_enabled(bool p_enabled) {
 		return;
 	}
 
-	if (!enabled) {
+	if (!_is_valid()) {
 		NavigationServer::get_singleton()->region_set_map(region, RID());
 	} else {
 		if (navigation) {
@@ -107,6 +107,11 @@ RID NavigationMeshInstance::get_region_rid() const {
 
 /////////////////////////////
 
+// Nav Polys are invalid unless they contain 3+ verts
+bool NavigationMeshInstance::_is_valid() const {
+	return enabled && navmesh.is_valid() && navmesh->get_polygon_count() > 2;
+}
+
 void NavigationMeshInstance::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE: {
@@ -114,7 +119,7 @@ void NavigationMeshInstance::_notification(int p_what) {
 			while (c) {
 				navigation = Object::cast_to<Navigation>(c);
 				if (navigation) {
-					if (enabled) {
+					if (_is_valid()) {
 						NavigationServer::get_singleton()->region_set_map(region, navigation->get_rid());
 					}
 					break;
@@ -123,7 +128,7 @@ void NavigationMeshInstance::_notification(int p_what) {
 				c = c->get_parent_spatial();
 			}
 
-			if (enabled && navigation == nullptr) {
+			if (_is_valid() && navigation == nullptr) {
 				// did not find a valid navigation node parent, fallback to default navigation map on world resource
 				NavigationServer::get_singleton()->region_set_map(region, get_world()->get_navigation_map());
 			}
@@ -131,7 +136,7 @@ void NavigationMeshInstance::_notification(int p_what) {
 			if (navmesh.is_valid() && get_tree()->is_debugging_navigation_hint()) {
 				MeshInstance *dm = memnew(MeshInstance);
 				dm->set_mesh(navmesh->get_debug_mesh());
-				if (is_enabled()) {
+				if (enabled) {
 					dm->set_material_override(get_tree()->get_debug_navigation_material());
 				} else {
 					dm->set_material_override(get_tree()->get_debug_navigation_disabled_material());
@@ -178,7 +183,7 @@ void NavigationMeshInstance::set_navigation_mesh(const Ref<NavigationMesh> &p_na
 	if (debug_view == nullptr && is_inside_tree() && navmesh.is_valid() && get_tree()->is_debugging_navigation_hint()) {
 		MeshInstance *dm = memnew(MeshInstance);
 		dm->set_mesh(navmesh->get_debug_mesh());
-		if (is_enabled()) {
+		if (enabled) {
 			dm->set_material_override(get_tree()->get_debug_navigation_material());
 		} else {
 			dm->set_material_override(get_tree()->get_debug_navigation_disabled_material());
