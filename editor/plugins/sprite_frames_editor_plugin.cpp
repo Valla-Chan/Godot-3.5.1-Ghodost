@@ -812,6 +812,7 @@ void SpriteFramesEditor::_frame_notify_send(int index) {
 			if (rect->get_sprite_frames()->reference() == frames->reference()) {
 				rect->set_animation(edited_anim);
 				rect->set_frame(index);
+				rect->set_visible(true);
 			}
 		}
 		else if (Object::cast_to<AnimatedSprite>(selected_nodes[i])) {
@@ -819,12 +820,14 @@ void SpriteFramesEditor::_frame_notify_send(int index) {
 			if (sprite->get_sprite_frames()->reference() == frames->reference()) {
 				sprite->set_animation(edited_anim);
 				sprite->set_frame(index);
+				sprite->set_visible(true);
 			}
 		} else if (Object::cast_to<AnimatedSprite3D>(selected_nodes[i])) {
 			AnimatedSprite3D *sprite = Object::cast_to<AnimatedSprite3D>(selected_nodes[i]);
 			if (sprite->get_sprite_frames()->reference() == frames->reference()) {
 				sprite->set_animation(edited_anim);
 				sprite->set_frame(index);
+				sprite->set_visible(true);
 			}
 		}
 		//frames->emit_signal(SceneStringNames::get_singleton()->animation_changed, edited_anim);

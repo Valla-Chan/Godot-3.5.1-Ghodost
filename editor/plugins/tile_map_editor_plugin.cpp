@@ -1222,7 +1222,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 						return true;
 					}
 
-					if (mb->get_command()) {
+					if (mb->get_alt()) { //get_command()
 						tool = TOOL_PICKING;
 						_pick_tile(over_tile);
 						_update_button_tool();
