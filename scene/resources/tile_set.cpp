@@ -51,14 +51,14 @@ bool TileSet::_set(const StringName &p_name, const Variant &p_value) {
 		tile_set_texture(id, p_value);
 	} else if (what == "normal_map") {
 		tile_set_normal_map(id, p_value);
+	} else if (what == "region") {
+		tile_set_region(id, p_value);
 	} else if (what == "tex_offset") {
 		tile_set_texture_offset(id, p_value);
 	} else if (what == "material") {
 		tile_set_material(id, p_value);
 	} else if (what == "modulate") {
 		tile_set_modulate(id, p_value);
-	} else if (what == "region") {
-		tile_set_region(id, p_value);
 	} else if (what == "tile_mode") {
 		tile_set_tile_mode(id, (TileMode)((int)p_value));
 	} else if (what == "is_autotile") {
@@ -226,14 +226,14 @@ bool TileSet::_get(const StringName &p_name, Variant &r_ret) const {
 		r_ret = tile_get_texture(id);
 	} else if (what == "normal_map") {
 		r_ret = tile_get_normal_map(id);
+	} else if (what == "region") {
+		r_ret = tile_get_region(id);
 	} else if (what == "tex_offset") {
 		r_ret = tile_get_texture_offset(id);
 	} else if (what == "material") {
 		r_ret = tile_get_material(id);
 	} else if (what == "modulate") {
 		r_ret = tile_get_modulate(id);
-	} else if (what == "region") {
-		r_ret = tile_get_region(id);
 	} else if (what == "tile_mode") {
 		r_ret = tile_get_tile_mode(id);
 	} else if (what.left(9) == "autotile/") {
@@ -330,10 +330,10 @@ void TileSet::_get_property_list(List<PropertyInfo> *p_list) const {
 		p_list->push_back(PropertyInfo(Variant::STRING, pre + "name", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR));
 		p_list->push_back(PropertyInfo(Variant::OBJECT, pre + "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture", PROPERTY_USAGE_NOEDITOR));
 		p_list->push_back(PropertyInfo(Variant::OBJECT, pre + "normal_map", PROPERTY_HINT_RESOURCE_TYPE, "Texture", PROPERTY_USAGE_NOEDITOR));
+		p_list->push_back(PropertyInfo(Variant::RECT2, pre + "region", PROPERTY_HINT_RANGE, "-8,8,1", PROPERTY_USAGE_NOEDITOR));
 		p_list->push_back(PropertyInfo(Variant::VECTOR2, pre + "tex_offset", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR));
 		p_list->push_back(PropertyInfo(Variant::OBJECT, pre + "material", PROPERTY_HINT_RESOURCE_TYPE, "ShaderMaterial", PROPERTY_USAGE_NOEDITOR));
 		p_list->push_back(PropertyInfo(Variant::COLOR, pre + "modulate", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR));
-		p_list->push_back(PropertyInfo(Variant::RECT2, pre + "region", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR));
 		p_list->push_back(PropertyInfo(Variant::INT, pre + "tile_mode", PROPERTY_HINT_ENUM, "SINGLE_TILE,AUTO_TILE,ATLAS_TILE", PROPERTY_USAGE_NOEDITOR));
 		if (tile_get_tile_mode(id) == AUTO_TILE) {
 			p_list->push_back(PropertyInfo(Variant::INT, pre + "autotile/bitmask_mode", PROPERTY_HINT_ENUM, "2X2,3X3 (minimal),3X3", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));

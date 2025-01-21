@@ -145,6 +145,7 @@ class TileSetEditor : public HSplitContainer {
 	Control *workspace;
 	Button *tool_workspacemode[WORKSPACE_MODE_MAX];
 	Button *tool_editmode[EDITMODE_MAX];
+	Button *tile_browse_btn;
 	HSeparator *separator_editmode;
 	HBoxContainer *toolbar;
 	ToolButton *tools[TOOL_MAX];
@@ -204,6 +205,7 @@ private:
 	void _on_workspace_process();
 	void _on_scroll_container_input(const Ref<InputEvent> &p_event);
 	void _on_workspace_input(const Ref<InputEvent> &p_ie);
+	void _tile_texture_browse();
 	void _on_tool_clicked(int p_tool);
 	void _on_priority_changed(float val);
 	void _on_z_index_changed(float val);

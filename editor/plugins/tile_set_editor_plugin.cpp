@@ -262,6 +262,7 @@ void TileSetEditor::_bind_methods() {
 	ClassDB::bind_method("_undo_redo_import_scene", &TileSetEditor::_undo_redo_import_scene);
 	ClassDB::bind_method("_on_tileset_toolbar_button_pressed", &TileSetEditor::_on_tileset_toolbar_button_pressed);
 	ClassDB::bind_method(D_METHOD("_quick_opened"), &TileSetEditor::_quick_opened);
+	ClassDB::bind_method(D_METHOD("_tile_texture_browse"), &TileSetEditor::_tile_texture_browse);
 	ClassDB::bind_method("_on_textures_added", &TileSetEditor::_on_textures_added);
 	ClassDB::bind_method("_on_tileset_toolbar_confirm", &TileSetEditor::_on_tileset_toolbar_confirm);
 	ClassDB::bind_method("_on_texture_list_selected", &TileSetEditor::_on_texture_list_selected);
@@ -338,6 +339,8 @@ void TileSetEditor::_notification(int p_what) {
 			tool_editmode[EDITMODE_PRIORITY]->set_icon(get_icon("MaterialPreviewLight1", "EditorIcons"));
 			tool_editmode[EDITMODE_ICON]->set_icon(get_icon("LargeTexture", "EditorIcons"));
 			tool_editmode[EDITMODE_Z_INDEX]->set_icon(get_icon("Sort", "EditorIcons"));
+
+			tile_browse_btn->set_icon(get_icon("Filesystem", "EditorIcons"));
 
 			scroll->add_style_override("bg", get_stylebox("bg", "Tree"));
 		} break;
@@ -417,6 +420,13 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 		tool_workspacemode[i]->connect("pressed", this, "_on_workspace_mode_changed", varray(i));
 		tool_hb->add_child(tool_workspacemode[i]);
 	}
+	// VALLA EDITS: add button to browse to texture location.
+	tile_browse_btn = memnew(Button);
+	tile_browse_btn->set_text(TTR(" Show in File Manager "));
+	tile_browse_btn->set_tooltip(TTR("Open the selected frame's image texture in the File Manager."));
+	tile_browse_btn->set_modulate(Color(1.05, 1.05, 1.05, 0.9));
+	tool_hb->add_child(tile_browse_btn);
+	tile_browse_btn->connect("pressed", this, "_tile_texture_browse");
 
 	Control *spacer = memnew(Control);
 	spacer->set_h_size_flags(Control::SIZE_EXPAND_FILL);
@@ -768,6 +778,7 @@ void TileSetEditor::_on_tileset_toolbar_confirm() {
 	}
 }
 
+// Texture selected
 void TileSetEditor::_on_texture_list_selected(int p_index) {
 	if (get_current_texture().is_valid()) {
 		current_item_index = p_index;
@@ -781,8 +792,12 @@ void TileSetEditor::_on_texture_list_selected(int p_index) {
 		update_workspace_tile_mode();
 	}
 
-	set_current_tile(-1);
+	_select_next_shape();
+	//set_current_tile(-1);
 	workspace->update();
+	// Hacky fix for scrollbar/zoom issue
+	_zoom_in();
+	_zoom_out();
 }
 
 // Valla edits
@@ -1336,12 +1351,14 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 		}
 	}
 
+	// Creating a new region when none exists
 	if (edit_mode == EDITMODE_REGION) {
 		if (mb.is_valid()) {
 			if (mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 				if (get_current_tile() >= 0 || workspace_mode != WORKSPACE_EDIT) {
+					Vector2 mPos = mb->get_position();
 					dragging = true;
-					region_from = mb->get_position();
+					region_from = mPos;
 					edited_region = Rect2(region_from, Size2());
 					workspace->update();
 					workspace_overlay->update();
@@ -1394,7 +1411,7 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 						undo_redo->add_undo_method(this, "_validate_current_tile_id");
 						undo_redo->add_do_method(tileset.ptr(), "tile_set_texture", t_id, get_current_texture());
 						undo_redo->add_do_method(tileset.ptr(), "tile_set_region", t_id, edited_region);
-						undo_redo->add_do_method(tileset.ptr(), "tile_set_name", t_id, get_current_texture()->get_path().get_file() + " " + String::num(t_id, 0));
+						undo_redo->add_do_method(tileset.ptr(), "tile_set_name", t_id, get_current_texture()->get_path().get_file().split(".")[0] + " " + String::num(t_id, 0));
 						if (workspace_mode != WORKSPACE_CREATE_SINGLE) {
 							undo_redo->add_do_method(tileset.ptr(), "autotile_set_size", t_id, snap_step);
 							undo_redo->add_do_method(tileset.ptr(), "autotile_set_spacing", t_id, snap_separation.x);
@@ -1446,6 +1463,7 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 		}
 	}
 
+	// Editing when there is already at least 1 region
 	if (workspace_mode == WORKSPACE_EDIT) {
 		if (get_current_tile() >= 0) {
 			int spacing = tileset->autotile_get_spacing(get_current_tile());
@@ -1637,6 +1655,8 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 					shape_anchor += current_tile_region.position;
 					if (tools[TOOL_SELECT]->is_pressed()) {
 						if (mb.is_valid()) {
+
+							// PRESS LEFT MOUSE
 							if (mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 								if (edit_mode != EDITMODE_PRIORITY && current_shape.size() > 0) {
 									int grabbed_point = get_grabbed_point(mb->get_position(), grab_threshold);
@@ -1655,6 +1675,8 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 									}
 								}
 								workspace->update();
+
+							// RELEASE LEFT MOUSE
 							} else if (!mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 								if (edit_mode == EDITMODE_COLLISION) {
 									if (dragging_point >= 0) {
@@ -1736,7 +1758,8 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 								workspace->update();
 							}
 						}
-					} else if (tools[SHAPE_NEW_POLYGON]->is_pressed()) {
+					}
+					else if (tools[SHAPE_NEW_POLYGON]->is_pressed()) {
 						if (mb.is_valid()) {
 							if (mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 								Vector2 pos = mb->get_position();
@@ -1770,7 +1793,8 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 								workspace->update();
 							}
 						}
-					} else if (tools[SHAPE_NEW_RECTANGLE]->is_pressed()) {
+					}
+					else if (tools[SHAPE_NEW_RECTANGLE]->is_pressed()) {
 						if (mb.is_valid()) {
 							if (mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 								_set_edited_collision_shape(Ref<ConvexPolygonShape2D>());
@@ -1823,6 +1847,19 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 			}
 		}
 	}
+}
+
+void TileSetEditor::_tile_texture_browse() {
+	if (get_current_texture().is_valid()) {
+		String fpath = get_current_texture()->get_path();
+
+		if (!fpath.ends_with("/")) {
+			fpath = fpath.get_base_dir();
+		}
+		String dir = ProjectSettings::get_singleton()->globalize_path(fpath);
+		OS::get_singleton()->shell_open(String("file://") + dir);
+	}
+	
 }
 
 void TileSetEditor::_on_tool_clicked(int p_tool) {
@@ -3321,6 +3358,7 @@ void TileSetEditor::update_workspace_tile_mode() {
 		for (int i = 1; i < WORKSPACE_MODE_MAX; i++) {
 			tool_workspacemode[i]->set_disabled(true);
 		}
+		tile_browse_btn->set_disabled(true);
 		tools[SELECT_NEXT]->set_disabled(true);
 		tools[SELECT_PREVIOUS]->set_disabled(true);
 
@@ -3335,6 +3373,7 @@ void TileSetEditor::update_workspace_tile_mode() {
 		for (int i = 1; i < WORKSPACE_MODE_MAX; i++) {
 			tool_workspacemode[i]->set_disabled(false);
 		}
+		tile_browse_btn->set_disabled(false);
 		tools[SELECT_NEXT]->set_disabled(false);
 		tools[SELECT_PREVIOUS]->set_disabled(false);
 
@@ -3642,6 +3681,7 @@ void TilesetEditorContext::_get_property_list(List<PropertyInfo> *p_list) const 
 		p_list->push_back(PropertyInfo(Variant::STRING, PNAME("tile_name")));
 		p_list->push_back(PropertyInfo(Variant::OBJECT, PNAME("tile_texture"), PROPERTY_HINT_RESOURCE_TYPE, "Texture"));
 		p_list->push_back(PropertyInfo(Variant::OBJECT, PNAME("tile_normal_map"), PROPERTY_HINT_RESOURCE_TYPE, "Texture"));
+		p_list->push_back(PropertyInfo(Variant::RECT2, PNAME("tile_region"), PROPERTY_HINT_RANGE, "-8,8,1"));
 		p_list->push_back(PropertyInfo(Variant::VECTOR2, PNAME("tile_tex_offset")));
 		p_list->push_back(PropertyInfo(Variant::OBJECT, PNAME("tile_material"), PROPERTY_HINT_RESOURCE_TYPE, "ShaderMaterial"));
 		p_list->push_back(PropertyInfo(Variant::COLOR, PNAME("tile_modulate")));

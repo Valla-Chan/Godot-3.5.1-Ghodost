@@ -484,12 +484,11 @@ void TileMapEditor::_update_palette() {
 
 	for (List<int>::Element *E = tiles.front(); E; E = E->next()) {
 		String name = tileset->tile_get_name(E->get());
-		name = name.split(".")[0];
 
 		if (name != "") {
 			if (show_tile_ids) {
 				if (sort_by_name) {
-					name = name + " - " + itos(E->get());
+					name = name + " " + itos(E->get());
 				} else {
 					name = itos(E->get()) + " - " + name;
 				}
