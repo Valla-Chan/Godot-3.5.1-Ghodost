@@ -671,6 +671,8 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	max_scale = 16.0f;
 	min_scale = 0.01f;
 	scale_ratio = 1.2f;
+
+	_zoom_fit();
 }
 
 TileSetEditor::~TileSetEditor() {
@@ -2481,10 +2483,30 @@ void TileSetEditor::_zoom_out() {
 	_zoom_on_position(1 / scale_ratio, Vector2());
 }
 
+// VALLA EDITS: TODO: make this dynamic.
+void TileSetEditor::_zoom_fit() {
+	const float old_scale = workspace->get_scale().x;
+	float new_scale = 3;
+	workspace->set_scale(Vector2(new_scale, new_scale));
+	workspace_container->set_custom_minimum_size(workspace->get_rect().size);
+	workspace_overlay->set_custom_minimum_size(workspace->get_rect().size);
+
+	Vector2 offset = Vector2(scroll->get_h_scroll(), scroll->get_v_scroll());
+	offset = (offset + Vector2()) / old_scale * new_scale - Vector2();
+	scroll->set_h_scroll(offset.x);
+	scroll->set_v_scroll(offset.y);
+}
+
 void TileSetEditor::_zoom_reset() {
+	const float old_scale = workspace->get_scale().x;
 	workspace->set_scale(Vector2(1, 1));
 	workspace_container->set_custom_minimum_size(workspace->get_rect().size);
 	workspace_overlay->set_custom_minimum_size(workspace->get_rect().size);
+
+	Vector2 offset = Vector2(scroll->get_h_scroll(), scroll->get_v_scroll());
+	offset = (offset + Vector2()) / old_scale * 1 - Vector2();
+	scroll->set_h_scroll(offset.x);
+	scroll->set_v_scroll(offset.y);
 }
 
 void TileSetEditor::_zoom_on_position(float p_zoom, const Vector2 &p_position) {

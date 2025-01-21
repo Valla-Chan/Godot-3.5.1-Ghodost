@@ -234,6 +234,7 @@ private:
 
 	void _zoom_in();
 	void _zoom_out();
+	void _zoom_fit();
 	void _zoom_reset();
 	void _zoom_on_position(float p_zoom, const Vector2 &p_position);
 
