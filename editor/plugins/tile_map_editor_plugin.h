@@ -54,6 +54,7 @@ class TileMapEditor : public VBoxContainer {
 		TOOL_LINE_PAINT,
 		TOOL_LINE_ERASE,
 		TOOL_SELECTING,
+		TOOL_SELECTED,
 		TOOL_BUCKET,
 		TOOL_PICKING,
 		TOOL_PASTING,

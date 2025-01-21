@@ -108,6 +108,7 @@ class TileSetEditor : public HSplitContainer {
 	ConfirmationDialog *cd;
 	AcceptDialog *err_dialog;
 	EditorFileDialog *texture_dialog;
+	EditorQuickOpen *quick_open;
 
 	ItemList *texture_list;
 	int option;
@@ -147,6 +148,8 @@ class TileSetEditor : public HSplitContainer {
 	HSeparator *separator_editmode;
 	HBoxContainer *toolbar;
 	ToolButton *tools[TOOL_MAX];
+	Label *shape_index;
+
 	VSeparator *separator_shape_toggle;
 	VSeparator *separator_bitmask;
 	VSeparator *separator_delete;
@@ -192,6 +195,7 @@ private:
 	void _on_tileset_toolbar_button_pressed(int p_index);
 	void _on_tileset_toolbar_confirm();
 	void _on_texture_list_selected(int p_index);
+	void _quick_opened();
 	void _on_textures_added(const PoolStringArray &p_paths);
 	void _on_edit_mode_changed(int p_edit_mode);
 	void _on_workspace_mode_changed(int p_workspace_mode);
@@ -216,6 +220,7 @@ private:
 	Vector2 _get_subtiles_count(int p_tile_id);
 	void _select_next_subtile();
 	void _select_previous_subtile();
+	void _update_shape_labels();
 	void _select_next_shape();
 	void _select_previous_shape();
 	void _set_edited_collision_shape(const Ref<Shape2D> &p_shape);

@@ -36,14 +36,17 @@
 #include "editor/plugins/canvas_item_editor_plugin.h"
 #include "scene/2d/physics_body_2d.h"
 #include "scene/2d/sprite.h"
+#include "scene/2d/tile_map.h"
 
 void TileSetEditor::edit(const Ref<TileSet> &p_tileset) {
-	tileset = p_tileset;
-	tileset->add_change_receptor(this);
+	if (tileset != p_tileset) {
+		tileset = p_tileset;
+		tileset->add_change_receptor(this);
 
-	texture_list->clear();
-	texture_map.clear();
-	update_texture_list();
+		texture_list->clear();
+		texture_map.clear();
+		update_texture_list();
+	}
 }
 
 void TileSetEditor::_import_node(Node *p_node, Ref<TileSet> p_library) {
@@ -258,6 +261,7 @@ void TileSetEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, C
 void TileSetEditor::_bind_methods() {
 	ClassDB::bind_method("_undo_redo_import_scene", &TileSetEditor::_undo_redo_import_scene);
 	ClassDB::bind_method("_on_tileset_toolbar_button_pressed", &TileSetEditor::_on_tileset_toolbar_button_pressed);
+	ClassDB::bind_method(D_METHOD("_quick_opened"), &TileSetEditor::_quick_opened);
 	ClassDB::bind_method("_on_textures_added", &TileSetEditor::_on_textures_added);
 	ClassDB::bind_method("_on_tileset_toolbar_confirm", &TileSetEditor::_on_tileset_toolbar_confirm);
 	ClassDB::bind_method("_on_texture_list_selected", &TileSetEditor::_on_texture_list_selected);
@@ -419,18 +423,30 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	tool_hb->add_child(spacer);
 	tool_hb->move_child(spacer, WORKSPACE_CREATE_SINGLE);
 
+	// Next and Prev arrows
+	//---------------------------------------
 	tools[SELECT_NEXT] = memnew(ToolButton);
 	tool_hb->add_child(tools[SELECT_NEXT]);
 	tool_hb->move_child(tools[SELECT_NEXT], WORKSPACE_CREATE_SINGLE);
 	tools[SELECT_NEXT]->set_shortcut(ED_SHORTCUT("tileset_editor/next_shape", TTR("Next Coordinate"), KEY_PAGEDOWN));
 	tools[SELECT_NEXT]->connect("pressed", this, "_on_tool_clicked", varray(SELECT_NEXT));
 	tools[SELECT_NEXT]->set_tooltip(TTR("Select the next shape, subtile, or Tile."));
+
+	// VALLA EDITS: add in a a label here that displays the shape index.
+	shape_index = memnew(Label);
+	shape_index->set_v_size_flags(Control::SIZE_EXPAND_FILL);
+	//shape_index->set_h_size_flags(Control::SIZE_EXPAND);
+	shape_index->set_custom_minimum_size(Size2(8, 4));
+	tool_hb->add_child(shape_index);
+	tool_hb->move_child(shape_index, WORKSPACE_CREATE_SINGLE);
+
 	tools[SELECT_PREVIOUS] = memnew(ToolButton);
 	tool_hb->add_child(tools[SELECT_PREVIOUS]);
 	tool_hb->move_child(tools[SELECT_PREVIOUS], WORKSPACE_CREATE_SINGLE);
 	tools[SELECT_PREVIOUS]->set_shortcut(ED_SHORTCUT("tileset_editor/previous_shape", TTR("Previous Coordinate"), KEY_PAGEUP));
 	tools[SELECT_PREVIOUS]->set_tooltip(TTR("Select the previous shape, subtile, or Tile."));
 	tools[SELECT_PREVIOUS]->connect("pressed", this, "_on_tool_clicked", varray(SELECT_PREVIOUS));
+	//---------------------------------------
 
 	VSeparator *separator_shape_selection = memnew(VSeparator);
 	tool_hb->add_child(separator_shape_selection);
@@ -639,12 +655,13 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	texture_dialog->clear_filters();
 	List<String> extensions;
 
-	ResourceLoader::get_recognized_extensions_for_type("Texture", &extensions);
-	for (List<String>::Element *E = extensions.front(); E; E = E->next()) {
-		texture_dialog->add_filter("*." + E->get() + " ; " + E->get().to_upper());
-	}
 	add_child(texture_dialog);
 	texture_dialog->connect("files_selected", this, "_on_textures_added");
+
+	// VALLA EDITS
+	quick_open = memnew(EditorQuickOpen);
+	add_child(quick_open);
+	quick_open->connect("quick_open", this, "_quick_opened");
 
 	//---------------
 	helper = memnew(TilesetEditorContext(this));
@@ -666,7 +683,22 @@ void TileSetEditor::_on_tileset_toolbar_button_pressed(int p_index) {
 	option = p_index;
 	switch (option) {
 		case TOOL_TILESET_ADD_TEXTURE: {
-			texture_dialog->popup_centered_ratio();
+			bool held_ctrl = Input::get_singleton()->is_key_pressed(KEY_CONTROL);
+			if (!held_ctrl) {
+				texture_dialog->clear_filters();
+				List<String> extensions;
+				ResourceLoader::get_recognized_extensions_for_type("Texture", &extensions);
+				for (List<String>::Element *E = extensions.front(); E; E = E->next()) {
+					texture_dialog->add_filter("*." + E->get() + " ; " + E->get().to_upper());
+				}
+				String path = get_current_texture()->get_path();
+				texture_dialog->popup_centered_ratio();
+				texture_dialog->set_current_path(path);
+			} else {
+				quick_open->popup_dialog("Texture", false);
+				quick_open->set_title(TTR("Quick Open Tile Texture..."));
+			}
+			
 		} break;
 		case TOOL_TILESET_REMOVE_TEXTURE: {
 			if (get_current_texture().is_valid()) {
@@ -746,6 +778,17 @@ void TileSetEditor::_on_texture_list_selected(int p_index) {
 
 	set_current_tile(-1);
 	workspace->update();
+}
+
+// Valla edits
+void TileSetEditor::_quick_opened() {
+	Vector<String> files = quick_open->get_selected_files();
+	PoolVector<String> files_pooled;
+
+	for (int i = 0; i < files.size(); i++) {
+		files_pooled.push_back(files[i]);
+	}
+	_on_textures_added(files_pooled);
 }
 
 void TileSetEditor::_on_textures_added(const PoolStringArray &p_paths) {
@@ -1843,6 +1886,7 @@ void TileSetEditor::_on_tool_clicked(int p_tool) {
 			_update_toggle_shape_button();
 			workspace->update();
 			workspace_container->update();
+			// Update the tileset editor context 
 			helper->_change_notify("");
 		}
 	} else if (p_tool == SELECT_NEXT) {
@@ -2338,9 +2382,19 @@ void TileSetEditor::_select_previous_shape() {
 	}
 }
 
+void TileSetEditor::_update_shape_labels() {
+	int index = get_current_tile();
+	if (index >= 0) {
+		shape_index->set_text(itos(index));
+	} else {
+		shape_index->set_text(" ");
+	}
+}
+
 void TileSetEditor::_set_edited_collision_shape(const Ref<Shape2D> &p_shape) {
 	edited_collision_shape = p_shape;
 	_update_toggle_shape_button();
+	_update_shape_labels();
 }
 
 void TileSetEditor::_set_snap_step(Vector2 p_val) {
@@ -3392,8 +3446,11 @@ void TileSetEditor::set_current_tile(int p_id) {
 		if (p_id == -1) {
 			editor->get_inspector()->edit(tileset.ptr());
 		} else {
+			// change editor focus to the context editor.
+			// TODO: do we still want this?
 			editor->get_inspector()->edit(helper);
 		}
+		_update_shape_labels();
 	}
 }
 
@@ -3609,13 +3666,28 @@ void TileSetEditorPlugin::edit(Object *p_node) {
 	if (Object::cast_to<TileSet>(p_node)) {
 		tileset_editor->edit(Object::cast_to<TileSet>(p_node));
 	}
+	else if (Object::cast_to<TileMap>(p_node)) {
+		TileMap *tilemap = Object::cast_to<TileMap>(p_node);
+		tileset_editor->edit(tilemap->get_tileset());
+	}
 }
 
 bool TileSetEditorPlugin::handles(Object *p_node) const {
-	return p_node->is_class("TileSet") || p_node->is_class("TilesetEditorContext");
+	return p_node->is_class("TileMap") || p_node->is_class("TileSet") || p_node->is_class("TilesetEditorContext");
 }
 
 void TileSetEditorPlugin::make_visible(bool p_visible) {
+
+	Object *inspector_ob = EditorNode::get_singleton()->get_inspector()->get_edited_object();
+	if (inspector_ob == nullptr)
+		return;
+
+	if (Object::cast_to<TileMap>(inspector_ob) ||
+			Object::cast_to<TileSet>(inspector_ob) ||
+			Object::cast_to<TilesetEditorContext>(inspector_ob)) {
+		p_visible = true;
+	}
+
 	if (p_visible) {
 		tileset_editor_button->show();
 		editor->make_bottom_panel_item_visible(tileset_editor);

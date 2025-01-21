@@ -484,6 +484,7 @@ void TileMapEditor::_update_palette() {
 
 	for (List<int>::Element *E = tiles.front(); E; E = E->next()) {
 		String name = tileset->tile_get_name(E->get());
+		name = name.split(".")[0];
 
 		if (name != "") {
 			if (show_tile_ids) {
@@ -509,6 +510,11 @@ void TileMapEditor::_update_palette() {
 		entries.sort();
 	}
 
+
+	// Add tiles to palette
+	//---------------------------------------------
+
+	// Add empty
 	if (entries.size() > 0) {
 		// add blank tile
 		palette->add_item("Empty");
@@ -563,6 +569,7 @@ void TileMapEditor::_update_palette() {
 		palette->set_item_icon(0, palette->get_item_icon(1));
 		palette->set_item_icon_modulate(0, Color(0, 0, 0, 0));
 	}
+	//---------------------------------------------
 
 	int sel_tile = selected.get(0);
 	if (selected.get(0) != TileMap::INVALID_CELL) {
@@ -1339,7 +1346,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 						return true; // We want to keep the Pasting tool.
 					} else if (tool == TOOL_SELECTING) {
 						CanvasItemEditor::get_singleton()->update_viewport();
-
+						//return true;
 					} else if (tool == TOOL_BUCKET) {
 						PoolVector<Vector2> points = _bucket_fill(over_tile);
 
@@ -2286,17 +2293,21 @@ TileMapEditor::TileMapEditor(EditorNode *p_editor) {
 	rotate_right_button->set_shortcut(ED_SHORTCUT("tile_map_editor/rotate_right", TTR("Rotate Right"), KEY_S));
 	tool_hb->add_child(rotate_right_button);
 
+	// VALLA EDITS: make these into toggles.
+
 	flip_horizontal_button = memnew(ToolButton);
 	flip_horizontal_button->set_tooltip(TTR("Flip Horizontally"));
-	flip_horizontal_button->set_focus_mode(FOCUS_NONE);
+	flip_horizontal_button->set_focus_mode(FOCUS_CLICK);
 	flip_horizontal_button->connect("pressed", this, "_flip_horizontal");
+	flip_horizontal_button->set_toggle_mode(true);
 	flip_horizontal_button->set_shortcut(ED_SHORTCUT("tile_map_editor/flip_horizontal", TTR("Flip Horizontally"), KEY_X));
 	tool_hb->add_child(flip_horizontal_button);
 
 	flip_vertical_button = memnew(ToolButton);
 	flip_vertical_button->set_tooltip(TTR("Flip Vertically"));
-	flip_vertical_button->set_focus_mode(FOCUS_NONE);
+	flip_vertical_button->set_focus_mode(FOCUS_CLICK);
 	flip_vertical_button->connect("pressed", this, "_flip_vertical");
+	flip_vertical_button->set_toggle_mode(true);
 	flip_vertical_button->set_shortcut(ED_SHORTCUT("tile_map_editor/flip_vertical", TTR("Flip Vertically"), KEY_Z));
 	tool_hb->add_child(flip_vertical_button);
 
@@ -2337,7 +2348,7 @@ void TileMapEditorPlugin::edit(Object *p_object) {
 }
 
 bool TileMapEditorPlugin::handles(Object *p_object) const {
-	return p_object->is_class("TileMap");
+	return p_object->is_class("TileMap") || p_object->is_class("TileSet") || p_object->is_class("TilesetEditorContext");
 }
 
 void TileMapEditorPlugin::make_visible(bool p_visible) {
