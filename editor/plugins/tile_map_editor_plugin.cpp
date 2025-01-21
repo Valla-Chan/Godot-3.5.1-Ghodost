@@ -1346,7 +1346,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 						return true; // We want to keep the Pasting tool.
 					} else if (tool == TOOL_SELECTING) {
 						CanvasItemEditor::get_singleton()->update_viewport();
-						//return true;
+						return true;
 					} else if (tool == TOOL_BUCKET) {
 						PoolVector<Vector2> points = _bucket_fill(over_tile);
 
@@ -1381,6 +1381,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 			}
 		} else if (mb->get_button_index() == BUTTON_RIGHT) {
 			if (mb->is_pressed()) {
+				// Cancel Selection
 				if (tool == TOOL_SELECTING || selection_active) {
 					tool = TOOL_NONE;
 					selection_active = false;
@@ -1525,10 +1526,13 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 			return true;
 		}
 
-		if (tool == TOOL_SELECTING) {
-			_select(rectangle_begin, over_tile);
+		if (Input::get_singleton()->is_mouse_button_pressed(BUTTON_LEFT)) {
+			// Continuously select
+			if (tool == TOOL_SELECTING) {
+				_select(rectangle_begin, over_tile);
 
-			return true;
+				return true;
+			}
 		}
 
 		if (tool == TOOL_LINE_PAINT || tool == TOOL_LINE_ERASE) {

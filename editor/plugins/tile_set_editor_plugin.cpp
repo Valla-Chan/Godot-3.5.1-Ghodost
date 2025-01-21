@@ -693,9 +693,12 @@ void TileSetEditor::_on_tileset_toolbar_button_pressed(int p_index) {
 				for (List<String>::Element *E = extensions.front(); E; E = E->next()) {
 					texture_dialog->add_filter("*." + E->get() + " ; " + E->get().to_upper());
 				}
-				String path = get_current_texture()->get_path();
+				// Use similar browse path to current texture, if it exists
+				if (get_current_texture().is_valid()) {
+					texture_dialog->set_current_path(get_current_texture()->get_path());
+				}
 				texture_dialog->popup_centered_ratio();
-				texture_dialog->set_current_path(path);
+				
 			} else {
 				quick_open->popup_dialog("Texture", false);
 				quick_open->set_title(TTR("Quick Open Tile Texture..."));
