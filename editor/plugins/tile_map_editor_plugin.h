@@ -54,10 +54,11 @@ class TileMapEditor : public VBoxContainer {
 		TOOL_LINE_PAINT,
 		TOOL_LINE_ERASE,
 		TOOL_SELECTING,
-		TOOL_SELECTED,
 		TOOL_BUCKET,
 		TOOL_PICKING,
 		TOOL_PASTING,
+		TOOL_MOVE_SELECTION,
+		TOOL_MOVE_TILES,
 		TOOL_NONE_RECT,
 		TOOL_NONE_LINE,
 	};
@@ -113,6 +114,7 @@ class TileMapEditor : public VBoxContainer {
 
 	bool selection_active;
 	bool mouse_over;
+	bool just_dropped = false;
 
 	bool flip_h;
 	bool flip_v;
@@ -123,6 +125,7 @@ class TileMapEditor : public VBoxContainer {
 	Rect2i rectangle;
 
 	Point2i over_tile;
+	Point2i last_over_tile_offset; // used in pasting
 	bool refocus_over_tile;
 
 	bool *bucket_cache_visited;
@@ -154,6 +157,7 @@ class TileMapEditor : public VBoxContainer {
 		bool flip_v;
 		bool transpose;
 		Point2i autotile_coord;
+		int _pos_index;
 
 		TileData() :
 				cell(TileMap::INVALID_CELL),
@@ -175,14 +179,15 @@ class TileMapEditor : public VBoxContainer {
 	void _erase_points(const PoolVector<Vector2> &p_points);
 
 	void _select(const Point2i &p_from, const Point2i &p_to);
-	void _erase_selection();
+	void _erase_copied_tiles(bool p_limit_tiles = false);
+	void _erase_selection(bool p_limit_tiles = false);
 
 	void _draw_grid(Control *p_viewport, const Rect2 &p_rect) const;
 	void _draw_cell(Control *p_viewport, int p_cell, const Point2i &p_point, bool p_flip_h, bool p_flip_v, bool p_transpose, const Point2i &p_autotile_coord, const Transform2D &p_xform);
 	void _draw_fill_preview(Control *p_viewport, int p_cell, const Point2i &p_point, bool p_flip_h, bool p_flip_v, bool p_transpose, const Point2i &p_autotile_coord, const Transform2D &p_xform);
 	void _clear_bucket_cache();
 
-	void _update_copydata();
+	void _update_copydata(bool p_limit_tiles = false, bool p_use_existing = false);
 
 	Vector<int> get_selected_tiles() const;
 	void set_selected_tiles(Vector<int> p_tile);
