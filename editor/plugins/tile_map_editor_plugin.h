@@ -178,6 +178,7 @@ class TileMapEditor : public VBoxContainer {
 	void _fill_points(const PoolVector<Vector2> &p_points, const Dictionary &p_op);
 	void _erase_points(const PoolVector<Vector2> &p_points);
 
+	void _select_vectors(const Vector2 &p_from, const Vector2 &p_to);
 	void _select(const Point2i &p_from, const Point2i &p_to);
 	void _erase_copied_tiles(bool p_limit_tiles = false);
 	void _erase_selection(bool p_limit_tiles = false);

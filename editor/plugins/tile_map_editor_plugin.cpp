@@ -822,6 +822,10 @@ void TileMapEditor::_erase_points(const PoolVector<Vector2> &p_points) {
 	}
 }
 
+void TileMapEditor::_select_vectors(const Vector2 &p_from, const Vector2 &p_to) {
+	_select(p_from, p_to);
+}
+
 void TileMapEditor::_select(const Point2i &p_from, const Point2i &p_to) {
 	Point2i begin = p_from;
 	Point2i end = p_to;
@@ -1468,8 +1472,8 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 						_update_copydata(mb->get_command(), just_dropped);
 
 						_start_undo(TTR("Move Tiles"));
-						// for UndoRedo posterity
-						_select(rectangle.position, rectangle.position + rectangle.size);
+						// for Undoing selection
+						undo_redo->add_undo_method(this, "_select_vectors", Vector2(rectangle.position), Vector2(rectangle.position + rectangle.size));
 
 						Point2 ofs = over_tile - rectangle.position;
 						last_over_tile_offset = ofs;
@@ -1563,11 +1567,13 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 						_set_cell(E->get().pos + ofs, ids, E->get().flip_h, E->get().flip_v, E->get().transpose, E->get().autotile_coord);
 					}
 					
-					// reselect previously selected area.
-					_select(rectangle.position + ofs, rectangle.position + ofs + rectangle.size);
+					// reselect previously selected area at the new offset
+					//_select(rectangle.position + ofs, rectangle.position + ofs + rectangle.size);
+					undo_redo->add_do_method(this, "_select_vectors", Vector2(rectangle.position + ofs), Vector2(rectangle.position + ofs + rectangle.size));
 					selection_active = true;
 					just_dropped = true;
-					//TODO: ensure that when moving it again, the previous copy data is preserved as to not pick up artifacts!!!
+					// NOTE: When moving it again, the previous copy data is preserved as to not pick up artifacts!!!
+					// However, this will still leave missing tiles where the dragged ones overlapped the existing ones. Fix this?
 
 					_finish_undo();
 
@@ -2141,6 +2147,7 @@ void TileMapEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_text_entered"), &TileMapEditor::_text_entered);
 	ClassDB::bind_method(D_METHOD("_text_changed"), &TileMapEditor::_text_changed);
 	ClassDB::bind_method(D_METHOD("_sbox_input"), &TileMapEditor::_sbox_input);
+	ClassDB::bind_method(D_METHOD("_select_vectors"), &TileMapEditor::_select_vectors);
 	ClassDB::bind_method(D_METHOD("_button_tool_select"), &TileMapEditor::_button_tool_select);
 	ClassDB::bind_method(D_METHOD("_menu_option"), &TileMapEditor::_menu_option);
 	ClassDB::bind_method(D_METHOD("_canvas_mouse_enter"), &TileMapEditor::_canvas_mouse_enter);
