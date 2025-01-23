@@ -370,6 +370,11 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	tileset_toolbar_container->add_child(tileset_toolbar_buttons[TOOL_TILESET_ADD_TEXTURE]);
 	tileset_toolbar_buttons[TOOL_TILESET_ADD_TEXTURE]->set_tooltip(TTR("Add Texture(s) to TileSet."));
 
+	//tileset_toolbar_buttons[TOOL_TILESET_CLONE_TEXTURE] = memnew(ToolButton);
+	//tileset_toolbar_buttons[TOOL_TILESET_CLONE_TEXTURE]->connect("pressed", this, "_on_tileset_toolbar_button_pressed", varray(TOOL_TILESET_CLONE_TEXTURE));
+	//tileset_toolbar_container->add_child(tileset_toolbar_buttons[TOOL_TILESET_CLONE_TEXTURE]);
+	//tileset_toolbar_buttons[TOOL_TILESET_CLONE_TEXTURE]->set_tooltip(TTR("Clone Tiles to New Texture."));
+
 	tileset_toolbar_buttons[TOOL_TILESET_REMOVE_TEXTURE] = memnew(ToolButton);
 	tileset_toolbar_buttons[TOOL_TILESET_REMOVE_TEXTURE]->connect("pressed", this, "_on_tileset_toolbar_button_pressed", varray(TOOL_TILESET_REMOVE_TEXTURE));
 	tileset_toolbar_container->add_child(tileset_toolbar_buttons[TOOL_TILESET_REMOVE_TEXTURE]);
@@ -712,6 +717,19 @@ void TileSetEditor::_on_tileset_toolbar_button_pressed(int p_index) {
 			} else {
 				quick_open->popup_dialog("Texture", false);
 				quick_open->set_title(TTR("Quick Open Tile Texture..."));
+			}
+			
+		} break;
+		// TODO
+		case TOOL_TILESET_CLONE_TEXTURE: {
+			String current_texture_path = get_current_texture()->get_path();
+			List<int> ids;
+			tileset->get_tile_list(&ids);
+			// check what tiles in the list use the texture path
+			for (List<int>::Element *E = ids.front(); E; E = E->next()) {
+				if (tileset->tile_get_texture(E->get())->get_path() == current_texture_path) {
+					tileset->clone_tile(E->get(), get_current_texture());
+				}
 			}
 			
 		} break;

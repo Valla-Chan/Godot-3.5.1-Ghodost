@@ -368,6 +368,15 @@ void TileSet::_get_property_list(List<PropertyInfo> *p_list) const {
 	}
 }
 
+void TileSet::clone_tile(int p_id, Ref<Texture> p_texture) {
+	ERR_FAIL_COND_MSG(!tile_map.has(p_id), vformat("The TileSet does not have a tile with ID '%d'.", p_id));
+	tile_map[tile_map.size()] = tile_map[p_id];
+	tile_map[tile_map.size()].autotile_data = tile_map[p_id].autotile_data;
+	tile_map[tile_map.size()].texture = p_texture;
+	_change_notify("");
+	emit_changed();
+}
+
 void TileSet::create_tile(int p_id) {
 	ERR_FAIL_COND_MSG(tile_map.has(p_id), vformat("The TileSet already has a tile with ID '%d'.", p_id));
 	tile_map[p_id] = TileData();

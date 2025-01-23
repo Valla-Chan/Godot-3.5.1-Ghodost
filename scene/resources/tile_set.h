@@ -148,6 +148,7 @@ protected:
 	static void _bind_methods();
 
 public:
+	void clone_tile(int p_id, Ref<Texture> p_texture);
 	void create_tile(int p_id);
 
 	void autotile_set_bitmask_mode(int p_id, BitmaskMode p_mode);
