@@ -281,6 +281,7 @@ Vector<int> TileMapEditor::get_selected_tiles() const {
 }
 
 void TileMapEditor::set_selected_tiles(Vector<int> p_tiles) {
+	int selectedprev = palette->get_selected_items().size();
 	palette->unselect_all();
 
 	for (int i = p_tiles.size() - 1; i >= 0; i--) {
@@ -291,9 +292,12 @@ void TileMapEditor::set_selected_tiles(Vector<int> p_tiles) {
 		}
 	}
 
-	if (tool != TOOL_BUCKET && tool != TOOL_RECTANGLE_PAINT && tool != TOOL_LINE_PAINT && tool != TOOL_NONE_LINE && tool != TOOL_NONE_RECT) {
-		tool = TOOL_NONE;
-		_update_button_tool();
+	// only reset tool if not multi-selecting
+	if (p_tiles.size() == 1 && abs(selectedprev - p_tiles.size()) < 2 ) {
+		if (tool != TOOL_BUCKET && tool != TOOL_RECTANGLE_PAINT && tool != TOOL_LINE_PAINT && tool != TOOL_NONE_LINE && tool != TOOL_NONE_RECT) {
+			tool = TOOL_NONE;
+			_update_button_tool();
+		}
 	}
 
 	palette->ensure_current_is_visible();
@@ -1830,7 +1834,7 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 		}
 		if (ED_IS_SHORTCUT("tile_map_editor/copy_selection", p_event)) {
 			// if holding ctrl, limit copying to the selected tiles in the palette.
-			_update_copydata(mb->get_command());
+			_update_copydata(mb.is_valid() && mb->get_command());
 			Point2 ofs = over_tile - rectangle.position;
 			last_over_tile_offset = ofs;
 
@@ -1846,14 +1850,14 @@ bool TileMapEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 		if (ED_IS_SHORTCUT("tile_map_editor/cut_selection", p_event)) {
 			if (selection_active) {
 				// if holding ctrl, limit copying to the selected tiles in the palette.
-				_update_copydata(mb->get_command());
+				_update_copydata(mb.is_valid() && mb->get_command());
 
 
 				_start_undo(TTR("Cut Selection"));
 				Point2 ofs = over_tile - rectangle.position;
 				last_over_tile_offset = ofs;
 				
-				_erase_selection(mb->get_command());
+				_erase_selection(mb.is_valid() && mb->get_command());
 				_finish_undo();
 
 				selection_active = false;
