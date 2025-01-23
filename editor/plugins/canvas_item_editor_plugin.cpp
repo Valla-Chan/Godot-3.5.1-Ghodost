@@ -2636,7 +2636,7 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 				CanvasItem *item = selection_results[0].item;
 				selection_results.clear();
 
-				_select_click_on_item(item, click, b->get_shift());
+				_select_click_on_item(item, click, b->get_shift() || b->get_command());
 
 				return true;
 			} else if (!selection_results.empty()) {
@@ -2680,7 +2680,7 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 					selection_menu->set_item_tooltip(i, String(item->get_name()) + "\nType: " + item->get_class() + "\nPath: " + node_path);
 				}
 
-				selection_menu_additive_selection = b->get_shift();
+				selection_menu_additive_selection = b->get_shift() || b->get_command();
 				selection_menu->set_global_position(b->get_global_position());
 				selection_menu->popup();
 				return true;
@@ -2723,7 +2723,7 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 
 			if (!canvas_item) {
 				// Start a box selection
-				if (!b->get_shift()) {
+				if (!(b->get_shift() || b->get_command())) {
 					// Clear the selection if not additive
 					editor_selection->clear();
 					viewport->update();
@@ -2735,7 +2735,7 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 				box_selecting_to = drag_from;
 				return true;
 			} else {
-				bool still_selected = _select_click_on_item(canvas_item, click, b->get_shift());
+				bool still_selected = _select_click_on_item(canvas_item, click, b->get_shift() || b->get_command());
 				// Start dragging
 				if (still_selected) {
 					// Drag the node(s) if requested
