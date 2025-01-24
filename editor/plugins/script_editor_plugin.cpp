@@ -1968,11 +1968,32 @@ void ScriptEditor::_update_script_names() {
 		_sort_list_on_update = false;
 	}
 
+
 	Vector<_ScriptEditorItemData> sedata_filtered;
-	for (int i = 0; i < sedata.size(); i++) {
+	{
 		String filter = filter_scripts->get_text();
-		if (filter == "" || filter.is_subsequence_ofi(sedata[i].name)) {
-			sedata_filtered.push_back(sedata[i]);
+		Vector<String> filter_terms = filter.split(" ");
+
+		for (int i = 0; i < sedata.size(); i++) {
+			// no filter, add all
+			if (filter == "") {
+				sedata_filtered.push_back(sedata[i]);
+			}
+			// check all terms for full matches
+			else {
+				bool matches = true;
+				for (int j = 0; j < filter_terms.size(); j++) {
+					if (!filter_terms[j].is_subsequence_ofi(sedata[i].name)) {
+						matches = false;
+						//break;
+					}
+					
+				}
+				if (matches) {
+					sedata_filtered.push_back(sedata[i]);
+				}
+			}
+			
 		}
 	}
 
