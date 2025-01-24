@@ -72,8 +72,13 @@ int NodePath::get_name_count() const {
 }
 StringName NodePath::get_name(int p_idx) const {
 	ERR_FAIL_COND_V(!data, StringName());
-	ERR_FAIL_INDEX_V(p_idx, data->path.size(), StringName());
-	return data->path[p_idx];
+	if (p_idx != -1) {
+		ERR_FAIL_INDEX_V(p_idx, data->path.size(), StringName());
+		return data->path[p_idx];
+	} else {
+		return data->path[data->path.size()-1];
+	}
+	
 }
 
 int NodePath::get_subname_count() const {
