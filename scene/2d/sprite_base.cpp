@@ -38,12 +38,14 @@
 Dictionary SpriteBase::_edit_get_state() const {
 	Dictionary state = Node2D::_edit_get_state();
 	state["offset"] = offset;
+	state["world_offset"] = world_offset;
 	return state;
 }
 
 void SpriteBase::_edit_set_state(const Dictionary &p_state) {
 	Node2D::_edit_set_state(p_state);
 	set_offset(p_state["offset"]);
+	set_world_offset(p_state["world_offset"]);
 }
 
 void SpriteBase::_edit_set_pivot(const Point2 &p_pivot) {
@@ -133,12 +135,50 @@ void SpriteBase::queue_set_flipped(int p_flip_h = -1, int p_flip_v = -1) {
 	vflip = bool(p_flip_v);
 }
 
+//---------------------------------------------------
+
+// Set and get the offset
+void SpriteBase::set_world_offset(const Point2 &p_offset) {
+	world_offset = p_offset;
+	update();
+	item_rect_changed();
+	_change_notify("world_offset");
+}
+
+Point2 SpriteBase::get_world_offset() const {
+	return world_offset;
+}
+
+void SpriteBase::set_texture_scale(const Point2 &p_offset) {
+	texture_scale = p_offset;
+	update();
+	item_rect_changed();
+	_change_notify("texture_scale");
+}
+
+Point2 SpriteBase::get_texture_scale() const {
+	return texture_scale;
+}
+
+//---------------------------------------------------
+
+
 bool SpriteBase::is_pixel_opaque(const Point2 &p_point) const {
 	return true;
 }
 
 
 void SpriteBase::_bind_methods() {
+
+	ClassDB::bind_method(D_METHOD("set_world_offset", "offset"), &SpriteBase::set_world_offset);
+	ClassDB::bind_method(D_METHOD("get_world_offset"), &SpriteBase::get_world_offset);
+
+	ClassDB::bind_method(D_METHOD("set_texture_scale", "offset"), &SpriteBase::set_texture_scale);
+	ClassDB::bind_method(D_METHOD("get_texture_scale"), &SpriteBase::get_texture_scale);
+
+	//ClassDB::bind_method(D_METHOD("get_offset_position"), &SpriteBase::get_offset_position);
+	//ClassDB::bind_method(D_METHOD("get_offset_global_position"), &SpriteBase::get_offset_global_position);
+
 
 	ClassDB::bind_method(D_METHOD("set_force_pixel_snapping", "snap"), &SpriteBase::set_force_pixel_snapping);
 	ClassDB::bind_method(D_METHOD("get_force_pixel_snapping"), &SpriteBase::get_force_pixel_snapping);
@@ -167,8 +207,10 @@ void SpriteBase::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "basealigned"), "set_basealigned", "is_basealigned");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "force_pixel_snapping"), "set_force_pixel_snapping", "get_force_pixel_snapping");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "offset"), "set_offset", "get_offset");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "texture_scale"), "set_texture_scale", "get_texture_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_h"), "set_flip_h", "is_flipped_h");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flip_v"), "set_flip_v", "is_flipped_v");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "world_offset"), "set_world_offset", "get_world_offset");
 
 }
 
@@ -178,6 +220,7 @@ SpriteBase::SpriteBase() {
 	hflip = false;
 	vflip = false;
 	force_pixel_snapping = false;
+	texture_scale = Vector2(1, 1);
 }
 
 SpriteBase::~SpriteBase() {

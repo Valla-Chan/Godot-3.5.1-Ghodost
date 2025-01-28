@@ -79,9 +79,10 @@ Rect2 AnimatedSprite::_get_rect() const {
 	if (t.is_null()) {
 		return Rect2();
 	}
-	Size2 s = t->get_size();
+	Size2 s = t->get_size() * get_texture_scale();
 
 	Point2 ofs = get_offset();
+	ofs += get_world_offset() / get_scale();
 	if (is_centered()) {
 		ofs -= s / 2;
 	}
@@ -442,17 +443,18 @@ void AnimatedSprite::_notification(int p_what) {
 
 			RID ci = get_canvas_item();
 
-			Size2 s = texture->get_size();
+			Size2 s = texture->get_size(); //* get_texture_scale()
 			Point2 ofs = get_offset();
+			ofs += get_world_offset() / get_scale();
 			if (is_centered()) {
-				ofs -= s / 2;
+				ofs -= s * get_texture_scale() / 2;
 			}
 			//VALLA EDITS
 			if (is_basealigned()) {
 				if (is_centered()) {
-					ofs.y -= Size2(s).y / 2;
+					ofs.y -= Size2(s * get_texture_scale()).y / 2;
 				} else {
-					ofs.y -= Size2(s).y;
+					ofs.y -= Size2(s * get_texture_scale()).y;
 					//ofs.x -= Size2(s).x / 2;
 				}
 			}
@@ -462,6 +464,7 @@ void AnimatedSprite::_notification(int p_what) {
 			}
 			Rect2 dst_rect(ofs, s);
 
+			dst_rect.size *= get_texture_scale();
 			if (is_flipped_h()) {
 				dst_rect.size.x = -dst_rect.size.x;
 			}

@@ -68,15 +68,16 @@ void Sprite::_get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_cli
 	r_src_rect.position = base_rect.position + frame_offset;
 
 	Point2 dest_offset = get_offset();
+	dest_offset += get_world_offset() / get_scale();
 	if (is_centered()) {
-		dest_offset -= frame_size / 2;
+		dest_offset -= frame_size * get_texture_scale() / 2;
 	}
 	//VALLA EDITS
 	if (is_basealigned()) {
 		if (is_centered()) {
-			dest_offset.y -= frame_size.y / 2;
+			dest_offset.y -= frame_size.y * get_texture_scale().y / 2;
 		} else {
-			dest_offset.y -= frame_size.y;
+			dest_offset.y -= frame_size.y * get_texture_scale().y;
 		}
 	}
 	
@@ -85,7 +86,7 @@ void Sprite::_get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_cli
 		dest_offset = dest_offset.floor();
 	}
 
-	r_dst_rect = Rect2(dest_offset, frame_size);
+	r_dst_rect = Rect2(dest_offset, frame_size * get_texture_scale());
 
 	if (is_flipped_h()) {
 		r_dst_rect.size.x = -r_dst_rect.size.x;
@@ -334,16 +335,19 @@ Rect2 Sprite::get_rect() const {
 
 	s = s / Point2(hframes, vframes);
 
+	s = Size2(s.x, s.y) * Size2(float(get_texture_scale().x), (get_texture_scale().y));
+
 	Point2 ofs = get_offset();
+	ofs += get_world_offset() / get_scale();
 	if (is_centered()) {
-		ofs -= Size2(s) / 2;
+		ofs -= Size2(s * get_texture_scale()) / 2;
 	}
 	//VALLA EDITS
 	if (is_basealigned()) {
 		if (is_centered()) {
-			ofs.y -= Size2(s).y / 2;
+			ofs.y -= Size2(s * get_texture_scale()).y / 2;
 		} else {
-			ofs.y -= Size2(s).y;
+			ofs.y -= Size2(s * get_texture_scale()).y;
 			//ofs.x -= Size2(s).x / 2;
 		}
 		
@@ -351,6 +355,8 @@ Rect2 Sprite::get_rect() const {
 	if (Engine::get_singleton()->get_use_gpu_pixel_snap() || get_force_pixel_snapping()) {
 		ofs = ofs.floor();
 	}
+
+	//s = Size2(s.x, s.y) * Size2(float(get_texture_scale().x), (get_texture_scale().y));
 
 	if (s == Size2(0, 0)) {
 		s = Size2(1, 1);

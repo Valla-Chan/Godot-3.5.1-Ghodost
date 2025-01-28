@@ -160,6 +160,7 @@ public:
 	StringName _request_gizmo;
 
 	StringName offset;
+	StringName world_offset;
 	StringName unit_offset;
 	StringName rotation_mode;
 	StringName rotate;

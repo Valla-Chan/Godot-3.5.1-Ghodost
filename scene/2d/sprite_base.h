@@ -41,6 +41,11 @@ class SpriteBase : public Node2D {
 	bool centered;
 	bool basealigned;
 	Point2 offset;
+	Point2 world_offset;
+	Point2 texture_scale;
+
+	Point2 pos_world;
+	Point2 pos_offset;
 
 	bool hflip;
 	bool vflip;
@@ -58,6 +63,11 @@ public:
 	virtual bool _edit_use_pivot() const;
 	virtual bool _edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const;
 #endif
+
+	virtual void set_world_offset(const Point2 &p_offset);
+	Point2 get_world_offset() const;
+	virtual void set_texture_scale(const Point2 &p_offset);
+	Point2 get_texture_scale() const;
 
 	virtual bool is_pixel_opaque(const Point2 &p_point) const;
 
