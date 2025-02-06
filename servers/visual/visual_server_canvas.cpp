@@ -162,7 +162,8 @@ void VisualServerCanvas::_render_canvas_item(Item *p_canvas_item, const Transfor
 		}
 		if (ci->sort_y) {
 			_render_canvas_item(child_items[i], xform * child_items[i]->ysort_xform, p_clip_rect, modulate * child_items[i]->ysort_modulate, p_z, z_list, z_last_list, (Item *)ci->final_clip_owner, (Item *)child_items[i]->material_owner);
-		} else {
+		}
+		else {
 			_render_canvas_item(child_items[i], xform, p_clip_rect, modulate, p_z, z_list, z_last_list, (Item *)ci->final_clip_owner, p_material_owner);
 		}
 	}
@@ -203,7 +204,8 @@ void VisualServerCanvas::_render_canvas_item(Item *p_canvas_item, const Transfor
 		}
 		if (ci->sort_y) {
 			_render_canvas_item(child_items[i], xform * child_items[i]->ysort_xform, p_clip_rect, modulate * child_items[i]->ysort_modulate, p_z, z_list, z_last_list, (Item *)ci->final_clip_owner, (Item *)child_items[i]->material_owner);
-		} else {
+		}
+		else {
 			_render_canvas_item(child_items[i], xform, p_clip_rect, modulate, p_z, z_list, z_last_list, (Item *)ci->final_clip_owner, p_material_owner);
 		}
 	}
@@ -899,6 +901,14 @@ void VisualServerCanvas::canvas_item_set_sort_children_by_y(RID p_item, bool p_e
 	ERR_FAIL_COND(!canvas_item);
 
 	canvas_item->sort_y = p_enable;
+
+	_mark_ysort_dirty(canvas_item, canvas_item_owner);
+}
+void VisualServerCanvas::canvas_item_set_ysort_suppressed(RID p_item, bool p_suppressed) {
+	Item *canvas_item = canvas_item_owner.getornull(p_item);
+	ERR_FAIL_COND(!canvas_item);
+
+	canvas_item->ysort_suppressed = p_suppressed;
 
 	_mark_ysort_dirty(canvas_item, canvas_item_owner);
 }
