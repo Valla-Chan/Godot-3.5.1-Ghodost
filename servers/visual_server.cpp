@@ -2165,6 +2165,7 @@ void VisualServer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("canvas_item_set_visible", "item", "visible"), &VisualServer::canvas_item_set_visible);
 	ClassDB::bind_method(D_METHOD("canvas_item_set_light_mask", "item", "mask"), &VisualServer::canvas_item_set_light_mask);
 	ClassDB::bind_method(D_METHOD("canvas_item_set_transform", "item", "transform"), &VisualServer::canvas_item_set_transform);
+	//ClassDB::bind_method(D_METHOD("canvas_item_set_global_pos", "item", "pos"), &VisualServer::canvas_item_set_global_pos);
 	ClassDB::bind_method(D_METHOD("canvas_item_set_clip", "item", "clip"), &VisualServer::canvas_item_set_clip);
 	ClassDB::bind_method(D_METHOD("canvas_item_set_distance_field_mode", "item", "enabled"), &VisualServer::canvas_item_set_distance_field_mode);
 	ClassDB::bind_method(D_METHOD("canvas_item_set_custom_rect", "item", "use_custom_rect", "rect"), &VisualServer::canvas_item_set_custom_rect, DEFVAL(Rect2()));

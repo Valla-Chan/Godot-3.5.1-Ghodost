@@ -56,6 +56,11 @@ void _collect_ysort_children(VisualServerCanvas::Item *p_canvas_item, Transform2
 	VisualServerCanvas::Item **child_items = p_canvas_item->child_items.ptrw();
 	for (int i = 0; i < child_item_count; i++) {
 		if (child_items[i]->visible) {
+
+			//if (!child_items[i]->sort_y) {
+			//	child_items[i]->ysort_suppressed = false;
+			//}
+			
 			if (r_items) {
 				r_items[r_index] = child_items[i];
 				child_items[i]->ysort_modulate = p_modulate;
@@ -63,7 +68,15 @@ void _collect_ysort_children(VisualServerCanvas::Item *p_canvas_item, Transform2
 				child_items[i]->ysort_pos = p_transform.xform(child_items[i]->xform.elements[2]);
 				child_items[i]->material_owner = child_items[i]->use_parent_material ? p_material_owner : nullptr;
 				child_items[i]->ysort_index = r_index;
+
+				//if (p_canvas_item->ysort_suppressed && p_canvas_item->sort_y && !child_items[i]->sort_y) {
+				//	child_items[i]->ysort_suppressed = true;
+				//}
+				// TODO: solve how to make this the global position of the parent node.
+				//child_items[i]->parent_pos = p_canvas_item->final_transform.elements[2];
+				
 			}
+			
 
 			r_index++;
 

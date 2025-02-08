@@ -52,6 +52,7 @@ public:
 		Color ysort_modulate;
 		Transform2D ysort_xform;
 		Vector2 ysort_pos;
+		//Vector2 parent_pos;
 		int ysort_index;
 
 		Vector<Item *> child_items;
@@ -71,6 +72,7 @@ public:
 			ysort_xform = Transform2D();
 			ysort_pos = Vector2();
 			ysort_index = 0;
+			parent_pos = Vector2();
 		}
 	};
 
@@ -82,6 +84,9 @@ public:
 
 	struct ItemPtrSort {
 		_FORCE_INLINE_ bool operator()(const Item *p_left, const Item *p_right) const {
+			//if (p_left->ysort_suppressed || p_right->ysort_suppressed) {
+			//	return p_left->parent_pos.y < p_right->parent_pos.y;
+			//}
 			if (Math::is_equal_approx(p_left->ysort_pos.y, p_right->ysort_pos.y)) {
 				return p_left->ysort_index < p_right->ysort_index;
 			}

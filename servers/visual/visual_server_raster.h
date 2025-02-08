@@ -689,6 +689,7 @@ public:
 	BIND2(canvas_item_set_update_when_visible, RID, bool)
 
 	BIND2(canvas_item_set_transform, RID, const Transform2D &)
+	//BIND2(canvas_item_set_global_pos, RID, const Vector2 &)
 	BIND2(canvas_item_set_clip, RID, bool)
 	BIND2(canvas_item_set_distance_field_mode, RID, bool)
 	BIND3(canvas_item_set_custom_rect, RID, bool, const Rect2 &)
