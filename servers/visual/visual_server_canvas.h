@@ -72,7 +72,7 @@ public:
 			ysort_xform = Transform2D();
 			ysort_pos = Vector2();
 			ysort_index = 0;
-			parent_pos = Vector2();
+			//parent_pos = Vector2();
 		}
 	};
 
