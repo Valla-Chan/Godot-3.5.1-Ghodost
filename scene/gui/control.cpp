@@ -475,7 +475,7 @@ void Control::_update_canvas_item_transform() {
 	xform[2] += get_position();
 
 	// We use a little workaround to avoid flickering when moving the pivot with _edit_set_pivot()
-	if (is_inside_tree() && Math::abs(Math::sin(data.rotation * 4.0f)) < 0.00001f && get_viewport()->is_snap_controls_to_pixels_enabled()) {
+	if (is_inside_tree() && Math::abs(Math::sin(data.rotation * 4.0f)) < 0.00001f && (get_viewport()->is_snap_controls_to_pixels_enabled() || data.force_pixel_snapping)) {
 		xform[2] = xform[2].round();
 	}
 
@@ -1199,8 +1199,16 @@ void Control::_size_changed() {
 		margin_pos[i] = data.margin[i] + (data.anchor[i] * area);
 	}
 
-	Point2 new_pos_cache = Point2(margin_pos[0], margin_pos[1]);
-	Size2 new_size_cache = Point2(margin_pos[2], margin_pos[3]) - new_pos_cache;
+	Point2 new_pos_cache;
+	Size2 new_size_cache;
+
+	if (data.force_pixel_snapping || (get_viewport() && get_viewport()->is_snap_controls_to_pixels_enabled())) {
+		new_pos_cache = Point2(margin_pos[0], margin_pos[1]).round();
+		new_size_cache = Point2(margin_pos[2], margin_pos[3]).round() - new_pos_cache;
+	} else {
+		new_pos_cache = Point2(margin_pos[0], margin_pos[1]);
+		new_size_cache = Point2(margin_pos[2], margin_pos[3]) - new_pos_cache;
+	}
 
 	Size2 minimum_size = get_combined_minimum_size();
 
@@ -2526,6 +2534,15 @@ bool Control::is_pivot_center_locked() const {
 	return data.pivot_lock_center;
 }
 
+void Control::set_force_pixel_snapping(bool p_snap) {
+	data.force_pixel_snapping = p_snap;
+	_size_changed();
+}
+
+bool Control::get_force_pixel_snapping() const {
+	return data.force_pixel_snapping;
+}
+
 
 void Control::set_pivot_offset(const Vector2 &p_pivot) {
 	if (data.pivot_lock_center)
@@ -2732,6 +2749,8 @@ void Control::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_pivot_offset"), &Control::get_pivot_offset);
 	ClassDB::bind_method(D_METHOD("set_pivot_center_locked", "centered"), &Control::set_pivot_center_locked);
 	ClassDB::bind_method(D_METHOD("is_pivot_center_locked"), &Control::is_pivot_center_locked);
+	ClassDB::bind_method(D_METHOD("set_force_pixel_snapping", "centered"), &Control::set_force_pixel_snapping);
+	ClassDB::bind_method(D_METHOD("get_force_pixel_snapping"), &Control::get_force_pixel_snapping);
 
 	ClassDB::bind_method(D_METHOD("set_h_size_flags", "flags"), &Control::set_h_size_flags);
 	ClassDB::bind_method(D_METHOD("get_h_size_flags"), &Control::get_h_size_flags);
@@ -2873,6 +2892,7 @@ void Control::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_scale"), "set_scale", "get_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_pivot_offset"), "set_pivot_offset", "get_pivot_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "rect_lock_pivot_to_center"), "set_pivot_center_locked", "is_pivot_center_locked");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "rect_force_pixel_snapping"), "set_force_pixel_snapping", "get_force_pixel_snapping");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "rect_clip_content"), "set_clip_contents", "is_clipping_contents");
 
 	ADD_GROUP("Hint", "hint_");
@@ -2989,6 +3009,7 @@ void Control::_bind_methods() {
 Control::Control() {
 	data.size_locked = false;
 	data.pivot_lock_center = false;
+	data.force_pixel_snapping = false;
 
 	data.parent = nullptr;
 

@@ -160,6 +160,7 @@ private:
 		Vector2 scale;
 		Vector2 pivot_offset;
 		bool pivot_lock_center;
+		bool force_pixel_snapping;
 
 		bool pending_resize;
 
@@ -379,6 +380,9 @@ public:
 	Vector2 get_pivot_offset() const;
 	void set_pivot_center_locked(bool p_centered);
 	bool is_pivot_center_locked() const;
+
+	void set_force_pixel_snapping(bool p_snap);
+	bool get_force_pixel_snapping() const;
 
 
 	void set_scale(const Vector2 &p_scale);
