@@ -2440,7 +2440,10 @@ void ScriptEditor::_add_callback(Object *p_obj, const String &p_function, const 
 
 		_go_to_tab(i);
 
-		script_list->select(script_list->find_metadata(i));
+		auto meta = script_list->find_metadata(i);
+		if (meta > 0) {
+			script_list->select(meta);
+		}
 
 		// Save the current script so the changes can be picked up by an external editor.
 		if (!_is_built_in_script(script.ptr())) { // But only if it's not built-in script.
