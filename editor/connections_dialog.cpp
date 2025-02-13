@@ -253,10 +253,10 @@ void ConnectDialog::_update_ok_enabled() {
 		return;
 	}
 
-	if (!advanced->is_pressed() && target->get_script().is_null()) {
-		get_ok()->set_disabled(true);
-		return;
-	}
+	//if (!advanced->is_pressed() && target->get_script().is_null()) {
+	//	get_ok()->set_disabled(true);
+	//	return;
+	//}
 
 	get_ok()->set_disabled(false);
 }
@@ -428,6 +428,9 @@ void ConnectDialog::_select_method_pressed() {
 		if (target->has_method("set_visible")) {
 			dst_methods.push_back(MethodInfo("set_visible"));
 		}
+		if (target->has_method("set_frame")) {
+			dst_methods.push_back(MethodInfo("set_frame"));
+		}
 		if (target->has_method("set_modulate")) {
 			dst_methods.push_back(MethodInfo("set_modulate"));
 			dst_methods.push_back(MethodInfo("set_self_modulate"));
@@ -471,14 +474,14 @@ void ConnectDialog::_select_method_confirmed() {
 		return;
 	}
 
-	if (!advanced->is_pressed() && target->get_script().is_null()) {
-		return;
-	}
+	//if (!advanced->is_pressed() && target->get_script().is_null()) {
+	//	return;
+	//}
 
-	if (target->get_script_instance() != nullptr) {
+	//if (target->get_script_instance() != nullptr) {
 
 		dst_method->set_text(dst_methods[dst_method_select_list->get_selected_id()].name);
-	}
+	//}
 }
 
 void ConnectDialog::_update_filter(String p_filtertext) {
