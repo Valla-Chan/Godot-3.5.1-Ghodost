@@ -128,10 +128,10 @@ void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, Vector<Pair<Str
 		_parse_fs(efsd->get_subdir(i), list);
 	}
 
-	Vector<String> search_array = search_box->get_text().split(" ");
+	Vector<String> search_array = search_box->get_text().split(" ",false);
 	//String search_text = search_box->get_text().split;
 
-	Vector<String> base_types = String(base_type).split(String(","));
+	Vector<String> base_types = String(base_type).split(String(","),false);
 	for (int i = 0; i < efsd->get_file_count(); i++) {
 		String file = efsd->get_file_path(i);
 		file = file.substr(6, file.length());
@@ -139,7 +139,16 @@ void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, Vector<Pair<Str
 		StringName file_type = efsd->get_file_type(i);
 		// Iterate all possible base types.
 		for (int j = 0; j < base_types.size(); j++) {
-			if (ClassDB::is_parent_class(file_type, base_types[j])) { // && search_text.is_subsequence_ofi(file)
+
+			// TODO: this is a bit slow to run, but i can't find any other way to do it.
+			bool valid = ClassDB::is_parent_class(file_type, base_types[j]);
+			if (!valid) {
+				if (!ClassDB::class_exists(base_types[j]) && ResourceLoader::get_resource_type(efsd->get_file_path(i)) == "Resource") {
+					auto res = ResourceLoader::load(efsd->get_file_path(i));
+					valid = res->get_script_class_name() == base_types[j];
+				}
+			}
+			if (valid) { // && search_text.is_subsequence_ofi(file)
 				bool within_search = true;
 				for (int t = 0; t < search_array.size(); t++) {
 					if (!search_array[t].is_subsequence_ofi(file)) {

@@ -496,7 +496,7 @@ void EditorResourcePicker::_button_input(const Ref<InputEvent> &p_event) {
 }
 
 void EditorResourcePicker::_get_allowed_types(bool p_with_convert, Set<String> *p_vector) const {
-	Vector<String> allowed_types = base_type.split(",");
+	Vector<String> allowed_types = base_type.split(",",false);
 	int size = allowed_types.size();
 
 	List<StringName> global_classes;
@@ -566,12 +566,18 @@ bool EditorResourcePicker::_is_drop_valid(const Dictionary &p_drag_data) const {
 		}
 	} else if (drag_data.has("type") && String(drag_data["type"]) == "resource") {
 		res = drag_data["resource"];
+	} else if (drag_data.has("type") && String(drag_data["type"]) == "files") {
+		Vector<String> files = drag_data["files"];
+		if (files.size() == 1) {
+			String file = files[0];
+			res = ResourceLoader::load(file);
+		}
 	}
 
 	Set<String> allowed_types;
 	_get_allowed_types(true, &allowed_types);
 
-	if (res.is_valid() && _is_type_valid(res->get_class(), allowed_types)) {
+	if (res.is_valid() && (_is_type_valid(res->get_class(), allowed_types) || _is_type_valid(res->get_script_class_name(), allowed_types))) {
 		return true;
 	}
 
