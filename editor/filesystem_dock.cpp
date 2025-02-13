@@ -85,7 +85,22 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 		subdirectory_item->set_collapsed(uncollapsed_paths.find(lpath) < 0);
 	}
 	if (get_filter_type() == 1 || get_filter_type() == 5) {
-		if (searched_string.length() > 0 && dname.to_lower().find(searched_string) >= 0) {
+
+		Vector<String> searched_string_terms = searched_string.to_lower().split(" ", false);
+
+		bool includefile = searched_string.length() > 0;
+		if (!includefile) {
+			includefile = true;
+			for (int j = 0; j < searched_string_terms.size(); j++) {
+				if (dname.to_lower().find(searched_string_terms[j]) > -1) {
+					//includefile = true;
+				} else {
+					includefile = false;
+				}
+			}
+		}
+
+		if (includefile) {
 			parent_should_expand = true;
 		}
 	}
@@ -114,19 +129,50 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 			}
 
 			String file_name = p_dir->get_file(i);
+
+			Vector<String> searched_string_terms = searched_string.to_lower().split(" ", false);
+
+			bool includefile = searched_string.length() == 0;
+			//if (!includefile) {
+			//	for (int j = 0; j < searched_string_terms.size(); j++) {
+			//		if (dname.to_lower().find(searched_string_terms[j]) > -1) {
+			//			includefile = true;
+			//			break;
+			//		}
+			//	}
+			//}
+
+
 			if (searched_string.length() > 0 || (get_filter_type() >= 2 && get_filter_type() <= 4)) {
 				switch (get_filter_type()) {
 					//// Files only. Normal search mode.
 					case 0: {
-						if (file_name.to_lower().find(searched_string) < 0) {
+
+						includefile = true;
+						for (int j = 0; j < searched_string_terms.size(); j++) {
+							if (file_name.to_lower().find(searched_string_terms[j]) > -1) {
+								//includefile = true;
+							} else {
+								includefile = false;
+							}
+						}
+						if (!includefile) {
 							// The searched string is not in the file name, so we skip it.
 							continue;
 						} else
 							parent_should_expand = true;
 					} break;
 					//// Folders only. Show ALL valid folder contents.
-					case 1: {  
-						if (lpath.to_lower().find(searched_string) < 0) {
+					case 1: {
+						includefile = true;
+						for (int j = 0; j < searched_string_terms.size(); j++) {
+							if (lpath.to_lower().find(searched_string_terms[j]) > -1) {
+								//includefile = true;
+							} else {
+								includefile = false;
+							}
+						}
+						if (!includefile) {
 							// The searched string is not in the file path, so we skip it.
 							continue;
 						} else {
@@ -139,11 +185,17 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 						if ( (file_name.to_lower().find(".") >= 0 && !file_name.to_lower().ends_with("scn")) || (lpath.to_lower().find("/scripts") >= 0)) {
 							continue;
 						}
-						// no search, fake a general term.
-						if (searched_string.length() == 0) {
-							searched_string = ".";
+
+						includefile = true;
+						for (int j = 0; j < searched_string_terms.size(); j++) {
+							if (file_name.to_lower().find(searched_string_terms[j]) > -1 || lpath.to_lower().find(searched_string_terms[j]) >= 0) {
+								//includefile = true;
+							} else {
+								includefile = false;
+							}
 						}
-						if (file_name.to_lower().find(searched_string) >= 0 || (lpath.to_lower().find(searched_string) >= 0 )) {
+
+						if (includefile) {
 							if (lpath.to_lower().find("ents/") >= 0 || (lpath.to_lower().find("/scenes/") >= 0 && lpath.to_lower().find("/objects/") >= 0)) {
 								parent_should_expand = true;
 							}
@@ -157,11 +209,15 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 						if (file_name.to_lower().find(".") >= 0 && !file_name.to_lower().ends_with("gd")) {
 							continue;
 						}
-						// no search, fake a general term.
-						if (searched_string.length() == 0) {
-							searched_string = ".";
+						includefile = true;
+						for (int j = 0; j < searched_string_terms.size(); j++) {
+							if (file_name.to_lower().find(searched_string_terms[j]) > -1 || lpath.to_lower().find(searched_string_terms[j]) >= 0) {
+								//includefile = true;
+							} else {
+								includefile = false;
+							}
 						}
-						if (file_name.to_lower().find(searched_string) >= 0 || (lpath.to_lower().find(searched_string) >= 0)) {
+						if (includefile) {
 							parent_should_expand = true;
 						} else {
 							continue;
@@ -173,11 +229,15 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 						if ((file_name.to_lower().find(".") >= 0 && !file_name.to_lower().ends_with("scn")) || (lpath.to_lower().find("/scripts") >= 0 || lpath.to_lower().find("/objects") >= 0)) {
 							continue;
 						}
-						// no search, fake a general term.
-						if (searched_string.length() == 0) {
-							searched_string = ".";
+						includefile = true;
+						for (int j = 0; j < searched_string_terms.size(); j++) {
+							if (file_name.to_lower().find(searched_string_terms[j]) > -1 || lpath.to_lower().find(searched_string_terms[j]) >= 0) {
+								//includefile = true;
+							} else {
+								includefile = false;
+							}
 						}
-						if (file_name.to_lower().find(searched_string) >= 0 || (lpath.to_lower().find(searched_string) >= 0)) {
+						if (includefile) {
 							if (lpath.to_lower().find("scenes/") >= 0) {
 								parent_should_expand = true;
 							}
@@ -187,13 +247,18 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 					} break;
 					//// Files and Folders. Show ALL valid folder contents, and extra matching files.
 					case 5: {
-						if (file_name.to_lower().find(searched_string) >= 0) {
+						includefile = true;
+						for (int j = 0; j < searched_string_terms.size(); j++) {
+							if (file_name.to_lower().find(searched_string_terms[j]) > -1 && lpath.to_lower().find(searched_string_terms[j]) > -1) {
+								//includefile = true;
+							} else {
+								includefile = false;
+							}
+						}
+						if (includefile >= 0) {
 							parent_should_expand = true;
-						} else if (lpath.to_lower().find(searched_string) < 0) {
-							// The searched string is not in the file name OR the path, so we skip it.
-							continue;
 						} else {
-							parent_should_expand = true;
+							continue;
 						}
 					} break;
 					
@@ -236,20 +301,54 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 			udata.push_back(file_item);
 			EditorResourcePreview::get_singleton()->queue_resource_preview(file_metadata, this, "_tree_thumbnail_done", udata);
 
+			Vector<String> searched_string_terms = searched_string.to_lower().split(" ", false);
+			bool includefile = false;
+
 			if (searched_string.length() > 0) {
 				switch (get_filter_type()) {
 					case 0: { // Files only. Normal search mode.
-						if (file_metadata.to_lower().find(searched_string) < 0)
+						includefile = true;
+						for (int j = 0; j < searched_string_terms.size(); j++) {
+							if (file_metadata.to_lower().find(searched_string_terms[j]) > -1) {
+								//includefile = true;
+							} else {
+								includefile = false;
+							}
+						}
+						if (!includefile)
 							subdirectory_item->set_collapsed(true);
 					} break;
 					case 1: { // Folders only. Subfolders are collapsed.
 						subdirectory_item->set_collapsed(false);
-						if ((file_metadata.to_lower().find(searched_string) >= 0) && subdirectory_item->get_text(0).to_lower().find(searched_string) < 0)
+						includefile = true;
+						for (int j = 0; j < searched_string_terms.size(); j++) {
+							if (file_metadata.to_lower().find(searched_string_terms[j]) > -1) {
+								//includefile = true;
+							} else {
+								includefile = false;
+							}
+						}
+						if (includefile) {
+							for (int j = 0; j < searched_string_terms.size(); j++) {
+								if (subdirectory_item->get_text(0).to_lower().find(searched_string_terms[j]) > -1) {
+									includefile = false;
+								}
+							}
+						}
+						if (includefile)
 							subdirectory_item->set_collapsed(true);
 					} break;
 					case 2: { // Files and Folders. Subfolders are collapsed.
 						subdirectory_item->set_collapsed(false);
-						if ((fi.name.to_lower().find(searched_string) < 0) && (file_metadata.to_lower().find(searched_string) >= 0) && subdirectory_item->get_text(0).to_lower().find(searched_string) < 0)
+						includefile = true;
+						for (int j = 0; j < searched_string_terms.size(); j++) {
+							if ((fi.name.to_lower().find(searched_string_terms[j]) < 0) && (file_metadata.to_lower().find(searched_string_terms[j]) >= 0) && subdirectory_item->get_text(0).to_lower().find(searched_string_terms[j]) < 0) {
+								//includefile = true;
+							} else {
+								includefile = false;
+							}
+						}
+						if (includefile)
 							subdirectory_item->set_collapsed(true);
 					} break;
 				}
@@ -367,7 +466,21 @@ void FileSystemDock::_update_tree(const Vector<String> &p_uncollapsed_paths, boo
 			color = Color(1, 1, 1);
 		}
 
-			if (searched_string.length() == 0 || text.to_lower().find(searched_string) >= 0) {
+			Vector<String> searched_string_terms = searched_string.to_lower().split(" ", false);
+
+			bool includefile = searched_string.length() == 0;
+			if (!includefile) {
+				includefile = true;
+				for (int j = 0; j < searched_string_terms.size(); j++) {
+					if (text.to_lower().find(searched_string_terms[j]) > -1) {
+						//includefile = true;
+					} else {
+						includefile = false;
+					}
+				}
+			}
+			if (includefile) {
+
 				TreeItem *ti = tree->create_item(favorites);
 				ti->set_text(0, text);
 				ti->set_icon(0, icon);
@@ -725,7 +838,21 @@ void FileSystemDock::_search(EditorFileSystemDirectory *p_path, List<FileInfo> *
 	for (int i = 0; i < p_path->get_file_count(); i++) {
 		String file = p_path->get_file(i);
 
-		if (file.to_lower().find(searched_string) != -1) {
+		Vector<String> searched_string_terms = searched_string.to_lower().split(" ", false);
+		bool includefile = searched_string.length() == 0;
+		if (!includefile) {
+			includefile = true;
+			for (int j = 0; j < searched_string_terms.size(); j++) {
+				if (file.to_lower().find(searched_string_terms[j]) > -1) {
+					//includefile = true;
+				} else {
+					includefile = false;
+				}
+			}
+		}
+
+		//if (file.to_lower().find(searched_string) != -1) {
+		if (includefile) {
 			FileInfo fi;
 			fi.name = file;
 			fi.type = p_path->get_file_type(i);
@@ -860,17 +987,40 @@ void FileSystemDock::_update_file_list(bool p_keep_selection) {
 			String favorite = favorites[i];
 			String text;
 			Ref<Texture> icon;
+			Vector<String> searched_string_terms = searched_string.to_lower().split(" ", false);
+			bool includefile = searched_string.length() == 0;
 			if (favorite == "res://") {
 				text = "/";
 				icon = folder_icon;
-				if (searched_string.length() == 0 || text.to_lower().find(searched_string) >= 0) {
+				
+				if (!includefile) {
+					includefile = true;
+					for (int j = 0; j < searched_string_terms.size(); j++) {
+						if (text.to_lower().find(searched_string_terms[j]) > -1) {
+							//includefile = true;
+						} else {
+							includefile = false;
+						}
+					}
+				}
+				if (includefile) {
 					files->add_item(text, icon, true);
 					files->set_item_metadata(files->get_item_count() - 1, favorite);
 				}
 			} else if (favorite.ends_with("/")) {
 				text = favorite.substr(0, favorite.length() - 1).get_file();
 				icon = folder_icon;
-				if (searched_string.length() == 0 || text.to_lower().find(searched_string) >= 0) {
+				if (!includefile) {
+					includefile = true;
+					for (int j = 0; j < searched_string_terms.size(); j++) {
+						if (text.to_lower().find(searched_string_terms[j]) > -1) {
+							//includefile = true;
+						} else {
+							includefile = false;
+						}
+					}
+				}
+				if (includefile) {
 					files->add_item(text, icon, true);
 					files->set_item_metadata(files->get_item_count() - 1, favorite);
 				}
@@ -891,7 +1041,17 @@ void FileSystemDock::_update_file_list(bool p_keep_selection) {
 					fi.modified_time = 0;
 				}
 
-				if (searched_string.length() == 0 || fi.name.to_lower().find(searched_string) >= 0) {
+				if (!includefile) {
+					includefile = true;
+					for (int j = 0; j < searched_string_terms.size(); j++) {
+						if (text.to_lower().find(searched_string_terms[j]) > -1) {
+							//includefile = true;
+						} else {
+							includefile = false;
+						}
+					}
+				}
+				if (includefile) {
 					file_list.push_back(fi);
 				}
 			}
