@@ -1334,9 +1334,25 @@ void SceneTreeDock::_property_selected(int p_idx) {
 }
 
 void SceneTreeDock::_drop_new_node(const String p_class, const String p_property) {
+
+	// Adjust casing according to project setting. The file name is expected to be in snake_case, but will work for others.
+	String name = resource_drop_path.get_file().get_basename();
+	switch (ProjectSettings::get_singleton()->get("node/name_casing").operator int()) {
+		case NAME_CASING_PASCAL_CASE:
+			name = name.capitalize().replace(" ", "");
+			break;
+		case NAME_CASING_CAMEL_CASE:
+			name = name.capitalize().replace(" ", "");
+			name[0] = name.to_lower()[0];
+			break;
+		case NAME_CASING_SNAKE_CASE:
+			name = name.capitalize().replace(" ", "_").to_lower();
+			break;
+	}
+
 	Node *new_node = _instance_node(p_class);
 	RES resource = ResourceLoader::load(resource_drop_path);
-	new_node->set_name(resource_drop_path.get_file().get_basename());
+	new_node->set_name(name);
 	new_node->set(p_property, resource);
 	Node *sprite = _add_node_to_tree(property_drop_node, new_node);
 }
