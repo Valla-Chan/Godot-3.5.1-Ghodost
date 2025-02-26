@@ -63,6 +63,7 @@ class EditorResourcePicker : public HBoxContainer {
 		OBJ_MENU_EDIT,
 		OBJ_MENU_CLEAR,
 		OBJ_MENU_MAKE_UNIQUE,
+		OBJ_MENU_MAKE_INHERITED,
 		OBJ_MENU_SAVE,
 		OBJ_MENU_COPY,
 		OBJ_MENU_PASTE,

@@ -686,7 +686,7 @@ void TextureRegionEditor::_zoom_in() {
 }
 
 void TextureRegionEditor::_zoom_reset() {
-	_zoom_on_position(1.0, edit_draw->get_size() / 2.0);
+	_zoom_on_position(2.0, edit_draw->get_size() / 2.0);
 }
 
 void TextureRegionEditor::_zoom_out() {
@@ -990,7 +990,7 @@ TextureRegionEditor::TextureRegionEditor(EditorNode *p_editor) {
 
 	snap_step = Vector2(10, 10);
 	snap_separation = Vector2(0, 0);
-	snap_mode = SNAP_NONE;
+	snap_mode = SNAP_PIXEL;
 	edited_margin = -1;
 	drag_index = -1;
 	drag = false;
@@ -1082,7 +1082,7 @@ TextureRegionEditor::TextureRegionEditor(EditorNode *p_editor) {
 	edit_draw->connect("draw", this, "_region_draw");
 	edit_draw->connect("gui_input", this, "_region_input");
 
-	draw_zoom = 1.0;
+	draw_zoom = 2.0;
 	edit_draw->set_clip_contents(true);
 
 	HBoxContainer *zoom_hb = memnew(HBoxContainer);

@@ -255,7 +255,7 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 								includefile = false;
 							}
 						}
-						if (includefile >= 0) {
+						if (includefile) {
 							parent_should_expand = true;
 						} else {
 							continue;
@@ -1474,6 +1474,41 @@ void FileSystemDock::_try_duplicate_item(const FileOrFolder &p_item, const Strin
 	memdelete(da);
 }
 
+void FileSystemDock::_try_extend_resfile(const String &p_res_path, const String &p_new_path) {
+	// Ensure folder paths end with "/".
+	String old_path = (p_res_path);
+	String new_path = (p_new_path);
+
+	if (new_path == old_path) {
+		EditorNode::get_singleton()->add_io_error(TTR("Cannot use original resource name."));
+		return;
+	}
+
+	DirAccess *da = DirAccess::create(DirAccess::ACCESS_RESOURCES);
+	print_verbose("Extending Resource " + old_path + " -> " + new_path);
+	Error err = da->copy(old_path, new_path);
+	if (err == OK) {
+		// Apply inherit state
+		RES res_old = ResourceLoader::load(p_res_path, "", false);
+		RES res = ResourceLoader::load(p_new_path, "", false);
+		ERR_FAIL_COND(!res.is_valid());
+		res->set_inherits_state(res_old);
+		ResourceSaver::save(p_new_path, res);
+
+		// Move/Rename any corresponding import settings too.
+		if (FileAccess::exists(old_path + ".import")) {
+			err = da->copy(old_path + ".import", new_path + ".import");
+			if (err != OK) {
+				EditorNode::get_singleton()->add_io_error(TTR("Error extending resource:") + "\n" + old_path + ".import\n");
+			}
+		}
+	} else {
+		EditorNode::get_singleton()->add_io_error(TTR("Error extending resource:") + "\n" + old_path + "\n");
+	}
+	memdelete(da);
+	
+}
+
 void FileSystemDock::_update_resource_paths_after_move(const Map<String, String> &p_renames) const {
 	// Rename all resources loaded, be it subresources or actual resources.
 	List<Ref<Resource>> cached;
@@ -1773,6 +1808,7 @@ void FileSystemDock::_rename_operation_confirm() {
 	current_path->set_text(path);
 }
 
+
 void FileSystemDock::_duplicate_operation_confirm() {
 	String new_name = duplicate_dialog_text->get_text().strip_edges();
 	if (new_name.length() == 0) {
@@ -1806,6 +1842,42 @@ void FileSystemDock::_duplicate_operation_confirm() {
 	print_verbose("FileSystem: calling rescan.");
 	_rescan();
 }
+
+// Valla edits
+void FileSystemDock::_extend_res_operation_confirm() {
+	String new_name = extend_res_dialog_text->get_text().strip_edges();
+	if (new_name.length() == 0) {
+		EditorNode::get_singleton()->show_warning(TTR("No name provided."));
+		return;
+	} else if (new_name.find("/") != -1 || new_name.find("\\") != -1 || new_name.find(":") != -1) {
+		EditorNode::get_singleton()->show_warning(TTR("Name contains invalid characters."));
+		return;
+	}
+
+	String base_dir = to_extend.get_base_dir();
+	// get_base_dir() returns "some/path" if the original path was "some/path/", so work it around.
+	if (to_extend.ends_with("/")) {
+		base_dir = base_dir.get_base_dir();
+	}
+
+	String new_path = base_dir.plus_file(new_name);
+
+	// Present a more user friendly warning for name conflict
+	DirAccess *da = DirAccess::create(DirAccess::ACCESS_RESOURCES);
+	if (da->file_exists(new_path) || da->dir_exists(new_path)) {
+		EditorNode::get_singleton()->show_warning(TTR("A file or folder with this name already exists."));
+		memdelete(da);
+		return;
+	}
+	memdelete(da);
+
+	_try_extend_resfile(to_extend, new_path);
+
+	// Rescan everything.
+	//print_verbose("FileSystem: calling rescan.");
+	//_rescan();
+}
+
 
 void FileSystemDock::_move_with_overwrite() {
 	_move_operation_confirm(to_move_path, true);
@@ -2004,10 +2076,24 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 			}
 		} break;
 
-		case FILE_INHERIT: {
+		case FILE_INHERIT_SCN: {
 			// Create a new scene inherited from the selected one.
 			if (p_selected.size() == 1) {
 				emit_signal("inherit", p_selected[0]);
+			}
+		} break;
+		// VALLA EDITS
+		case FILE_INHERIT_RES: {
+			if (p_selected.size() == 1) {
+				// Create a new resource inherited from the selected one.
+				to_extend = p_selected[0];
+				String name = to_extend.get_file();
+				extend_res_dialog->set_title(TTR("Extending Resource:") + " " + name);
+				extend_res_dialog_text->set_text(name);
+				extend_res_dialog_text->select(0, name.rfind("."));
+
+				extend_res_dialog->popup_centered_minsize(Size2(250, 80) * EDSCALE);
+				extend_res_dialog_text->grab_focus();
 			}
 		} break;
 
@@ -2640,6 +2726,22 @@ void FileSystemDock::_get_drag_target_folder(String &target, bool &target_favori
 	}
 }
 
+bool _is_path_resource(String &p_path) {
+	String extension = p_path.get_extension();
+	List<String> extensions;
+	Ref<Resource> sd = memnew(Resource);
+	ResourceSaver::get_recognized_extensions(sd, &extensions);
+
+	bool extension_correct = false;
+	for (List<String>::Element *E = extensions.front(); E; E = E->next()) {
+		if (E->get() == extension) {
+			extension_correct = true;
+			break;
+		}
+	}
+	return extension_correct;
+}
+
 void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, Vector<String> p_paths, bool p_display_path_dependent_options) {
 	// Add options for files and folders.
 	ERR_FAIL_COND_MSG(p_paths.empty(), "Path cannot be empty.");
@@ -2651,6 +2753,7 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, Vector<Str
 
 	bool all_files = true;
 	bool all_files_scenes = true;
+	bool all_files_resources = true;
 	bool all_folders = true;
 	bool all_favorites = true;
 	bool all_not_favorites = true;
@@ -2664,6 +2767,8 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, Vector<Str
 			filenames.push_back(fpath);
 			all_folders = false;
 			all_files_scenes &= (EditorFileSystem::get_singleton()->get_file_type(fpath) == "PackedScene");
+			auto thing = EditorFileSystem::get_singleton()->get_file_type(fpath);
+			all_files_resources &= _is_path_resource(fpath);
 		}
 
 		// Check if in favorites.
@@ -2685,7 +2790,7 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, Vector<Str
 		if (all_files_scenes) {
 			if (filenames.size() == 1) {
 				p_popup->add_icon_item(get_icon("Load", "EditorIcons"), TTR("Open Scene"), FILE_OPEN);
-				p_popup->add_icon_item(get_icon("CreateNewSceneFrom", "EditorIcons"), TTR("New Inherited Scene"), FILE_INHERIT);
+				p_popup->add_icon_item(get_icon("CreateNewSceneFrom", "EditorIcons"), TTR("New Inherited Scene"), FILE_INHERIT_SCN);
 				if (ProjectSettings::get_singleton()->get("application/run/main_scene") != filenames[0]) {
 					p_popup->add_icon_item(get_icon("PlayScene", "EditorIcons"), TTR("Set As Main Scene"), FILE_MAIN_SCENE);
 				}
@@ -2694,6 +2799,10 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, Vector<Str
 			}
 			p_popup->add_icon_item(get_icon("Instance", "EditorIcons"), TTR("Instance"), FILE_INSTANCE);
 			p_popup->add_separator();
+		} else if (all_files_resources) {
+			if (filenames.size() == 1) {
+				p_popup->add_icon_item(get_icon("NewResource", "EditorIcons"), TTR("New Inherited Resource"), FILE_INHERIT_RES);
+			}
 		} else if (filenames.size() == 1) {
 			p_popup->add_icon_item(get_icon("Load", "EditorIcons"), TTR("Open"), FILE_OPEN);
 			p_popup->add_separator();
@@ -3059,6 +3168,7 @@ void FileSystemDock::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_move_with_overwrite"), &FileSystemDock::_move_with_overwrite);
 	ClassDB::bind_method(D_METHOD("_rename_operation_confirm"), &FileSystemDock::_rename_operation_confirm);
 	ClassDB::bind_method(D_METHOD("_duplicate_operation_confirm"), &FileSystemDock::_duplicate_operation_confirm);
+	ClassDB::bind_method(D_METHOD("_extend_res_operation_confirm"), &FileSystemDock::_extend_res_operation_confirm);
 
 	ClassDB::bind_method(D_METHOD("_search_changed"), &FileSystemDock::_search_changed);
 	ClassDB::bind_method(D_METHOD("_filter_type_changed"), &FileSystemDock::_filter_type_changed);
@@ -3075,6 +3185,7 @@ void FileSystemDock::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_feature_profile_changed"), &FileSystemDock::_feature_profile_changed);
 
 	ADD_SIGNAL(MethodInfo("inherit", PropertyInfo(Variant::STRING, "file")));
+	ADD_SIGNAL(MethodInfo("inherit_res", PropertyInfo(Variant::STRING, "file")));
 	ADD_SIGNAL(MethodInfo("instance", PropertyInfo(Variant::POOL_STRING_ARRAY, "files")));
 
 	ADD_SIGNAL(MethodInfo("file_removed", PropertyInfo(Variant::STRING, "file")));
@@ -3283,6 +3394,17 @@ FileSystemDock::FileSystemDock(EditorNode *p_editor) {
 	add_child(duplicate_dialog);
 	duplicate_dialog->register_text_enter(duplicate_dialog_text);
 	duplicate_dialog->connect("confirmed", this, "_duplicate_operation_confirm");
+
+	extend_res_dialog = memnew(ConfirmationDialog);
+	VBoxContainer *extend_res_dialog_vb = memnew(VBoxContainer);
+	extend_res_dialog->add_child(extend_res_dialog_vb);
+
+	extend_res_dialog_text = memnew(LineEdit);
+	extend_res_dialog_vb->add_margin_child(TTR("Name:"), extend_res_dialog_text);
+	extend_res_dialog->get_ok()->set_text(TTR("Extend"));
+	add_child(extend_res_dialog);
+	extend_res_dialog->register_text_enter(extend_res_dialog_text);
+	extend_res_dialog->connect("confirmed", this, "_extend_res_operation_confirm");
 
 	make_dir_dialog = memnew(ConfirmationDialog);
 	make_dir_dialog->set_title(TTR("Create Folder"));

@@ -225,8 +225,8 @@ void ShaderMaterial::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_shader_param", "param", "value"), &ShaderMaterial::set_shader_param);
 	ClassDB::bind_method(D_METHOD("get_shader_param", "param"), &ShaderMaterial::get_shader_param);
 	ClassDB::bind_method(D_METHOD("_shader_changed"), &ShaderMaterial::_shader_changed);
-	ClassDB::bind_method(D_METHOD("property_can_revert", "name"), &ShaderMaterial::property_can_revert);
-	ClassDB::bind_method(D_METHOD("property_get_revert", "name"), &ShaderMaterial::property_get_revert);
+	//ClassDB::bind_method(D_METHOD("property_can_revert", "name"), &ShaderMaterial::property_can_revert);
+	//ClassDB::bind_method(D_METHOD("property_get_revert", "name"), &ShaderMaterial::property_get_revert);
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "shader", PROPERTY_HINT_RESOURCE_TYPE, "Shader"), "set_shader", "get_shader");
 }

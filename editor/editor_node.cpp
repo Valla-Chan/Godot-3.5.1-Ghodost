@@ -1779,6 +1779,26 @@ void EditorNode::_dialog_action(String p_file) {
 
 			load_scene(p_file, false, true);
 		} break;
+		// VALLA EDITS
+		case FILE_NEW_INHERITED_RESOURCE: {
+			RES res = ResourceLoader::load(p_file, "", false);
+			ERR_FAIL_COND(!res.is_valid());
+
+			Ref<Script> res_script = res->get_script();
+			if (res_script.is_valid()) {
+				StringName script_name = ScriptServer::get_global_class_name(res_script->get_path());
+				if (ScriptServer::is_global_class(script_name)) {
+					res = ScriptServer::instantiate_global_class(script_name);
+				}
+			}
+			if (res.is_null()) {
+				res = ClassDB::instance(res->get_class());
+			}
+
+			res->copy_inherits_state(res);
+
+			inspector_dock->edit_resource(res);
+		} break;
 		case FILE_OPEN_SCENE: {
 			load_scene(p_file);
 		} break;
@@ -2127,6 +2147,9 @@ void EditorNode::_edit_current(bool p_skip_foreign) {
 	if (is_resource) {
 		Resource *current_res = Object::cast_to<Resource>(current_obj);
 		ERR_FAIL_COND(!current_res);
+		if (current_res->get_inherits_state().is_valid()) {
+			current_res->reload_from_file();
+		}
 		get_inspector()->edit(current_res);
 		scene_tree_dock->set_selected(nullptr);
 		node_dock->set_node(nullptr);
@@ -3901,6 +3924,11 @@ InspectorDock *EditorNode::get_inspector_dock() {
 
 void EditorNode::_inherit_request(String p_file) {
 	current_option = FILE_NEW_INHERITED_SCENE;
+	_dialog_action(p_file);
+}
+
+void EditorNode::_inherit_res_request(String p_file) {
+	current_option = FILE_NEW_INHERITED_RESOURCE;
 	_dialog_action(p_file);
 }
 
@@ -5867,6 +5895,7 @@ void EditorNode::_bind_methods() {
 	ClassDB::bind_method("set_edited_scene", &EditorNode::set_edited_scene);
 	ClassDB::bind_method("open_request", &EditorNode::open_request);
 	ClassDB::bind_method("_inherit_request", &EditorNode::_inherit_request);
+	ClassDB::bind_method("_inherit_res_request", &EditorNode::_inherit_res_request);
 	ClassDB::bind_method("_instance_request", &EditorNode::_instance_request);
 	ClassDB::bind_method("_close_messages", &EditorNode::_close_messages);
 	ClassDB::bind_method("_show_messages", &EditorNode::_show_messages);
@@ -6930,6 +6959,7 @@ EditorNode::EditorNode() {
 
 	filesystem_dock = memnew(FileSystemDock(this));
 	filesystem_dock->connect("inherit", this, "_inherit_request");
+	filesystem_dock->connect("inherit_res", this, "_inherit_res_request");
 	filesystem_dock->connect("instance", this, "_instance_request");
 	filesystem_dock->connect("display_mode_changed", this, "_save_docks");
 

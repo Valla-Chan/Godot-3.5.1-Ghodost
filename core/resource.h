@@ -59,6 +59,8 @@ class Resource : public Reference {
 	String path_cache;
 	int subindex;
 
+	Ref<Resource> inherits_state;
+
 #ifdef TOOLS_ENABLED
 	uint64_t last_modified_time;
 	uint64_t import_last_modified_time;
@@ -82,11 +84,24 @@ protected:
 	void _set_path(const String &p_path);
 	void _take_over_path(const String &p_path);
 
+	virtual bool property_can_revert(const String &p_name) const;
+	virtual Variant property_get_revert(const String &p_name) const;
+	void _validate_property(PropertyInfo &p_property) const;
+
+	virtual bool is_inherited_state_property_value_saved(const StringName &p_name, const Variant &p_value) const;
+	virtual bool setup_inherits_state(const Ref<Resource> &p_resource, bool p_copy);
+
 public:
 	static Node *(*_get_local_scene_func)(); //used by editor
 
 	virtual bool editor_can_reload_from_file();
 	virtual void reload_from_file();
+	void properties_revert_foreign();
+	//for resources that use variable amount of properties, either via _validate_property or _get_property_list, this function needs to be implemented to correctly clear state
+	//virtual void reset_state();
+
+	virtual Error copy_from(const Ref<Resource> &p_resource, bool p_copy_inheritance = true);
+	
 
 	void register_owner(Object *p_owner);
 	void unregister_owner(Object *p_owner);
@@ -101,6 +116,9 @@ public:
 
 	void set_subindex(int p_sub_index);
 	int get_subindex() const;
+
+	Vector<String> _get_resfile_propnames() const;
+	//void _get_saved_res_keys() const;
 
 	virtual Ref<Resource> duplicate(bool p_subresources = false) const;
 	Ref<Resource> duplicate_for_local_scene(Node *p_for_scene, Map<Ref<Resource>, Ref<Resource>> &remap_cache);
@@ -137,6 +155,11 @@ public:
 	void set_id_for_path(const String &p_path, int p_id);
 	int get_id_for_path(const String &p_path) const;
 #endif
+
+	void copy_inherits_state(const Ref<Resource> &p_resource);
+	void set_inherits_state(const Ref<Resource> &p_resource);
+	Ref<Resource> get_inherits_state() const;
+	bool is_property_value_saved(const StringName &p_property, const Variant &p_value) const;
 
 	Resource();
 	~Resource();

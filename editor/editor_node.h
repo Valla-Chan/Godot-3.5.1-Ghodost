@@ -123,6 +123,7 @@ private:
 		FILE_NEW_SCENE,
 		FILE_NEW_INHERITED_SCENE,
 		FILE_NEW_INHERITED_SCENE_CURRENT,
+		FILE_NEW_INHERITED_RESOURCE,
 		FILE_OPEN_SCENE,
 		FILE_SAVE_SCENE,
 		FILE_SAVE_AS_SCENE,
@@ -523,6 +524,7 @@ private:
 	void _discard_changes(const String &p_str = String());
 
 	void _inherit_request(String p_file);
+	void _inherit_res_request(String p_file);
 	void _instance_request(const Vector<String> &p_files);
 
 	void _display_top_editors(bool p_display);

@@ -1607,8 +1607,8 @@ void EditorSettings::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_setting", "name"), &EditorSettings::get_setting);
 	ClassDB::bind_method(D_METHOD("erase", "property"), &EditorSettings::erase);
 	ClassDB::bind_method(D_METHOD("set_initial_value", "name", "value", "update_current"), &EditorSettings::set_initial_value);
-	ClassDB::bind_method(D_METHOD("property_can_revert", "name"), &EditorSettings::property_can_revert);
-	ClassDB::bind_method(D_METHOD("property_get_revert", "name"), &EditorSettings::property_get_revert);
+	//ClassDB::bind_method(D_METHOD("property_can_revert", "name"), &EditorSettings::property_can_revert);
+	//ClassDB::bind_method(D_METHOD("property_get_revert", "name"), &EditorSettings::property_get_revert);
 	ClassDB::bind_method(D_METHOD("add_property_info", "info"), &EditorSettings::_add_property_info_bind);
 
 	ClassDB::bind_method(D_METHOD("get_settings_dir"), &EditorSettings::get_settings_dir);

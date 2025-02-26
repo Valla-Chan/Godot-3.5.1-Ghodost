@@ -186,6 +186,10 @@ void EditorResourcePicker::_update_menu_items() {
 		edit_menu->add_icon_item(get_icon("Edit", "EditorIcons"), TTR("Edit"), OBJ_MENU_EDIT);
 		edit_menu->add_icon_item(get_icon("Clear", "EditorIcons"), TTR("Clear"), OBJ_MENU_CLEAR);
 		edit_menu->add_icon_item(get_icon("Duplicate", "EditorIcons"), TTR("Make Unique"), OBJ_MENU_MAKE_UNIQUE);
+		//if (edited_resource->get_inherits_state().is_null()) {
+			edit_menu->add_icon_item(get_icon("NewResource", "EditorIcons"), TTR("New Inherited Resource"), OBJ_MENU_MAKE_INHERITED);
+		//}
+
 		edit_menu->add_icon_item(get_icon("Save", "EditorIcons"), TTR("Save"), OBJ_MENU_SAVE);
 
 		if (edited_resource->get_path().is_resource_file()) {
@@ -287,6 +291,32 @@ void EditorResourcePicker::_edit_menu_cbk(int p_which) {
 
 		case OBJ_MENU_CLEAR: {
 			edited_resource = RES();
+			emit_signal("resource_changed", edited_resource);
+			_update_resource();
+		} break;
+
+		case OBJ_MENU_MAKE_INHERITED: {
+			if (edited_resource.is_null()) {
+				return;
+			}
+
+			Ref<Resource> r;
+			Ref<Script> res_script = edited_resource->get_script();
+			if (res_script.is_valid()) {
+				StringName script_name = ScriptServer::get_global_class_name(res_script->get_path());
+				if (ScriptServer::is_global_class(script_name)) {
+					r = ScriptServer::instantiate_global_class(script_name);
+				}
+			}
+			if (r.is_null()) {
+				r = ClassDB::instance(edited_resource->get_class());
+			}
+
+			ERR_FAIL_COND(r.is_null());
+
+			r->copy_inherits_state(edited_resource);
+
+			edited_resource = r;
 			emit_signal("resource_changed", edited_resource);
 			_update_resource();
 		} break;

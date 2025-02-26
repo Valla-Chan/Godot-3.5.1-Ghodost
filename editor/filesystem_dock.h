@@ -83,7 +83,8 @@ public:
 private:
 	enum FileMenu {
 		FILE_OPEN,
-		FILE_INHERIT,
+		FILE_INHERIT_SCN,
+		FILE_INHERIT_RES,
 		FILE_MAIN_SCENE,
 		FILE_INSTANCE,
 		FILE_ADD_FAVORITE,
@@ -161,6 +162,8 @@ private:
 	ConfirmationDialog *overwrite_dialog;
 	ScriptCreateDialog *make_script_dialog;
 	CreateDialog *new_resource_dialog;
+	ConfirmationDialog *extend_res_dialog;
+	LineEdit *extend_res_dialog_text;
 
 	bool always_show_folders;
 
@@ -178,6 +181,7 @@ private:
 	};
 	FileOrFolder to_rename;
 	FileOrFolder to_duplicate;
+	String to_extend;
 	Vector<FileOrFolder> to_move;
 	String to_move_path;
 
@@ -221,6 +225,7 @@ private:
 	void _find_remaps(EditorFileSystemDirectory *efsd, const Map<String, String> &renames, Vector<String> &to_remaps) const;
 	void _try_move_item(const FileOrFolder &p_item, const String &p_new_path, Map<String, String> &p_file_renames, Map<String, String> &p_folder_renames);
 	void _try_duplicate_item(const FileOrFolder &p_item, const String &p_new_path) const;
+	void _try_extend_resfile(const String &p_res_path, const String &p_new_path);
 	void _update_dependencies_after_move(const Map<String, String> &p_renames) const;
 	void _update_resource_paths_after_move(const Map<String, String> &p_renames) const;
 	void _save_scenes_after_move(const Map<String, String> &p_renames) const;
@@ -235,6 +240,7 @@ private:
 	void _make_scene_confirm();
 	void _rename_operation_confirm();
 	void _duplicate_operation_confirm();
+	void _extend_res_operation_confirm();
 	void _move_with_overwrite();
 	Vector<String> _check_existing();
 	void _move_operation_confirm(const String &p_to_path, bool overwrite = false);

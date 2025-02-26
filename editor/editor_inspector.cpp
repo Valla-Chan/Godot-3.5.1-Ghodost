@@ -349,8 +349,8 @@ bool EditorProperty::is_read_only() const {
 }
 
 Variant EditorPropertyRevert::get_property_revert_value(Object *p_object, const StringName &p_property, bool *r_is_valid) {
-	if (p_object->has_method("property_can_revert") && p_object->call("property_can_revert", p_property)) {
-		if (r_is_valid) {
+	if (p_object->has_method("property_can_revert")) {
+		if (r_is_valid && p_object->call("property_can_revert", p_property)) {
 			*r_is_valid = true;
 		}
 		return p_object->call("property_get_revert", p_property);
@@ -360,6 +360,10 @@ Variant EditorPropertyRevert::get_property_revert_value(Object *p_object, const 
 }
 
 bool EditorPropertyRevert::can_property_revert(Object *p_object, const StringName &p_property) {
+	if (p_object->has_method("property_can_revert")) {
+		return p_object->call("property_can_revert", p_property);
+	}
+
 	bool is_valid_revert = false;
 	Variant revert_value = EditorPropertyRevert::get_property_revert_value(p_object, p_property, &is_valid_revert);
 	if (!is_valid_revert) {

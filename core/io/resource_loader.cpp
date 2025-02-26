@@ -362,6 +362,7 @@ RES ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p
 				}
 				ResourceCache::lock.read_unlock();
 				_remove_from_loading_map(local_path);
+				res->properties_revert_foreign();
 				return res;
 			}
 		}
@@ -412,6 +413,7 @@ RES ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p
 	if (_loaded_callback) {
 		_loaded_callback(res, p_path);
 	}
+	res->properties_revert_foreign();
 
 	return res;
 }
