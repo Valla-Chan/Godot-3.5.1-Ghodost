@@ -1005,7 +1005,7 @@ TextureRegionEditor::TextureRegionEditor(EditorNode *p_editor) {
 	snap_mode_button->add_item(TTR("Pixel Snap"), 1);
 	snap_mode_button->add_item(TTR("Grid Snap"), 2);
 	snap_mode_button->add_item(TTR("Auto Slice"), 3);
-	snap_mode_button->select(0);
+	snap_mode_button->select(1);
 	snap_mode_button->connect("item_selected", this, "_set_snap_mode");
 
 	hb_grid = memnew(HBoxContainer);
