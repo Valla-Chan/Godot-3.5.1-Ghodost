@@ -327,6 +327,8 @@ class ThemeTypeEditor : public MarginContainer {
 	VBoxContainer *icon_items_list;
 	VBoxContainer *stylebox_items_list;
 
+	Control *current_edited_property;
+
 	LineEdit *type_variation_edit;
 	Button *type_variation_button;
 	Label *type_variation_locked;

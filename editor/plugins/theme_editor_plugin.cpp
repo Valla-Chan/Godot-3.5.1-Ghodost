@@ -2244,14 +2244,23 @@ HBoxContainer *ThemeTypeEditor::_create_property_control(Theme::DataType p_data_
 	item_name_container->set_stretch_ratio(2.0);
 	item_control->add_child(item_name_container);
 
-	Label *item_name = memnew(Label);
+	// Child 0
+
+	Button *item_name = memnew(Button);
 	item_name->set_h_size_flags(SIZE_EXPAND_FILL);
 	item_name->set_clip_text(true);
 	item_name->set_text(p_item_name);
-	item_name->set_tooltip(p_item_name);
+	item_name->set_flat(true);
+	item_name->set_tooltip(TTR("Rename Item"));
+	item_name->set_text_align(ToolButton::ALIGN_LEFT);
 	item_name_container->add_child(item_name);
+	item_name->set_focus_mode(FOCUS_NONE);
+
 
 	if (p_editable) {
+
+		// Child 1
+
 		LineEdit *item_name_edit = memnew(LineEdit);
 		item_name_edit->set_h_size_flags(SIZE_EXPAND_FILL);
 		item_name_edit->set_text(p_item_name);
@@ -2259,12 +2268,7 @@ HBoxContainer *ThemeTypeEditor::_create_property_control(Theme::DataType p_data_
 		item_name_edit->connect("text_entered", this, "_item_rename_entered", varray(p_data_type, p_item_name, item_name_container));
 		item_name_edit->hide();
 
-		Button *item_rename_button = memnew(Button);
-		item_rename_button->set_icon(get_icon("Edit", "EditorIcons"));
-		item_rename_button->set_tooltip(TTR("Rename Item"));
-		item_rename_button->set_flat(true);
-		item_name_container->add_child(item_rename_button);
-		item_rename_button->connect("pressed", this, "_item_rename_cbk", varray(p_data_type, p_item_name, item_name_container));
+		// Child 2
 
 		Button *item_remove_button = memnew(Button);
 		item_remove_button->set_icon(get_icon("Remove", "EditorIcons"));
@@ -2272,6 +2276,8 @@ HBoxContainer *ThemeTypeEditor::_create_property_control(Theme::DataType p_data_
 		item_remove_button->set_flat(true);
 		item_name_container->add_child(item_remove_button);
 		item_remove_button->connect("pressed", this, "_item_remove_cbk", varray(p_data_type, p_item_name));
+
+		// Child 3
 
 		Button *item_rename_confirm_button = memnew(Button);
 		item_rename_confirm_button->set_icon(get_icon("ImportCheck", "EditorIcons"));
@@ -2281,6 +2287,8 @@ HBoxContainer *ThemeTypeEditor::_create_property_control(Theme::DataType p_data_
 		item_rename_confirm_button->connect("pressed", this, "_item_rename_confirmed", varray(p_data_type, p_item_name, item_name_container));
 		item_rename_confirm_button->hide();
 
+		// Child 4
+
 		Button *item_rename_cancel_button = memnew(Button);
 		item_rename_cancel_button->set_icon(get_icon("ImportFail", "EditorIcons"));
 		item_rename_cancel_button->set_tooltip(TTR("Cancel Item Rename"));
@@ -2288,8 +2296,15 @@ HBoxContainer *ThemeTypeEditor::_create_property_control(Theme::DataType p_data_
 		item_name_container->add_child(item_rename_cancel_button);
 		item_rename_cancel_button->connect("pressed", this, "_item_rename_canceled", varray(p_data_type, p_item_name, item_name_container));
 		item_rename_cancel_button->hide();
+
+		item_name->connect("pressed", this, "_item_rename_cbk", varray(p_data_type, p_item_name, item_name_container));
+
 	} else {
+
+		// Child 1
+
 		item_name->add_color_override("font_color", get_color("disabled_font_color", "Editor"));
+		item_name->set_disabled(true);
 
 		Button *item_override_button = memnew(Button);
 		item_override_button->set_icon(get_icon("Add", "EditorIcons"));
@@ -2701,18 +2716,21 @@ void ThemeTypeEditor::_item_remove_cbk(int p_data_type, String p_item_name) {
 }
 
 void ThemeTypeEditor::_item_rename_cbk(int p_data_type, String p_item_name, Control *p_control) {
-	// Label
-	Object::cast_to<Label>(p_control->get_child(0))->hide();
+	if (current_edited_property != nullptr) {
+		_item_rename_canceled(p_data_type, p_item_name, current_edited_property);
+	}
+	current_edited_property = p_control;
+	// Label (Toolbutton)
+	Object::cast_to<Control>(p_control->get_child(0))->hide();
 	// Label buttons
-	Object::cast_to<Button>(p_control->get_child(2))->hide();
-	Object::cast_to<Button>(p_control->get_child(3))->hide();
+	Object::cast_to<Control>(p_control->get_child(2))->hide();
 
 	// LineEdit
 	Object::cast_to<LineEdit>(p_control->get_child(1))->set_text(p_item_name);
 	Object::cast_to<LineEdit>(p_control->get_child(1))->show();
 	// LineEdit buttons
-	Object::cast_to<Button>(p_control->get_child(4))->show();
-	Object::cast_to<Button>(p_control->get_child(5))->show();
+	Object::cast_to<Control>(p_control->get_child(3))->show();
+	Object::cast_to<Control>(p_control->get_child(4))->show();
 }
 
 void ThemeTypeEditor::_item_rename_confirmed(int p_data_type, String p_item_name, Control *p_control) {
@@ -2755,17 +2773,17 @@ void ThemeTypeEditor::_item_rename_entered(String p_value, int p_data_type, Stri
 }
 
 void ThemeTypeEditor::_item_rename_canceled(int p_data_type, String p_item_name, Control *p_control) {
+	current_edited_property = nullptr;
 	// LineEdit
 	Object::cast_to<LineEdit>(p_control->get_child(1))->hide();
 	// LineEdit buttons
-	Object::cast_to<Button>(p_control->get_child(4))->hide();
-	Object::cast_to<Button>(p_control->get_child(5))->hide();
+	Object::cast_to<Control>(p_control->get_child(3))->hide();
+	Object::cast_to<Control>(p_control->get_child(4))->hide();
 
-	// Label
-	Object::cast_to<Label>(p_control->get_child(0))->show();
+	// Label (Toolbutton)
+	Object::cast_to<Control>(p_control->get_child(0))->show();
 	// Label buttons
-	Object::cast_to<Button>(p_control->get_child(2))->show();
-	Object::cast_to<Button>(p_control->get_child(3))->show();
+	Object::cast_to<Control>(p_control->get_child(2))->show();
 }
 
 void ThemeTypeEditor::_color_item_changed(Color p_value, String p_item_name) {
