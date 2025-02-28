@@ -210,12 +210,14 @@ Vector<String> Resource::_get_resfile_propnames() const {
 	Vector<String> propnames = {};
 	Error err;
 	String file = FileAccess::get_file_as_string(get_path(), &err);
+	//auto path = get_path();
 	
 
 	if (err != OK) {
 		return propnames;
 	}
 	// make sure the properties chunk is below "[resource]"
+	// TODO: this probably causes some kind of issue with subresources.
 	int start = file.find("[resource]");
 	if (start == -1)
 		return propnames;

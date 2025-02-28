@@ -117,6 +117,7 @@ Error ResourceInteractiveLoaderText::_parse_sub_resource(VariantParser::Stream *
 
 	ERR_FAIL_COND_V(!int_resources.has(index), ERR_INVALID_PARAMETER);
 	r_res = int_resources[index];
+	r_res->properties_revert_foreign();
 
 	VariantParser::get_token(p_stream, token, line, r_err_str);
 	if (token.type != VariantParser::TK_PARENTHESIS_CLOSE) {
