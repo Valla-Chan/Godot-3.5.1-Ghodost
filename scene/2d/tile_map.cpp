@@ -1761,6 +1761,11 @@ Array TileMap::get_all_cells_in_rect(Rect2 p_rect) const {
 	for (int x = p_rect.position.x; x < p_rect.position.x + p_rect.size.x; ++x) {
 		for (int y = p_rect.position.y; y < p_rect.position.y + p_rect.size.y; ++y) {
 			PosKey pk(x, y);
+
+			// Check if the coordinate is in tile_map
+			if (tile_map.has(pk)) {
+				unused_cells.push_back(Vector2(x, y));
+			}
 		}
 	}
 
