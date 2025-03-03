@@ -485,6 +485,12 @@ void ConnectDialog::_select_method_confirmed() {
 }
 
 void ConnectDialog::_update_filter(String p_filtertext) {
+	if (p_filtertext == "self") {
+		if (tree->get_marked_nodes().size() > 0) {
+			tree->set_filter(tree->get_marked_nodes()[0]->get_name());
+			return;
+		}
+	}
 	tree->set_filter(p_filtertext);
 }
 

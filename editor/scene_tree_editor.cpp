@@ -167,6 +167,20 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		return false;
 	}
 
+	// add hidden root
+	if (!p_parent) {
+		TreeItem *rootitem = tree->create_item(nullptr);
+		tree->set_hide_root(true);
+
+		// add copy of marked nodes at root
+		for (Set<Node *>::Element *E = marked.front(); E; E = E->next()) {
+			_add_nodes(E->get(), tree->get_root(), p_scroll_to_selected);
+		}
+
+		p_parent = rootitem;
+	}
+
+
 	bool is_root = p_node->get_parent() == get_scene_node() || p_node == get_scene_node();
 
 	// only owned nodes are editable, since nodes can create their own (manually owned) child nodes,
@@ -472,10 +486,12 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		} break;
 	}
 
-	for (int i = 0; i < p_node->get_child_count(); i++) {
-		bool child_keep = _add_nodes(p_node->get_child(i), item, p_scroll_to_selected);
+	if (!(marked.has(p_node) && p_parent == tree->get_root())) {
+		for (int i = 0; i < p_node->get_child_count(); i++) {
+			bool child_keep = _add_nodes(p_node->get_child(i), item, p_scroll_to_selected);
 
-		keep = keep || child_keep;
+			keep = keep || child_keep;
+		}
 	}
 
 	if (valid_types.size()) {
@@ -927,6 +943,18 @@ void SceneTreeEditor::set_marked(Node *p_marked, bool p_selectable, bool p_child
 		s.insert(p_marked);
 	}
 	set_marked(s, p_selectable, p_children_selectable);
+}
+
+Vector<Node *> SceneTreeEditor::get_marked_nodes() const {
+	Vector<Node *> nodes;
+	for (Set<Node*>::Element *E = marked.front(); E; E = E->next()) {
+		nodes.push_back(E->get());
+	}
+	return nodes;
+}
+
+size_t SceneTreeEditor::get_marked_node_amount() const {
+	return marked.size();
 }
 
 void SceneTreeEditor::set_filter(const String &p_filter) {

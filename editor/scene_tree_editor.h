@@ -147,6 +147,8 @@ public:
 
 	void set_marked(const Set<Node *> &p_marked, bool p_selectable = false, bool p_children_selectable = true);
 	void set_marked(Node *p_marked, bool p_selectable = false, bool p_children_selectable = true);
+	Vector<Node *> get_marked_nodes() const;
+	size_t get_marked_node_amount() const;
 	void set_selected(Node *p_node, bool p_emit_selected = true);
 	Node *get_selected();
 	void set_can_rename(bool p_can_rename) { can_rename = p_can_rename; }
