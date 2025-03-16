@@ -379,6 +379,23 @@ void Camera2D::set_position(const Point2 &p_pos) {
 	Node2D::set_position(p_pos);
 }
 
+void Camera2D::set_global_position_smooth(const Point2 &p_global_pos) {
+	Point2 new_localpos;
+	Transform2D inv;
+	CanvasItem *pi = get_parent_item();
+	if (pi) {
+		inv = pi->get_global_transform().affine_inverse();
+		new_localpos = (inv.xform(p_global_pos));
+	} else {
+		new_localpos = (p_global_pos);
+	}
+	auto difference = new_localpos - get_position();
+	set_position(new_localpos);
+	smoothed_camera_pos += difference;
+	_update_scroll();
+	//set_position(new_localpos);
+};
+
 void Camera2D::set_frozen(bool p_frozen, bool p_keep_pos) {
 	if (!p_keep_pos && frozen && !p_frozen) {
 		Node2D::set_position(pos_dirty);
@@ -668,6 +685,8 @@ bool Camera2D::is_margin_drawing_enabled() const {
 void Camera2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_offset", "offset"), &Camera2D::set_offset);
 	ClassDB::bind_method(D_METHOD("get_offset"), &Camera2D::get_offset);
+
+	ClassDB::bind_method(D_METHOD("set_global_position_smooth"), &Camera2D::set_global_position_smooth);
 
 	ClassDB::bind_method(D_METHOD("set_frozen", "frozen", "keep_pos"), &Camera2D::set_frozen, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("is_frozen"), &Camera2D::is_frozen);

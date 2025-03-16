@@ -104,6 +104,8 @@ protected:
 
 public:
 	void set_position(const Point2 &p_pos);
+	// set the camera's position while preserving the smoothing offset
+	void set_global_position_smooth(const Point2 &p_global_pos);
 
 	void set_offset(const Vector2 &p_offset);
 	Vector2 get_offset() const;
