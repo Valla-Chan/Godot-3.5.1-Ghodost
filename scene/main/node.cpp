@@ -500,9 +500,9 @@ bool Node::is_physics_processing_internal() const {
 }
 
 void Node::set_process_mode(ProcessMode p_mode) {
-	//if (data.process_mode == p_mode) {
-	//	return;
-	//}
+	if (data.process_mode == p_mode) {
+		return;
+	}
 
 	if (!is_inside_tree()) {
 		data.process_mode = p_mode;
@@ -1619,6 +1619,34 @@ Node *Node::find_node(const String &p_mask, bool p_recursive, bool p_owned) cons
 		}
 
 		Node *ret = cptr[i]->find_node(p_mask, true, p_owned);
+		if (ret) {
+			return ret;
+		}
+	}
+	return nullptr;
+}
+
+// Find the first node of a specific class in this node's heirarchy
+Node *Node::find_node_by_class(const String &p_mask, bool p_recursive, bool p_owned) const {
+	Node *const *cptr = data.children.ptr();
+	int ccount = data.children.size();
+	for (int i = 0; i < ccount; i++) {
+		if (p_owned && !cptr[i]->data.owner) {
+			continue;
+		}
+		StringName classname = cptr[i]->get_script_class_name();
+		if (classname == StringName()) {
+			classname = cptr[i]->get_class_name();
+		}
+		if (classname.operator String().match(p_mask)) {
+			return cptr[i];
+		}
+
+		if (!p_recursive) {
+			continue;
+		}
+
+		Node *ret = cptr[i]->find_node_by_class(p_mask, true, p_owned);
 		if (ret) {
 			return ret;
 		}
@@ -3146,6 +3174,7 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_node_or_null", "path"), &Node::get_node_or_null);
 	ClassDB::bind_method(D_METHOD("get_parent"), &Node::get_parent);
 	ClassDB::bind_method(D_METHOD("find_node", "mask", "recursive", "owned"), &Node::find_node, DEFVAL(true), DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("find_node_by_class", "mask", "recursive", "owned"), &Node::find_node_by_class, DEFVAL(true), DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("find_parent", "mask"), &Node::find_parent);
 	ClassDB::bind_method(D_METHOD("has_node_and_resource", "path"), &Node::has_node_and_resource);
 	ClassDB::bind_method(D_METHOD("get_node_and_resource", "path"), &Node::_get_node_and_resource);
