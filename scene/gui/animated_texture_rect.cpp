@@ -515,6 +515,7 @@ void AnimatedTextureRect::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("animation_locked_changed"));
 	ADD_SIGNAL(MethodInfo("animation_changed"));
 	ADD_SIGNAL(MethodInfo("frame_changed"));
+	ADD_SIGNAL(MethodInfo("flip_changed"));
 	ADD_SIGNAL(MethodInfo("animation_finished"));
 	//
 
@@ -605,7 +606,10 @@ AnimatedTextureRect::StretchMode AnimatedTextureRect::get_stretch_mode() const {
 }
 
 void AnimatedTextureRect::set_flip_h(bool p_flip) {
-	hflip = p_flip;
+	if (p_flip != hflip) {
+		hflip = p_flip;
+		emit_signal(SceneStringNames::get_singleton()->flip_changed);
+	}
 	update();
 }
 
@@ -614,7 +618,10 @@ bool AnimatedTextureRect::is_flipped_h() const {
 }
 
 void AnimatedTextureRect::set_flip_v(bool p_flip) {
-	vflip = p_flip;
+	if (p_flip != vflip) {
+		vflip = p_flip;
+		emit_signal(SceneStringNames::get_singleton()->flip_changed);
+	}
 	update();
 }
 

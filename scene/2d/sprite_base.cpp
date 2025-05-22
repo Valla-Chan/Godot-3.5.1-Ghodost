@@ -107,7 +107,10 @@ Point2 SpriteBase::get_offset() const {
 }
 
 void SpriteBase::set_flip_h(bool p_flip) {
-	hflip = p_flip;
+	if (hflip != p_flip) {
+		hflip = p_flip;
+		emit_signal(SceneStringNames::get_singleton()->flip_changed);
+	}
 	update();
 }
 bool SpriteBase::is_flipped_h() const {
@@ -115,7 +118,10 @@ bool SpriteBase::is_flipped_h() const {
 }
 
 void SpriteBase::set_flip_v(bool p_flip) {
-	vflip = p_flip;
+	if (vflip != p_flip) {
+		vflip = p_flip;
+		emit_signal(SceneStringNames::get_singleton()->flip_changed);
+	}
 	update();
 }
 bool SpriteBase::is_flipped_v() const {
@@ -201,6 +207,8 @@ void SpriteBase::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("queue_set_flipped", "flip_h", "flip_v"), &SpriteBase::queue_set_flipped);
 
 	ClassDB::bind_method(D_METHOD("is_pixel_opaque", "pos"), &SpriteBase::is_pixel_opaque);
+
+	ADD_SIGNAL(MethodInfo("flip_changed"));
 
 	ADD_GROUP("Offset", "");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "centered"), "set_centered", "is_centered");
