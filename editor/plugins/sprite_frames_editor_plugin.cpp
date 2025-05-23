@@ -50,6 +50,19 @@ static void _draw_shadowed_line(Control *p_control, const Point2 &p_from, const 
 }
 
 void SpriteFramesEditor::_gui_input(Ref<InputEvent> p_event) {
+	// Valla Edits
+	Ref<InputEventKey> key = p_event;
+	if (key.is_valid() && key->is_pressed() && key->get_command()) {
+		switch (key->get_scancode()) {
+			case KEY_C:
+				_copy_pressed();
+				break;
+			case KEY_V:
+				_paste_pressed();
+				break;
+		}
+		
+	}
 }
 
 void SpriteFramesEditor::_open_sprite_sheet() {

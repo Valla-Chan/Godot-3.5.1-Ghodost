@@ -33,6 +33,8 @@
 #include "editor/editor_node.h"
 #include "editor_scale.h"
 
+#include "core/os/keyboard.h"
+
 float AnimationBezierTrackEdit::_bezier_h_to_pixel(float p_h) {
 	float h = p_h;
 	h = (h - v_scroll) / v_zoom;
@@ -610,6 +612,12 @@ void AnimationBezierTrackEdit::_gui_input(const Ref<InputEvent> &p_event) {
 			delete_selection();
 			accept_event();
 		}
+	}
+
+	// Valla Edits
+	Ref<InputEventKey> key = p_event;
+	if (key.is_valid() && key->is_pressed() && key->get_command() && key->get_scancode() == KEY_C) {
+		duplicate_selection();
 	}
 
 	Ref<InputEventMouseButton> mb = p_event;
