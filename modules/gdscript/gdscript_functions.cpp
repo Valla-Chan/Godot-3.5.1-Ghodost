@@ -134,6 +134,7 @@ const char *GDScriptFunctions::get_func_name(Function p_func) {
 		"instance_from_id",
 		"len",
 		"is_instance_valid",
+		"is_valid",
 		"deep_equal",
 	};
 
@@ -1385,6 +1386,15 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 				Object *obj = *p_args[0];
 				r_ret = obj != nullptr;
 			}
+		} break;
+		case IS_VALID: {
+			VALIDATE_ARG_COUNT(1);
+			if (p_args[0]->get_type() != Variant::OBJECT) {
+				r_ret = false;
+			} else {
+				Object *obj = *p_args[0];
+				r_ret = obj != nullptr;
+			}
 
 		} break;
 		case DEEP_EQUAL: {
@@ -1959,6 +1969,11 @@ MethodInfo GDScriptFunctions::get_info(Function p_func) {
 			return mi;
 		} break;
 		case IS_INSTANCE_VALID: {
+			MethodInfo mi("is_instance_valid", PropertyInfo(Variant::OBJECT, ARGNAME("instance")));
+			mi.return_val.type = Variant::BOOL;
+			return mi;
+		} break;
+		case IS_VALID: {
 			MethodInfo mi("is_instance_valid", PropertyInfo(Variant::OBJECT, ARGNAME("instance")));
 			mi.return_val.type = Variant::BOOL;
 			return mi;
