@@ -175,6 +175,28 @@ void SpriteFrames::rename_animation(const StringName &p_prev, const StringName &
 	emit_changed();
 }
 
+void SpriteFrames::clone_animation(const StringName &p_refanim, const StringName &p_newanim, bool p_reverse) {
+	ERR_FAIL_COND_MSG(!animations.has(p_refanim), "SpriteFrames doesn't have animation '" + String(p_refanim) + "'.");
+	ERR_FAIL_COND_MSG(animations.has(p_newanim), "Animation '" + String(p_newanim) + "' already exists.");
+
+	Anim anim = Anim();
+	anim.loop = animations[p_refanim].loop;
+	anim.speed = animations[p_refanim].speed;
+	anim.normal_name = String(p_newanim) + NORMAL_SUFFIX;
+
+	if (!p_reverse) {
+		anim.frames = animations[p_refanim].frames;
+	}
+	else {
+		for (int i = animations[p_refanim].frames.size()-1; i > -1; i--) {
+			anim.frames.push_back(animations[p_refanim].frames[i]);
+		}
+	}
+
+	animations[p_newanim] = anim;
+	emit_changed();
+}
+
 void SpriteFrames::get_animation_list(List<StringName> *r_animations) const {
 	for (const Map<StringName, Anim>::Element *E = animations.front(); E; E = E->next()) {
 		r_animations->push_back(E->key());
@@ -279,6 +301,7 @@ void SpriteFrames::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_animation", "anim"), &SpriteFrames::has_animation);
 	ClassDB::bind_method(D_METHOD("remove_animation", "anim"), &SpriteFrames::remove_animation);
 	ClassDB::bind_method(D_METHOD("rename_animation", "anim", "newname"), &SpriteFrames::rename_animation);
+	ClassDB::bind_method(D_METHOD("clone_animation", "anim", "newname", "reversed"), &SpriteFrames::clone_animation);
 
 	ClassDB::bind_method(D_METHOD("get_animation_names"), &SpriteFrames::get_animation_names);
 

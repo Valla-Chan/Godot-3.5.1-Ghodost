@@ -71,6 +71,7 @@ public:
 	bool has_animation(const StringName &p_anim) const;
 	void remove_animation(const StringName &p_anim);
 	void rename_animation(const StringName &p_prev, const StringName &p_next);
+	void clone_animation(const StringName &p_refanim, const StringName &p_newanim, bool p_reverse);
 
 	void get_animation_list(List<StringName> *r_animations) const;
 	Vector<String> get_animation_names() const;
