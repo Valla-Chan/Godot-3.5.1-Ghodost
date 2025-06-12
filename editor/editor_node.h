@@ -701,6 +701,7 @@ protected:
 protected:
 	friend class FileSystemDock;
 
+	int last_tab = -1;
 	int get_current_tab();
 	void set_current_tab(int p_tab);
 

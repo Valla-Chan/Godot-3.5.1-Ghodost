@@ -377,11 +377,11 @@ void EditorNode::_update_scene_tabs() {
 			tabbar_container->remove_child(scene_tab_add);
 			scene_tabs->add_child(scene_tab_add);
 		}
-		Rect2 last_tab = Rect2();
+		Rect2 last_tab_rect = Rect2();
 		if (scene_tabs->get_tab_count() != 0) {
-			last_tab = scene_tabs->get_tab_rect(scene_tabs->get_tab_count() - 1);
+			last_tab_rect = scene_tabs->get_tab_rect(scene_tabs->get_tab_count() - 1);
 		}
-		scene_tab_add->set_position(Point2(last_tab.get_position().x + last_tab.get_size().x + 3, last_tab.get_position().y));
+		scene_tab_add->set_position(Point2(last_tab_rect.get_position().x + last_tab_rect.get_size().x + 3, last_tab_rect.get_position().y));
 	}
 }
 
@@ -3509,17 +3509,17 @@ bool EditorNode::is_addon_plugin_enabled(const String &p_addon) const {
 }
 
 void EditorNode::_remove_edited_scene(bool p_change_tab) {
-	int new_index = editor_data.get_edited_scene();
-	int old_index = new_index;
+	//int new_index = editor_data.get_edited_scene();
+	//int new_index = scene_tabs->get_previous_tab();
+	int new_index = last_tab;
+	int old_index = editor_data.get_edited_scene();
 
-	if (new_index > 0) {
-		new_index = new_index - 1;
-	} else if (editor_data.get_edited_scene_count() > 1) {
+	if (new_index <= 0) {
+		if (editor_data.get_edited_scene_count() <= 1) {
+			editor_data.add_edited_scene(-1);
+		}
 		new_index = 1;
-	} else {
-		editor_data.add_edited_scene(-1);
-		new_index = 1;
-	}
+	} 
 
 	if (p_change_tab) {
 		_scene_tab_changed(new_index);
@@ -5234,6 +5234,7 @@ void EditorNode::_scene_tab_changed(int p_tab) {
 	if (p_tab == editor_data.get_edited_scene()) {
 		return; //pointless
 	}
+	last_tab = editor_data.get_edited_scene();
 
 	uint64_t next_scene_version = editor_data.get_scene_version(p_tab);
 
