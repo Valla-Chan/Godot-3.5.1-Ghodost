@@ -253,6 +253,7 @@ void Tween::_bind_methods() {
 	// Bind getters and setters
 	ClassDB::bind_method(D_METHOD("is_active"), &Tween::is_active);
 	ClassDB::bind_method(D_METHOD("set_active", "active"), &Tween::set_active);
+	ClassDB::bind_method(D_METHOD("is_tween_playing", "object", "key"), &Tween::is_tween_playing, DEFVAL(""));
 
 	ClassDB::bind_method(D_METHOD("is_repeat"), &Tween::is_repeat);
 	ClassDB::bind_method(D_METHOD("set_repeat", "repeat"), &Tween::set_repeat);
@@ -867,6 +868,25 @@ Tween::TweenProcessMode Tween::get_tween_process_mode() const {
 
 bool Tween::is_active() const {
 	return is_processing_internal() || is_physics_processing_internal();
+}
+
+// check if a certain tweened property/method is active
+bool Tween::is_tween_playing(Object *p_object, StringName p_key) {
+	// Find the first tween that uses the given target object and string key
+	for (List<InterpolateData>::Element *E = interpolates.front(); E; E = E->next()) {
+		// Grab the object
+		InterpolateData &data = E->get();
+		Object *object = ObjectDB::get_instance(data.id);
+		if (object == nullptr) {
+			continue;
+		}
+
+		// If the object and string key match, activate it
+		if (object == p_object && (data.concatenated_key == p_key || p_key == "")) {
+			return data.active;
+		}
+	}
+	return false;
 }
 
 void Tween::set_active(bool p_active) {

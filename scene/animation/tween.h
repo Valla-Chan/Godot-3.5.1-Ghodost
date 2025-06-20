@@ -154,6 +154,7 @@ public:
 	static real_t run_equation(Tween::TransitionType p_trans_type, Tween::EaseType p_ease_type, real_t p_time, real_t p_initial, real_t p_delta, real_t p_duration);
 
 	bool is_active() const;
+	bool is_tween_playing(Object *p_object, StringName p_key);
 	void set_active(bool p_active);
 
 	bool is_repeat() const;
