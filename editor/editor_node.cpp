@@ -3512,13 +3512,17 @@ void EditorNode::_remove_edited_scene(bool p_change_tab) {
 	//int new_index = editor_data.get_edited_scene();
 	//int new_index = scene_tabs->get_previous_tab();
 	int new_index = last_tab;
+	if (new_index >= editor_data.get_edited_scene_count()-1) {
+		new_index = editor_data.get_edited_scene_count() - 2;
+	}
 	int old_index = editor_data.get_edited_scene();
 
-	if (new_index <= 0) {
+	if (new_index < 0) {
+		new_index = 0;
 		if (editor_data.get_edited_scene_count() <= 1) {
 			editor_data.add_edited_scene(-1);
+			new_index = 1;
 		}
-		new_index = 1;
 	} 
 
 	if (p_change_tab) {
