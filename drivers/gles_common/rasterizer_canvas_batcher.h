@@ -1494,8 +1494,13 @@ bool C_PREAMBLE::_prefill_ninepatch(RasterizerCanvas::Item::CommandNinePatch *p_
 
 	float screen_scale = 1.0f;
 
+	float tex_margin_left = p_np->margin[MARGIN_LEFT];
+	float tex_margin_right = p_np->margin[MARGIN_RIGHT];
+	float tex_margin_top = p_np->margin[MARGIN_TOP];
+	float tex_margin_bottom = p_np->margin[MARGIN_BOTTOM];
+
 	// optional crazy ninepatch scaling mode
-	if ((bdata.settings_ninepatch_mode == 1) && (source.size.x != 0) && (source.size.y != 0)) {
+	if ((bdata.settings_ninepatch_mode == 1) && ((source.size.x != 0) && (source.size.y != 0))) {
 		screen_scale = MIN(p_np->rect.size.x / source.size.x, p_np->rect.size.y / source.size.y);
 		screen_scale = MIN(1.0, screen_scale);
 	}
@@ -1508,22 +1513,17 @@ bool C_PREAMBLE::_prefill_ninepatch(RasterizerCanvas::Item::CommandNinePatch *p_
 	Rect2 &rt = trect.rect;
 	Rect2 &src = trect.source;
 
-	float tex_margin_left = p_np->margin[MARGIN_LEFT];
-	float tex_margin_right = p_np->margin[MARGIN_RIGHT];
-	float tex_margin_top = p_np->margin[MARGIN_TOP];
-	float tex_margin_bottom = p_np->margin[MARGIN_BOTTOM];
-
 	float x[4];
-	x[0] = p_np->rect.position.x;
-	x[1] = x[0] + (p_np->margin[MARGIN_LEFT] * screen_scale);
-	x[3] = x[0] + (p_np->rect.size.x);
-	x[2] = x[3] - (p_np->margin[MARGIN_RIGHT] * screen_scale);
+	x[0] = p_np->rect.position.x; // left (start) of LEFT MARGIN
+	x[1] = x[0] + (tex_margin_left * screen_scale); // right (end) of LEFT MARGIN
+	x[3] = x[0] + (p_np->rect.size.x); // right of RIGHT MARGIN
+	x[2] = x[3] - (tex_margin_right * screen_scale); // left of RIGHT MARGIN
 
 	float y[4];
-	y[0] = p_np->rect.position.y;
-	y[1] = y[0] + (p_np->margin[MARGIN_TOP] * screen_scale);
-	y[3] = y[0] + (p_np->rect.size.y);
-	y[2] = y[3] - (p_np->margin[MARGIN_BOTTOM] * screen_scale);
+	y[0] = p_np->rect.position.y; // top (start) of TOP MARGIN
+	y[1] = y[0] + (tex_margin_top * screen_scale); // bottom (end) of TOP MARGIN
+	y[3] = y[0] + (p_np->rect.size.y); // bottom of BOTTOM MARGIN
+	y[2] = y[3] - (tex_margin_bottom * screen_scale); // top of BOTTOM MARGIN
 
 	float u[4];
 	u[0] = source.position.x;
@@ -1537,6 +1537,21 @@ bool C_PREAMBLE::_prefill_ninepatch(RasterizerCanvas::Item::CommandNinePatch *p_
 	v[3] = v[0] + source.size.y;
 	v[2] = v[3] - tex_margin_bottom;
 
+	// Allow the axes to squash individually if scaling below the margin amount
+	
+	if (x[2] < x[1]) {
+		// positive total difference
+		float total_diff = x[1] - x[2];
+		x[1] -= total_diff / 2;
+		x[2] += total_diff / 2;
+	}
+	if (y[2] < y[1]) {
+		// positive total difference
+		float total_diff = y[1] - y[2];
+		y[1] -= total_diff / 2;
+		y[2] += total_diff / 2;
+	}
+
 	// Some protection for the use of ninepatches with rect size smaller than margin size.
 	// Note these cannot be produced by the UI, only programmatically, and the results
 	// are somewhat undefined, because the margins overlap.
@@ -1547,6 +1562,8 @@ bool C_PREAMBLE::_prefill_ninepatch(RasterizerCanvas::Item::CommandNinePatch *p_
 	x[2] = MIN(x[2], x[3]);
 	y[1] = MIN(y[1], y[3]);
 	y[2] = MIN(y[2], y[3]);
+
+
 
 	// temporarily override to prevent single rect fallback
 	bool single_rect_fallback = bdata.settings_use_single_rect_fallback;
