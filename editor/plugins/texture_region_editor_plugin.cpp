@@ -988,7 +988,7 @@ TextureRegionEditor::TextureRegionEditor(EditorNode *p_editor) {
 	editor = p_editor;
 	undo_redo = editor->get_undo_redo();
 
-	snap_step = Vector2(10, 10);
+	snap_step = Vector2(16, 16);
 	snap_separation = Vector2(0, 0);
 	snap_mode = SNAP_PIXEL;
 	edited_margin = -1;
