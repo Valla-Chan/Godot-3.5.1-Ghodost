@@ -367,7 +367,7 @@ void CreateDialog::_update_search() {
 				type2 = cpp_type2 ? ClassDB::get_parent_class(type2) : ed.script_class_get_base(type2);
 				cpp_type2 = cpp_type2 || ClassDB::class_exists(type2); // Built-in class can't inherit from custom type, so we can skip the check if it's already true.
 
-				if (!cpp_type2 && !search_loaded_scripts.has(type2)) {
+				if (!cpp_type2 && !search_loaded_scripts.has(type2) && !type2.empty()) {
 					search_loaded_scripts[type2] = ScriptServer::get_global_class_script(type2);
 				}
 			}

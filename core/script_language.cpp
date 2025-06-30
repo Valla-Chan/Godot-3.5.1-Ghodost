@@ -275,6 +275,9 @@ StringName ScriptServer::get_global_class_native_base(const StringName &p_class)
 }
 
 Ref<Script> ScriptServer::get_global_class_script(const StringName &p_class) {
+	if (!p_class) {
+		return Ref<Script>();
+	}
 	ERR_FAIL_COND_V_MSG(!ScriptServer::is_global_class(p_class), Ref<Script>(), vformat("Class to load '%s' is not a script class.", p_class));
 	if (!ScriptServer::is_global_class(p_class)) {
 		return Ref<Script>();
