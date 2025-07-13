@@ -3513,7 +3513,7 @@ void EditorNode::_remove_edited_scene(bool p_change_tab) {
 	int old_index = new_index;
 
 	if (new_index > 0) {
-		if (last_tab > -1 && last_tab != new_index) {
+		if (last_tab > -1 && last_tab < new_index) {
 			new_index = last_tab;
 		} else {
 			new_index = new_index - 1;
