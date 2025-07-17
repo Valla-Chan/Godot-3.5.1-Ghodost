@@ -1349,6 +1349,14 @@ float KinematicBody2D::get_move_safe_fraction_to(const Vector2 &p_location, bool
 	return get_move_safe_fraction(get_global_transform(), motion, p_infinite_inertia);
 }
 
+// start from global p_origin, get how far the body could move before hitting a collision
+float KinematicBody2D::get_move_safe_fraction_from_to(const Vector2 &p_origin, const Vector2 &p_location, bool p_infinite_inertia) {
+	Transform2D transform_origin = get_global_transform();
+	transform_origin.set_origin(p_origin);
+	Vector2 motion = p_origin.direction_to(p_location) * p_origin.distance_to(p_location);
+	return get_move_safe_fraction(transform_origin, motion, p_infinite_inertia);
+}
+
 // check body can go to specified pos
 bool KinematicBody2D::test_move(const Transform2D &p_from, const Vector2 &p_motion, bool p_infinite_inertia) {
 	ERR_FAIL_COND_V(!is_inside_tree(), false);
@@ -1479,6 +1487,7 @@ void KinematicBody2D::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_move_safe_fraction", "from", "rel_vec", "infinite_inertia"), &KinematicBody2D::get_move_safe_fraction, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("get_move_safe_fraction_to", "position", "infinite_inertia"), &KinematicBody2D::get_move_safe_fraction_to, DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("get_move_safe_fraction_from_to", "origin", "position", "infinite_inertia"), &KinematicBody2D::get_move_safe_fraction_from_to, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("test_move", "from", "rel_vec", "infinite_inertia"), &KinematicBody2D::test_move, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("test_move_to", "position", "infinite_inertia"), &KinematicBody2D::test_move_to, DEFVAL(true));
 
