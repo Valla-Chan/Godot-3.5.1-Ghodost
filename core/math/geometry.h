@@ -1095,6 +1095,17 @@ public:
 		return (real_t)(A.x - O.x) * (B.y - O.y) - (real_t)(A.y - O.y) * (B.x - O.x);
 	}
 
+	static Vector<Point2> scale_polygon_about_point(const Vector<Point2> P, float s, const Point2 &C) {
+		int n = P.size();
+		Vector<Point2> H;
+		H.resize(n);
+		for (int i = 0; i < n; i++) {
+			Point2 pt = (P[i] - C) * s + C;
+			H.write[i] = pt;
+		}
+		return H;
+	}
+
 	// Returns a list of points on the convex hull in counter-clockwise order.
 	// Note: the last point in the returned list is the same as the first one.
 	static Vector<Point2> convex_hull_2d(Vector<Point2> P) {

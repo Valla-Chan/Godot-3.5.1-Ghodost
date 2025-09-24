@@ -1747,6 +1747,10 @@ Vector<Point2> _Geometry::convex_hull_2d(const Vector<Point2> &p_points) {
 	return Geometry::convex_hull_2d(p_points);
 }
 
+Vector<Point2> _Geometry::scale_polygon_about_point(const Vector<Point2> &p_polygon, float p_scale, const Point2 &p_point) {
+	return Geometry::scale_polygon_about_point(p_polygon, p_scale, p_point);
+}
+
 Vector<Vector3> _Geometry::clip_polygon(const Vector<Vector3> &p_points, const Plane &p_plane) {
 	return Geometry::clip_polygon(p_points, p_plane);
 }
@@ -1901,6 +1905,7 @@ void _Geometry::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("triangulate_polygon", "polygon"), &_Geometry::triangulate_polygon);
 	ClassDB::bind_method(D_METHOD("triangulate_delaunay_2d", "points"), &_Geometry::triangulate_delaunay_2d);
 	ClassDB::bind_method(D_METHOD("convex_hull_2d", "points"), &_Geometry::convex_hull_2d);
+	ClassDB::bind_method(D_METHOD("scale_polygon_about_point", "polygon", "scale", "point"), &_Geometry::scale_polygon_about_point);
 	ClassDB::bind_method(D_METHOD("clip_polygon", "points", "plane"), &_Geometry::clip_polygon);
 
 	ClassDB::bind_method(D_METHOD("merge_polygons_2d", "polygon_a", "polygon_b"), &_Geometry::merge_polygons_2d);
