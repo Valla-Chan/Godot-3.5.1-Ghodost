@@ -79,6 +79,17 @@ class SpriteFramesEditor : public HSplitContainer {
 	SpinBox *anim_speed;
 	CheckButton *anim_loop;
 
+	ToolButton *new_sequence;
+	ToolButton *remove_sequence;
+	LineEdit *seq_search_box;
+	Tree *sequences;
+	Map<StringName, TreeItem *> sequences_map;
+	//EditorSpinSlider *seq_range_min;
+	//EditorSpinSlider *seq_range_max;
+	Button *seq_set_framerange;
+	Button *seq_extend_framerange; // context button to extend or crop range
+	Button *seq_clear_framerange; // clear all range
+
 	EditorQuickOpen *quick_open;
 
 	EditorFileDialog *file;
@@ -88,8 +99,10 @@ class SpriteFramesEditor : public HSplitContainer {
 	SpriteFrames *frames;
 
 	StringName edited_anim;
+	StringName edited_sequence;
 
-	ConfirmationDialog *delete_dialog;
+	ConfirmationDialog *delete_anim_dialog;
+	ConfirmationDialog *delete_seq_dialog;
 	ConfirmationDialog *delete_all_dialog;
 
 	ConfirmationDialog *split_sheet_dialog;
@@ -142,7 +155,7 @@ class SpriteFramesEditor : public HSplitContainer {
 	void _frames_remove_confirmed();
 	void _up_pressed();
 	void _down_pressed();
-	void _update_library(bool p_skip_selector = false);
+	void _update_library(bool p_skip_selector = false, bool p_reset_selection = true);
 
 	Ref<Texture> _get_locked_icon(bool p_locked);
 	void _animation_select();
@@ -154,7 +167,22 @@ class SpriteFramesEditor : public HSplitContainer {
 	void _animation_loop_changed();
 	void _animation_fps_changed(double p_value);
 
+	void _sequence_select();
+	void _sequence_name_edited();
+	void _sequence_add();
+	void _sequence_remove();
+	void _sequence_remove_confirmed();
+	void _sequence_search_text_changed(const String &p_text);
+	//void _sequence_min_changed(int min);
+	//void _sequence_max_changed(int max);
+	//void _sequence_minmax_changed(int min, int max);
+	void _sequence_set_range();
+	void _sequence_extend_range();
+	void _sequence_clear_range();
+	void _sequence_button_pressed(Object *item, int column, int id);
+
 	void _tree_input(const Ref<InputEvent> &p_event);
+	void _tree_selection_changed(int i, bool selected);
 	void _zoom_in();
 	void _zoom_out();
 	void _zoom_reset();

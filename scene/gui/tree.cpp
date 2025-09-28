@@ -564,6 +564,13 @@ void TreeItem::erase_button(int p_column, int p_idx) {
 	cells.write[p_column].buttons.remove(p_idx);
 	_changed_notify(p_column);
 }
+void TreeItem::erase_all_buttons(int p_column) {
+	ERR_FAIL_INDEX(p_column, cells.size());
+	for (size_t i = cells[p_column].buttons.size(); i-- > 0;) {
+		cells.write[p_column].buttons.remove(i);
+	}
+	_changed_notify(p_column);
+}
 
 int TreeItem::get_button_by_id(int p_column, int p_id) const {
 	ERR_FAIL_INDEX_V(p_column, cells.size(), -1);
@@ -830,6 +837,7 @@ void TreeItem::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_button", "column", "button_idx"), &TreeItem::get_button);
 	ClassDB::bind_method(D_METHOD("set_button", "column", "button_idx", "button"), &TreeItem::set_button);
 	ClassDB::bind_method(D_METHOD("erase_button", "column", "button_idx"), &TreeItem::erase_button);
+	ClassDB::bind_method(D_METHOD("erase_all_buttons", "column"), &TreeItem::erase_all_buttons);
 	ClassDB::bind_method(D_METHOD("set_button_disabled", "column", "button_idx", "disabled"), &TreeItem::set_button_disabled);
 	ClassDB::bind_method(D_METHOD("is_button_disabled", "column", "button_idx"), &TreeItem::is_button_disabled);
 

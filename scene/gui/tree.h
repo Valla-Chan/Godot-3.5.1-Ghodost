@@ -208,6 +208,7 @@ public:
 	Ref<Texture> get_button(int p_column, int p_idx) const;
 	int get_button_id(int p_column, int p_idx) const;
 	void erase_button(int p_column, int p_idx);
+	void erase_all_buttons(int p_column);
 	int get_button_by_id(int p_column, int p_id) const;
 	void set_button(int p_column, int p_idx, const Ref<Texture> &p_button);
 	void set_button_color(int p_column, int p_idx, const Color &p_color);

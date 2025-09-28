@@ -132,6 +132,7 @@ void SpriteFrames::remove_frame(const StringName &p_anim, int p_idx) {
 	ERR_FAIL_COND_MSG(!E, "Animation '" + String(p_anim) + "' doesn't exist.");
 
 	E->get().frames.remove(p_idx);
+
 	emit_changed();
 }
 void SpriteFrames::clear(const StringName &p_anim) {
@@ -172,6 +173,7 @@ void SpriteFrames::rename_animation(const StringName &p_prev, const StringName &
 	animations.erase(p_prev);
 	animations[p_next] = anim;
 	animations[p_next].normal_name = String(p_next) + NORMAL_SUFFIX;
+
 	emit_changed();
 }
 
@@ -183,6 +185,7 @@ void SpriteFrames::clone_animation(const StringName &p_refanim, const StringName
 	anim.loop = animations[p_refanim].loop;
 	anim.speed = animations[p_refanim].speed;
 	anim.normal_name = String(p_newanim) + NORMAL_SUFFIX;
+	anim.seq_map = animations[p_refanim].seq_map;
 
 	if (!p_reverse) {
 		anim.frames = animations[p_refanim].frames;
@@ -235,6 +238,102 @@ bool SpriteFrames::get_animation_loop(const StringName &p_anim) const {
 	return E->get().loop;
 }
 
+// Sequences
+
+void SpriteFrames::add_sequence(const StringName &p_seq) {
+	ERR_FAIL_COND_MSG(sequences.find(p_seq) > -1, "SpriteFrames already has sequence '" + p_seq + "'.");
+	sequences.push_back(p_seq);
+	emit_changed();
+}
+
+bool SpriteFrames::has_sequence(const StringName &p_seq) const {
+	return sequences.find(p_seq) > -1;
+}
+
+void SpriteFrames::remove_sequence(const StringName &p_seq) {
+	sequences.erase(p_seq);
+	for (Map<StringName, Anim>::Element *A = animations.front(); A; A = A->next()) {
+		A->value().seq_map.erase(p_seq);
+	}
+	emit_changed();
+}
+
+void SpriteFrames::rename_sequence(const StringName &p_prev, const StringName &p_next) {
+	int idx = sequences.find(p_prev);
+	ERR_FAIL_COND_MSG(idx == -1, "SpriteFrames doesn't have sequence '" + String(p_prev) + "'.");
+	ERR_FAIL_COND_MSG(sequences.find(p_next) > -1, "Sequence '" + String(p_next) + "' already exists.");
+
+	sequences.erase(p_prev);
+	sequences.insert(idx, p_next);
+
+	for (Map<StringName, Anim>::Element *A = animations.front(); A; A = A->next()) {
+		auto E = A->get().seq_map.find(p_prev);
+		if (E) {
+			A->get().seq_map.insert(p_next, E->value());
+			A->get().seq_map.erase(p_prev);
+		}
+	}
+
+	emit_changed();
+}
+
+void SpriteFrames::get_sequence_list(List<StringName> *r_sequences) const {
+	for (size_t i = 0; i < sequences.size(); i++) {
+		r_sequences->push_back(sequences[i]);
+	}
+}
+
+Vector<String> SpriteFrames::get_sequence_names() const {
+	Vector<String> names;
+	for (size_t i = 0; i < sequences.size(); i++) {
+		names.push_back(sequences[i]);
+	}
+	return names;
+}
+
+void SpriteFrames::set_anim_sequence_range(const StringName &p_anim, const StringName &p_seq, int min, int max) {
+	ERR_FAIL_COND_MSG(min < 0, "Start frame cannot be negative (" + itos(min) + ").");
+	ERR_FAIL_COND_MSG(max < min, "End frame must be greater than or equal to start frame (" + itos(max) + " <= " + itos(min) + ").");
+
+	Map<StringName, Anim>::Element *A = animations.find(p_anim);
+	ERR_FAIL_COND_MSG(!A, "Animation '" + String(p_anim) + "' doesn't exist.");
+	ERR_FAIL_COND_MSG(max >= A->get().frames.size(), "End frame is outside of animation frame range '" + String(p_anim) + "' length (" + itos(max) + " > " + itos(A->get().frames.size()-1) + ").");
+
+	ERR_FAIL_COND_MSG(sequences.find(p_seq) == -1, "Sequence '" + String(p_seq) + "' doesn't exist.");
+	A->get().set_sequence_range(p_seq, min, max);
+}
+PoolIntArray SpriteFrames::get_anim_sequence_range(const StringName &p_anim, const StringName &p_seq) const {
+	const Map<StringName, Anim>::Element *A = animations.find(p_anim);
+	PoolIntArray intrange;
+	ERR_FAIL_COND_V_MSG(!A, intrange, "Animation '" + String(p_anim) + "' doesn't exist.");
+	ERR_FAIL_COND_V_MSG(sequences.find(p_seq) == -1, intrange, "Sequence '" + String(p_seq) + "' doesn't exist.");
+	Vector2i range = A->get().get_sequence_range(p_seq);
+	intrange.push_back(range.x);
+	intrange.push_back(range.y);
+	return intrange;
+}
+void SpriteFrames::clear_anim_sequence(const StringName &p_anim, const StringName &p_seq) {
+	Map<StringName, Anim>::Element *A = animations.find(p_anim);
+	ERR_FAIL_COND_MSG(!A, "Animation '" + String(p_anim) + "' doesn't exist.");
+	ERR_FAIL_COND_MSG(sequences.find(p_seq) == -1, "Sequence '" + String(p_seq) + "' doesn't exist.");
+	A->get().clear_sequence(p_seq);
+}
+
+bool SpriteFrames::is_anim_frame_in_sequence(const StringName& p_anim, int frame, const StringName& p_seq) const {
+	const Map<StringName, Anim>::Element *A = animations.find(p_anim);
+	ERR_FAIL_COND_V_MSG(!A, false, "Animation '" + String(p_anim) + "' doesn't exist.");
+	ERR_FAIL_COND_V_MSG(sequences.find(p_seq) == -1, false, "Sequence '" + String(p_seq) + "' doesn't exist.");
+
+	return A->get().is_frame_in_sequence(frame, p_seq);
+}
+
+StringName SpriteFrames::get_anim_frame_sequence(const StringName &p_anim, int frame) const {
+	const Map<StringName, Anim>::Element *A = animations.find(p_anim);
+	ERR_FAIL_COND_V_MSG(!A, "", "Animation '" + String(p_anim) + "' doesn't exist.");
+
+	return A->get().get_frame_sequence(frame);
+}
+
 void SpriteFrames::_set_frames(const Array &p_frames) {
 	clear_all();
 	Map<StringName, Anim>::Element *E = animations.find(SceneStringNames::get_singleton()->_default);
@@ -267,6 +366,14 @@ Array SpriteFrames::_get_animations() const {
 			frames.push_back(anim.frames[i]);
 		}
 		d["frames"] = frames;
+		Dictionary seqmap;
+		for (const Map<StringName, Vector2i>::Element *S = anim.seq_map.front(); S; S = S->next()) {
+			PoolIntArray range;
+			range.push_back(S->value().x);
+			range.push_back(S->value().y);
+			seqmap[S->key()] = range;
+		}
+		d["seqmap"] = seqmap;
 		anims.push_back(d);
 	}
 
@@ -291,8 +398,34 @@ void SpriteFrames::_set_animations(const Array &p_animations) {
 			RES res = frames[j];
 			anim.frames.push_back(res);
 		}
+		Dictionary seqmap = d["seqmap"];
+		for (int j = 0; j < seqmap.size(); j++) {
+			PoolIntArray range = PoolIntArray(seqmap.values()[j]);
+			anim.seq_map.insert(seqmap.keys()[j], Vector2i(range[0], range[1]));
+		}
+		d["seqmap"] = seqmap;
 
 		animations[d["name"]] = anim;
+	}
+}
+
+PoolStringArray SpriteFrames::_get_sequences() const {
+	PoolStringArray seqs;
+
+	List<StringName> names;
+	get_sequence_list(&names);
+
+	for (List<StringName>::Element *E = names.front(); E; E = E->next()) {
+		seqs.push_back(E->get());
+	}
+
+	return seqs;
+}
+
+void SpriteFrames::_set_sequences(const PoolStringArray &p_sequences) {
+	sequences.clear();
+	for (int i = 0; i < p_sequences.size(); i++) {
+		sequences.push_back(p_sequences[i]);
 	}
 }
 
@@ -311,6 +444,19 @@ void SpriteFrames::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_animation_loop", "anim", "loop"), &SpriteFrames::set_animation_loop);
 	ClassDB::bind_method(D_METHOD("get_animation_loop", "anim"), &SpriteFrames::get_animation_loop);
 
+	ClassDB::bind_method(D_METHOD("add_sequence", "seq"), &SpriteFrames::add_sequence);
+	ClassDB::bind_method(D_METHOD("has_sequence", "seq"), &SpriteFrames::has_sequence);
+	ClassDB::bind_method(D_METHOD("remove_sequence", "seq"), &SpriteFrames::remove_sequence);
+	ClassDB::bind_method(D_METHOD("rename_sequence", "seq", "newname"), &SpriteFrames::rename_sequence);
+
+	ClassDB::bind_method(D_METHOD("get_sequence_names"), &SpriteFrames::get_sequence_names);
+
+	ClassDB::bind_method(D_METHOD("set_anim_sequence_range", "anim", "seq", "min", "max"), &SpriteFrames::set_anim_sequence_range);
+	ClassDB::bind_method(D_METHOD("get_anim_sequence_range", "anim", "seq"), &SpriteFrames::get_anim_sequence_range);
+	ClassDB::bind_method(D_METHOD("clear_anim_sequence"), &SpriteFrames::clear_anim_sequence);
+	ClassDB::bind_method(D_METHOD("is_anim_frame_in_sequence"), &SpriteFrames::is_anim_frame_in_sequence);
+	ClassDB::bind_method(D_METHOD("get_anim_frame_sequence"), &SpriteFrames::get_anim_frame_sequence);
+
 	ClassDB::bind_method(D_METHOD("add_frame", "anim", "frame", "at_position"), &SpriteFrames::add_frame, DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("get_frame_count", "anim"), &SpriteFrames::get_frame_count);
 	ClassDB::bind_method(D_METHOD("get_frame", "anim", "idx"), &SpriteFrames::get_frame);
@@ -326,10 +472,14 @@ void SpriteFrames::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_set_animations"), &SpriteFrames::_set_animations);
 	ClassDB::bind_method(D_METHOD("_get_animations"), &SpriteFrames::_get_animations);
+	ClassDB::bind_method(D_METHOD("_set_sequences"), &SpriteFrames::_set_sequences);
+	ClassDB::bind_method(D_METHOD("_get_sequences"), &SpriteFrames::_get_sequences);
 
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "animations", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL), "_set_animations", "_get_animations");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "sequences", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL), "_set_sequences", "_get_sequences");
 
 	ADD_SIGNAL(MethodInfo("animation_changed"));
+	ADD_SIGNAL(MethodInfo("sequence_changed"));
 	ADD_SIGNAL(MethodInfo("frame_changed"));
 }
 
@@ -696,6 +846,31 @@ void AnimatedSprite::set_animation_continue(const StringName &p_animation) {
 }
 StringName AnimatedSprite::get_animation() const {
 	return animation;
+}
+
+// TODO: have a bool to say whether this accepts missign sequences without throwing error?
+// TODO: consider just having the sequence never reset the frame, or use a bool to say so. have it translate the global frame.
+void AnimatedSprite::set_sequence(const StringName &p_sequence, bool p_reset = true) {
+	ERR_FAIL_COND_MSG(frames == nullptr, vformat("There is no sequence with name '%s'.", p_sequence));
+	ERR_FAIL_COND_MSG(frames->get_sequence_names().find(p_sequence) == -1, vformat("There is no sequence with name '%s'.", p_sequence));
+	PoolIntArray range = frames->get_anim_sequence_range(animation, p_sequence);
+	ERR_FAIL_COND_MSG(range[0] == -1, vformat("Sequence '%s' is not defined in current animation '%s'.", p_sequence, animation));
+
+	if (sequence == p_sequence) {
+		return;
+	}
+
+	sequence = p_sequence;
+	_reset_timeout();
+	if (p_reset) {
+		set_frame(range[0]);
+	}
+	_change_notify();
+	emit_signal("sequence_changed");
+	update();
+}
+StringName AnimatedSprite::get_sequence() const {
+	return sequence;
 }
 
 String AnimatedSprite::get_configuration_warning() const {

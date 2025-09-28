@@ -41,17 +41,85 @@ class SpriteFrames : public Resource {
 		bool loop;
 		Vector<Ref<Texture>> frames;
 
+		StringName normal_name;
+		Map<StringName, Vector2i> seq_map; // Map sequence name to frame range.
+
 		Anim() {
 			loop = true;
-			//speed = 5;
-			//valla edit
+			//speed = 5; //valla edit
 			speed = 10;
 		}
 
-		StringName normal_name;
+		StringName get_frame_sequence(int p_frame) const {
+			for (const Map<StringName, Vector2i>::Element *S = seq_map.front(); S; S = S->next()) {
+				if (p_frame >= S->value().x && p_frame <= S->value().y) {
+					return S->key();
+				}
+			}
+			return "";
+		}
+		bool is_frame_in_sequence(int p_frame, const StringName& p_seq) const {
+			const Map<StringName, Vector2i>::Element *S = seq_map.find(p_seq);
+			if (!S) {
+				return false;
+			}
+			return (p_frame >= S->value().x && p_frame <= S->value().y);
+		}
+
+		Vector2i get_sequence_range(const StringName &p_seq) const {
+			const Map<StringName, Vector2i>::Element *S = seq_map.find(p_seq);
+			if (!S) {
+				return Vector2i(-1, -1);
+			}
+			return S->value();
+		}
+
+		void set_sequence_range(const StringName& p_seq, int min, int max) {
+			min = CLAMP(min, 0, MIN(max, frames.size() - 1));
+			max = CLAMP(max, min, frames.size() - 1);
+
+			if (!seq_map.find(p_seq)) {
+				seq_map.insert(p_seq, Vector2i(min, max));
+			}
+			Map<StringName, Vector2i> seq_map_new;
+
+			for (const Map<StringName, Vector2i>::Element *S = seq_map.front(); S; S = S->next()) {
+				// This sequence
+				if (S->key() == p_seq) {
+					seq_map_new.insert(S->key(), Vector2i(min, max));
+				}
+				// Other sequences
+				else {
+					// erase sequences that exist entirely within this range
+					if (S->value().x >= min && S->value().y <= max) {
+						continue;
+					}
+					// only max is in range (cap preceding sequence)
+					else if (S->value().x < min && S->value().y >= min && S->value().y < max) {
+						seq_map_new.insert(S->key(), Vector2i(S->value().x, MIN(S->value().y, min-1)));
+					}
+					// only min is in range (cap following sequence)
+					else if (S->value().x >= min && S->value().x < max && S->value().y > max) {
+						seq_map_new.insert(S->key(), Vector2i(MAX(S->value().x, max-1), S->value().y));
+					}
+					else {
+						seq_map_new.insert(S->key(), S->value());
+					}
+				}
+			}
+			seq_map = seq_map_new;
+		}
+		void clear_sequence(const StringName& p_seq) {
+			seq_map.erase(p_seq);
+		}
+	};
+
+	struct Seq {
+		Map<Anim, Vector2i> animframes;
 	};
 
 	Map<StringName, Anim> animations;
+	Vector<StringName> sequences;
 
 	Array _get_frames() const;
 	void _set_frames(const Array &p_frames);
@@ -59,10 +127,14 @@ class SpriteFrames : public Resource {
 	Array _get_animations() const;
 	void _set_animations(const Array &p_animations);
 
+	PoolStringArray _get_sequences() const;
+	void _set_sequences(const PoolStringArray &p_sequences);
+
 protected:
 	static void _bind_methods();
 
 public:
+
 	// return the entire array of textures
 	Vector<Ref<Texture>> get_animation_frames(const StringName &p_anim);
 	//void set_animation_frames(const StringName &p_anim, Vector<Ref<Texture>>);
@@ -81,6 +153,21 @@ public:
 
 	void set_animation_loop(const StringName &p_anim, bool p_loop);
 	bool get_animation_loop(const StringName &p_anim) const;
+
+	void add_sequence(const StringName &p_seq);
+	bool has_sequence(const StringName &p_seq) const;
+	void remove_sequence(const StringName &p_seq);
+	void rename_sequence(const StringName &p_prev, const StringName &p_next);
+
+	void get_sequence_list(List<StringName> *r_sequences) const;
+	Vector<String> get_sequence_names() const;
+
+	void set_anim_sequence_range(const StringName &p_anim, const StringName &p_seq, int min, int max);
+	PoolIntArray get_anim_sequence_range(const StringName &p_anim, const StringName &p_seq) const;
+	void clear_anim_sequence(const StringName &p_anim, const StringName &p_seq);
+	bool is_anim_frame_in_sequence(const StringName &p_anim, int frame, const StringName &p_seq) const;
+	// Return the sequence name assigned to this frame
+	StringName get_anim_frame_sequence(const StringName &p_anim, int frame) const;
 
 	void add_frame(const StringName &p_anim, const Ref<Texture> &p_frame, int p_at_pos = -1);
 	//void add_frames(const StringName &p_anim, const Vector<Ref<Texture>> &p_frames, int p_at_pos = -1);
@@ -134,8 +221,10 @@ class AnimatedSprite : public SpriteBase {
 	bool playing;
 	bool reversed;
 	StringName animation;
+	StringName sequence;
 	bool animation_locked;
-	int frame;
+	int local_frame; // frame inside the sequence
+	int frame; // global frame
 	float speed_scale;
 
 	bool is_over;
@@ -175,6 +264,9 @@ public:
 	void set_animation(const StringName &p_animation);
 	void set_animation_continue(const StringName &p_animation);
 	StringName get_animation() const;
+
+	void set_sequence(const StringName &p_sequence, bool p_reset = true);
+	StringName get_sequence() const;
 
 	void set_frame(int p_frame);
 	int get_frame() const;

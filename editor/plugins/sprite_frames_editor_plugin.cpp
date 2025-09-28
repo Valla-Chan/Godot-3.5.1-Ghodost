@@ -489,9 +489,15 @@ void SpriteFramesEditor::_notification(int p_what) {
 			zoom_out->set_icon(get_icon("ZoomLess", "EditorIcons"));
 			zoom_reset->set_icon(get_icon("ZoomReset", "EditorIcons"));
 			zoom_in->set_icon(get_icon("ZoomMore", "EditorIcons"));
+			// Anim
 			new_anim->set_icon(get_icon("New", "EditorIcons"));
 			remove_anim->set_icon(get_icon("Remove", "EditorIcons"));
 			anim_search_box->set_right_icon(get_icon("Search", "EditorIcons"));
+			// Seq
+			new_sequence->set_icon(get_icon("New", "EditorIcons"));
+			remove_sequence->set_icon(get_icon("Remove", "EditorIcons"));
+			seq_search_box->set_right_icon(get_icon("Search", "EditorIcons"));
+			// Zoom
 			split_sheet_zoom_out->set_icon(get_icon("ZoomLess", "EditorIcons"));
 			split_sheet_zoom_reset->set_icon(get_icon("ZoomReset", "EditorIcons"));
 			split_sheet_zoom_in->set_icon(get_icon("ZoomMore", "EditorIcons"));
@@ -878,6 +884,8 @@ void SpriteFramesEditor::_frames_remove_confirmed() {
 	undo_redo->commit_action();
 }
 
+// Animation Code
+
 void SpriteFramesEditor::_animation_select() {
 	if (updating) {
 		return;
@@ -1038,8 +1046,8 @@ void SpriteFramesEditor::_animation_remove() {
 		return;
 	}
 
-	delete_dialog->set_text(TTR("Delete Animation?"));
-	delete_dialog->popup_centered_minsize();
+	delete_anim_dialog->set_text(TTR("Delete Animation?"));
+	delete_anim_dialog->popup_centered_minsize();
 }
 
 
@@ -1049,6 +1057,7 @@ void SpriteFramesEditor::_animation_remove_confirmed() {
 	undo_redo->add_undo_method(frames, "add_animation", edited_anim);
 	undo_redo->add_undo_method(frames, "set_animation_speed", edited_anim, frames->get_animation_speed(edited_anim));
 	undo_redo->add_undo_method(frames, "set_animation_loop", edited_anim, frames->get_animation_loop(edited_anim));
+
 	int fc = frames->get_frame_count(edited_anim);
 	for (int i = 0; i < fc; i++) {
 		Ref<Texture> frame = frames->get_frame(edited_anim, i);
@@ -1064,19 +1073,26 @@ void SpriteFramesEditor::_animation_remove_confirmed() {
 	// If removing not the last animation, make the first animation left the new edited one.
 	if (anim_names.size() > 1) {
 		new_edited_anim = edited_anim != anim_names.front()->get() ? anim_names.front()->get() : anim_names.front()->next()->get();
+	}
+	// removing last animation
+	else {
+		new_edited_anim = "default";
+		undo_redo->add_do_method(frames, "add_animation", new_edited_anim);
+		undo_redo->add_undo_method(frames, "remove_animation", new_edited_anim);
+	}
 
-		List<Node *> nodes;
-		_find_anim_sprites(EditorNode::get_singleton()->get_edited_scene(), &nodes, Ref<SpriteFrames>(frames));
+	List<Node *> nodes;
+	_find_anim_sprites(EditorNode::get_singleton()->get_edited_scene(), &nodes, Ref<SpriteFrames>(frames));
 
-		for (List<Node *>::Element *E = nodes.front(); E; E = E->next()) {
-			StringName current = E->get()->call("get_animation");
-			if (current != edited_anim) {
-				continue;
-			}
-
-			undo_redo->add_do_method(E->get(), "set_animation", new_edited_anim);
-			undo_redo->add_undo_method(E->get(), "set_animation", current);
+	for (List<Node *>::Element *E = nodes.front(); E; E = E->next()) {
+		StringName current = E->get()->call("get_animation");
+		if (current != edited_anim) {
+			continue;
 		}
+
+		undo_redo->add_do_method(E->get(), "set_animation", new_edited_anim);
+		undo_redo->add_undo_method(E->get(), "set_animation", current);
+		
 	}
 
 	undo_redo->add_do_method(this, "_update_library");
@@ -1099,8 +1115,8 @@ void SpriteFramesEditor::_animation_loop_changed() {
 	undo_redo->create_action(TTR("Change Animation Loop"));
 	undo_redo->add_do_method(frames, "set_animation_loop", edited_anim, anim_loop->is_pressed());
 	undo_redo->add_undo_method(frames, "set_animation_loop", edited_anim, frames->get_animation_loop(edited_anim));
-	undo_redo->add_do_method(this, "_update_library", true);
-	undo_redo->add_undo_method(this, "_update_library", true);
+	undo_redo->add_do_method(this, "_update_library", true, true);
+	undo_redo->add_undo_method(this, "_update_library", true, true);
 	undo_redo->commit_action();
 }
 
@@ -1112,10 +1128,260 @@ void SpriteFramesEditor::_animation_fps_changed(double p_value) {
 	undo_redo->create_action(TTR("Change Animation FPS"), UndoRedo::MERGE_ENDS);
 	undo_redo->add_do_method(frames, "set_animation_speed", edited_anim, p_value);
 	undo_redo->add_undo_method(frames, "set_animation_speed", edited_anim, frames->get_animation_speed(edited_anim));
-	undo_redo->add_do_method(this, "_update_library", true);
-	undo_redo->add_undo_method(this, "_update_library", true);
+	undo_redo->add_do_method(this, "_update_library", true, true);
+	undo_redo->add_undo_method(this, "_update_library", true, true);
 
 	undo_redo->commit_action();
+}
+
+// Sequence Code
+
+void SpriteFramesEditor::_sequence_select() {
+	if (updating) {
+		return;
+	}
+	if (edited_anim && edited_sequence) {
+		seq_set_framerange->set_visible(true);
+		seq_extend_framerange->set_visible(true);
+		seq_clear_framerange->set_visible(true);
+		/*
+		if (frames->has_animation(edited_anim) && frames->has_sequence(edited_sequence)) {
+			PoolIntArray range = frames->get_anim_sequence_range(edited_anim, edited_sequence);
+			if (range.size() == 2) {
+				
+				double min = seq_range_min->get_line_edit()->get_text().to_double();
+				double max = seq_range_max->get_line_edit()->get_text().to_double();
+				if (!Math::is_equal_approx(min, (double)range[0])) {
+					_sequence_min_changed(min);
+				}
+				if (!Math::is_equal_approx(min, (double)range[1])) {
+					_sequence_max_changed(max);
+				}
+			}
+		}*/
+	} else {
+		seq_set_framerange->set_visible(false);
+		seq_extend_framerange->set_visible(false);
+		seq_clear_framerange->set_visible(false);
+	}
+
+	TreeItem *child = sequences->get_root()->get_children();
+	while (child != NULL) {
+		child->erase_all_buttons(0);
+		child = child->get_next();
+	}
+
+	TreeItem *selected = sequences->get_selected();
+	ERR_FAIL_COND(!selected);
+
+	selected->add_button(0, get_icon("MoveUp", "EditorIcons"), 0, !selected->get_prev(), TTR("Move Up"));
+	selected->add_button(0, get_icon("MoveDown", "EditorIcons"), 1, !selected->get_next(), TTR("Move Down"));
+
+	edited_sequence = selected->get_text(0);
+	_update_library(true, false);
+}
+
+void SpriteFramesEditor::_sequence_name_edited() {
+	if (updating) {
+		return;
+	}
+
+	if (!frames->has_sequence(edited_sequence)) {
+		return;
+	}
+
+	TreeItem *edited = sequences->get_edited();
+	if (!edited) {
+		return;
+	}
+
+	String new_name = edited->get_text(0);
+
+	if (new_name == String(edited_sequence)) {
+		return;
+	}
+
+	new_name = new_name.replace("/", "_").replace(",", " ");
+
+	String name = new_name;
+	int counter = 0;
+	while (frames->has_sequence(name)) {
+		counter++;
+		name = new_name + " " + itos(counter);
+	}
+
+	undo_redo->create_action(TTR("Rename Sequence"));
+	undo_redo->add_do_method(frames, "rename_sequence", edited_sequence, name);
+	undo_redo->add_undo_method(frames, "rename_sequence", name, edited_sequence);
+
+	undo_redo->add_do_method(this, "_update_library");
+	undo_redo->add_undo_method(this, "_update_library");
+
+	edited_sequence = name;
+
+	undo_redo->commit_action();
+}
+
+void SpriteFramesEditor::_sequence_add() {
+	String name = "New Sequence";
+	int counter = 0;
+	while (frames->has_sequence(name)) {
+		counter++;
+		name = "New Sequence " + itos(counter);
+	}
+
+	undo_redo->create_action(TTR("Add Sequence"));
+	undo_redo->add_do_method(frames, "add_sequence", name);
+	undo_redo->add_undo_method(frames, "remove_sequence", name);
+	undo_redo->add_do_method(this, "_update_library", false, false);
+	undo_redo->add_undo_method(this, "_update_library", false, false);
+
+	edited_sequence = name;
+
+	undo_redo->commit_action();
+	sequences->grab_focus();
+	_sequence_select();
+}
+
+void SpriteFramesEditor::_sequence_remove() {
+	if (updating) {
+		return;
+	}
+
+	if (!frames->has_sequence(edited_sequence)) {
+		return;
+	}
+
+	delete_seq_dialog->set_text(TTR("Delete Sequence?"));
+	delete_seq_dialog->popup_centered_minsize();
+}
+
+void SpriteFramesEditor::_sequence_remove_confirmed() {
+	undo_redo->create_action(TTR("Remove Sequence"));
+	undo_redo->add_do_method(frames, "remove_sequence", edited_sequence);
+	undo_redo->add_undo_method(frames, "add_sequence", edited_sequence);
+
+	// TODO: add undo/redo to restore frame range
+	
+	undo_redo->add_undo_method(frames, "add_sequence", edited_sequence);
+	undo_redo->add_undo_method(frames, "set_anim_sequence_range", edited_anim, frames->get_anim_sequence_range(edited_anim, edited_sequence));
+	//undo_redo->add_undo_method(frames, "set_animation_loop", edited_anim, frames->get_animation_loop(edited_anim));
+	//int fc = frames->get_frame_count(edited_anim);
+	//for (int i = 0; i < fc; i++) {
+	//	Ref<Texture> frame = frames->get_frame(edited_anim, i);
+	//	undo_redo->add_undo_method(frames, "add_frame", edited_anim, frame);
+	//}
+
+	StringName new_edited_seq = StringName();
+
+	List<StringName> seq_names;
+	frames->get_sequence_list(&seq_names);
+
+	// If removing not the last sequence, make the first sequence left the new edited one.
+	if (seq_names.size() > 1) {
+		new_edited_seq = edited_sequence != seq_names.front()->get() ? seq_names.front()->get() : seq_names.front()->next()->get();
+	}
+
+	undo_redo->add_do_method(this, "_update_library");
+	undo_redo->add_undo_method(this, "_update_library");
+
+	edited_sequence = new_edited_seq;
+
+	undo_redo->commit_action();
+	_sequence_select();
+}
+
+void SpriteFramesEditor::_sequence_search_text_changed(const String &p_text) {
+	_update_library();
+}
+
+//void SpriteFramesEditor::_sequence_min_changed(int min) {
+//	_sequence_minmax_changed(min, seq_range_max->get_value());
+//}
+
+//void SpriteFramesEditor::_sequence_max_changed(int max) {
+//	_sequence_minmax_changed(seq_range_min->get_value(), max);
+//}
+/*
+void SpriteFramesEditor::_sequence_minmax_changed(int min, int max) {
+	if (updating) {
+		return;
+	}
+
+	undo_redo->create_action(TTR("Change Sequence Range"), UndoRedo::MERGE_ENDS);
+	undo_redo->add_do_method(frames, "set_anim_sequence_range", edited_anim, edited_sequence, min, max);
+	undo_redo->add_undo_method(frames, "set_anim_sequence_range", edited_anim, edited_sequence, frames->get_anim_sequence_range(edited_anim, edited_sequence));
+	undo_redo->add_do_method(this, "_update_library", true, false);
+	undo_redo->add_undo_method(this, "_update_library", true, false);
+
+	undo_redo->commit_action();
+}*/
+
+void SpriteFramesEditor::_sequence_set_range() {
+	Vector<int> selected = tree->get_selected_items();
+	selected.sort();
+	int min = selected[0];
+	int max = selected[selected.size()-1];
+
+	undo_redo->create_action(TTR("Change Sequence Range"), UndoRedo::MERGE_ENDS);
+	undo_redo->add_do_method(frames, "set_anim_sequence_range", edited_anim, edited_sequence, min, max);
+	undo_redo->add_undo_method(frames, "set_anim_sequence_range", edited_anim, edited_sequence, frames->get_anim_sequence_range(edited_anim, edited_sequence));
+	undo_redo->add_do_method(this, "_update_library", true, false);
+	undo_redo->add_undo_method(this, "_update_library", true, false);
+
+	undo_redo->commit_action();
+}
+
+void SpriteFramesEditor::_sequence_extend_range() {
+	PoolIntArray range = frames->get_anim_sequence_range(edited_anim, edited_sequence);
+	Vector<int> selected = tree->get_selected_items();
+	selected.sort();
+	int min = MIN(selected[0], range[0]);
+	int max = MAX(selected[selected.size() - 1], range[1]);
+
+	undo_redo->create_action(TTR("Change Sequence Range"), UndoRedo::MERGE_ENDS);
+	undo_redo->add_do_method(frames, "set_anim_sequence_range", edited_anim, edited_sequence, min, max);
+	undo_redo->add_undo_method(frames, "set_anim_sequence_range", edited_anim, edited_sequence, frames->get_anim_sequence_range(edited_anim, edited_sequence));
+	undo_redo->add_do_method(this, "_update_library", true, false);
+	undo_redo->add_undo_method(this, "_update_library", true, false);
+
+	undo_redo->commit_action();
+}
+
+void SpriteFramesEditor::_sequence_clear_range() {
+	undo_redo->create_action(TTR("Change Sequence Range"), UndoRedo::MERGE_ENDS);
+	undo_redo->add_do_method(frames, "clear_anim_sequence", edited_anim, edited_sequence);
+	undo_redo->add_undo_method(frames, "set_anim_sequence_range", edited_anim, edited_sequence, frames->get_anim_sequence_range(edited_anim, edited_sequence));
+	undo_redo->add_do_method(this, "_update_library", true, false);
+	undo_redo->add_undo_method(this, "_update_library", true, false);
+
+	undo_redo->commit_action();
+}
+
+void SpriteFramesEditor::_sequence_button_pressed(Object *item, int column, int id) {
+	TreeItem *ti = Object::cast_to<TreeItem>(item);
+	Vector<String> seqs = frames->get_sequence_names();
+	int idx = seqs.find(ti->get_text(0));
+	print_line(vformat("index : %d  item: %s  sequence: %s", idx, ti->get_text(0), seqs[idx]));
+	if (idx == -1) { return; }
+	if (id == 0 && idx > 0) {
+		// Move up
+		String temp = seqs[idx - 1];
+		seqs.write[idx - 1] = seqs[idx];
+		seqs.write[idx] = temp;
+	} else if (id == 1 && idx < seqs.size() - 1) {
+		// Move down
+		String temp = seqs[idx + 1];
+		seqs.write[idx + 1] = seqs[idx];
+		seqs.write[idx] = temp;
+	}
+	PoolStringArray seqnames;
+	for (size_t i = 0; i < seqs.size(); i++) {
+		seqnames.push_back(seqs[i]);
+	}
+	frames->call("_set_sequences", seqnames);
+	_update_library(false, false);
+	_sequence_select();
 }
 
 void SpriteFramesEditor::_tree_input(const Ref<InputEvent> &p_event) {
@@ -1130,6 +1396,40 @@ void SpriteFramesEditor::_tree_input(const Ref<InputEvent> &p_event) {
 			_zoom_out();
 			// Don't scroll down after zooming out.
 			accept_event();
+		}
+	}
+}
+
+void SpriteFramesEditor::_tree_selection_changed(int i, bool selected) {
+	if (edited_sequence && edited_anim) {
+
+		if (!frames->has_sequence(edited_sequence)) {
+			return;
+		}
+
+		Vector<int> selection = tree->get_selected_items();
+		selection.sort();
+		PoolIntArray range = frames->get_anim_sequence_range(edited_anim, edited_sequence);
+		if (selection.size() == 0) {
+			seq_set_framerange->set_disabled(true);
+			seq_extend_framerange->set_disabled(true);
+		} else {
+			seq_set_framerange->set_disabled(false);
+			int inside = 0;
+			int outside = 0;
+			for (size_t i = 0; i < selection.size(); i++) {
+				if (selection[i] >= range[0] && selection[i] <= range[1]) {
+					inside++;
+				} else {
+					outside++;
+				}
+			}
+			if (inside == selection.size()) {
+				seq_extend_framerange->set_disabled(true);
+			}
+			else {
+				seq_extend_framerange->set_disabled(false);
+			}
 		}
 	}
 }
@@ -1166,76 +1466,143 @@ void SpriteFramesEditor::_zoom_reset() {
 	tree->set_fixed_icon_size(Size2(thumbnail_default_size, thumbnail_default_size));
 }
 
-void SpriteFramesEditor::_update_library(bool p_skip_selector) {
+void SpriteFramesEditor::_update_library(bool p_skip_selector, bool p_reset_selection) {
 	updating = true;
 
 	if (!p_skip_selector) {
-		animations->clear();
+		// Animations
+		{
+			animations->clear();
+			TreeItem *anim_root = animations->create_item();
 
-		TreeItem *anim_root = animations->create_item();
+			List<StringName> anim_names;
+			frames->get_animation_list(&anim_names);
+			anim_names.sort_custom<StringName::AlphCompare>();
 
-		List<StringName> anim_names;
-		frames->get_animation_list(&anim_names);
-		anim_names.sort_custom<StringName::AlphCompare>();
-
-		bool searching = anim_search_box->get_text().size();
-		String searched_string = searching ? anim_search_box->get_text().to_lower() : String();
-
-		animations_map.clear();
-		for (List<StringName>::Element *E = anim_names.front(); E; E = E->next()) {
-			String name = E->get();
-
-			if (searching && name.to_lower().find(searched_string) < 0) {
-				continue;
+			if (anim_names.size() == 0) {
+				((Control *)(anim_speed->get_parent()))->set_visible(false);
+				anim_loop->set_visible(false);
+			} else {
+				((Control *)(anim_speed->get_parent()))->set_visible(true);
+				anim_loop->set_visible(true);
 			}
 
-			TreeItem *it = animations->create_item(anim_root);
+			bool searching_anim = anim_search_box->get_text().size();
+			String searched_anim_string = searching_anim ? anim_search_box->get_text().to_lower() : String();
 
-			it->set_metadata(0, name);
+			animations_map.clear();
+			for (List<StringName>::Element *E = anim_names.front(); E; E = E->next()) {
+				String name = E->get();
 
-			it->set_text(0, name);
-			it->set_selectable(0,!animation_locked);
-			it->set_editable(0, true);
-			animations_map.insert(name, it);
-			if (animation_locked) {
-				it->set_custom_color(0, Color(1.0, 1.0, 1.0, 0.4));
-			}
-			
-
-			if (E->get() == edited_anim) {
-				it->select(0);
-				it->set_selectable(0,true);
-				it->clear_custom_color(0);
-				if (animation_locked) {
-					it->add_button(0, _get_locked_icon(true), -1, false, "Lock Animation");
+				if (searching_anim && name.to_lower().find(searched_anim_string) < 0) {
+					continue;
 				}
-					
+
+				TreeItem *it = animations->create_item(anim_root);
+
+				it->set_metadata(0, name);
+
+				it->set_text(0, name);
+				it->set_selectable(0, !animation_locked);
+				it->set_editable(0, true);
+				animations_map.insert(name, it);
+				if (animation_locked) {
+					it->set_custom_color(0, Color(1.0, 1.0, 1.0, 0.4));
+				}
+
+				if (E->get() == edited_anim) {
+					it->select(0);
+					it->set_selectable(0, true);
+					it->clear_custom_color(0);
+					if (animation_locked) {
+						it->add_button(0, _get_locked_icon(true), -1, false, "Lock Animation");
+					}
+				}
 			}
 		}
 	}
 
-	tree->clear();
+	List<StringName> seq_names;
+	frames->get_sequence_list(&seq_names);
+
+	if (seq_names.size() == 0) {
+		seq_set_framerange->set_visible(false);
+		seq_extend_framerange->set_visible(false);
+		seq_clear_framerange->set_visible(false);
+	} else {
+		seq_set_framerange->set_visible(true);
+		seq_extend_framerange->set_visible(true);
+		seq_clear_framerange->set_visible(true);
+	}
+	// update selection buttons
+	_tree_selection_changed(1, false);
+
+	if (!p_skip_selector) {
+		// Sequences
+		{
+			sequences->clear();
+			TreeItem *seq_root = sequences->create_item();
+
+			bool searching_seq = seq_search_box->get_text().size();
+			String searched_seq_string = searching_seq ? seq_search_box->get_text().to_lower() : String();
+
+			sequences_map.clear();
+			for (List<StringName>::Element *E = seq_names.front(); E; E = E->next()) {
+				String name = E->get();
+
+				if (searching_seq && name.to_lower().find(searched_seq_string) < 0) {
+					continue;
+				}
+
+				TreeItem *it = sequences->create_item(seq_root);
+				it->set_metadata(0, name);
+
+				it->set_text(0, name);
+				it->set_selectable(0, true);
+				it->set_editable(0, true);
+				sequences_map.insert(name, it);
+
+				if (E->get() == edited_sequence) {
+					it->select(0);
+					it->set_selectable(0, true);
+					it->clear_custom_color(0);
+				}
+			}
+		}
+	}
 
 	if (!frames->has_animation(edited_anim)) {
 		updating = false;
+		tree->clear();
 		return;
 	}
 
-	// Reset selection to start or end
-	if (sel >= frames->get_frame_count(edited_anim)) {
-		sel = frames->get_frame_count(edited_anim) - 1;
-	} else if (sel < 0 && frames->get_frame_count(edited_anim)) {
-		sel = 0;
+	Vector<int> selected;
+	if (p_reset_selection) {
+		// Reset selection to start or end
+		if (sel >= frames->get_frame_count(edited_anim)) {
+			sel = frames->get_frame_count(edited_anim) - 1;
+		} else if (sel < 0 && frames->get_frame_count(edited_anim)) {
+			sel = 0;
+		}
+	} else {
+		selected = tree->get_selected_items();
 	}
+
+	tree->clear();
 
 	for (int i = 0; i < frames->get_frame_count(edited_anim); i++) {
 		String name;
 		Ref<Texture> frame = frames->get_frame(edited_anim, i);
+		StringName sequence = frames->get_anim_frame_sequence(edited_anim, i);
 
 		if (frame.is_null()) {
 			name = itos(i) + ": " + TTR("(empty)");
 		} else {
 			name = itos(i) + ": " + frame->get_name();
+		}
+		if (!String(sequence).empty()) {
+			name += " [" + sequence + "]";
 		}
 
 		tree->add_item(name, frame);
@@ -1255,8 +1622,8 @@ void SpriteFramesEditor::_update_library(bool p_skip_selector) {
 
 			tree->set_item_tooltip(tree->get_item_count() - 1, tooltip);
 		}
-		if (sel == i) {
-			//tree->select(tree->get_item_count() - 1);
+		if (selected.find(i) > -1 && !p_reset_selection) {
+			tree->select(tree->get_item_count() - 1, false);
 		}
 	}
 
@@ -1431,9 +1798,10 @@ void SpriteFramesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_paste_pressed"), &SpriteFramesEditor::_paste_pressed);
 	ClassDB::bind_method(D_METHOD("_file_load_request", "files", "at_position"), &SpriteFramesEditor::_file_load_request, DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("_quick_opened"), &SpriteFramesEditor::_quick_opened);
-	ClassDB::bind_method(D_METHOD("_update_library", "skipsel"), &SpriteFramesEditor::_update_library, DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("_update_library", "skipsel", "resetsel"), &SpriteFramesEditor::_update_library, DEFVAL(false), DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("_up_pressed"), &SpriteFramesEditor::_up_pressed);
 	ClassDB::bind_method(D_METHOD("_down_pressed"), &SpriteFramesEditor::_down_pressed);
+	// Anim
 	ClassDB::bind_method(D_METHOD("_animation_select"), &SpriteFramesEditor::_animation_select);
 	ClassDB::bind_method(D_METHOD("_animation_name_edited"), &SpriteFramesEditor::_animation_name_edited);
 	ClassDB::bind_method(D_METHOD("_animation_add"), &SpriteFramesEditor::_animation_add);
@@ -1443,7 +1811,22 @@ void SpriteFramesEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_animation_search_text_changed"), &SpriteFramesEditor::_animation_search_text_changed);
 	ClassDB::bind_method(D_METHOD("_animation_loop_changed"), &SpriteFramesEditor::_animation_loop_changed);
 	ClassDB::bind_method(D_METHOD("_animation_fps_changed"), &SpriteFramesEditor::_animation_fps_changed);
+	// Seq
+	ClassDB::bind_method(D_METHOD("_sequence_select"), &SpriteFramesEditor::_sequence_select);
+	ClassDB::bind_method(D_METHOD("_sequence_name_edited"), &SpriteFramesEditor::_sequence_name_edited);
+	ClassDB::bind_method(D_METHOD("_sequence_add"), &SpriteFramesEditor::_sequence_add);
+	ClassDB::bind_method(D_METHOD("_sequence_remove"), &SpriteFramesEditor::_sequence_remove);
+	ClassDB::bind_method(D_METHOD("_sequence_remove_confirmed"), &SpriteFramesEditor::_sequence_remove_confirmed);
+	//ClassDB::bind_method(D_METHOD("_sequence_min_changed", "min"), &SpriteFramesEditor::_sequence_min_changed);
+	//ClassDB::bind_method(D_METHOD("_sequence_max_changed", "max"), &SpriteFramesEditor::_sequence_max_changed);
+	//ClassDB::bind_method(D_METHOD("_sequence_minmax_changed", "min", "max"), &SpriteFramesEditor::_sequence_minmax_changed);
+	ClassDB::bind_method(D_METHOD("_sequence_set_range"), &SpriteFramesEditor::_sequence_set_range);
+	ClassDB::bind_method(D_METHOD("_sequence_extend_range"), &SpriteFramesEditor::_sequence_extend_range);
+	ClassDB::bind_method(D_METHOD("_sequence_clear_range"), &SpriteFramesEditor::_sequence_clear_range);
+	ClassDB::bind_method(D_METHOD("_sequence_button_pressed"), &SpriteFramesEditor::_sequence_button_pressed);
+	//
 	ClassDB::bind_method(D_METHOD("_tree_input"), &SpriteFramesEditor::_tree_input);
+	ClassDB::bind_method(D_METHOD("_tree_selection_changed", "frame", "selected"), &SpriteFramesEditor::_tree_selection_changed);
 	ClassDB::bind_method(D_METHOD("_zoom_in"), &SpriteFramesEditor::_zoom_in);
 	ClassDB::bind_method(D_METHOD("_zoom_out"), &SpriteFramesEditor::_zoom_out);
 	ClassDB::bind_method(D_METHOD("_zoom_reset"), &SpriteFramesEditor::_zoom_reset);
@@ -1465,17 +1848,28 @@ void SpriteFramesEditor::_bind_methods() {
 }
 
 SpriteFramesEditor::SpriteFramesEditor() {
-	VBoxContainer *vbc_animlist = memnew(VBoxContainer);
-	add_child(vbc_animlist);
-	vbc_animlist->set_custom_minimum_size(Size2(150, 0) * EDSCALE);
 
+	// Animations / Sequences List
+
+	// TabContainer
+	TabContainer *tab_container = memnew(TabContainer);
+	tab_container->set_name("AnimationTabs");
+	tab_container->set_tab_align(TabContainer::ALIGN_LEFT);
+	tab_container->set_custom_minimum_size(Size2(170, 0) * EDSCALE);
+	add_child(tab_container);
+
+	// "Animations" tab
+	VBoxContainer *animations_tab = memnew(VBoxContainer);
+	tab_container->add_child(animations_tab);
+	tab_container->set_tab_title(0, TTR("Animations"));
+
+	// Animations SubVB
 	VBoxContainer *sub_vb = memnew(VBoxContainer);
-	vbc_animlist->add_margin_child(TTR("Animations:"), sub_vb, true);
 	sub_vb->set_v_size_flags(SIZE_EXPAND_FILL);
-
 	HBoxContainer *hbc_animlist = memnew(HBoxContainer);
 	sub_vb->add_child(hbc_animlist);
-
+	animations_tab->add_child(sub_vb);
+	
 	new_anim = memnew(ToolButton);
 	new_anim->set_tooltip(TTR("New Animation"));
 	hbc_animlist->add_child(new_anim);
@@ -1503,7 +1897,7 @@ SpriteFramesEditor::SpriteFramesEditor() {
 
 	HBoxContainer *hbc_anim_speed = memnew(HBoxContainer);
 	hbc_anim_speed->add_child(memnew(Label(TTR("Speed:"))));
-	vbc_animlist->add_child(hbc_anim_speed);
+	animations_tab->add_child(hbc_anim_speed);
 	anim_speed = memnew(SpinBox);
 	anim_speed->set_suffix(TTR("FPS"));
 	anim_speed->set_min(0);
@@ -1517,8 +1911,81 @@ SpriteFramesEditor::SpriteFramesEditor() {
 
 	anim_loop = memnew(CheckButton);
 	anim_loop->set_text(TTR("Loop"));
-	vbc_animlist->add_child(anim_loop);
+	animations_tab->add_child(anim_loop);
 	anim_loop->connect("pressed", this, "_animation_loop_changed");
+
+	// "Sequences" tab
+	VBoxContainer *sequences_tab = memnew(VBoxContainer);
+	tab_container->add_child(sequences_tab);
+	tab_container->set_tab_title(1, TTR("Sequences"));
+
+	// Sequences SubVB
+	sub_vb = memnew(VBoxContainer);
+	sub_vb->set_v_size_flags(SIZE_EXPAND_FILL);
+	HBoxContainer *hbc_seqlist = memnew(HBoxContainer);
+	sub_vb->add_child(hbc_seqlist);
+	sequences_tab->add_child(sub_vb);
+
+	new_sequence = memnew(ToolButton);
+	new_sequence->set_tooltip(TTR("New Sequence"));
+	hbc_seqlist->add_child(new_sequence);
+	new_sequence->connect("pressed", this, "_sequence_add");
+
+	remove_sequence = memnew(ToolButton);
+	remove_sequence->set_tooltip(TTR("Remove Sequence"));
+	hbc_seqlist->add_child(remove_sequence);
+	remove_sequence->connect("pressed", this, "_sequence_remove");
+
+	seq_search_box = memnew(LineEdit);
+	hbc_seqlist->add_child(seq_search_box);
+	seq_search_box->set_h_size_flags(SIZE_EXPAND_FILL);
+	seq_search_box->set_placeholder(TTR("Filter sequences"));
+	seq_search_box->set_clear_button_enabled(true);
+	seq_search_box->connect("text_changed", this, "_sequence_search_text_changed");
+
+	sequences = memnew(Tree);
+	sub_vb->add_child(sequences);
+	sequences->set_v_size_flags(SIZE_EXPAND_FILL);
+	sequences->set_hide_root(true);
+	sequences->connect("cell_selected", this, "_sequence_select");
+	sequences->connect("item_edited", this, "_sequence_name_edited");
+	sequences->set_allow_reselect(true);
+
+	HBoxContainer *hbc_seq_frameset = memnew(HBoxContainer);
+	HBoxContainer *hbc_seq_frameremove = memnew(HBoxContainer);
+	hbc_seq_frameset->set_h_size_flags(SIZE_FILL);
+	hbc_seq_frameremove->set_h_size_flags(SIZE_FILL);
+	sequences_tab->add_child(hbc_seq_frameset);
+	sequences_tab->add_child(hbc_seq_frameremove);
+
+	seq_set_framerange = memnew(Button);
+	hbc_seq_frameset->add_child(seq_set_framerange);
+	seq_set_framerange->set_text(TTR("Set Range"));
+	seq_set_framerange->set_tooltip(TTR("Set range from selected frames."));
+	seq_set_framerange->connect("pressed", this, "_sequence_set_range");
+	seq_set_framerange->set_h_size_flags(SIZE_EXPAND_FILL);
+	seq_set_framerange->set_disabled(true);
+
+	// Disable this button when all selected frames are within sequence range
+	seq_extend_framerange = memnew(Button);
+	hbc_seq_frameset->add_child(seq_extend_framerange);
+	seq_extend_framerange->set_text(TTR("+"));
+	seq_extend_framerange->set_tooltip(TTR("Extend range from selected frames."));
+	seq_extend_framerange->connect("pressed", this, "_sequence_extend_range");
+	seq_extend_framerange->set_disabled(true);
+
+	seq_clear_framerange = memnew(Button);
+	hbc_seq_frameremove->add_child(seq_clear_framerange);
+	seq_clear_framerange->set_text(TTR("Clear"));
+	seq_clear_framerange->set_tooltip(TTR("Clear frame range."));
+	seq_clear_framerange->connect("pressed", this, "_sequence_clear_range");
+	seq_clear_framerange->set_h_size_flags(SIZE_EXPAND_FILL);
+
+	seq_extend_framerange->set_custom_minimum_size(Size2(seq_clear_framerange->_edit_get_minimum_size().x,0));
+
+	sequences->connect("button_pressed", this, "_sequence_button_pressed");
+
+	// Frames Display
 
 	VBoxContainer *vbc = memnew(VBoxContainer);
 	add_child(vbc);
@@ -1602,6 +2069,7 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	zoom_in = memnew(ToolButton);
 	zoom_in->set_tooltip(TTR("Zoom In"));
 	hbc->add_child(zoom_in);
+
 	//
 
 	file = memnew(EditorFileDialog);
@@ -1627,9 +2095,6 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	dialog = memnew(AcceptDialog);
 	add_child(dialog);
 
-	// send a signal when user double clicks on a frame
-	tree->connect("item_activated", this, "_frame_notify_send");
-
 	load->connect("pressed", this, "_load_pressed");
 	load_sheet->connect("pressed", this, "_open_sprite_sheet");
 	_delete->connect("pressed", this, "_delete_pressed");
@@ -1645,7 +2110,12 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	zoom_out->connect("pressed", this, "_zoom_out");
 	zoom_reset->connect("pressed", this, "_zoom_reset");
 	file->connect("files_selected", this, "_file_load_request");
+	// Tree
 	tree->connect("gui_input", this, "_tree_input");
+	tree->connect("multi_selected", this, "_tree_selection_changed");
+	// send a signal when user double clicks on a frame
+	tree->connect("item_activated", this, "_frame_notify_send");
+
 	loading_scene = false;
 	sel = -1;
 
@@ -1653,9 +2123,13 @@ SpriteFramesEditor::SpriteFramesEditor() {
 
 	edited_anim = "default";
 
-	delete_dialog = memnew(ConfirmationDialog);
-	add_child(delete_dialog);
-	delete_dialog->connect("confirmed", this, "_animation_remove_confirmed");
+	delete_anim_dialog = memnew(ConfirmationDialog);
+	add_child(delete_anim_dialog);
+	delete_anim_dialog->connect("confirmed", this, "_animation_remove_confirmed");
+
+	delete_seq_dialog = memnew(ConfirmationDialog);
+	add_child(delete_seq_dialog);
+	delete_seq_dialog->connect("confirmed", this, "_sequence_remove_confirmed");
 
 	delete_all_dialog = memnew(ConfirmationDialog);
 	add_child(delete_all_dialog);
