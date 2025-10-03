@@ -291,7 +291,7 @@ Vector<String> SpriteFrames::get_sequence_names() const {
 	return names;
 }
 
-void SpriteFrames::set_anim_sequence_range(const StringName &p_anim, const StringName &p_seq, int min, int max) {
+void SpriteFrames::set_sequence_range(const StringName &p_anim, const StringName &p_seq, int min, int max) {
 	ERR_FAIL_COND_MSG(min < 0, "Start frame cannot be negative (" + itos(min) + ").");
 	ERR_FAIL_COND_MSG(max < min, "End frame must be greater than or equal to start frame (" + itos(max) + " <= " + itos(min) + ").");
 
@@ -302,24 +302,34 @@ void SpriteFrames::set_anim_sequence_range(const StringName &p_anim, const Strin
 	ERR_FAIL_COND_MSG(sequences.find(p_seq) == -1, "Sequence '" + String(p_seq) + "' doesn't exist.");
 	A->get().set_sequence_range(p_seq, min, max);
 }
-PoolIntArray SpriteFrames::get_anim_sequence_range(const StringName &p_anim, const StringName &p_seq) const {
+PoolIntArray SpriteFrames::get_sequence_range(const StringName &p_anim, const StringName &p_seq) const {
 	const Map<StringName, Anim>::Element *A = animations.find(p_anim);
 	PoolIntArray intrange;
 	ERR_FAIL_COND_V_MSG(!A, intrange, "Animation '" + String(p_anim) + "' doesn't exist.");
 	ERR_FAIL_COND_V_MSG(sequences.find(p_seq) == -1, intrange, "Sequence '" + String(p_seq) + "' doesn't exist.");
 	Vector2i range = A->get().get_sequence_range(p_seq);
+	if (range == Vector2i(-1, -1)) {
+		return intrange;
+	}
 	intrange.push_back(range.x);
 	intrange.push_back(range.y);
 	return intrange;
 }
-void SpriteFrames::clear_anim_sequence(const StringName &p_anim, const StringName &p_seq) {
+int SpriteFrames::get_sequence_framecount(const StringName &p_anim, const StringName &p_seq) const {
+	const Map<StringName, Anim>::Element *A = animations.find(p_anim);
+	ERR_FAIL_COND_V_MSG(!A, 0, "Animation '" + String(p_anim) + "' doesn't exist.");
+	ERR_FAIL_COND_V_MSG(sequences.find(p_seq) == -1, 0, "Sequence '" + String(p_seq) + "' doesn't exist.");
+	Vector2i range = A->get().get_sequence_range(p_seq);
+	return range.y - range.x + 1;
+}
+void SpriteFrames::clear_sequence_range(const StringName &p_anim, const StringName &p_seq) {
 	Map<StringName, Anim>::Element *A = animations.find(p_anim);
 	ERR_FAIL_COND_MSG(!A, "Animation '" + String(p_anim) + "' doesn't exist.");
 	ERR_FAIL_COND_MSG(sequences.find(p_seq) == -1, "Sequence '" + String(p_seq) + "' doesn't exist.");
 	A->get().clear_sequence(p_seq);
 }
 
-bool SpriteFrames::is_anim_frame_in_sequence(const StringName& p_anim, int frame, const StringName& p_seq) const {
+bool SpriteFrames::is_frame_in_sequence(const StringName &p_anim, int frame, const StringName &p_seq) const {
 	const Map<StringName, Anim>::Element *A = animations.find(p_anim);
 	ERR_FAIL_COND_V_MSG(!A, false, "Animation '" + String(p_anim) + "' doesn't exist.");
 	ERR_FAIL_COND_V_MSG(sequences.find(p_seq) == -1, false, "Sequence '" + String(p_seq) + "' doesn't exist.");
@@ -327,11 +337,27 @@ bool SpriteFrames::is_anim_frame_in_sequence(const StringName& p_anim, int frame
 	return A->get().is_frame_in_sequence(frame, p_seq);
 }
 
-StringName SpriteFrames::get_anim_frame_sequence(const StringName &p_anim, int frame) const {
+StringName SpriteFrames::get_sequence_for_frame(const StringName &p_anim, int frame) const {
 	const Map<StringName, Anim>::Element *A = animations.find(p_anim);
 	ERR_FAIL_COND_V_MSG(!A, "", "Animation '" + String(p_anim) + "' doesn't exist.");
 
 	return A->get().get_frame_sequence(frame);
+}
+
+int SpriteFrames::get_sequence_global_frame(const StringName &p_anim, const StringName &p_seq, int localframe) const {
+	const Map<StringName, Anim>::Element *A = animations.find(p_anim);
+	ERR_FAIL_COND_V_MSG(!A, -1, "Animation '" + String(p_anim) + "' doesn't exist.");
+	ERR_FAIL_COND_V_MSG(sequences.find(p_seq) == -1, -1, "Sequence '" + String(p_seq) + "' doesn't exist.");
+	Vector2i range = A->get().get_sequence_range(p_seq);
+	ERR_FAIL_COND_V_MSG((localframe > range[1] - range[0]), -1, "Frame is outside the local frame range of animation '" + p_anim + "' sequence '" + String(p_seq) + "' (" + itos(localframe) + " > " + itos(range[1] - range[0]) + ")");
+
+	return Math::wrapi(localframe + range[0], range[0], range[1]);
+}
+
+Vector<String> SpriteFrames::get_used_sequences(const StringName &p_anim) const {
+	const Map<StringName, Anim>::Element *A = animations.find(p_anim);
+	ERR_FAIL_COND_V_MSG(!A, Vector<String>(), "Animation '" + String(p_anim) + "' doesn't exist.");
+	return A->get().get_used_sequences();
 }
 
 void SpriteFrames::_set_frames(const Array &p_frames) {
@@ -451,11 +477,14 @@ void SpriteFrames::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_sequence_names"), &SpriteFrames::get_sequence_names);
 
-	ClassDB::bind_method(D_METHOD("set_anim_sequence_range", "anim", "seq", "min", "max"), &SpriteFrames::set_anim_sequence_range);
-	ClassDB::bind_method(D_METHOD("get_anim_sequence_range", "anim", "seq"), &SpriteFrames::get_anim_sequence_range);
-	ClassDB::bind_method(D_METHOD("clear_anim_sequence"), &SpriteFrames::clear_anim_sequence);
-	ClassDB::bind_method(D_METHOD("is_anim_frame_in_sequence"), &SpriteFrames::is_anim_frame_in_sequence);
-	ClassDB::bind_method(D_METHOD("get_anim_frame_sequence"), &SpriteFrames::get_anim_frame_sequence);
+	ClassDB::bind_method(D_METHOD("set_sequence_range", "anim", "seq", "min", "max"), &SpriteFrames::set_sequence_range);
+	ClassDB::bind_method(D_METHOD("get_sequence_range", "anim", "seq"), &SpriteFrames::get_sequence_range);
+	ClassDB::bind_method(D_METHOD("get_sequence_framecount", "anim", "seq"), &SpriteFrames::get_sequence_framecount);
+	ClassDB::bind_method(D_METHOD("clear_sequence_range"), &SpriteFrames::clear_sequence_range);
+	ClassDB::bind_method(D_METHOD("is_frame_in_sequence"), &SpriteFrames::is_frame_in_sequence);
+	ClassDB::bind_method(D_METHOD("get_sequence_for_frame"), &SpriteFrames::get_sequence_for_frame);
+	ClassDB::bind_method(D_METHOD("get_sequence_global_frame", "anim", "seq", "localframe"), &SpriteFrames::get_sequence_global_frame);
+	ClassDB::bind_method(D_METHOD("get_used_sequences", "anim"), &SpriteFrames::get_used_sequences);
 
 	ClassDB::bind_method(D_METHOD("add_frame", "anim", "frame", "at_position"), &SpriteFrames::add_frame, DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("get_frame_count", "anim"), &SpriteFrames::get_frame_count);
@@ -712,6 +741,31 @@ void AnimatedSprite::set_frame(int p_frame) {
 	_change_notify("frame");
 	emit_signal(SceneStringNames::get_singleton()->frame_changed);
 }
+void AnimatedSprite::set_frame_continue(int p_frame) {
+	if (!frames.is_valid()) {
+		return;
+	}
+
+	if (frames->has_animation(animation)) {
+		int limit = frames->get_frame_count(animation);
+		if (p_frame >= limit) {
+			p_frame = limit - 1;
+		}
+	}
+
+	if (p_frame < 0) {
+		p_frame = 0;
+	}
+
+	if (frame == p_frame) {
+		return;
+	}
+
+	frame = p_frame;
+	update();
+	_change_notify("frame");
+	emit_signal(SceneStringNames::get_singleton()->frame_changed);
+}
 int AnimatedSprite::get_frame() const {
 	return frame;
 }
@@ -848,31 +902,6 @@ StringName AnimatedSprite::get_animation() const {
 	return animation;
 }
 
-// TODO: have a bool to say whether this accepts missign sequences without throwing error?
-// TODO: consider just having the sequence never reset the frame, or use a bool to say so. have it translate the global frame.
-void AnimatedSprite::set_sequence(const StringName &p_sequence, bool p_reset = true) {
-	ERR_FAIL_COND_MSG(frames == nullptr, vformat("There is no sequence with name '%s'.", p_sequence));
-	ERR_FAIL_COND_MSG(frames->get_sequence_names().find(p_sequence) == -1, vformat("There is no sequence with name '%s'.", p_sequence));
-	PoolIntArray range = frames->get_anim_sequence_range(animation, p_sequence);
-	ERR_FAIL_COND_MSG(range[0] == -1, vformat("Sequence '%s' is not defined in current animation '%s'.", p_sequence, animation));
-
-	if (sequence == p_sequence) {
-		return;
-	}
-
-	sequence = p_sequence;
-	_reset_timeout();
-	if (p_reset) {
-		set_frame(range[0]);
-	}
-	_change_notify();
-	emit_signal("sequence_changed");
-	update();
-}
-StringName AnimatedSprite::get_sequence() const {
-	return sequence;
-}
-
 String AnimatedSprite::get_configuration_warning() const {
 	String warning = Node2D::get_configuration_warning();
 	if (frames.is_null()) {
@@ -920,6 +949,7 @@ void AnimatedSprite::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("stop"), &AnimatedSprite::stop);
 
 	ClassDB::bind_method(D_METHOD("set_frame", "frame"), &AnimatedSprite::set_frame);
+	ClassDB::bind_method(D_METHOD("set_frame_continue", "frame"), &AnimatedSprite::set_frame_continue);
 	ClassDB::bind_method(D_METHOD("get_frame"), &AnimatedSprite::get_frame);
 
 	ClassDB::bind_method(D_METHOD("set_speed_scale", "speed_scale"), &AnimatedSprite::set_speed_scale);

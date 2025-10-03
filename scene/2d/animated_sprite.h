@@ -50,6 +50,14 @@ class SpriteFrames : public Resource {
 			speed = 10;
 		}
 
+		Vector<String> get_used_sequences() const {
+			Vector<String> seqs;
+			for (const Map<StringName, Vector2i>::Element *S = seq_map.front(); S; S = S->next()) {
+				seqs.push_back(S->key());
+			}
+			return seqs;
+		}
+
 		StringName get_frame_sequence(int p_frame) const {
 			for (const Map<StringName, Vector2i>::Element *S = seq_map.front(); S; S = S->next()) {
 				if (p_frame >= S->value().x && p_frame <= S->value().y) {
@@ -72,6 +80,14 @@ class SpriteFrames : public Resource {
 				return Vector2i(-1, -1);
 			}
 			return S->value();
+		}
+
+		int get_sequence_length(const StringName &p_seq) const {
+			const Map<StringName, Vector2i>::Element *S = seq_map.find(p_seq);
+			if (!S) {
+				return 0;
+			}
+			return S->value().y - S->value().x + 1;
 		}
 
 		void set_sequence_range(const StringName& p_seq, int min, int max) {
@@ -162,12 +178,15 @@ public:
 	void get_sequence_list(List<StringName> *r_sequences) const;
 	Vector<String> get_sequence_names() const;
 
-	void set_anim_sequence_range(const StringName &p_anim, const StringName &p_seq, int min, int max);
-	PoolIntArray get_anim_sequence_range(const StringName &p_anim, const StringName &p_seq) const;
-	void clear_anim_sequence(const StringName &p_anim, const StringName &p_seq);
-	bool is_anim_frame_in_sequence(const StringName &p_anim, int frame, const StringName &p_seq) const;
+	void set_sequence_range(const StringName &p_anim, const StringName &p_seq, int min, int max);
+	PoolIntArray get_sequence_range(const StringName &p_anim, const StringName &p_seq) const;
+	int get_sequence_framecount(const StringName &p_anim, const StringName &p_seq) const;
+	void clear_sequence_range(const StringName &p_anim, const StringName &p_seq);
+	bool is_frame_in_sequence(const StringName &p_anim, int frame, const StringName &p_seq) const;
 	// Return the sequence name assigned to this frame
-	StringName get_anim_frame_sequence(const StringName &p_anim, int frame) const;
+	StringName get_sequence_for_frame(const StringName &p_anim, int frame) const;
+	int get_sequence_global_frame(const StringName &p_anim, const StringName &p_seq, int localframe) const;
+	Vector<String> get_used_sequences(const StringName &p_anim) const;
 
 	void add_frame(const StringName &p_anim, const Ref<Texture> &p_frame, int p_at_pos = -1);
 	//void add_frames(const StringName &p_anim, const Vector<Ref<Texture>> &p_frames, int p_at_pos = -1);
@@ -221,10 +240,8 @@ class AnimatedSprite : public SpriteBase {
 	bool playing;
 	bool reversed;
 	StringName animation;
-	StringName sequence;
 	bool animation_locked;
-	int local_frame; // frame inside the sequence
-	int frame; // global frame
+	int frame;
 	float speed_scale;
 
 	bool is_over;
@@ -265,10 +282,8 @@ public:
 	void set_animation_continue(const StringName &p_animation);
 	StringName get_animation() const;
 
-	void set_sequence(const StringName &p_sequence, bool p_reset = true);
-	StringName get_sequence() const;
-
 	void set_frame(int p_frame);
+	void set_frame_continue(int p_frame);
 	int get_frame() const;
 
 	void set_speed_scale(float p_speed_scale);
