@@ -345,9 +345,11 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 
 		item->set_tooltip(0, tooltip);
 	} else {
-		StringName type = EditorNode::get_singleton()->get_object_custom_type_name(p_node);
+		String type = EditorNode::get_singleton()->get_object_custom_type_name(p_node);
 		if (type == StringName()) {
 			type = p_node->get_class();
+		} else {
+			type = type + " (" + p_node->get_class() + ")";
 		}
 
 		String tooltip = String(p_node->get_name()) + "\n" + TTR("Type:") + " " + type;
