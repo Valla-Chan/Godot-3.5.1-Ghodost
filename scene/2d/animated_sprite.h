@@ -179,7 +179,9 @@ public:
 	Vector<String> get_sequence_names() const;
 
 	void set_sequence_range(const StringName &p_anim, const StringName &p_seq, int min, int max);
+	void _set_sequence_range_arr(const StringName &p_anim, const StringName &p_seq, PoolIntArray range);
 	PoolIntArray get_sequence_range(const StringName &p_anim, const StringName &p_seq) const;
+	PoolIntArray _get_sequence_range_def(const StringName &p_anim, const StringName &p_seq) const;
 	int get_sequence_framecount(const StringName &p_anim, const StringName &p_seq) const;
 	void clear_sequence_range(const StringName &p_anim, const StringName &p_seq);
 	bool is_frame_in_sequence(const StringName &p_anim, int frame, const StringName &p_seq) const;

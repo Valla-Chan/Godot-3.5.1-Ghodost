@@ -302,6 +302,18 @@ void SpriteFrames::set_sequence_range(const StringName &p_anim, const StringName
 	ERR_FAIL_COND_MSG(sequences.find(p_seq) == -1, "Sequence '" + String(p_seq) + "' doesn't exist.");
 	A->get().set_sequence_range(p_seq, min, max);
 }
+void SpriteFrames::_set_sequence_range_arr(const StringName &p_anim, const StringName &p_seq, PoolIntArray range) {
+	ERR_FAIL_COND_MSG(range.size() != 2, "Range must be size 2.");
+	ERR_FAIL_COND_MSG(range[0] < 0, "Start frame cannot be negative (" + itos(range[0]) + ").");
+	ERR_FAIL_COND_MSG(range[1] < range[0], "End frame must be greater than or equal to start frame (" + itos(range[1]) + " <= " + itos(range[0]) + ").");
+
+	Map<StringName, Anim>::Element *A = animations.find(p_anim);
+	ERR_FAIL_COND_MSG(!A, "Animation '" + String(p_anim) + "' doesn't exist.");
+	ERR_FAIL_COND_MSG(range[1] >= A->get().frames.size(), "End frame is outside of animation frame range '" + String(p_anim) + "' length (" + itos(range[1]) + " > " + itos(A->get().frames.size() - 1) + ").");
+
+	ERR_FAIL_COND_MSG(sequences.find(p_seq) == -1, "Sequence '" + String(p_seq) + "' doesn't exist.");
+	A->get().set_sequence_range(p_seq, range[0], range[1]);
+}
 PoolIntArray SpriteFrames::get_sequence_range(const StringName &p_anim, const StringName &p_seq) const {
 	const Map<StringName, Anim>::Element *A = animations.find(p_anim);
 	PoolIntArray intrange;
@@ -311,6 +323,16 @@ PoolIntArray SpriteFrames::get_sequence_range(const StringName &p_anim, const St
 	if (range == Vector2i(-1, -1)) {
 		return intrange;
 	}
+	intrange.push_back(range.x);
+	intrange.push_back(range.y);
+	return intrange;
+}
+PoolIntArray SpriteFrames::_get_sequence_range_def(const StringName &p_anim, const StringName &p_seq) const {
+	const Map<StringName, Anim>::Element *A = animations.find(p_anim);
+	PoolIntArray intrange;
+	ERR_FAIL_COND_V_MSG(!A, intrange, "Animation '" + String(p_anim) + "' doesn't exist.");
+	ERR_FAIL_COND_V_MSG(sequences.find(p_seq) == -1, intrange, "Sequence '" + String(p_seq) + "' doesn't exist.");
+	Vector2i range = A->get().get_sequence_range(p_seq);
 	intrange.push_back(range.x);
 	intrange.push_back(range.y);
 	return intrange;
@@ -478,6 +500,7 @@ void SpriteFrames::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_sequence_names"), &SpriteFrames::get_sequence_names);
 
 	ClassDB::bind_method(D_METHOD("set_sequence_range", "anim", "seq", "min", "max"), &SpriteFrames::set_sequence_range);
+	ClassDB::bind_method(D_METHOD("_set_sequence_range_arr", "anim", "seq", "range"), &SpriteFrames::_set_sequence_range_arr);
 	ClassDB::bind_method(D_METHOD("get_sequence_range", "anim", "seq"), &SpriteFrames::get_sequence_range);
 	ClassDB::bind_method(D_METHOD("get_sequence_framecount", "anim", "seq"), &SpriteFrames::get_sequence_framecount);
 	ClassDB::bind_method(D_METHOD("clear_sequence_range"), &SpriteFrames::clear_sequence_range);

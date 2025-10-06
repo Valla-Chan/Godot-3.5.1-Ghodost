@@ -1146,7 +1146,7 @@ void SpriteFramesEditor::_sequence_select() {
 		seq_clear_framerange->set_visible(true);
 		/*
 		if (frames->has_animation(edited_anim) && frames->has_sequence(edited_sequence)) {
-			PoolIntArray range = frames->get_sequence_range(edited_anim, edited_sequence);
+			PoolIntArray range = frames->_get_sequence_range_def(edited_anim, edited_sequence);
 			if (range.size() == 2) {
 				
 				double min = seq_range_min->get_line_edit()->get_text().to_double();
@@ -1264,7 +1264,7 @@ void SpriteFramesEditor::_sequence_remove_confirmed() {
 	// TODO: add undo/redo to restore frame range
 	
 	undo_redo->add_undo_method(frames, "add_sequence", edited_sequence);
-	undo_redo->add_undo_method(frames, "set_sequence_range", edited_anim, frames->get_sequence_range(edited_anim, edited_sequence));
+	undo_redo->add_undo_method(frames, "_set_sequence_range_arr", edited_anim, frames->_get_sequence_range_def(edited_anim, edited_sequence));
 	//undo_redo->add_undo_method(frames, "set_animation_loop", edited_anim, frames->get_animation_loop(edited_anim));
 	//int fc = frames->get_frame_count(edited_anim);
 	//for (int i = 0; i < fc; i++) {
@@ -1310,7 +1310,7 @@ void SpriteFramesEditor::_sequence_minmax_changed(int min, int max) {
 
 	undo_redo->create_action(TTR("Change Sequence Range"), UndoRedo::MERGE_ENDS);
 	undo_redo->add_do_method(frames, "set_sequence_range", edited_anim, edited_sequence, min, max);
-	undo_redo->add_undo_method(frames, "set_sequence_range", edited_anim, edited_sequence, frames->get_sequence_range(edited_anim, edited_sequence));
+	undo_redo->add_undo_method(frames, "_set_sequence_range_arr", edited_anim, edited_sequence, frames->_get_sequence_range_def(edited_anim, edited_sequence));
 	undo_redo->add_do_method(this, "_update_library", true, false);
 	undo_redo->add_undo_method(this, "_update_library", true, false);
 
@@ -1325,7 +1325,7 @@ void SpriteFramesEditor::_sequence_set_range() {
 
 	undo_redo->create_action(TTR("Change Sequence Range"), UndoRedo::MERGE_ENDS);
 	undo_redo->add_do_method(frames, "set_sequence_range", edited_anim, edited_sequence, min, max);
-	undo_redo->add_undo_method(frames, "set_sequence_range", edited_anim, edited_sequence, frames->get_sequence_range(edited_anim, edited_sequence));
+	undo_redo->add_undo_method(frames, "_set_sequence_range_arr", edited_anim, edited_sequence, frames->_get_sequence_range_def(edited_anim, edited_sequence));
 	undo_redo->add_do_method(this, "_update_library", true, false);
 	undo_redo->add_undo_method(this, "_update_library", true, false);
 
@@ -1333,7 +1333,7 @@ void SpriteFramesEditor::_sequence_set_range() {
 }
 
 void SpriteFramesEditor::_sequence_extend_range() {
-	PoolIntArray range = frames->get_sequence_range(edited_anim, edited_sequence);
+	PoolIntArray range = frames->_get_sequence_range_def(edited_anim, edited_sequence);
 	Vector<int> selected = tree->get_selected_items();
 	selected.sort();
 	int min = MIN(selected[0], range[0]);
@@ -1341,7 +1341,7 @@ void SpriteFramesEditor::_sequence_extend_range() {
 
 	undo_redo->create_action(TTR("Change Sequence Range"), UndoRedo::MERGE_ENDS);
 	undo_redo->add_do_method(frames, "set_sequence_range", edited_anim, edited_sequence, min, max);
-	undo_redo->add_undo_method(frames, "set_sequence_range", edited_anim, edited_sequence, frames->get_sequence_range(edited_anim, edited_sequence));
+	undo_redo->add_undo_method(frames, "_set_sequence_range_arr", edited_anim, edited_sequence, frames->_get_sequence_range_def(edited_anim, edited_sequence));
 	undo_redo->add_do_method(this, "_update_library", true, false);
 	undo_redo->add_undo_method(this, "_update_library", true, false);
 
@@ -1351,7 +1351,7 @@ void SpriteFramesEditor::_sequence_extend_range() {
 void SpriteFramesEditor::_sequence_clear_range() {
 	undo_redo->create_action(TTR("Change Sequence Range"), UndoRedo::MERGE_ENDS);
 	undo_redo->add_do_method(frames, "clear_sequence", edited_anim, edited_sequence);
-	undo_redo->add_undo_method(frames, "set_sequence_range", edited_anim, edited_sequence, frames->get_sequence_range(edited_anim, edited_sequence));
+	undo_redo->add_undo_method(frames, "_set_sequence_range_arr", edited_anim, edited_sequence, frames->_get_sequence_range_def(edited_anim, edited_sequence));
 	undo_redo->add_do_method(this, "_update_library", true, false);
 	undo_redo->add_undo_method(this, "_update_library", true, false);
 
@@ -1409,7 +1409,7 @@ void SpriteFramesEditor::_tree_selection_changed(int i, bool selected) {
 
 		Vector<int> selection = tree->get_selected_items();
 		selection.sort();
-		PoolIntArray range = frames->get_sequence_range(edited_anim, edited_sequence);
+		PoolIntArray range = frames->_get_sequence_range_def(edited_anim, edited_sequence);
 		if (selection.size() == 0) {
 			seq_set_framerange->set_disabled(true);
 			seq_extend_framerange->set_disabled(true);
