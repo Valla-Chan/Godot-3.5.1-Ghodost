@@ -1317,7 +1317,8 @@ void Node::_add_child_nocheck(Node *p_child, const StringName &p_name) {
 }
 
 void Node::add_child(Node *p_child, bool p_legible_unique_name) {
-	ERR_FAIL_NULL(p_child);
+	//ERR_FAIL_NULL(p_child);
+	ERR_FAIL_COND_MSG(!p_child, vformat("Can't add null child to '%s'.", get_name())); // adding to itself!
 	ERR_FAIL_COND_MSG(p_child == this, vformat("Can't add child '%s' to itself.", p_child->get_name())); // adding to itself!
 	ERR_FAIL_COND_MSG(p_child->data.parent, vformat("Can't add child '%s' to '%s', already has a parent '%s'.", p_child->get_name(), get_name(), p_child->data.parent->get_name())); //Fail if node has a parent
 #ifdef DEBUG_ENABLED
@@ -1333,37 +1334,39 @@ void Node::add_child(Node *p_child, bool p_legible_unique_name) {
 
 // remove child node from its parent, then add child to self, keeping the existing position.
 void Node::reparent_child(Node *p_child, bool p_legible_unique_name) {
-	Node *childparent = p_child->get_parent();
-	if (childparent) {
-		// 2D node
-		if (Object::cast_to<Node2D>(p_child)) {
-			Node2D *child2d = Object::cast_to<Node2D>(p_child);
-			Vector2 pos = child2d->get_global_position();
-			p_child->get_parent()->remove_child(p_child);
-			add_child(p_child, p_legible_unique_name);
-			child2d->set_global_position(pos);
-			return;
-		// UI node
-		} else if (Object::cast_to<Control>(p_child)) {
-			Control *childui = Object::cast_to<Control>(p_child);
-			Vector2 pos = childui->get_global_position();
-			p_child->get_parent()->remove_child(p_child);
-			add_child(p_child, p_legible_unique_name);
-			childui->set_global_position(pos);
-			return;
-		// 3D node
-		} else if (Object::cast_to<Spatial>(p_child)) {
-			Spatial *child3d = Object::cast_to<Spatial>(p_child);
-			Vector3 pos = child3d->get_global_translation();
-			p_child->get_parent()->remove_child(p_child);
-			add_child(p_child, p_legible_unique_name);
-			child3d->set_global_translation(pos);
-			return;
-		// neither
-		} else {
-			p_child->get_parent()->remove_child(p_child);
-			add_child(p_child, p_legible_unique_name);
-			return;
+	if (p_child->is_inside_tree()) {
+		Node *childparent = p_child->get_parent();
+		if (childparent) {
+			// 2D node
+			if (Object::cast_to<Node2D>(p_child)) {
+				Node2D *child2d = Object::cast_to<Node2D>(p_child);
+				Vector2 pos = child2d->get_global_position();
+				p_child->get_parent()->remove_child(p_child);
+				add_child(p_child, p_legible_unique_name);
+				child2d->set_global_position(pos);
+				return;
+				// UI node
+			} else if (Object::cast_to<Control>(p_child)) {
+				Control *childui = Object::cast_to<Control>(p_child);
+				Vector2 pos = childui->get_global_position();
+				p_child->get_parent()->remove_child(p_child);
+				add_child(p_child, p_legible_unique_name);
+				childui->set_global_position(pos);
+				return;
+				// 3D node
+			} else if (Object::cast_to<Spatial>(p_child)) {
+				Spatial *child3d = Object::cast_to<Spatial>(p_child);
+				Vector3 pos = child3d->get_global_translation();
+				p_child->get_parent()->remove_child(p_child);
+				add_child(p_child, p_legible_unique_name);
+				child3d->set_global_translation(pos);
+				return;
+				// neither
+			} else {
+				p_child->get_parent()->remove_child(p_child);
+				add_child(p_child, p_legible_unique_name);
+				return;
+			}
 		}
 	}
 	// child has no parent, simply add child.
