@@ -1345,14 +1345,13 @@ void Node::reparent_child(Node *p_child, bool p_legible_unique_name) {
 				Transform2D transthis = thiscanvas->get_global_transform();
 
 				p_child->get_parent()->remove_child(p_child);
-				transchild = (transthis.affine_inverse() * transchild);
+				Transform2D trans = (transthis.affine_inverse() * transchild);
 				if (Object::cast_to<Node2D>(p_child)) {
 					Node2D *child2d = Object::cast_to<Node2D>(p_child);
-					child2d->set_transform(transchild);
+					child2d->set_position(trans.get_origin());
 				} else if (Object::cast_to<Control>(p_child)) {
 					Control *childui = Object::cast_to<Control>(p_child);
-					childui->set_position(transchild.get_origin());
-					childui->set_rotation(transchild.get_rotation());
+					childui->set_position(trans.get_origin());
 				}
 				// neither
 			} else if (Object::cast_to<Spatial>(p_child) && Object::cast_to<Spatial>(this)) {
