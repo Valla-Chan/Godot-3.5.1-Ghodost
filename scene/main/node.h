@@ -322,7 +322,7 @@ public:
 	bool is_vis_hidden() const;
 
 	void add_child(Node *p_child, bool p_legible_unique_name = false);
-	void reparent_child(Node *p_child, bool p_legible_unique_name = false);
+	virtual void reparent_child(Node *p_child, bool p_legible_unique_name = false);
 	void add_child_below_node(Node *p_node, Node *p_child, bool p_legible_unique_name = false);
 	void remove_child(Node *p_child);
 
@@ -474,6 +474,8 @@ public:
 	_FORCE_INLINE_ bool is_physics_interpolated() const { return data.physics_interpolated; }
 	_FORCE_INLINE_ bool is_physics_interpolated_and_enabled() const { return is_inside_tree() && get_tree()->is_physics_interpolation_enabled() && is_physics_interpolated(); }
 	void reset_physics_interpolation();
+
+	bool is_ready() const;
 
 	void request_ready();
 

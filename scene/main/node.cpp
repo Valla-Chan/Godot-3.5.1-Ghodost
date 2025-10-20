@@ -1337,35 +1337,36 @@ void Node::reparent_child(Node *p_child, bool p_legible_unique_name) {
 	if (p_child->is_inside_tree()) {
 		Node *childparent = p_child->get_parent();
 		if (childparent) {
-			// 2D node
-			if (Object::cast_to<Node2D>(p_child)) {
-				Node2D *child2d = Object::cast_to<Node2D>(p_child);
-				Vector2 pos = child2d->get_global_position();
+			// Canvas Node (2D or Control)
+			if (Object::cast_to<CanvasItem>(p_child) && Object::cast_to<CanvasItem>(this)) {
+				CanvasItem *childcanvas = Object::cast_to<CanvasItem>(p_child);
+				CanvasItem *thiscanvas = Object::cast_to<CanvasItem>(this);
+				Transform2D transchild = childcanvas->get_global_transform();
+				Transform2D transthis = thiscanvas->get_global_transform();
+
 				p_child->get_parent()->remove_child(p_child);
-				add_child(p_child, p_legible_unique_name);
-				child2d->set_global_position(pos);
-				return;
-				// UI node
-			} else if (Object::cast_to<Control>(p_child)) {
-				Control *childui = Object::cast_to<Control>(p_child);
-				Vector2 pos = childui->get_global_position();
-				p_child->get_parent()->remove_child(p_child);
-				add_child(p_child, p_legible_unique_name);
-				childui->set_global_position(pos);
-				return;
-				// 3D node
-			} else if (Object::cast_to<Spatial>(p_child)) {
-				Spatial *child3d = Object::cast_to<Spatial>(p_child);
-				Vector3 pos = child3d->get_global_translation();
-				p_child->get_parent()->remove_child(p_child);
-				add_child(p_child, p_legible_unique_name);
-				child3d->set_global_translation(pos);
-				return;
+				transchild = (transthis.affine_inverse() * transchild);
+				if (Object::cast_to<Node2D>(p_child)) {
+					Node2D *child2d = Object::cast_to<Node2D>(p_child);
+					child2d->set_transform(transchild);
+				} else if (Object::cast_to<Control>(p_child)) {
+					Control *childui = Object::cast_to<Control>(p_child);
+					childui->set_position(transchild.get_origin());
+					childui->set_rotation(transchild.get_rotation());
+				}
 				// neither
-			} else {
+			} else if (Object::cast_to<Spatial>(p_child) && Object::cast_to<Spatial>(this)) {
+				Spatial *child3d = Object::cast_to<Spatial>(p_child);
+				Spatial *this3d = Object::cast_to<Spatial>(this);
+				Transform transchild = child3d->get_global_transform();
+				Transform transthis = this3d->get_global_transform();
+
 				p_child->get_parent()->remove_child(p_child);
-				add_child(p_child, p_legible_unique_name);
-				return;
+				transchild = (transthis.affine_inverse() * transchild);
+				child3d->set_transform(transchild);
+			}
+			else {
+				p_child->get_parent()->remove_child(p_child);
 			}
 		}
 	}
@@ -3149,6 +3150,10 @@ void Node::request_ready() {
 	data.ready_first = true;
 }
 
+bool Node::is_ready() const {
+	return !data.ready_first;
+}
+
 void Node::_bind_methods() {
 	GLOBAL_DEF("node/name_num_separator", 0);
 	ProjectSettings::get_singleton()->set_custom_property_info("node/name_num_separator", PropertyInfo(Variant::INT, "node/name_num_separator", PROPERTY_HINT_ENUM, "None,Space,Underscore,Dash"));
@@ -3254,6 +3259,7 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("queue_free"), &Node::queue_delete);
 
 	ClassDB::bind_method(D_METHOD("request_ready"), &Node::request_ready);
+	ClassDB::bind_method(D_METHOD("is_ready"), &Node::is_ready);
 
 	ClassDB::bind_method(D_METHOD("set_network_master", "id", "recursive"), &Node::set_network_master, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("get_network_master"), &Node::get_network_master);
