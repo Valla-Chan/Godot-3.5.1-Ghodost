@@ -1334,7 +1334,7 @@ void Node::add_child(Node *p_child, bool p_legible_unique_name) {
 
 // remove child node from its parent, then add child to self, keeping the existing position.
 void Node::reparent_child(Node *p_child, bool p_legible_unique_name) {
-	if (p_child->is_inside_tree()) {
+	if (p_child->is_inside_tree() && is_inside_tree()) {
 		Node *childparent = p_child->get_parent();
 		if (childparent) {
 			// Canvas Node (2D or Control)
@@ -1344,7 +1344,7 @@ void Node::reparent_child(Node *p_child, bool p_legible_unique_name) {
 				Transform2D transchild = childcanvas->get_global_transform();
 				Transform2D transthis = thiscanvas->get_global_transform();
 
-				p_child->get_parent()->remove_child(p_child);
+				p_child->data.parent->remove_child(p_child);
 				Transform2D trans = (transthis.affine_inverse() * transchild);
 				if (Object::cast_to<Node2D>(p_child)) {
 					Node2D *child2d = Object::cast_to<Node2D>(p_child);
@@ -1360,14 +1360,16 @@ void Node::reparent_child(Node *p_child, bool p_legible_unique_name) {
 				Transform transchild = child3d->get_global_transform();
 				Transform transthis = this3d->get_global_transform();
 
-				p_child->get_parent()->remove_child(p_child);
+				p_child->data.parent->remove_child(p_child);
 				transchild = (transthis.affine_inverse() * transchild);
 				child3d->set_transform(transchild);
 			}
 			else {
-				p_child->get_parent()->remove_child(p_child);
+				p_child->data.parent->remove_child(p_child);
 			}
 		}
+	} else if (p_child->data.parent) {
+		p_child->data.parent->remove_child(p_child);
 	}
 	// child has no parent, simply add child.
 	add_child(p_child, p_legible_unique_name);

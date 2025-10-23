@@ -5692,6 +5692,7 @@ void CanvasItemEditor::_bind_methods() {
 	ClassDB::bind_method("_button_toggle_anchor_mode", &CanvasItemEditor::_button_toggle_anchor_mode);
 	ClassDB::bind_method("_update_scroll", &CanvasItemEditor::_update_scroll);
 	ClassDB::bind_method("_update_scrollbars", &CanvasItemEditor::_update_scrollbars);
+	ClassDB::bind_method("_update_snap_label", &CanvasItemEditor::_update_snap_label);
 	ClassDB::bind_method("_popup_callback", &CanvasItemEditor::_popup_callback);
 	ClassDB::bind_method("_prepare_grid_menu", &CanvasItemEditor::_prepare_grid_menu);
 	ClassDB::bind_method("_on_grid_menu_id_pressed", &CanvasItemEditor::_on_grid_menu_id_pressed);
@@ -6100,6 +6101,7 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 	label_gridsize->set_tooltip("Grid Size");
 	main_menu_hbox->add_child(label_gridsize);
 	main_menu_hbox->add_child(memnew(VSeparator));
+	editor->call_deferred("connect", "scene_changed", this, "_update_snap_label");
 
 
 	bottom_split = memnew(VSplitContainer);

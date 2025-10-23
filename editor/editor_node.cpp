@@ -5250,6 +5250,8 @@ void EditorNode::_scene_tab_changed(int p_tab) {
 	editor_data.get_undo_redo().add_undo_method(this, "set_current_scene", editor_data.get_edited_scene());
 	editor_data.get_undo_redo().add_undo_method(this, "set_current_version", saved_version);
 	editor_data.get_undo_redo().commit_action();
+
+	emit_signal("scene_changed");
 }
 
 ToolButton *EditorNode::add_bottom_panel_item(String p_text, Control *p_item, const Ref<Image> &p_icon, bool p_reparent) {
@@ -5977,6 +5979,7 @@ void EditorNode::_bind_methods() {
 	ClassDB::bind_method("_request_screenshot", &EditorNode::_request_screenshot);
 	ClassDB::bind_method("_save_screenshot", &EditorNode::_save_screenshot);
 
+	ADD_SIGNAL(MethodInfo("scene_changed"));
 	ADD_SIGNAL(MethodInfo("play_pressed"));
 	ADD_SIGNAL(MethodInfo("pause_pressed"));
 	ADD_SIGNAL(MethodInfo("stop_pressed"));
