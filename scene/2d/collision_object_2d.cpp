@@ -54,6 +54,7 @@ void CollisionObject2D::_notification(int p_what) {
 			}
 
 			_update_pickable();
+			set_collision_disabled(collision_disabled);
 
 			//get space
 		} break;
@@ -102,12 +103,26 @@ void CollisionObject2D::_notification(int p_what) {
 	}
 }
 
+void CollisionObject2D::set_collision_disabled(bool p_state) {
+	if (collision_disabled == p_state) {
+		return;
+	}
+
+	collision_disabled = p_state;
+	set_collision_layer(collision_layer);
+	set_collision_mask(collision_mask);
+}
+
+bool CollisionObject2D::is_collision_disabled() const {
+	return collision_disabled;
+}
+
 void CollisionObject2D::set_collision_layer(uint32_t p_layer) {
 	collision_layer = p_layer;
 	if (area) {
-		Physics2DServer::get_singleton()->area_set_collision_layer(get_rid(), p_layer);
+		Physics2DServer::get_singleton()->area_set_collision_layer(get_rid(), p_layer * int(!collision_disabled));
 	} else {
-		Physics2DServer::get_singleton()->body_set_collision_layer(get_rid(), p_layer);
+		Physics2DServer::get_singleton()->body_set_collision_layer(get_rid(), p_layer * int(!collision_disabled));
 	}
 }
 
@@ -118,9 +133,9 @@ uint32_t CollisionObject2D::get_collision_layer() const {
 void CollisionObject2D::set_collision_mask(uint32_t p_mask) {
 	collision_mask = p_mask;
 	if (area) {
-		Physics2DServer::get_singleton()->area_set_collision_mask(get_rid(), p_mask);
+		Physics2DServer::get_singleton()->area_set_collision_mask(get_rid(), p_mask * int(!collision_disabled));
 	} else {
-		Physics2DServer::get_singleton()->body_set_collision_mask(get_rid(), p_mask);
+		Physics2DServer::get_singleton()->body_set_collision_mask(get_rid(), p_mask * int(!collision_disabled));
 	}
 }
 
@@ -434,6 +449,8 @@ String CollisionObject2D::get_configuration_warning() const {
 
 void CollisionObject2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_rid"), &CollisionObject2D::get_rid);
+	ClassDB::bind_method(D_METHOD("set_collision_disabled", "disabled"), &CollisionObject2D::set_collision_disabled);
+	ClassDB::bind_method(D_METHOD("is_collision_disabled"), &CollisionObject2D::is_collision_disabled);
 	ClassDB::bind_method(D_METHOD("set_collision_layer", "layer"), &CollisionObject2D::set_collision_layer);
 	ClassDB::bind_method(D_METHOD("get_collision_layer"), &CollisionObject2D::get_collision_layer);
 	ClassDB::bind_method(D_METHOD("set_collision_mask", "mask"), &CollisionObject2D::set_collision_mask);
@@ -471,6 +488,7 @@ void CollisionObject2D::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("mouse_exited"));
 
 	ADD_GROUP("Collision", "collision_");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "collision_disabled"), "set_collision_disabled", "is_collision_disabled");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "collision_layer", PROPERTY_HINT_LAYERS_2D_PHYSICS), "set_collision_layer", "get_collision_layer");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "collision_mask", PROPERTY_HINT_LAYERS_2D_PHYSICS), "set_collision_mask", "get_collision_mask");
 
@@ -482,6 +500,7 @@ CollisionObject2D::CollisionObject2D(RID p_rid, bool p_area) {
 	rid = p_rid;
 	area = p_area;
 	pickable = true;
+	collision_disabled = false;
 	set_notify_transform(true);
 	total_subshapes = 0;
 	only_update_transform_changes = false;
@@ -494,8 +513,6 @@ CollisionObject2D::CollisionObject2D(RID p_rid, bool p_area) {
 }
 
 CollisionObject2D::CollisionObject2D() {
-	//owner=
-
 	set_notify_transform(true);
 }
 

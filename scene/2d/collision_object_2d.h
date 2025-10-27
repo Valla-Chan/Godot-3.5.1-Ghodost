@@ -40,6 +40,7 @@ class CollisionObject2D : public Node2D {
 	uint32_t collision_layer = 1;
 	uint32_t collision_mask = 1;
 
+	bool collision_disabled;
 	bool area;
 	RID rid;
 	bool pickable;
@@ -85,6 +86,10 @@ protected:
 	void set_only_update_transform_changes(bool p_enable);
 
 public:
+
+	void set_collision_disabled(bool p_enabled);
+	bool is_collision_disabled() const;
+
 	void set_collision_layer(uint32_t p_layer);
 	uint32_t get_collision_layer() const;
 
@@ -127,6 +132,8 @@ public:
 
 	void set_pickable(bool p_enabled);
 	bool is_pickable() const;
+
+	
 
 	String get_configuration_warning() const;
 
