@@ -215,6 +215,9 @@ void StaticBody2D::_bind_methods() {
 StaticBody2D::StaticBody2D() :
 		PhysicsBody2D(Physics2DServer::BODY_MODE_STATIC) {
 	constant_angular_velocity = 0;
+	// Static Collisions default to layer 1, mask 0
+	set_collision_layer(1);
+	set_collision_mask(0);
 }
 
 StaticBody2D::~StaticBody2D() {

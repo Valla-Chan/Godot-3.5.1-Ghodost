@@ -585,6 +585,9 @@ Area2D::Area2D() :
 	audio_bus_override = false;
 	set_monitoring(true);
 	set_monitorable(true);
+	// Areas default to layer 0, mask 1
+	set_collision_layer(0);
+	set_collision_mask(1);
 }
 
 Area2D::~Area2D() {
