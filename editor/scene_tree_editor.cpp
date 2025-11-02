@@ -324,12 +324,19 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		}
 	}
 
+	String type = EditorNode::get_singleton()->get_object_custom_type_name(p_node);
+	if (type == StringName()) {
+		type = p_node->get_class();
+	} else {
+		type = type + " (" + p_node->get_class() + ")";
+	}
+
 	// Display the node name in all tooltips so that long node names can be previewed
 	// without having to rename them.
 	if (p_node == get_scene_node() && p_node->get_scene_inherited_state().is_valid()) {
 		item->add_button(0, get_icon("InstanceOptions", "EditorIcons"), BUTTON_SUBSCENE, false, TTR("Open in Editor"));
 
-		String tooltip = String(p_node->get_name()) + "\n" + TTR("Inherits:") + " " + p_node->get_scene_inherited_state()->get_path() + "\n" + TTR("Type:") + " " + p_node->get_class();
+		String tooltip = String(p_node->get_name()) + "\n" + TTR("Inherits:") + " " + p_node->get_scene_inherited_state()->get_path() + "\n" + TTR("Type:") + " " + type;
 		if (p_node->get_editor_description() != String()) {
 			tooltip += "\n\n" + p_node->get_editor_description();
 		}
@@ -338,19 +345,13 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 	} else if (p_node != get_scene_node() && p_node->get_filename() != "" && can_open_instance) {
 		item->add_button(0, get_icon("InstanceOptions", "EditorIcons"), BUTTON_SUBSCENE, false, TTR("Open in Editor"));
 
-		String tooltip = String(p_node->get_name()) + "\n" + TTR("Instance:") + " " + p_node->get_filename() + "\n" + TTR("Type:") + " " + p_node->get_class();
+		String tooltip = String(p_node->get_name()) + "\n" + TTR("Instance:") + " " + p_node->get_filename() + "\n" + TTR("Type:") + " " + type;
 		if (p_node->get_editor_description() != String()) {
 			tooltip += "\n\n" + p_node->get_editor_description();
 		}
 
 		item->set_tooltip(0, tooltip);
 	} else {
-		String type = EditorNode::get_singleton()->get_object_custom_type_name(p_node);
-		if (type == StringName()) {
-			type = p_node->get_class();
-		} else {
-			type = type + " (" + p_node->get_class() + ")";
-		}
 
 		String tooltip = String(p_node->get_name()) + "\n" + TTR("Type:") + " " + type;
 		if (p_node->get_editor_description() != String()) {
