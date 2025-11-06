@@ -3103,7 +3103,7 @@ void ScriptEditor::set_scene_root_script(Ref<Script> p_script) {
 
 	if (open_dominant && !use_external_editor && p_script.is_valid()) {
 		// do not set script in editor if it is something generic.
-		if (!String(p_script->get_path().get_file()).begins_with("scn_")) {
+		if (!String(p_script->get_path().get_file()).begins_with("Scene")) {
 			edit(p_script);
 		}
 	}
