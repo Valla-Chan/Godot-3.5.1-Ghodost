@@ -58,6 +58,7 @@ private:
 	bool pass;
 	bool text_changed_dirty;
 
+	bool flat;
 	String undo_text;
 	String text;
 	String placeholder;
@@ -224,6 +225,9 @@ public:
 	String get_secret_character() const;
 
 	virtual Size2 get_minimum_size() const;
+
+	void set_flat(bool p_flat);
+	bool is_flat() const;
 
 	void set_expand_to_text_length(bool p_enabled);
 	bool get_expand_to_text_length() const;

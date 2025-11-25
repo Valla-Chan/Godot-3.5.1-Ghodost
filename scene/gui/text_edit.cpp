@@ -4448,8 +4448,8 @@ int TextEdit::get_char_count() {
 Size2 TextEdit::get_minimum_size() const {
 	if (!expand_to_text_height) {
 		return cache.style_normal->get_minimum_size();
-	} else {
-
+	}
+	else {
 		Size2 min_size;
 
 		min_size.width = cache.style_normal->get_minimum_size().x;
@@ -6010,12 +6010,12 @@ void TextEdit::_cursor_changed_emit() {
 }
 
 void TextEdit::_text_changed_emit() {
-	emit_signal("text_changed");
-	text_changed_dirty = false;
 	if (expand_to_text_height) {
 		minimum_size_changed();
 		update();
 	}
+	emit_signal("text_changed");
+	text_changed_dirty = false;
 }
 
 void TextEdit::set_line_as_marked(int p_line, bool p_marked) {
@@ -7447,6 +7447,7 @@ int TextEdit::get_line_height() const {
 void TextEdit::set_expand_to_text_height(bool p_enabled) {
 	expand_to_text_height = p_enabled;
 	minimum_size_changed();
+	update();
 }
 
 bool TextEdit::get_expand_to_text_height() const {

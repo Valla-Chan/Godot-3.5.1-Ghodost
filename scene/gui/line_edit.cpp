@@ -812,7 +812,9 @@ void LineEdit::_notification(int p_what) {
 
 			Ref<Font> font = get_font_scaled("font");
 
-			style->draw(ci, Rect2(Point2(), size));
+			if (!flat) {
+				style->draw(ci, Rect2(Point2(), size));
+			}
 
 			if (has_focus()) {
 				get_stylebox("focus")->draw(ci, Rect2(Point2(), size));
@@ -1785,6 +1787,16 @@ void LineEdit::_editor_settings_changed() {
 #endif
 }
 
+void LineEdit::set_flat(bool p_flat) {
+	flat = p_flat;
+	update();
+	_change_notify("flat");
+}
+
+bool LineEdit::is_flat() const {
+	return flat;
+}
+
 void LineEdit::set_expand_to_text_length(bool p_enabled) {
 	expand_to_text_length = p_enabled;
 	minimum_size_changed();
@@ -1985,6 +1997,8 @@ void LineEdit::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_cursor_position", "position"), &LineEdit::set_cursor_position);
 	ClassDB::bind_method(D_METHOD("get_cursor_position"), &LineEdit::get_cursor_position);
 	ClassDB::bind_method(D_METHOD("get_scroll_offset"), &LineEdit::get_scroll_offset);
+	ClassDB::bind_method(D_METHOD("set_flat", "enabled"), &LineEdit::set_flat);
+	ClassDB::bind_method(D_METHOD("is_flat"), &LineEdit::is_flat);
 	ClassDB::bind_method(D_METHOD("set_expand_to_text_length", "enabled"), &LineEdit::set_expand_to_text_length);
 	ClassDB::bind_method(D_METHOD("get_expand_to_text_length"), &LineEdit::get_expand_to_text_length);
 	ClassDB::bind_method(D_METHOD("cursor_set_blink_enabled", "enabled"), &LineEdit::cursor_set_blink_enabled);
@@ -2045,6 +2059,7 @@ void LineEdit::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "editable"), "set_editable", "is_editable");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "secret"), "set_secret", "is_secret");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "secret_character"), "set_secret_character", "get_secret_character");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flat"), "set_flat", "is_flat");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "expand_to_text_length"), "set_expand_to_text_length", "get_expand_to_text_length");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "context_menu_enabled"), "set_context_menu_enabled", "is_context_menu_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "virtual_keyboard_enabled"), "set_virtual_keyboard_enabled", "is_virtual_keyboard_enabled");
@@ -2073,6 +2088,7 @@ LineEdit::LineEdit() {
 	max_length = 0;
 	pass = false;
 	secret_character = "*";
+	flat = false;
 	text_changed_dirty = false;
 	placeholder_alpha = 0.6;
 	clear_button_enabled = false;
