@@ -35,6 +35,7 @@
 #include "core/cowdata.h"
 #include "core/typedefs.h"
 #include "core/vector.h"
+#include "core/string/char_utils.h"
 
 template <class T>
 class CharProxy {
