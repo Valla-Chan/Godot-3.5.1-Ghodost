@@ -1352,7 +1352,7 @@ void ProjectSettingsEditor::_translation_res_option_changed() {
 	String path = ed->get_metadata(1);
 	int which = ed->get_range(1);
 
-	Vector<String> langs = TranslationServer::get_all_locales();
+	PoolVector<String> langs = TranslationServer::get_singleton()->get_all_locales();
 
 	ERR_FAIL_INDEX(which, langs.size());
 
@@ -1545,8 +1545,8 @@ void ProjectSettingsEditor::_update_translations() {
 		}
 	}
 
-	Vector<String> langs = TranslationServer::get_all_locales();
-	Vector<String> names = TranslationServer::get_all_locale_names();
+	PoolVector<String> langs = TranslationServer::get_singleton()->get_all_locales();
+	PoolVector<String> names = TranslationServer::get_singleton()->get_all_locale_names();
 
 	//update filter tab
 	Array l_filter_all;

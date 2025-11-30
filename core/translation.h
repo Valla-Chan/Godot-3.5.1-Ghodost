@@ -107,15 +107,16 @@ public:
 
 	String get_locale_name(const String &p_locale) const;
 
-	Array get_loaded_locales() const;
+	PoolStringArray get_loaded_locales() const;
 
 	void add_translation(const Ref<Translation> &p_translation);
 	void remove_translation(const Ref<Translation> &p_translation);
 
 	StringName translate(const StringName &p_message) const;
 
-	static Vector<String> get_all_locales();
-	static Vector<String> get_all_locale_names();
+	PoolStringArray get_all_locales();
+	PoolStringArray get_all_standard_locales();
+	PoolStringArray get_all_locale_names();
 	static bool is_locale_valid(const String &p_locale);
 	static String standardize_locale(const String &p_locale);
 	static String get_language_code(const String &p_locale);

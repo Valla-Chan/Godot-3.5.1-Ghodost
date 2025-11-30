@@ -266,11 +266,11 @@ String TranslationServer::get_locale_name(const String &p_locale) const {
 	return locale_name_map[p_locale];
 }
 
-Array TranslationServer::get_loaded_locales() const {
-	Array locales;
+PoolStringArray TranslationServer::get_loaded_locales() const {
+	PoolStringArray locales;
 	for (const Set<Ref<Translation>>::Element *E = translations.front(); E; E = E->next()) {
 		const Ref<Translation> &t = E->get();
-		ERR_FAIL_COND_V(t.is_null(), Array());
+		ERR_FAIL_COND_V(t.is_null(), PoolStringArray());
 		String l = t->get_locale();
 
 		if (!locales.has(l)) {
@@ -282,8 +282,8 @@ Array TranslationServer::get_loaded_locales() const {
 	return locales;
 }
 
-Vector<String> TranslationServer::get_all_locales() {
-	Vector<String> locales;
+PoolStringArray TranslationServer::get_all_locales() {
+	PoolStringArray locales;
 
 	const char **ptr = locale_list;
 
@@ -295,8 +295,24 @@ Vector<String> TranslationServer::get_all_locales() {
 	return locales;
 }
 
-Vector<String> TranslationServer::get_all_locale_names() {
-	Vector<String> locales;
+PoolStringArray TranslationServer::get_all_standard_locales() {
+	PoolStringArray locales;
+
+	const char **ptr = locale_list;
+
+	while (*ptr) {
+		String locale_str = *ptr;
+		if (locale_str.find("_") == -1) {
+			locales.push_back(locale_str);
+		}
+		ptr++;
+	}
+
+	return locales;
+}
+
+PoolStringArray TranslationServer::get_all_locale_names() {
+	PoolStringArray locales;
 
 	const char **ptr = locale_names;
 
@@ -502,6 +518,9 @@ void TranslationServer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("clear"), &TranslationServer::clear);
 
 	ClassDB::bind_method(D_METHOD("get_loaded_locales"), &TranslationServer::get_loaded_locales);
+	ClassDB::bind_method(D_METHOD("get_all_locales"), &TranslationServer::get_all_locales);
+	ClassDB::bind_method(D_METHOD("get_all_standard_locales"), &TranslationServer::get_all_standard_locales);
+	ClassDB::bind_method(D_METHOD("get_all_locale_names"), &TranslationServer::get_all_locale_names);
 }
 
 void TranslationServer::load_translations() {
