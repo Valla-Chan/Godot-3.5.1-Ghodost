@@ -245,6 +245,7 @@ void OptionButton::_select(int p_which, bool p_emit) {
 
 	if (is_inside_tree() && p_emit) {
 		emit_signal("item_selected", current);
+		emit_signal("selection_changed");
 	}
 }
 
@@ -360,6 +361,7 @@ void OptionButton::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "selected"), "_select_int", "get_selected");
 	ADD_SIGNAL(MethodInfo("item_selected", PropertyInfo(Variant::INT, "index")));
 	ADD_SIGNAL(MethodInfo("item_focused", PropertyInfo(Variant::INT, "index")));
+	ADD_SIGNAL(MethodInfo("selection_changed"));
 }
 
 OptionButton::OptionButton() {
