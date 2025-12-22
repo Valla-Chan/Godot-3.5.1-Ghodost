@@ -1334,6 +1334,10 @@ void SpriteFramesEditor::_sequence_set_range() {
 
 void SpriteFramesEditor::_sequence_extend_range() {
 	PoolIntArray range = frames->_get_sequence_range_def(edited_anim, edited_sequence);
+	if (!range.size()) {
+		range.push_back(0);
+		range.push_back(0);
+	}
 	Vector<int> selected = tree->get_selected_items();
 	selected.sort();
 	int min = MIN(selected[0], range[0]);
@@ -1417,11 +1421,14 @@ void SpriteFramesEditor::_tree_selection_changed(int i, bool selected) {
 			seq_set_framerange->set_disabled(false);
 			int inside = 0;
 			int outside = 0;
-			for (size_t i = 0; i < selection.size(); i++) {
-				if (selection[i] >= range[0] && selection[i] <= range[1]) {
-					inside++;
-				} else {
-					outside++;
+			// No sequence range
+			if (range.size()) {
+				for (size_t i = 0; i < selection.size(); i++) {
+					if (selection[i] >= range[0] && selection[i] <= range[1]) {
+						inside++;
+					} else {
+						outside++;
+					}
 				}
 			}
 			if (inside == selection.size()) {
