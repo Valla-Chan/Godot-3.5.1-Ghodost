@@ -373,7 +373,7 @@ int SpriteFrames::get_sequence_global_frame(const StringName &p_anim, const Stri
 	Vector2i range = A->get().get_sequence_range(p_seq);
 	ERR_FAIL_COND_V_MSG((localframe > range[1] - range[0]), -1, "Frame is outside the local frame range of animation '" + p_anim + "' sequence '" + String(p_seq) + "' (" + itos(localframe) + " > " + itos(range[1] - range[0]) + ")");
 
-	return Math::wrapi(localframe + range[0], range[0], range[1]);
+	return Math::wrapi(localframe + range[0], range[0], range[1]+1);
 }
 
 Vector<String> SpriteFrames::get_used_sequences(const StringName &p_anim) const {
