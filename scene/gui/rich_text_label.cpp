@@ -46,7 +46,7 @@
 #include "modules/regex/regex.h"
 #endif
 
-RichTextLabel::Item *RichTextLabel::_get_next_item(Item *p_item, bool p_free) {
+RichTextLabel::Item *RichTextLabel::_get_next_item(Item *p_item, bool p_free) const {
 	if (p_free) {
 		if (p_item->subitems.size()) {
 			return p_item->subitems.front()->get();
@@ -91,7 +91,7 @@ RichTextLabel::Item *RichTextLabel::_get_next_item(Item *p_item, bool p_free) {
 	return nullptr;
 }
 
-RichTextLabel::Item *RichTextLabel::_get_prev_item(Item *p_item, bool p_free) {
+RichTextLabel::Item *RichTextLabel::_get_prev_item(Item *p_item, bool p_free) const {
 	if (p_free) {
 		if (p_item->subitems.size()) {
 			return p_item->subitems.back()->get();
@@ -514,7 +514,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 									fx_color.a = faded_visibility;
 								}
 
-								bool visible = visible_characters < 0 || ((p_char_count < visible_characters && YRANGE_VISIBLE(y + lh - line_descent - line_ascent, line_ascent + line_descent)) && faded_visibility > 0.0f);
+								bool visible = visible_chars < 0 || ((p_char_count < visible_chars && YRANGE_VISIBLE(y + lh - line_descent - line_ascent, line_ascent + line_descent)) && faded_visibility > 0.0f);
 
 								const bool previously_visible = visible;
 
@@ -698,7 +698,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 				ENSURE_WIDTH(img->size.width);
 
-				bool visible = visible_characters < 0 || (p_char_count < visible_characters && YRANGE_VISIBLE(y + lh - font->get_descent() - img->size.height, img->size.height));
+				bool visible = visible_chars < 0 || (p_char_count < visible_chars && YRANGE_VISIBLE(y + lh - font->get_descent() - img->size.height, img->size.height));
 				if (visible) {
 					line_is_blank = false;
 				}
@@ -2819,7 +2819,7 @@ bool RichTextLabel::is_using_bbcode() const {
 	return use_bbcode;
 }
 
-String RichTextLabel::get_text() {
+String RichTextLabel::get_text() const {
 	String text = "";
 	Item *it = main;
 	while (it) {
@@ -2839,23 +2839,6 @@ String RichTextLabel::get_text() {
 void RichTextLabel::set_text(const String &p_string) {
 	clear();
 	add_text(p_string);
-}
-
-void RichTextLabel::set_percent_visible(float p_percent) {
-	if (p_percent < 0 || p_percent >= 1) {
-		visible_characters = -1;
-		percent_visible = 1;
-
-	} else {
-		visible_characters = get_total_character_count() * p_percent;
-		percent_visible = p_percent;
-	}
-	_change_notify("visible_characters");
-	update();
-}
-
-float RichTextLabel::get_percent_visible() const {
-	return percent_visible;
 }
 
 void RichTextLabel::set_effects(const Vector<Variant> &effects) {
@@ -2905,13 +2888,9 @@ void RichTextLabel::_update_font_scale() {
 }
 
 void RichTextLabel::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_align", "align"), &RichTextLabel::set_align);
-	ClassDB::bind_method(D_METHOD("get_align"), &RichTextLabel::get_align);
 	ClassDB::bind_method(D_METHOD("_gui_input"), &RichTextLabel::_gui_input);
 	ClassDB::bind_method(D_METHOD("_scroll_changed"), &RichTextLabel::_scroll_changed);
-	ClassDB::bind_method(D_METHOD("get_text"), &RichTextLabel::get_text);
 	ClassDB::bind_method(D_METHOD("add_text", "text"), &RichTextLabel::add_text);
-	ClassDB::bind_method(D_METHOD("set_text", "text"), &RichTextLabel::set_text);
 	ClassDB::bind_method(D_METHOD("add_image", "image", "width", "height", "align"), &RichTextLabel::add_image, DEFVAL(0), DEFVAL(0), DEFVAL(INLINE_ALIGN_BASELINE));
 	ClassDB::bind_method(D_METHOD("newline"), &RichTextLabel::add_newline);
 	ClassDB::bind_method(D_METHOD("remove_line", "line"), &RichTextLabel::remove_line);
@@ -2971,24 +2950,10 @@ void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_bbcode", "text"), &RichTextLabel::set_bbcode);
 	ClassDB::bind_method(D_METHOD("get_bbcode"), &RichTextLabel::get_bbcode);
 
-	ClassDB::bind_method(D_METHOD("set_visible_characters", "amount"), &RichTextLabel::set_visible_characters);
-	ClassDB::bind_method(D_METHOD("get_visible_characters"), &RichTextLabel::get_visible_characters);
-
-	ClassDB::bind_method(D_METHOD("set_percent_visible", "percent_visible"), &RichTextLabel::set_percent_visible);
-	ClassDB::bind_method(D_METHOD("get_percent_visible"), &RichTextLabel::get_percent_visible);
-
-	//valla edit
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "default_align", PROPERTY_HINT_ENUM, "Left,Center,Right,Fill"), "set_align", "get_align");
-	//
-
-	ClassDB::bind_method(D_METHOD("get_total_character_count"), &RichTextLabel::get_total_character_count);
-
 	ClassDB::bind_method(D_METHOD("set_use_bbcode", "enable"), &RichTextLabel::set_use_bbcode);
 	ClassDB::bind_method(D_METHOD("is_using_bbcode"), &RichTextLabel::is_using_bbcode);
 
-	ClassDB::bind_method(D_METHOD("get_line_count"), &RichTextLabel::get_line_count);
 	ClassDB::bind_method(D_METHOD("get_paragraph_count"), &RichTextLabel::get_paragraph_count);
-	ClassDB::bind_method(D_METHOD("get_visible_line_count"), &RichTextLabel::get_visible_line_count);
 
 	ClassDB::bind_method(D_METHOD("get_content_height"), &RichTextLabel::get_content_height);
 
@@ -2998,16 +2963,14 @@ void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_effects"), &RichTextLabel::get_effects);
 	ClassDB::bind_method(D_METHOD("install_effect", "effect"), &RichTextLabel::install_effect);
 
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "default_align", PROPERTY_HINT_ENUM, "Left,Center,Right,Fill"), "set_align", "get_align");
+
 	ADD_GROUP("BBCode", "bbcode_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bbcode_enabled"), "set_use_bbcode", "is_using_bbcode");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "bbcode_text", PROPERTY_HINT_MULTILINE_TEXT), "set_bbcode", "get_bbcode");
 
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "visible_characters", PROPERTY_HINT_RANGE, "-1,128000,1"), "set_visible_characters", "get_visible_characters");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "percent_visible", PROPERTY_HINT_RANGE, "0,1,0.001"), "set_percent_visible", "get_percent_visible");
-
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "meta_underlined"), "set_meta_underline", "is_meta_underlined");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "tab_size", PROPERTY_HINT_RANGE, "0,24,1"), "set_tab_size", "get_tab_size");
-	ADD_PROPERTY(PropertyInfo(Variant::STRING, "text", PROPERTY_HINT_MULTILINE_TEXT), "set_text", "get_text");
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "fit_content_height"), "set_fit_content_height", "is_fit_content_height_enabled");
 
@@ -3079,7 +3042,7 @@ TextBase::Align RichTextLabel::get_align() const {
 }
 
 void RichTextLabel::set_visible_characters(int p_visible) {
-	visible_characters = p_visible;
+	visible_chars = p_visible;
 	if (p_visible == -1) {
 		percent_visible = 1;
 	} else {
@@ -3092,9 +3055,6 @@ void RichTextLabel::set_visible_characters(int p_visible) {
 	update();
 }
 
-int RichTextLabel::get_visible_characters() const {
-	return visible_characters;
-}
 int RichTextLabel::get_total_character_count() const {
 	int tc = 0;
 	for (int i = 0; i < current_frame->lines.size(); i++) {
@@ -3236,8 +3196,6 @@ RichTextLabel::RichTextLabel() {
 	selection.drag_attempt = false;
 	deselect_on_focus_loss_enabled = true;
 
-	visible_characters = -1;
-	percent_visible = 1;
 	visible_line_count = 0;
 
 	fixed_width = -1;

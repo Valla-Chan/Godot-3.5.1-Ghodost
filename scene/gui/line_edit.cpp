@@ -1386,7 +1386,7 @@ void LineEdit::delete_text(int p_from_column, int p_to_column) {
 	}
 }
 
-void LineEdit::set_text(String p_text) {
+void LineEdit::set_text(const String &p_text) {
 	clear_internal();
 	append_at_cursor(p_text);
 	_create_undo_state();
@@ -1973,13 +1973,13 @@ void LineEdit::_generate_context_menu() {
 }
 
 void LineEdit::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_align", "align"), &LineEdit::set_align);
-	ClassDB::bind_method(D_METHOD("get_align"), &LineEdit::get_align);
 	ClassDB::bind_method(D_METHOD("_text_changed"), &LineEdit::_text_changed);
 	ClassDB::bind_method(D_METHOD("_toggle_draw_caret"), &LineEdit::_toggle_draw_caret);
 
 	ClassDB::bind_method("_editor_settings_changed", &LineEdit::_editor_settings_changed);
 
+	ClassDB::bind_method(D_METHOD("set_align", "align"), &LineEdit::set_align);
+	ClassDB::bind_method(D_METHOD("get_align"), &LineEdit::get_align);
 	ClassDB::bind_method(D_METHOD("_gui_input"), &LineEdit::_gui_input);
 	ClassDB::bind_method(D_METHOD("clear"), &LineEdit::clear);
 	ClassDB::bind_method(D_METHOD("select", "from", "to"), &LineEdit::select, DEFVAL(0), DEFVAL(-1));
@@ -1988,8 +1988,6 @@ void LineEdit::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_selection"), &LineEdit::has_selection);
 	ClassDB::bind_method(D_METHOD("get_selection_from_column"), &LineEdit::get_selection_from_column);
 	ClassDB::bind_method(D_METHOD("get_selection_to_column"), &LineEdit::get_selection_to_column);
-	ClassDB::bind_method(D_METHOD("set_text", "text"), &LineEdit::set_text);
-	ClassDB::bind_method(D_METHOD("get_text"), &LineEdit::get_text);
 	ClassDB::bind_method(D_METHOD("set_placeholder", "text"), &LineEdit::set_placeholder);
 	ClassDB::bind_method(D_METHOD("get_placeholder"), &LineEdit::get_placeholder);
 	ClassDB::bind_method(D_METHOD("set_placeholder_alpha", "alpha"), &LineEdit::set_placeholder_alpha);

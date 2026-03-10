@@ -31,17 +31,16 @@
 #ifndef LABEL_H
 #define LABEL_H
 
-#include "scene/gui/text.h"
+#include "scene/gui/text_display.h"
 
-class Label : public TextBase {
-	GDCLASS(Label, TextBase);
+class Label : public TextDisplay {
+	GDCLASS(Label, TextDisplay);
 
 public:
 
 private:
 	Align align;
 	VAlign valign;
-	String text;
 	String xl_text;
 	bool autowrap;
 	bool clip;
@@ -73,11 +72,8 @@ private:
 	bool word_cache_dirty;
 	void regenerate_word_cache();
 
-	float percent_visible;
-
 	WordCache *word_cache;
 	int total_char_cache;
-	int visible_chars;
 	int lines_skipped;
 	int max_lines_visible;
 	//VALLA EDITS
@@ -98,8 +94,8 @@ public:
 	void set_valign(VAlign p_align);
 	VAlign get_valign() const;
 
-	void set_text(const String &p_string);
-	String get_text() const;
+	void set_text(const String &p_string) override;
+	String get_text() const override;
 
 	void set_autowrap(bool p_autowrap);
 	bool has_autowrap() const;
@@ -107,19 +103,14 @@ public:
 	void set_uppercase(bool p_uppercase);
 	bool is_uppercase() const;
 
-
 	void set_extra_spacing(Size2 p_amount);
 	Size2 get_extra_spacing() const;
 
-	void set_visible_characters(int p_amount);
-	int get_visible_characters() const;
-	int get_total_character_count() const;
+	void set_visible_characters(int p_amount) override;
+	int get_total_character_count() const override;
 
 	void set_clip_text(bool p_clip);
 	bool is_clipping_text() const;
-
-	void set_percent_visible(float p_percent);
-	float get_percent_visible() const;
 
 	void set_lines_skipped(int p_lines);
 	int get_lines_skipped() const;
@@ -128,8 +119,8 @@ public:
 	int get_max_lines_visible() const;
 
 	int get_line_height() const;
-	int get_line_count() const;
-	int get_visible_line_count() const;
+	virtual int get_line_count() const override;
+	int get_visible_line_count() const override;
 
 	Label(const String &p_text = String());
 	~Label();

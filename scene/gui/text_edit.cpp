@@ -5239,7 +5239,7 @@ Control::CursorShape TextEdit::get_cursor_shape(const Point2 &p_pos) const {
 	return get_default_cursor_shape();
 }
 
-void TextEdit::set_text(String p_text) {
+void TextEdit::set_text(const String &p_text) {
 	setting_text = true;
 	if (!undo_enabled) {
 		_clear();
@@ -5268,7 +5268,7 @@ void TextEdit::set_text(String p_text) {
 	setting_text = false;
 };
 
-String TextEdit::get_text() {
+String TextEdit::get_text() const {
 	String longthing;
 	int len = text.size();
 	for (int i = 0; i < len; i++) {
@@ -7477,11 +7477,8 @@ void TextEdit::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("delete_line"),&TextEdit::delete_line);
 */
 
-	ClassDB::bind_method(D_METHOD("set_text", "text"), &TextEdit::set_text);
 	ClassDB::bind_method(D_METHOD("insert_text_at_cursor", "text"), &TextEdit::insert_text_at_cursor);
 
-	ClassDB::bind_method(D_METHOD("get_line_count"), &TextEdit::get_line_count);
-	ClassDB::bind_method(D_METHOD("get_text"), &TextEdit::get_text);
 	ClassDB::bind_method(D_METHOD("get_line", "line"), &TextEdit::get_line);
 	ClassDB::bind_method(D_METHOD("set_line", "line", "new_text"), &TextEdit::set_line);
 	ClassDB::bind_method(D_METHOD("get_line_wrapped_text", "line"), &TextEdit::get_wrap_rows_text);

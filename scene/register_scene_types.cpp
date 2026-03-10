@@ -305,6 +305,7 @@ void register_scene_types() {
 	ClassDB::register_class<Control>();
 	ClassDB::register_class<Button>();
 	ClassDB::register_virtual_class<TextBase>();
+	ClassDB::register_virtual_class<TextDisplay>();
 	ClassDB::register_class<Label>();
 	ClassDB::register_virtual_class<ScrollBar>();
 	ClassDB::register_class<HScrollBar>();

@@ -188,8 +188,8 @@ public:
 
 	void delete_char();
 	void delete_text(int p_from_column, int p_to_column);
-	void set_text(String p_text);
-	String get_text() const;
+	void set_text(const String &p_text) override;
+	String get_text() const override;
 	void set_placeholder(String p_text);
 	String get_placeholder() const;
 	void set_placeholder_alpha(float p_alpha);

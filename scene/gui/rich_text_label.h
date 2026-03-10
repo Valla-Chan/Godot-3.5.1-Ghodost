@@ -31,12 +31,12 @@
 #ifndef RICH_TEXT_LABEL_H
 #define RICH_TEXT_LABEL_H
 
-#include "text.h"
+#include "text_display.h"
 #include "rich_text_effect.h"
 #include "scene/gui/scroll_bar.h"
 
-class RichTextLabel : public TextBase {
-	GDCLASS(RichTextLabel, TextBase);
+class RichTextLabel : public TextDisplay {
+	GDCLASS(RichTextLabel, TextDisplay);
 
 public:
 
@@ -401,9 +401,6 @@ private:
 	Selection selection;
 	bool deselect_on_focus_loss_enabled;
 
-	int visible_characters;
-	float percent_visible;
-
 	bool _is_click_inside_selection() const;
 	int _process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &y, int p_width, int p_line, ProcessMode p_mode, const Ref<Font> &p_base_font, const Color &p_base_color, const Color &p_font_color_shadow, bool p_shadow_as_outline, const Point2 &shadow_ofs, const Point2i &p_click_pos = Point2i(), Item **r_click_item = nullptr, int *r_click_char = nullptr, bool *r_outside = nullptr, int p_char_count = 0);
 	void _find_click(ItemFrame *p_frame, const Point2i &p_click, Item **r_click_item = nullptr, int *r_click_char = nullptr, bool *r_outside = nullptr);
@@ -424,8 +421,8 @@ private:
 	void _scroll_changed(double);
 
 	void _gui_input(Ref<InputEvent> p_event);
-	Item *_get_next_item(Item *p_item, bool p_free = false);
-	Item *_get_prev_item(Item *p_item, bool p_free = false);
+	Item *_get_next_item(Item *p_item, bool p_free = false) const;
+	Item *_get_prev_item(Item *p_item, bool p_free = false) const;
 
 	Rect2 _get_text_rect();
 	Ref<RichTextEffect> _get_custom_effect_by_code(String p_bbcode_identifier);
@@ -443,7 +440,6 @@ protected:
 	void _notification(int p_what);
 
 public:
-	String get_text();
 	void add_text(const String &p_text);
 	void add_image(const Ref<Texture> &p_image, const int p_width = 0, const int p_height = 0, RichTextLabel::InlineAlign p_align = INLINE_ALIGN_BASELINE);
 	void add_newline();
@@ -499,9 +495,9 @@ public:
 	bool search(const String &p_string, bool p_from_selection = false, bool p_search_previous = false);
 
 	void scroll_to_line(int p_line);
-	int get_line_count() const;
+	virtual int get_line_count() const override;
 	int get_paragraph_count() const;
-	int get_visible_line_count() const;
+	int get_visible_line_count() const override;
 
 	int get_content_height() const;
 
@@ -527,19 +523,16 @@ public:
 	void set_bbcode(const String &p_bbcode);
 	String get_bbcode() const;
 
-	void set_text(const String &p_string);
+	void set_text(const String &p_string) override;
+	String get_text() const override;
 
 	//valla edits
 	void set_align(Align p_align);
 	Align get_align() const;
 	//
 
-	void set_visible_characters(int p_visible);
-	int get_visible_characters() const;
-	int get_total_character_count() const;
-
-	void set_percent_visible(float p_percent);
-	float get_percent_visible() const;
+	void set_visible_characters(int p_visible) override;
+	int get_total_character_count() const override;
 
 	void set_effects(const Vector<Variant> &effects);
 	Vector<Variant> get_effects();

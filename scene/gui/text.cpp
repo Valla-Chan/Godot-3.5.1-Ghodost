@@ -34,14 +34,6 @@
 #include "core/translation.h"
 #include "scene/resources/dynamic_font.h"
 
-void TextBase::set_align(Align p_align) {
-}
-
-TextBase::Align TextBase::get_align() const {
-	return Align(0);
-}
-
-
 void TextBase::set_font_size_override(int p_size) {
 	if (p_size < 0 ){
 		p_size = 0;
@@ -95,6 +87,24 @@ Ref<Font> TextBase::get_font_scaled(const String &p_font = "font") const {
 	return font;
 }
 
+// Stubs
+
+void TextBase::set_text(const String &p_string) {
+	if (text == p_string) {
+		return;
+	}
+	text = p_string;
+	update();
+}
+
+String TextBase::get_text() const {
+	return text;
+}
+
+int TextBase::get_line_count() const {
+	return 1;
+}
+
 void TextBase::_update_font_scale() {
 	_notification(NOTIFICATION_THEME_CHANGED);
 	_notification(NOTIFICATION_RESIZED);
@@ -107,6 +117,11 @@ void TextBase::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_font_size_override"), &TextBase::get_font_size_override);
 	ClassDB::bind_method(D_METHOD("get_font_scale"), &TextBase::get_font_scale);
 
+	ClassDB::bind_method(D_METHOD("set_text", "text"), &TextBase::set_text);
+	ClassDB::bind_method(D_METHOD("get_text"), &TextBase::get_text);
+	ClassDB::bind_method(D_METHOD("get_line_count"), &TextBase::get_line_count);
+
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "text", PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT_INTL), "set_text", "get_text");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "font_size_override", PROPERTY_HINT_RANGE, "0,128,1,false"), "set_font_size_override", "get_font_size_override");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "font_scale", PROPERTY_HINT_RANGE, "0.001,3,0.1,false"), "set_font_scale", "get_font_scale");
 

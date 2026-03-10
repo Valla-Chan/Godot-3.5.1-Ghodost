@@ -616,14 +616,14 @@ public:
 
 	bool is_insert_text_operation();
 
-	void set_text(String p_text);
+	void set_text(const String &p_text) override;
 	void insert_text_at_cursor(const String &p_text);
 	void insert_at(const String &p_text, int at);
 
 	void set_expand_to_text_height(bool p_enabled);
 	bool get_expand_to_text_height() const;
 
-	int get_line_count() const;
+	virtual int get_line_count() const override;
 
 	int get_line_width(int p_line, int p_wrap_index = -1) const;
 	int get_line_height() const;
@@ -664,7 +664,7 @@ public:
 	void unfold_line(int p_line);
 	void toggle_fold_line(int p_line);
 
-	String get_text();
+	String get_text() const override;
 	String get_line(int line) const;
 	void set_line(int line, String new_text);
 	void backspace_at_cursor();

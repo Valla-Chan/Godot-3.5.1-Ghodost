@@ -28,58 +28,42 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef TEXTBASE_H
-#define TEXTBASE_H
+#ifndef TEXTDISPLAY_H
+#define TEXTDISPLAY_H
 
-#include "scene/gui/control.h"
+#include "scene/gui/text.h"
 
-class TextBase : public Control {
-	GDCLASS(TextBase, Control);
+class TextDisplay : public TextBase {
+	GDCLASS(TextDisplay, TextBase);
 
 public:
-	enum Align {
-		ALIGN_LEFT,
-		ALIGN_CENTER,
-		ALIGN_RIGHT,
-		ALIGN_FILL
-	};
-
-	enum VAlign {
-
-		VALIGN_TOP,
-		VALIGN_CENTER,
-		VALIGN_BOTTOM,
-		VALIGN_FILL
-	};
 
 protected:
-	String text;
-	mutable Map<String,Ref<Font>> font_scaled_cache;
-	static void _bind_methods();
-	virtual void _update_font_scale();
+	int visible_chars;
+	float percent_visible;
 
 public:
-	int font_size_override = 0;
-	float font_scale = 1.0;
 
-	void set_font_size_override(int p_size);
-	int get_font_size_override() const;
-	void set_font_scale(float p_scale);
-	float get_font_scale() const;
-	Ref<Font> get_font_scaled(const String &p_font) const;
+	virtual void set_align(Align p_align);
+	virtual Align get_align() const;
 
-	// Stubs
+	virtual void set_visible_characters(int p_amount);
+	virtual int get_visible_characters() const;
+	virtual int get_total_character_count() const;
 
-	virtual void set_text(const String &p_string);
-	virtual String get_text() const;
+	virtual void set_percent_visible(float p_percent);
+	virtual float get_percent_visible() const;
 
-	virtual int get_line_count() const;
+	virtual int get_visible_line_count() const;
 
-	TextBase();
-	~TextBase();
+protected:
+
+	static void _bind_methods();
+
+public:
+
+	TextDisplay();
+	~TextDisplay();
 };
 
-VARIANT_ENUM_CAST(TextBase::Align);
-VARIANT_ENUM_CAST(TextBase::VAlign);
-
-#endif // TEXTBASE_H
+#endif // TEXTDISPLAY_H

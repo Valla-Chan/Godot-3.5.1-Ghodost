@@ -630,27 +630,6 @@ void Label::set_visible_characters(int p_amount) {
 	update();
 }
 
-int Label::get_visible_characters() const {
-	return visible_chars;
-}
-
-void Label::set_percent_visible(float p_percent) {
-	if (p_percent < 0 || p_percent >= 1) {
-		visible_chars = -1;
-		percent_visible = 1;
-
-	} else {
-		visible_chars = get_total_character_count() * p_percent;
-		percent_visible = p_percent;
-	}
-	_change_notify("visible_chars");
-	update();
-}
-
-float Label::get_percent_visible() const {
-	return percent_visible;
-}
-
 //VALLA EDITS
 void Label::set_extra_spacing(Size2 p_amount) {
 	ERR_FAIL_COND(p_amount.height < 0 || p_amount.width < 0 );
@@ -693,12 +672,8 @@ int Label::get_total_character_count() const {
 }
 
 void Label::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_align", "align"), &Label::set_align);
-	ClassDB::bind_method(D_METHOD("get_align"), &Label::get_align);
 	ClassDB::bind_method(D_METHOD("set_valign", "valign"), &Label::set_valign);
 	ClassDB::bind_method(D_METHOD("get_valign"), &Label::get_valign);
-	ClassDB::bind_method(D_METHOD("set_text", "text"), &Label::set_text);
-	ClassDB::bind_method(D_METHOD("get_text"), &Label::get_text);
 	ClassDB::bind_method(D_METHOD("set_autowrap", "enable"), &Label::set_autowrap);
 	ClassDB::bind_method(D_METHOD("has_autowrap"), &Label::has_autowrap);
 	ClassDB::bind_method(D_METHOD("set_clip_text", "enable"), &Label::set_clip_text);
@@ -710,19 +685,11 @@ void Label::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_extra_spacing"), &Label::get_extra_spacing);
 	//
 	ClassDB::bind_method(D_METHOD("get_line_height"), &Label::get_line_height);
-	ClassDB::bind_method(D_METHOD("get_line_count"), &Label::get_line_count);
-	ClassDB::bind_method(D_METHOD("get_visible_line_count"), &Label::get_visible_line_count);
-	ClassDB::bind_method(D_METHOD("get_total_character_count"), &Label::get_total_character_count);
-	ClassDB::bind_method(D_METHOD("set_visible_characters", "amount"), &Label::set_visible_characters);
-	ClassDB::bind_method(D_METHOD("get_visible_characters"), &Label::get_visible_characters);
-	ClassDB::bind_method(D_METHOD("set_percent_visible", "percent_visible"), &Label::set_percent_visible);
-	ClassDB::bind_method(D_METHOD("get_percent_visible"), &Label::get_percent_visible);
 	ClassDB::bind_method(D_METHOD("set_lines_skipped", "lines_skipped"), &Label::set_lines_skipped);
 	ClassDB::bind_method(D_METHOD("get_lines_skipped"), &Label::get_lines_skipped);
 	ClassDB::bind_method(D_METHOD("set_max_lines_visible", "lines_visible"), &Label::set_max_lines_visible);
 	ClassDB::bind_method(D_METHOD("get_max_lines_visible"), &Label::get_max_lines_visible);
 
-	ADD_PROPERTY(PropertyInfo(Variant::STRING, "text", PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT_INTL), "set_text", "get_text");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "align", PROPERTY_HINT_ENUM, "Left,Center,Right,Fill"), "set_align", "get_align");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "valign", PROPERTY_HINT_ENUM, "Top,Center,Bottom,Fill"), "set_valign", "get_valign");
 	//VALLA EDITS
@@ -731,8 +698,6 @@ void Label::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "autowrap"), "set_autowrap", "has_autowrap");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "clip_text"), "set_clip_text", "is_clipping_text");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "uppercase"), "set_uppercase", "is_uppercase");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "visible_characters", PROPERTY_HINT_RANGE, "-1,128000,1", PROPERTY_USAGE_EDITOR), "set_visible_characters", "get_visible_characters");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "percent_visible", PROPERTY_HINT_RANGE, "0,1,0.001"), "set_percent_visible", "get_percent_visible");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "lines_skipped", PROPERTY_HINT_RANGE, "0,999,1"), "set_lines_skipped", "get_lines_skipped");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "max_lines_visible", PROPERTY_HINT_RANGE, "-1,999,1"), "set_max_lines_visible", "get_max_lines_visible");
 }
@@ -749,8 +714,6 @@ Label::Label(const String &p_text) {
 	clip = false;
 	set_mouse_filter(MOUSE_FILTER_IGNORE);
 	total_char_cache = 0;
-	visible_chars = -1;
-	percent_visible = 1;
 	lines_skipped = 0;
 	max_lines_visible = -1;
 	set_text(p_text);
