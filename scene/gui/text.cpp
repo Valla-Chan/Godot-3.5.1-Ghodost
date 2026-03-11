@@ -35,9 +35,7 @@
 #include "scene/resources/dynamic_font.h"
 
 void TextBase::set_font_size_override(int p_size) {
-	if (p_size < 0 ){
-		p_size = 0;
-	}
+	p_size = MAX(p_size, 0);
 	if (font_size_override != p_size) {
 		font_scaled_cache.clear();
 	}
@@ -46,10 +44,12 @@ void TextBase::set_font_size_override(int p_size) {
 	_update_font_scale();
 }
 
+int TextBase::get_font_size_override() const {
+	return font_size_override;
+}
+
 void TextBase::set_font_scale(float p_scale) {
-	if (p_scale < 0) {
-		p_scale = 0;
-	}
+	p_scale = MAX(p_scale, 0);
 	if (font_scale != p_scale) {
 		font_scaled_cache.clear();
 	}
@@ -58,24 +58,37 @@ void TextBase::set_font_scale(float p_scale) {
 	_update_font_scale();
 }
 
-int TextBase::get_font_size_override() const {
-	return font_size_override;
-}
-
 float TextBase::get_font_scale() const {
 	return font_scale;
+}
+
+void TextBase::set_font_spacing_offset(int p_offset) {
+	if (font_spacing_offset != p_offset) {
+		font_scaled_cache.clear();
+	}
+	font_spacing_offset = p_offset;
+
+	_update_font_scale();
+}
+
+int TextBase::get_font_spacing_offset() const {
+	return font_spacing_offset;
 }
 
 // return a scaled version of the main font
 Ref<Font> TextBase::get_font_scaled(const String &p_font = "font") const {
 	Ref<Font> font = get_font(p_font);
 	Ref<DynamicFont> dynfont = font;
-	if (font_size_override > 0 || (font_scale != 1.0 && font_scale > 0)) {
+	if (font_size_override > 0 || (font_scale != 1.0 && font_scale > 0) || font_spacing_offset != 0) {
 		if (font_scaled_cache.has(p_font) && font_scaled_cache[p_font].is_valid()) {
 			return font_scaled_cache[p_font];
 		}
-
 		dynfont = dynfont->duplicate();
+
+		if (font_spacing_offset != 0) {
+			int spacing = dynfont->get_spacing(DynamicFont::SpacingType::SPACING_SPACE);
+			dynfont->set_spacing(DynamicFont::SpacingType::SPACING_SPACE, spacing + font_spacing_offset);
+		}
 		if (font_size_override > 0)
 			dynfont->set_size(font_size_override);
 		if (font_scale != 1.0 && font_scale > 0)
@@ -113,9 +126,11 @@ void TextBase::_update_font_scale() {
 void TextBase::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_font_size_override", "size"), &TextBase::set_font_size_override);
-	ClassDB::bind_method(D_METHOD("set_font_scale", "scale"), &TextBase::set_font_scale);
 	ClassDB::bind_method(D_METHOD("get_font_size_override"), &TextBase::get_font_size_override);
+	ClassDB::bind_method(D_METHOD("set_font_scale", "scale"), &TextBase::set_font_scale);
 	ClassDB::bind_method(D_METHOD("get_font_scale"), &TextBase::get_font_scale);
+	ClassDB::bind_method(D_METHOD("set_font_spacing_offset"), &TextBase::set_font_spacing_offset);
+	ClassDB::bind_method(D_METHOD("get_font_spacing_offset"), &TextBase::get_font_spacing_offset);
 
 	ClassDB::bind_method(D_METHOD("set_text", "text"), &TextBase::set_text);
 	ClassDB::bind_method(D_METHOD("get_text"), &TextBase::get_text);
@@ -124,6 +139,7 @@ void TextBase::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "text", PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT_INTL), "set_text", "get_text");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "font_size_override", PROPERTY_HINT_RANGE, "0,128,1,false"), "set_font_size_override", "get_font_size_override");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "font_scale", PROPERTY_HINT_RANGE, "0.001,3,0.1,false"), "set_font_scale", "get_font_scale");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "font_spacing_offset", PROPERTY_HINT_RANGE, "-16,16,1,false"), "set_font_spacing_offset", "get_font_spacing_offset");
 
 	BIND_ENUM_CONSTANT(ALIGN_LEFT);
 	BIND_ENUM_CONSTANT(ALIGN_CENTER);

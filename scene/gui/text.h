@@ -45,7 +45,6 @@ public:
 	};
 
 	enum VAlign {
-
 		VALIGN_TOP,
 		VALIGN_CENTER,
 		VALIGN_BOTTOM,
@@ -61,11 +60,14 @@ protected:
 public:
 	int font_size_override = 0;
 	float font_scale = 1.0;
+	int font_spacing_offset = 0;
 
 	void set_font_size_override(int p_size);
 	int get_font_size_override() const;
 	void set_font_scale(float p_scale);
 	float get_font_scale() const;
+	void set_font_spacing_offset(int p_offset);
+	int get_font_spacing_offset() const;
 	Ref<Font> get_font_scaled(const String &p_font) const;
 
 	// Stubs
