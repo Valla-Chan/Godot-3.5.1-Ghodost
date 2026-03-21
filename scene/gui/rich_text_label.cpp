@@ -2883,8 +2883,8 @@ int RichTextLabel::get_content_height() const {
 }
 
 void RichTextLabel::_update_font_scale() {
-	_notification(NOTIFICATION_THEME_CHANGED);
-	_notification(NOTIFICATION_RESIZED);
+	TextBase::_update_font_scale();
+	set_bbcode(bbcode);
 }
 
 void RichTextLabel::_bind_methods() {
