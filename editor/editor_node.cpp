@@ -6095,7 +6095,7 @@ EditorNode::EditorNode() {
 	scene_distraction = false;
 	script_distraction = false;
 
-	TranslationServer::get_singleton()->set_enabled(false);
+	//TranslationServer::get_singleton()->set_enabled(false);
 	// load settings
 	if (!EditorSettings::get_singleton()) {
 		EditorSettings::create();

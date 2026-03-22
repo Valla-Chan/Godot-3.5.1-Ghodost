@@ -145,6 +145,7 @@ private:
 
 	struct ItemText : public Item {
 		String text;
+		String xl_text;
 		ItemText() { type = ITEM_TEXT; }
 	};
 
@@ -430,9 +431,9 @@ private:
 
 	bool use_bbcode;
 	String bbcode;
+	String xl_bbcode;
 
 	int fixed_width;
-
 	bool fit_content_height;
 
 protected:
@@ -522,6 +523,8 @@ public:
 
 	void set_bbcode(const String &p_bbcode);
 	String get_bbcode() const;
+
+	String _get_xl_bbcode(const String &p_bbcode) const;
 
 	void set_text(const String &p_string) override;
 	String get_text() const override;

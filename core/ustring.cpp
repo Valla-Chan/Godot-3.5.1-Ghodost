@@ -868,6 +868,54 @@ Vector<String> String::split(const String &p_splitter, bool p_allow_empty, int p
 	return ret;
 }
 
+Vector<String> String::split_delims(const Vector<String> &p_splitters, bool p_allow_empty, int p_maxsplit) const {
+	Vector<String> ret;
+	int from = 0;
+	int len = length();
+
+	while (true) {
+		int end = -1;
+		int splitter_len = 0;
+
+		// Find the closest matching delimiter
+		for (int i = 0; i < p_splitters.size(); i++) {
+			const String &splitter = p_splitters[i];
+			int pos = find(splitter, from);
+
+			if (pos >= 0 && (end == -1 || pos < end)) {
+				end = pos;
+				splitter_len = splitter.length();
+			}
+		}
+
+		if (end < 0) {
+			end = len;
+		}
+		if (p_allow_empty || (end > from)) {
+			if (p_maxsplit <= 0) {
+				ret.push_back(substr(from, end - from));
+			} else {
+				// Put rest of the string and leave cycle.
+				if (p_maxsplit == ret.size()) {
+					ret.push_back(substr(from, len));
+					break;
+				}
+
+				// Otherwise, push items until positive limit is reached.
+				ret.push_back(substr(from, end - from));
+			}
+		}
+
+		if (end == len) {
+			break;
+		}
+
+		from = end + splitter_len;
+	}
+
+	return ret;
+}
+
 Vector<String> String::rsplit(const String &p_splitter, bool p_allow_empty, int p_maxsplit) const {
 	Vector<String> ret;
 	const int len = length();
