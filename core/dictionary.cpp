@@ -197,10 +197,36 @@ void Dictionary::clear() {
 	_p->variant_map.clear();
 }
 
-void Dictionary::merge(const Dictionary &p_dictionary, bool p_overwrite) {
+void Dictionary::merge(const Dictionary &p_dictionary, bool p_overwrite, bool p_deep) {
+	if (p_deep) {
+		deep_merge(p_dictionary, p_overwrite);
+		return;
+	}
 	for (OrderedHashMap<Variant, Variant, VariantHasher, VariantComparator>::Element E = p_dictionary._p->variant_map.front(); E; E = E.next()) {
 		if (p_overwrite || !has(E.key())) {
 			this->operator[](E.key()) = E.value();
+		}
+	}
+}
+
+void Dictionary::deep_merge(const Dictionary &p_dictionary, bool p_overwrite) {
+	for (OrderedHashMap<Variant, Variant, VariantHasher, VariantComparator>::Element E = p_dictionary._p->variant_map.front(); E; E = E.next()) {
+		const Variant &key = E.key();
+		const Variant &value = E.value();
+
+		if (has(key)) {
+			Variant &current = this->operator[](key);
+
+			// If both are dictionaries, recurse
+			if (current.get_type() == Variant::DICTIONARY && value.get_type() == Variant::DICTIONARY) {
+				Dictionary current_dict = current;
+				current_dict.deep_merge(value, p_overwrite);
+				current = current_dict;
+			} else if (p_overwrite) {
+				current = value;
+			}
+		} else {
+			this->operator[](key) = value;
 		}
 	}
 }
