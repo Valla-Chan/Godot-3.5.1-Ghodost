@@ -327,6 +327,10 @@ int TextEdit::Text::get_char_width(CharType c, CharType next_c, int px) const {
 }
 
 void TextEdit::_update_scrollbars() {
+
+	if (expand_to_text_height)
+		minimum_size_changed();
+
 	Size2 size = get_size();
 	Size2 hmin = h_scroll->get_combined_minimum_size();
 	Size2 vmin = v_scroll->get_combined_minimum_size();
