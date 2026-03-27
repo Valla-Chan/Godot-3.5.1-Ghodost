@@ -179,6 +179,7 @@ Error VariantParser::get_token(Stream *p_stream, Token &r_token, int &line, Stri
 			case '#': {
 				StringBuffer<> color_str;
 				color_str += '#';
+				bool first = false;
 				while (true) {
 					CharType ch = p_stream->get_char();
 					if (p_stream->is_eof()) {
@@ -188,9 +189,21 @@ Error VariantParser::get_token(Stream *p_stream, Token &r_token, int &line, Stri
 						color_str += ch;
 
 					} else {
+						// first char is not within range, this is not a color.
+						if (first) {
+							r_err_str = "Invalid color code: " + color_str + ".";
+							r_token.type = TK_ERROR;
+							return ERR_PARSE_ERROR;
+						}
 						p_stream->saved = ch;
 						break;
 					}
+				}
+
+				if (color_str.length() == 1) {
+					r_err_str = "Invalid color code: " + color_str + ".";
+					r_token.type = TK_ERROR;
+					return ERR_PARSE_ERROR;
 				}
 
 				r_token.value = Color::html(color_str.as_string());
