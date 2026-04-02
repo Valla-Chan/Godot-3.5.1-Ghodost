@@ -3116,7 +3116,7 @@ void RichTextLabel::set_align(Align p_align) {
 	_change_notify("default_align");
 	if (!bbcode.empty() && use_bbcode) {
 		set_bbcode(bbcode);
-	} else if (get_text().empty()) {
+	} else if (!get_text().empty()) {
 		set_text(get_text());
 	}
 	minimum_size_changed();
