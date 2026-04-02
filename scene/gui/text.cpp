@@ -100,6 +100,15 @@ Ref<Font> TextBase::get_font_scaled(const String &p_font = "font") const {
 	return font;
 }
 
+// Return scaled font if possible, otherwise return the default font.
+Ref<Font> TextBase::get_theme_default_font() const {
+	Ref<Font> font = get_font_scaled();
+	if (font.is_valid()) {
+		return font;
+	}
+	return Control::get_theme_default_font();
+}
+
 // Stubs
 
 void TextBase::set_text(const String &p_string) {

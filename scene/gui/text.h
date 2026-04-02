@@ -70,6 +70,8 @@ public:
 	int get_font_spacing_offset() const;
 	Ref<Font> get_font_scaled(const String &p_font) const;
 
+	virtual Ref<Font> get_theme_default_font() const;
+
 	// Stubs
 
 	virtual void set_text(const String &p_string);
