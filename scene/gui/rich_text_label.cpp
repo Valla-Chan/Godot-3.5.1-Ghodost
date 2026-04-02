@@ -2963,6 +2963,8 @@ int RichTextLabel::get_content_height() const {
 	int total_height = 0;
 	const_cast<RichTextLabel *>(this)->_validate_line_caches(main);
 	if (main->lines.size()) {
+		if (main->lines.size() == 1 && main->lines[0].char_count == 0)
+			return total_height;
 		total_height = main->lines[main->lines.size() - 1].height_accum_cache + get_stylebox("normal")->get_minimum_size().height;
 	}
 	return total_height;
