@@ -79,6 +79,13 @@ public:
 		ITEM_CUSTOMFX
 	};
 
+	enum ParseMode {
+
+		PARSE_MODE_OFF,
+		PARSE_MODE_ON,
+		PARSE_MODE_PLAINTEXT
+	};
+
 protected:
 	void _update_font_scale();
 	static void _bind_methods();
@@ -417,6 +424,7 @@ private:
 	bool _find_by_type(Item *p_item, ItemType p_type);
 	void _fetch_item_fx_stack(Item *p_item, Vector<ItemFX *> &r_stack);
 
+	void _update_text();
 	void _update_scroll();
 	void _update_fx(ItemFrame *p_frame, float p_delta_time);
 	void _scroll_changed(double);
@@ -429,8 +437,11 @@ private:
 	Ref<RichTextEffect> _get_custom_effect_by_code(String p_bbcode_identifier);
 	virtual Dictionary parse_expressions_for_values(Vector<String> p_expressions);
 
-	bool use_bbcode;
-	String bbcode;
+	String _get_xl_bbcode(const String &p_bbcode) const;
+
+	bool xl_bbcode_dirty = false;
+	ParseMode bbcode_parse_mode;
+	//String bbcode;
 	String xl_bbcode;
 
 	int fixed_width;
@@ -518,21 +529,16 @@ public:
 	Error parse_bbcode(const String &p_bbcode);
 	Error append_bbcode(const String &p_bbcode);
 
-	void set_use_bbcode(bool p_enable);
-	bool is_using_bbcode() const;
-
-	void set_bbcode(const String &p_bbcode);
-	String get_bbcode() const;
-
-	String _get_xl_bbcode(const String &p_bbcode) const;
+	void set_bbcode_parse_mode(ParseMode p_mode);
+	ParseMode get_bbcode_parse_mode() const;
 
 	void set_text(const String &p_string) override;
 	String get_text() const override;
 
-	//valla edits
+	String get_parsed_text() const;
+
 	void set_align(Align p_align);
 	Align get_align() const;
-	//
 
 	void set_visible_characters(int p_visible) override;
 	int get_total_character_count() const override;
@@ -552,5 +558,8 @@ public:
 VARIANT_ENUM_CAST(RichTextLabel::InlineAlign);
 VARIANT_ENUM_CAST(RichTextLabel::ListType);
 VARIANT_ENUM_CAST(RichTextLabel::ItemType);
+
+VARIANT_ENUM_CAST(RichTextLabel::ParseMode);
+
 
 #endif // RICH_TEXT_LABEL_H
