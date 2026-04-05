@@ -255,6 +255,8 @@ class AnimatedSprite : public SpriteBase {
 	void _reset_timeout();
 	Rect2 _get_rect() const;
 
+	bool _frames_valid() const;
+
 protected:
 	static void _bind_methods();
 	void _notification(int p_what);

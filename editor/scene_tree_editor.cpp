@@ -201,12 +201,13 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 
 	TreeItem *item = tree->create_item(p_parent);
 
+	
 	item->set_text(0, p_node->get_name());
 	if (can_rename && !part_of_subscene /*(p_node->get_owner() == get_scene_node() || p_node==get_scene_node())*/) {
 		item->set_editable(0, true);
 	}
-
 	item->set_selectable(0, true);
+
 	if (can_rename) {
 #ifndef DISABLE_DEPRECATED
 		if (p_node->has_meta("_editor_collapsed")) {
@@ -230,6 +231,8 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 	item->set_icon(0, icon);
 	item->set_metadata(0, p_node->get_path());
 
+
+	// Signal Connection Window 
 	if (connect_to_script_mode) {
 		Color accent = get_color("accent_color", "Editor");
 
@@ -489,7 +492,8 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		} break;
 	}
 
-	if (!(marked.has(p_node) && p_parent == tree->get_root())) {
+	// Hide children for signal connection root node
+	if (!(marked.has(p_node) && p_parent == tree->get_root() && !item->get_prev())) {
 		for (int i = 0; i < p_node->get_child_count(); i++) {
 			bool child_keep = _add_nodes(p_node->get_child(i), item, p_scroll_to_selected);
 

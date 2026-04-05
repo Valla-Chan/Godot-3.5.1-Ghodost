@@ -580,21 +580,23 @@ void AnimatedSprite::_validate_property(PropertyInfo &property) const {
 	}
 }
 
+bool AnimatedSprite::_frames_valid() const {
+	if (frames.is_null())
+		return false;
+	if (frame < 0)
+		return false;
+	if (!frames->has_animation(animation))
+		return false;
+	return true;
+}
+
 void AnimatedSprite::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_INTERNAL_PROCESS: {
-			if (frames.is_null()) {
+			if (!_frames_valid())
 				return;
-			}
-			if (!frames->has_animation(animation)) {
+			if (!OS::get_singleton()->is_update_pending())
 				return;
-			}
-			if (frame < 0) {
-				return;
-			}
-			if (!OS::get_singleton()->is_update_pending()) {
-				return;
-			}
 
 			float remaining = get_process_delta_time();
 
@@ -649,15 +651,8 @@ void AnimatedSprite::_notification(int p_what) {
 		} break;
 
 		case NOTIFICATION_DRAW: {
-			if (frames.is_null()) {
+			if (!_frames_valid())
 				return;
-			}
-			if (frame < 0) {
-				return;
-			}
-			if (!frames->has_animation(animation)) {
-				return;
-			}
 
 			Ref<Texture> texture = frames->get_frame(animation, frame);
 			if (texture.is_null()) {
