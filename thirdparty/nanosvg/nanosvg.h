@@ -1398,6 +1398,7 @@ NSVGNamedColor nsvg__colors[] = {
 	{ "mediumturquoise", NSVG_RGB( 72, 209, 204) },
 	{ "mediumvioletred", NSVG_RGB(199, 21, 133) },
 	{ "midnightblue", NSVG_RGB( 25, 25, 112) },
+	{ "middlegray", NSVG_RGB( 128, 128, 128) },
 	{ "mintcream", NSVG_RGB(245, 255, 250) },
 	{ "mistyrose", NSVG_RGB(255, 228, 225) },
 	{ "moccasin", NSVG_RGB(255, 228, 181) },

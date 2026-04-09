@@ -98,6 +98,7 @@ static void _populate_named_colors() {
 	_named_colors.insert("mediumturquoise", Color::hex(0x48D1CCFF));
 	_named_colors.insert("mediumvioletred", Color::hex(0xC71585FF));
 	_named_colors.insert("midnightblue", Color::hex(0x191970FF));
+	_named_colors.insert("middlegray", Color::hex(0x808080FF));
 	_named_colors.insert("mintcream", Color::hex(0xF5FFFAFF));
 	_named_colors.insert("mistyrose", Color::hex(0xFFE4E1FF));
 	_named_colors.insert("moccasin", Color::hex(0xFFE4B5FF));

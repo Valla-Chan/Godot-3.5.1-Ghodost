@@ -725,7 +725,7 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 			"lightSkyBlue", "lightSlateGray", "lightSteelBlue", "lightYellow", "lime", "limeGreen",
 			"linen", "magenta", "maroon", "mediumAquamarine", "mediumBlue", "mediumOrchid",
 			"mediumPurple", "mediumSeaGreen", "mediumSlateBlue", "mediumSpringGreen", "mediumTurquoise", "mediumVioletRed",
-			"midnightBlue", "mintCream", "mistyRose", "moccasin", "navajoWhite", "navy",
+			"midnightBlue", "middleGray", "mintCream", "mistyRose", "moccasin", "navajoWhite", "navy",
 			"oldLace", "olive", "oliveDrab", "orange", "orangeRed", "orchid",
 			"paleGoldenrod", "paleGreen", "paleTurquoise", "paleVioletRed", "papayaWhip", "peachPuff",
 			"peru", "pink", "plum", "powderBlue", "purple", "red",
