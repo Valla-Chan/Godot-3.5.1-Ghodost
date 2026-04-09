@@ -175,6 +175,8 @@ private:
 
 		bool clip_contents;
 
+		bool unhandled_gui_input : 1;
+
 		bool block_minimum_size_adjust;
 		bool disable_visibility_clip;
 
@@ -309,6 +311,10 @@ public:
 
 	virtual Size2 _edit_get_minimum_size() const;
 #endif
+
+	void set_process_unhandled_gui_input(bool p_enable);
+	bool is_processing_unhandled_gui_input() const;
+	void _update_process_unhandled_gui_input();
 
 	void accept_event();
 

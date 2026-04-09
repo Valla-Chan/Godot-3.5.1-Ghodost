@@ -2864,13 +2864,17 @@ void Viewport::input(const Ref<InputEvent> &p_event) {
 	local_input_handled = false;
 
 	if (!is_input_handled()) {
-		get_tree()->_call_input_pause(input_group, "_input", p_event); //not a bug, must happen before GUI, order is _input -> gui input -> _unhandled input
+		get_tree()->_call_input_pause(input_group, "_input", p_event); //not a bug, must happen before GUI, order is _input -> _gui_input -> _unhandled_gui_input -> _unhandled_input
 	}
 
 	if (!is_input_handled()) {
 		_gui_input_event(p_event);
 	} else {
 		_gui_cleanup_internal_state(p_event);
+	}
+	// _unhandled_gui_input is called AFTER _gui_input, so we can GUI exceptions not caught by _gui_input before it reaches _unhandled_input.
+	if (!is_input_handled()) {
+		get_tree()->_call_input_pause(unhandled_gui_input_group, "_unhandled_gui_input", p_event);
 	}
 	//get_tree()->call_group(SceneTree::GROUP_CALL_REVERSE|SceneTree::GROUP_CALL_REALTIME|SceneTree::GROUP_CALL_MULIILEVEL,gui_input_group,"_gui_input",p_event); //special one for GUI, as controls use their own process check
 }
@@ -3496,6 +3500,7 @@ Viewport::Viewport() {
 
 	String id = itos(get_instance_id());
 	input_group = "_vp_input" + id;
+	unhandled_gui_input_group = "_vp_unhandled_gui_input" + id;
 	gui_input_group = "_vp_gui_input" + id;
 	unhandled_input_group = "_vp_unhandled_input" + id;
 	unhandled_key_input_group = "_vp_unhandled_key_input" + id;

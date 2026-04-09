@@ -649,6 +649,9 @@ void Control::_notification(int p_notification) {
 			emit_signal("modal_closed");
 		} break;
 		case NOTIFICATION_VISIBILITY_CHANGED: {
+			if (!Engine::get_singleton()->is_editor_hint()) {
+				_update_process_unhandled_gui_input();
+			}
 			if (!is_visible_in_tree()) {
 				if (get_viewport() != nullptr) {
 					get_viewport()->_gui_hid_control(this);
@@ -2179,6 +2182,32 @@ StringName Control::get_theme_type_variation() const {
 	return data.theme_type_variation;
 }
 
+void Control::set_process_unhandled_gui_input(bool p_enable) {
+	if (p_enable == data.unhandled_gui_input) {
+		return;
+	}
+
+	data.unhandled_gui_input = p_enable;
+
+	_update_process_unhandled_gui_input();
+}
+
+bool Control::is_processing_unhandled_gui_input() const {
+	return data.unhandled_gui_input;
+}
+
+void Control::_update_process_unhandled_gui_input() {
+	if (!is_inside_tree()) {
+		return;
+	}
+
+	if (data.unhandled_gui_input && is_visible_in_tree()) {
+		add_to_group("_vp_unhandled_gui_input" + itos(get_viewport()->get_instance_id()));
+	} else if (is_in_group("_vp_unhandled_gui_input" + itos(get_viewport()->get_instance_id()))) {
+		remove_from_group("_vp_unhandled_gui_input" + itos(get_viewport()->get_instance_id()));
+	}
+}
+
 void Control::accept_event() {
 	if (is_inside_tree()) {
 		get_viewport()->_gui_accept_event();
@@ -2695,6 +2724,8 @@ void Control::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_size_changed"), &Control::_size_changed);
 	ClassDB::bind_method(D_METHOD("_update_minimum_size"), &Control::_update_minimum_size);
 
+	ClassDB::bind_method(D_METHOD("set_process_unhandled_gui_input", "enable"), &Control::set_process_unhandled_gui_input);
+	ClassDB::bind_method(D_METHOD("is_processing_unhandled_gui_input"), &Control::is_processing_unhandled_gui_input);
 	ClassDB::bind_method(D_METHOD("accept_event"), &Control::accept_event);
 	ClassDB::bind_method(D_METHOD("get_minimum_size"), &Control::get_minimum_size);
 	ClassDB::bind_method(D_METHOD("get_combined_minimum_size"), &Control::get_combined_minimum_size);
@@ -3003,6 +3034,7 @@ void Control::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("minimum_size_changed"));
 	ADD_SIGNAL(MethodInfo("modal_closed"));
 
+	BIND_VMETHOD(MethodInfo("_unhandled_gui_input", PropertyInfo(Variant::OBJECT, "event", PROPERTY_HINT_RESOURCE_TYPE, "InputEvent")));
 	BIND_VMETHOD(MethodInfo(Variant::BOOL, "has_point", PropertyInfo(Variant::VECTOR2, "point")));
 }
 
@@ -3015,6 +3047,7 @@ Control::Control() {
 
 	data.mouse_filter = MOUSE_FILTER_STOP;
 	data.pass_on_modal_close_click = true;
+	data.unhandled_gui_input = false;
 
 	data.SI = nullptr;
 	data.MI = nullptr;
