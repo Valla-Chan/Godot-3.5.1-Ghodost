@@ -335,6 +335,7 @@ public:
 
 	Rect2 get_used_rect() const;
 	Ref<Image> get_rect(const Rect2 &p_area) const;
+	Ref<Image> get_scaled(const float p_scale) const;
 
 	static void set_compress_bc_func(void (*p_compress_func)(Image *, float, CompressSource));
 	static void set_compress_bptc_func(void (*p_compress_func)(Image *, float, CompressSource));

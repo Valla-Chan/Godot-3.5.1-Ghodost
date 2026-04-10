@@ -2403,6 +2403,12 @@ Ref<Image> Image::get_rect(const Rect2 &p_area) const {
 	return img;
 }
 
+Ref<Image> Image::get_scaled(const float p_scale) const {
+	Ref<Image> img = duplicate();
+	img->resize(int(width * p_scale), int(height * p_scale));
+	return img;
+}
+
 void Image::_get_clipped_src_and_dest_rects(const Ref<Image> &p_src, const Rect2i &p_src_rect, const Point2i &p_dest, Rect2i &r_clipped_src_rect, Rect2i &r_clipped_dest_rect) const {
 	r_clipped_dest_rect.position = p_dest;
 	r_clipped_src_rect = p_src_rect;
@@ -3117,6 +3123,7 @@ void Image::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_used_rect"), &Image::get_used_rect);
 	ClassDB::bind_method(D_METHOD("get_rect", "rect"), &Image::get_rect);
+	ClassDB::bind_method(D_METHOD("get_scaled", "scale"), &Image::get_scaled);
 
 	ClassDB::bind_method(D_METHOD("copy_from", "src"), &Image::copy_internals_from);
 
