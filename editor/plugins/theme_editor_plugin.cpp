@@ -2720,17 +2720,19 @@ void ThemeTypeEditor::_item_rename_cbk(int p_data_type, String p_item_name, Cont
 		_item_rename_canceled(p_data_type, p_item_name, current_edited_property);
 	}
 	current_edited_property = p_control;
-	// Label (Toolbutton)
-	Object::cast_to<Control>(p_control->get_child(0))->hide();
-	// Label buttons
-	Object::cast_to<Control>(p_control->get_child(2))->hide();
+	if (p_control->get_child_count() > 0) {
+		// Label (Toolbutton)
+		Object::cast_to<Control>(p_control->get_child(0))->hide();
+		// Label buttons
+		Object::cast_to<Control>(p_control->get_child(2))->hide();
 
-	// LineEdit
-	Object::cast_to<LineEdit>(p_control->get_child(1))->set_text(p_item_name);
-	Object::cast_to<LineEdit>(p_control->get_child(1))->show();
-	// LineEdit buttons
-	Object::cast_to<Control>(p_control->get_child(3))->show();
-	Object::cast_to<Control>(p_control->get_child(4))->show();
+		// LineEdit
+		Object::cast_to<LineEdit>(p_control->get_child(1))->set_text(p_item_name);
+		Object::cast_to<LineEdit>(p_control->get_child(1))->show();
+		// LineEdit buttons
+		Object::cast_to<Control>(p_control->get_child(3))->show();
+		Object::cast_to<Control>(p_control->get_child(4))->show();
+	}
 }
 
 void ThemeTypeEditor::_item_rename_confirmed(int p_data_type, String p_item_name, Control *p_control) {
@@ -2774,16 +2776,18 @@ void ThemeTypeEditor::_item_rename_entered(String p_value, int p_data_type, Stri
 
 void ThemeTypeEditor::_item_rename_canceled(int p_data_type, String p_item_name, Control *p_control) {
 	current_edited_property = nullptr;
-	// LineEdit
-	Object::cast_to<LineEdit>(p_control->get_child(1))->hide();
-	// LineEdit buttons
-	Object::cast_to<Control>(p_control->get_child(3))->hide();
-	Object::cast_to<Control>(p_control->get_child(4))->hide();
+	if (p_control->get_child_count() > 0) {
+		// LineEdit
+		Object::cast_to<LineEdit>(p_control->get_child(1))->hide();
+		// LineEdit buttons
+		Object::cast_to<Control>(p_control->get_child(3))->hide();
+		Object::cast_to<Control>(p_control->get_child(4))->hide();
 
-	// Label (Toolbutton)
-	Object::cast_to<Control>(p_control->get_child(0))->show();
-	// Label buttons
-	Object::cast_to<Control>(p_control->get_child(2))->show();
+		// Label (Toolbutton)
+		Object::cast_to<Control>(p_control->get_child(0))->show();
+		// Label buttons
+		Object::cast_to<Control>(p_control->get_child(2))->show();
+	}
 }
 
 void ThemeTypeEditor::_color_item_changed(Color p_value, String p_item_name) {
