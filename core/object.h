@@ -562,6 +562,7 @@ protected:
 
 	PoolVector<String> _get_meta_list_bind() const;
 	Array _get_property_list_bind() const;
+	Array _get_script_property_list_bind() const;
 	Array _get_method_list_bind() const;
 
 	void _clear_internal_resource_paths(const Variant &p_var);
@@ -668,6 +669,7 @@ public:
 	Variant get_indexed(const Vector<StringName> &p_names, bool *r_valid = nullptr) const;
 
 	void get_property_list(List<PropertyInfo> *p_list, bool p_reversed = false) const;
+	void get_script_property_list(List<PropertyInfo> *p_list, bool p_reversed = false) const;
 
 	bool has_method(const StringName &p_method) const;
 	void get_method_list(List<MethodInfo> *p_list) const;

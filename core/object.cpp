@@ -655,6 +655,13 @@ void Object::get_property_list(List<PropertyInfo> *p_list, bool p_reversed) cons
 	}
 }
 
+void Object::get_script_property_list(List<PropertyInfo> *p_list, bool p_reversed) const {
+	if (!script_instance) {
+		return;
+	}
+	script_instance->get_property_list(p_list);
+}
+
 void Object::_validate_property(PropertyInfo &property) const {
 }
 
@@ -1086,6 +1093,12 @@ void Object::remove_meta(const String &p_name) {
 Array Object::_get_property_list_bind() const {
 	List<PropertyInfo> lpi;
 	get_property_list(&lpi);
+	return convert_property_list(&lpi);
+}
+
+Array Object::_get_script_property_list_bind() const {
+	List<PropertyInfo> lpi;
+	get_script_property_list(&lpi);
 	return convert_property_list(&lpi);
 }
 
@@ -1684,6 +1697,7 @@ void Object::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_indexed", "property", "value"), &Object::_set_indexed_bind);
 	ClassDB::bind_method(D_METHOD("get_indexed", "property"), &Object::_get_indexed_bind);
 	ClassDB::bind_method(D_METHOD("get_property_list"), &Object::_get_property_list_bind);
+	ClassDB::bind_method(D_METHOD("get_script_property_list"), &Object::_get_script_property_list_bind);
 	ClassDB::bind_method(D_METHOD("get_method_list"), &Object::_get_method_list_bind);
 	ClassDB::bind_method(D_METHOD("notification", "what", "reversed"), &Object::notification, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("to_string"), &Object::to_string);
