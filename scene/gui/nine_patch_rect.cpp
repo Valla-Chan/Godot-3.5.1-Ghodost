@@ -44,7 +44,7 @@ void NinePatchRect::_notification(int p_what) {
 		texture->get_rect_region(rect, src_rect, rect, src_rect);
 
 		RID ci = get_canvas_item();
-		VS::get_singleton()->canvas_item_add_nine_patch(ci, rect, src_rect, texture->get_rid(), Vector2(margin[MARGIN_LEFT], margin[MARGIN_TOP]), Vector2(margin[MARGIN_RIGHT], margin[MARGIN_BOTTOM]), VS::NinePatchAxisMode(axis_h), VS::NinePatchAxisMode(axis_v), draw_center);
+		VS::get_singleton()->canvas_item_add_nine_patch(ci, rect, src_rect, texture->get_rid(), Vector2(margin[MARGIN_LEFT], margin[MARGIN_TOP]), Vector2(margin[MARGIN_RIGHT], margin[MARGIN_BOTTOM]), VS::NinePatchAxisMode(axis_h), VS::NinePatchAxisMode(axis_v), draw_center, Color(1,1,1,1), RID(), scale);
 	}
 }
 
@@ -66,11 +66,15 @@ void NinePatchRect::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_v_axis_stretch_mode", "mode"), &NinePatchRect::set_v_axis_stretch_mode);
 	ClassDB::bind_method(D_METHOD("get_v_axis_stretch_mode"), &NinePatchRect::get_v_axis_stretch_mode);
 
+	ClassDB::bind_method(D_METHOD("set_texel_scale", "scale"), &NinePatchRect::set_scale);
+	ClassDB::bind_method(D_METHOD("get_texel_scale"), &NinePatchRect::get_scale);
+
 	ADD_SIGNAL(MethodInfo("texture_changed"));
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_texture", "get_texture");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "draw_center"), "set_draw_center", "is_draw_center_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::RECT2, "region_rect"), "set_region_rect", "get_region_rect");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "texel_scale", PROPERTY_HINT_RANGE, "0.05, 4.0, 0.05"), "set_texel_scale", "get_texel_scale");
 
 	ADD_GROUP("Patch Margin", "patch_margin_");
 	ADD_PROPERTYI(PropertyInfo(Variant::INT, "patch_margin_left", PROPERTY_HINT_RANGE, "0,16384,1"), "set_patch_margin", "get_patch_margin", MARGIN_LEFT);
@@ -155,6 +159,16 @@ bool NinePatchRect::is_draw_center_enabled() const {
 	return draw_center;
 }
 
+void NinePatchRect::set_scale(float p_scale) {
+	ERR_FAIL_COND_MSG(p_scale <= 0, vformat("Scale %s is out of range."), p_scale);
+	scale = p_scale;
+	update();
+}
+
+float NinePatchRect::get_scale() const {
+	return scale;
+}
+
 void NinePatchRect::set_h_axis_stretch_mode(AxisStretchMode p_mode) {
 	axis_h = p_mode;
 	update_configuration_warning();
@@ -198,6 +212,7 @@ NinePatchRect::NinePatchRect() {
 
 	set_mouse_filter(MOUSE_FILTER_IGNORE);
 	draw_center = true;
+	scale = 1.0;
 
 	axis_h = AXIS_STRETCH_MODE_STRETCH;
 	axis_v = AXIS_STRETCH_MODE_STRETCH;

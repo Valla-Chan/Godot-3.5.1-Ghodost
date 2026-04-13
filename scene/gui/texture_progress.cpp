@@ -136,6 +136,16 @@ Color TextureProgress::get_tint_over() const {
 	return tint_over;
 }
 
+void TextureProgress::set_scale(float p_scale) {
+	ERR_FAIL_COND_MSG(p_scale <= 0, vformat("Texel scale %s is out of range."), p_scale);
+	scale = p_scale;
+	update();
+}
+
+float TextureProgress::get_scale() const {
+	return scale;
+}
+
 Point2 TextureProgress::unit_val_to_uv(float val) {
 	if (progress.is_null()) {
 		return Point2();
@@ -383,7 +393,7 @@ void TextureProgress::draw_nine_patch_stretched(const Ref<Texture> &p_texture, F
 	p_texture->get_rect_region(dst_rect, src_rect, dst_rect, src_rect);
 
 	RID ci = get_canvas_item();
-	VS::get_singleton()->canvas_item_add_nine_patch(ci, dst_rect, src_rect, p_texture->get_rid(), topleft, bottomright, VS::NINE_PATCH_STRETCH, VS::NINE_PATCH_STRETCH, true, p_modulate);
+	VS::get_singleton()->canvas_item_add_nine_patch(ci, dst_rect, src_rect, p_texture->get_rid(), topleft, bottomright, VS::NINE_PATCH_STRETCH, VS::NINE_PATCH_STRETCH, true, p_modulate, RID(), scale);
 }
 
 void TextureProgress::_notification(int p_what) {
@@ -630,12 +640,16 @@ void TextureProgress::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_nine_patch_stretch", "stretch"), &TextureProgress::set_nine_patch_stretch);
 	ClassDB::bind_method(D_METHOD("get_nine_patch_stretch"), &TextureProgress::get_nine_patch_stretch);
 
+	ClassDB::bind_method(D_METHOD("set_texel_scale", "scale"), &TextureProgress::set_scale);
+	ClassDB::bind_method(D_METHOD("get_texel_scale"), &TextureProgress::get_scale);
+
 	ADD_GROUP("Textures", "texture_");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture_under", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_under_texture", "get_under_texture");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture_over", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_over_texture", "get_over_texture");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture_progress", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_progress_texture", "get_progress_texture");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "texture_progress_offset"), "set_texture_progress_offset", "get_texture_progress_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "fill_mode", PROPERTY_HINT_ENUM, "Left to Right,Right to Left,Top to Bottom,Bottom to Top,Clockwise,Counter Clockwise,Bilinear (Left and Right),Bilinear (Top and Bottom),Clockwise and Counter Clockwise"), "set_fill_mode", "get_fill_mode");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "texel_scale", PROPERTY_HINT_RANGE, "0.05, 4.0, 0.05"), "set_texel_scale", "get_texel_scale");
 	ADD_GROUP("Tint", "tint_");
 	ADD_PROPERTY(PropertyInfo(Variant::COLOR, "tint_under"), "set_tint_under", "get_tint_under");
 	ADD_PROPERTY(PropertyInfo(Variant::COLOR, "tint_over"), "set_tint_over", "get_tint_over");
@@ -664,6 +678,7 @@ void TextureProgress::_bind_methods() {
 
 TextureProgress::TextureProgress() {
 	mode = FILL_LEFT_TO_RIGHT;
+	scale = 1.0f;
 	rad_init_angle = 0;
 	rad_center_off = Point2();
 	rad_max_degrees = 360;

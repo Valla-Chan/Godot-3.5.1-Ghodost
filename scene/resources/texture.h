@@ -134,6 +134,7 @@ public:
 #endif
 	void set_data(const Ref<Image> &p_image);
 	Ref<Image> get_data() const;
+	Ref<Image> get_data_scaled(float p_scale = 1.0) const;
 
 	int get_width() const;
 	int get_height() const;

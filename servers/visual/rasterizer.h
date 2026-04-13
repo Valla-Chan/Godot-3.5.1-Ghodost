@@ -223,7 +223,7 @@ public:
 			int p_dst_mip,
 			int p_level = 0) = 0;
 
-	virtual Ref<Image> texture_get_data(RID p_texture, int p_level = 0) const = 0;
+	virtual Ref<Image> texture_get_data(RID p_texture, int p_level = 0, float p_scale = 1.0) const = 0;
 	virtual void texture_set_flags(RID p_texture, uint32_t p_flags) = 0;
 	virtual uint32_t texture_get_flags(RID p_texture) const = 0;
 	virtual Image::Format texture_get_format(RID p_texture) const = 0;
@@ -854,6 +854,7 @@ public:
 			Rect2 source;
 			RID texture;
 			RID normal_map;
+			float scale;
 			float margin[4];
 			bool draw_center;
 			Color color;
@@ -862,6 +863,7 @@ public:
 			CommandNinePatch() {
 				draw_center = true;
 				type = TYPE_NINEPATCH;
+				scale = 1.0;
 			}
 		};
 

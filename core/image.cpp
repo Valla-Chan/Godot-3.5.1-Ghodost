@@ -2404,6 +2404,10 @@ Ref<Image> Image::get_rect(const Rect2 &p_area) const {
 }
 
 Ref<Image> Image::get_scaled(const float p_scale) const {
+	if (p_scale == 1.0) {
+		return this;
+	}
+	ERR_FAIL_COND_V_MSG(p_scale <= 0 || p_scale > 4096, this, vformat("Image scale %s is out of bounds.", p_scale));
 	Ref<Image> img = duplicate();
 	img->resize(int(width * p_scale), int(height * p_scale));
 	return img;

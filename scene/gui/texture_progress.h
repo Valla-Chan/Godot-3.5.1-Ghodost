@@ -97,12 +97,16 @@ public:
 	void set_tint_over(const Color &p_tint);
 	Color get_tint_over() const;
 
+	void set_scale(float p_scale);
+	float get_scale() const;
+
 	Size2 get_minimum_size() const;
 
 	TextureProgress();
 
 private:
 	FillMode mode;
+	float scale;
 	Point2 progress_offset;
 	float rad_init_angle;
 	float rad_max_degrees;

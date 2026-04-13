@@ -660,7 +660,7 @@ void RasterizerCanvasGLES2::render_batches(Item *p_current_clip, bool &r_reclip,
 								source.size.y = tex->height;
 							}
 
-							float screen_scale = 1.0;
+							float screen_scale = 1.0 * np->scale;
 
 							if ((bdata.settings_ninepatch_mode == 1) && (source.size.x != 0) && (source.size.y != 0)) {
 								screen_scale = MIN(np->rect.size.x / source.size.x, np->rect.size.y / source.size.y);

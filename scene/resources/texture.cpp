@@ -93,6 +93,7 @@ void Texture::_bind_methods() {
 }
 
 Texture::Texture() {
+	//scale = 1.0;
 }
 
 /////////////////////
@@ -260,6 +261,14 @@ Ref<Image> ImageTexture::get_data() const {
 	}
 }
 
+Ref<Image> ImageTexture::get_data_scaled(float p_scale) const {
+	if (image_stored) {
+		return VisualServer::get_singleton()->texture_get_data(texture, 0, p_scale);
+	} else {
+		return Ref<Image>();
+	}
+}
+
 int ImageTexture::get_width() const {
 	return w;
 }
@@ -405,6 +414,7 @@ void ImageTexture::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_size_override", "size"), &ImageTexture::set_size_override);
 	ClassDB::bind_method(D_METHOD("_reload_hook", "rid"), &ImageTexture::_reload_hook);
+	ClassDB::bind_method(D_METHOD("get_data_scaled", "scale"), &ImageTexture::get_data_scaled, DEFVAL(1.0));
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "storage", PROPERTY_HINT_ENUM, "Uncompressed,Compress Lossy,Compress Lossless"), "set_storage", "get_storage");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "lossy_quality", PROPERTY_HINT_RANGE, "0.0,1.0,0.01"), "set_lossy_storage_quality", "get_lossy_storage_quality");

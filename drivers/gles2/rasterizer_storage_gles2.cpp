@@ -769,7 +769,7 @@ void RasterizerStorageGLES2::texture_set_data_partial(RID p_texture, const Ref<I
 	ERR_PRINT("Not implemented (ask Karroffel to do it :p)");
 }
 
-Ref<Image> RasterizerStorageGLES2::texture_get_data(RID p_texture, int p_layer) const {
+Ref<Image> RasterizerStorageGLES2::texture_get_data(RID p_texture, int p_layer, float p_scale) const {
 	Texture *texture = texture_owner.getornull(p_texture);
 
 	ERR_FAIL_COND_V(!texture, Ref<Image>());
@@ -777,7 +777,7 @@ Ref<Image> RasterizerStorageGLES2::texture_get_data(RID p_texture, int p_layer) 
 	ERR_FAIL_COND_V(texture->data_size == 0 && !texture->render_target, Ref<Image>());
 
 	if (texture->type == VS::TEXTURE_TYPE_CUBEMAP && p_layer < 6 && p_layer >= 0 && !texture->images[p_layer].is_null()) {
-		return texture->images[p_layer];
+		return texture->images[p_layer]->get_scaled(p_scale);
 	}
 
 #ifdef GLES_OVER_GL

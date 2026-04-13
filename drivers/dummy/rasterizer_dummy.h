@@ -190,7 +190,7 @@ public:
 		t->image->blit_rect(p_image, Rect2(src_x, src_y, src_w, src_h), Vector2(dst_x, dst_y));
 	}
 
-	Ref<Image> texture_get_data(RID p_texture, int p_level) const {
+	Ref<Image> texture_get_data(RID p_texture, int p_level, float p_scale) const {
 		DummyTexture *t = texture_owner.getornull(p_texture);
 		ERR_FAIL_COND_V(!t, Ref<Image>());
 		return t->image;

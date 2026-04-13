@@ -707,7 +707,7 @@ void RasterizerCanvasGLES3::render_batches(Item *p_current_clip, bool &r_reclip,
 							RasterizerStorageGLES3::Texture *texture = _bind_canvas_texture(np->texture, np->normal_map);
 
 							Size2 texpixel_size;
-
+							// NOTE: this block does not affect style_box ninepatches. See rasterizer_canvas_batcher.h
 							if (!texture) {
 								texpixel_size = Size2(1, 1);
 
@@ -722,6 +722,7 @@ void RasterizerCanvasGLES3::render_batches(Item *p_current_clip, bool &r_reclip,
 									state.canvas_shader.set_uniform(CanvasShaderGLES3::SRC_RECT, Color(0, 0, 1, 1));
 								}
 							}
+							texpixel_size *= np->scale;
 
 							state.canvas_shader.set_uniform(CanvasShaderGLES3::COLOR_TEXPIXEL_SIZE, texpixel_size);
 							state.canvas_shader.set_uniform(CanvasShaderGLES3::CLIP_RECT_UV, false);

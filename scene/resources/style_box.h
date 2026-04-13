@@ -91,6 +91,7 @@ private:
 	Rect2 region_rect;
 	Ref<Texture> texture;
 	Ref<Texture> normal_map;
+	float scale;
 	bool draw_center;
 	Color modulate;
 	AxisStretchMode axis_h;
@@ -131,8 +132,11 @@ public:
 	void set_modulate(const Color &p_modulate);
 	Color get_modulate() const;
 
+	void set_scale(float p_scale);
+	float get_scale() const;
+
 	virtual Rect2 get_draw_rect(const Rect2 &p_rect) const;
-	virtual void draw(RID p_canvas_item, const Rect2 &p_rect) const;
+	virtual void draw(RID p_canvas_item, const Rect2 &p_rect) const; // , float p_scale = 0
 
 	StyleBoxTexture();
 	~StyleBoxTexture();

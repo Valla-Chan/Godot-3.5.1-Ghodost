@@ -166,10 +166,11 @@ Rect2 StyleBoxTexture::get_draw_rect(const Rect2 &p_rect) const {
 	return p_rect.grow_individual(expand_margin[MARGIN_LEFT], expand_margin[MARGIN_TOP], expand_margin[MARGIN_RIGHT], expand_margin[MARGIN_BOTTOM]);
 }
 
-void StyleBoxTexture::draw(RID p_canvas_item, const Rect2 &p_rect) const {
+void StyleBoxTexture::draw(RID p_canvas_item, const Rect2 &p_rect) const { // , float p_scale
 	if (texture.is_null()) {
 		return;
 	}
+	//float renderscale = p_scale > 0 ? p_scale : scale;
 
 	Rect2 rect = p_rect;
 	Rect2 src_rect = region_rect;
@@ -186,7 +187,7 @@ void StyleBoxTexture::draw(RID p_canvas_item, const Rect2 &p_rect) const {
 		normal_rid = normal_map->get_rid();
 	}
 
-	VisualServer::get_singleton()->canvas_item_add_nine_patch(p_canvas_item, rect, src_rect, texture->get_rid(), Vector2(margin[MARGIN_LEFT], margin[MARGIN_TOP]), Vector2(margin[MARGIN_RIGHT], margin[MARGIN_BOTTOM]), VS::NinePatchAxisMode(axis_h), VS::NinePatchAxisMode(axis_v), draw_center, modulate, normal_rid);
+	VS::get_singleton()->canvas_item_add_nine_patch(p_canvas_item, rect, src_rect, texture->get_rid(), Vector2(margin[MARGIN_LEFT], margin[MARGIN_TOP]), Vector2(margin[MARGIN_RIGHT], margin[MARGIN_BOTTOM]), VS::NinePatchAxisMode(axis_h), VS::NinePatchAxisMode(axis_v), draw_center, modulate, normal_rid, scale); //renderscale
 }
 
 void StyleBoxTexture::set_draw_center(bool p_enabled) {
@@ -278,6 +279,16 @@ Color StyleBoxTexture::get_modulate() const {
 	return modulate;
 }
 
+void StyleBoxTexture::set_scale(float p_scale) {
+	ERR_FAIL_COND_MSG(p_scale <= 0, vformat("Texel scale %s is out of range."), p_scale);
+	scale = p_scale;
+	emit_changed();
+}
+
+float StyleBoxTexture::get_scale() const {
+	return scale;
+}
+
 void StyleBoxTexture::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_texture", "texture"), &StyleBoxTexture::set_texture);
 	ClassDB::bind_method(D_METHOD("get_texture"), &StyleBoxTexture::get_texture);
@@ -308,11 +319,15 @@ void StyleBoxTexture::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_v_axis_stretch_mode", "mode"), &StyleBoxTexture::set_v_axis_stretch_mode);
 	ClassDB::bind_method(D_METHOD("get_v_axis_stretch_mode"), &StyleBoxTexture::get_v_axis_stretch_mode);
 
+	ClassDB::bind_method(D_METHOD("set_texel_scale", "scale"), &StyleBoxTexture::set_scale);
+	ClassDB::bind_method(D_METHOD("get_texel_scale"), &StyleBoxTexture::get_scale);
+
 	ADD_SIGNAL(MethodInfo("texture_changed"));
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_texture", "get_texture");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "normal_map", PROPERTY_HINT_RESOURCE_TYPE, "Texture"), "set_normal_map", "get_normal_map");
 	ADD_PROPERTY(PropertyInfo(Variant::RECT2, "region_rect"), "set_region_rect", "get_region_rect");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "texel_scale", PROPERTY_HINT_RANGE, "0.05, 4.0, 0.05"), "set_texel_scale", "get_texel_scale");
 	ADD_GROUP("Margin", "margin_");
 	ADD_PROPERTYI(PropertyInfo(Variant::REAL, "margin_left", PROPERTY_HINT_RANGE, "0,2048,1"), "set_margin_size", "get_margin_size", MARGIN_LEFT);
 	ADD_PROPERTYI(PropertyInfo(Variant::REAL, "margin_right", PROPERTY_HINT_RANGE, "0,2048,1"), "set_margin_size", "get_margin_size", MARGIN_RIGHT);
@@ -340,6 +355,7 @@ StyleBoxTexture::StyleBoxTexture() {
 		margin[i] = 0;
 		expand_margin[i] = 0;
 	}
+	scale = 1.0;
 	draw_center = true;
 	modulate = Color(1, 1, 1, 1);
 

@@ -47,6 +47,7 @@ public:
 	int margin[4];
 	Rect2 region_rect;
 	Ref<Texture> texture;
+	float scale;
 
 	AxisStretchMode axis_h, axis_v;
 
@@ -67,6 +68,9 @@ public:
 
 	void set_draw_center(bool p_enabled);
 	bool is_draw_center_enabled() const;
+
+	void set_scale(float p_scale);
+	float get_scale() const;
 
 	void set_h_axis_stretch_mode(AxisStretchMode p_mode);
 	AxisStretchMode get_h_axis_stretch_mode() const;

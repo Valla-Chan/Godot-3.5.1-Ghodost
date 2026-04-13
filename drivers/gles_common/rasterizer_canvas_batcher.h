@@ -1492,7 +1492,7 @@ bool C_PREAMBLE::_prefill_ninepatch(RasterizerCanvas::Item::CommandNinePatch *p_
 		source.size.y = tex->height;
 	}
 
-	float screen_scale = 1.0f;
+	float screen_scale = 1.0f * p_np->scale;
 
 	float tex_margin_left = p_np->margin[MARGIN_LEFT];
 	float tex_margin_right = p_np->margin[MARGIN_RIGHT];
