@@ -169,6 +169,7 @@ public:
 
 	StringName transform_pos;
 	StringName transform_rot;
+	StringName transform_skew;
 	StringName transform_scale;
 
 	StringName _update_remote;

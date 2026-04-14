@@ -149,6 +149,7 @@ SceneStringNames::SceneStringNames() {
 
 	transform_pos = StaticCString::create("position");
 	transform_rot = StaticCString::create("rotation_degrees");
+	transform_skew = StaticCString::create("skew_degrees");
 	transform_scale = StaticCString::create("scale");
 
 	_update_remote = StaticCString::create("_update_remote");

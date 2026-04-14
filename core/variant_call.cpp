@@ -887,6 +887,7 @@ struct _VariantCall {
 	VCALL_PTR0R(Transform2D, get_rotation);
 	VCALL_PTR0R(Transform2D, get_origin);
 	VCALL_PTR0R(Transform2D, get_scale);
+	VCALL_PTR0R(Transform2D, get_skew);
 	VCALL_PTR0R(Transform2D, orthonormalized);
 	VCALL_PTR1R(Transform2D, rotated);
 	VCALL_PTR1R(Transform2D, scaled);
@@ -2166,6 +2167,7 @@ void register_variant_methods() {
 	ADDFUNC0R(TRANSFORM2D, REAL, Transform2D, get_rotation, varray());
 	ADDFUNC0R(TRANSFORM2D, VECTOR2, Transform2D, get_origin, varray());
 	ADDFUNC0R(TRANSFORM2D, VECTOR2, Transform2D, get_scale, varray());
+	ADDFUNC0R(TRANSFORM2D, REAL, Transform2D, get_skew, varray());
 	ADDFUNC0R(TRANSFORM2D, TRANSFORM2D, Transform2D, orthonormalized, varray());
 	ADDFUNC1R(TRANSFORM2D, TRANSFORM2D, Transform2D, rotated, REAL, "angle", varray());
 	ADDFUNC1R(TRANSFORM2D, TRANSFORM2D, Transform2D, scaled, VECTOR2, "scale", varray());
