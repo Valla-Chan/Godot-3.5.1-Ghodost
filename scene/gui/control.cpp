@@ -217,7 +217,7 @@ Size2 Control::get_combined_minimum_size() const {
 
 Transform2D Control::_get_internal_transform() const {
 	Transform2D rot_scale;
-	rot_scale.set_rotation_and_scale(data.rotation, data.scale);
+	rot_scale.set_rotation_scale_and_skew(data.rotation, data.scale, data.skew);
 	Transform2D offset;
 	offset.set_origin(-data.pivot_offset);
 
@@ -1574,6 +1574,7 @@ void Control::_change_notify_margins() {
 	_change_notify("margin_bottom");
 	_change_notify("rect_position");
 	_change_notify("rect_size");
+	_change_notify("rect_skew");
 }
 
 void Control::set_margin(Margin p_margin, float p_value) {
@@ -2546,6 +2547,25 @@ float Control::get_rotation_degrees() const {
 	return Math::rad2deg(get_rotation());
 }
 
+void Control::set_skew(float p_radians) {
+	data.skew = p_radians;
+	update();
+	_notify_transform();
+	_change_notify("rect_skew");
+}
+
+float Control::get_skew() const {
+	return data.skew;
+}
+
+void Control::set_skew_degrees(float p_degrees) {
+	set_skew(Math::deg2rad(p_degrees));
+}
+
+float Control::get_skew_degrees() const {
+	return Math::rad2deg(get_skew());
+}
+
 void Control::_override_changed() {
 	notification(NOTIFICATION_THEME_CHANGED);
 	minimum_size_changed(); // overrides are likely to affect minimum size
@@ -2752,6 +2772,8 @@ void Control::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_set_global_position", "position"), &Control::_set_global_position);
 	ClassDB::bind_method(D_METHOD("set_rotation", "radians"), &Control::set_rotation);
 	ClassDB::bind_method(D_METHOD("set_rotation_degrees", "degrees"), &Control::set_rotation_degrees);
+	ClassDB::bind_method(D_METHOD("set_skew", "radians"), &Control::set_skew);
+	ClassDB::bind_method(D_METHOD("set_skew_degrees", "degrees"), &Control::set_skew_degrees);
 	ClassDB::bind_method(D_METHOD("set_scale", "scale"), &Control::set_scale);
 	ClassDB::bind_method(D_METHOD("get_margin", "margin"), &Control::get_margin);
 	ClassDB::bind_method(D_METHOD("get_begin"), &Control::get_begin);
@@ -2760,6 +2782,8 @@ void Control::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_size"), &Control::get_size);
 	ClassDB::bind_method(D_METHOD("get_rotation"), &Control::get_rotation);
 	ClassDB::bind_method(D_METHOD("get_rotation_degrees"), &Control::get_rotation_degrees);
+	ClassDB::bind_method(D_METHOD("get_skew"), &Control::get_skew);
+	ClassDB::bind_method(D_METHOD("get_skew_degrees"), &Control::get_skew_degrees);
 	ClassDB::bind_method(D_METHOD("get_scale"), &Control::get_scale);
 	ClassDB::bind_method(D_METHOD("get_custom_minimum_size"), &Control::get_custom_minimum_size);
 	ClassDB::bind_method(D_METHOD("get_parent_area_size"), &Control::get_parent_area_size);
@@ -2921,6 +2945,7 @@ void Control::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_min_size"), "set_custom_minimum_size", "get_custom_minimum_size");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "rect_rotation", PROPERTY_HINT_RANGE, "-360,360,0.1,or_lesser,or_greater"), "set_rotation_degrees", "get_rotation_degrees");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_scale"), "set_scale", "get_scale");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "rect_skew", PROPERTY_HINT_RANGE, "-89.9,89.9,0.1"), "set_skew_degrees", "get_skew_degrees");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_pivot_offset"), "set_pivot_offset", "get_pivot_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "rect_lock_pivot_to_center"), "set_pivot_center_locked", "is_pivot_center_locked");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "rect_force_pixel_snapping"), "set_force_pixel_snapping", "get_force_pixel_snapping");
@@ -3061,6 +3086,7 @@ Control::Control() {
 	data.rotation = 0;
 	data.parent_canvas_item = nullptr;
 	data.scale = Vector2(1, 1);
+	data.skew = 0.0;
 	data.drag_owner = 0;
 	data.modal_frame = 0;
 	data.block_minimum_size_adjust = false;
