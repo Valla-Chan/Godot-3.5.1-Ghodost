@@ -854,7 +854,9 @@ void LineEdit::_notification(int p_what) {
 			Color font_color_selected = get_color("font_color_selected");
 			Color cursor_color = get_color("cursor_color");
 
-			const String &t = using_placeholder ? placeholder_translated : text;
+			const String &t1 = using_placeholder ? placeholder_translated : text;
+			const String &t = upper ? t1.to_upper() : t1;
+
 			// Draw placeholder color.
 			if (using_placeholder) {
 				font_color.a *= placeholder_alpha;
@@ -1671,6 +1673,16 @@ bool LineEdit::is_editable() const {
 	return editable;
 }
 
+void LineEdit::set_uppercase(bool p_upper) {
+	upper = p_upper;
+	update_cached_width();
+	update();
+}
+
+bool LineEdit::is_uppercase() const {
+	return upper;
+}
+
 void LineEdit::set_secret(bool p_secret) {
 	pass = p_secret;
 	update_cached_width();
@@ -2010,6 +2022,8 @@ void LineEdit::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("delete_text", "from_column", "to_column"), &LineEdit::delete_text);
 	ClassDB::bind_method(D_METHOD("set_editable", "enabled"), &LineEdit::set_editable);
 	ClassDB::bind_method(D_METHOD("is_editable"), &LineEdit::is_editable);
+	ClassDB::bind_method(D_METHOD("set_uppercase", "enabled"), &LineEdit::set_uppercase);
+	ClassDB::bind_method(D_METHOD("is_uppercase"), &LineEdit::is_uppercase);
 	ClassDB::bind_method(D_METHOD("set_secret", "enabled"), &LineEdit::set_secret);
 	ClassDB::bind_method(D_METHOD("is_secret"), &LineEdit::is_secret);
 	ClassDB::bind_method(D_METHOD("set_secret_character", "character"), &LineEdit::set_secret_character);
@@ -2055,6 +2069,7 @@ void LineEdit::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "align", PROPERTY_HINT_ENUM, "Left,Center,Right,Fill"), "set_align", "get_align");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "max_length", PROPERTY_HINT_RANGE, "0,1000,1,or_greater"), "set_max_length", "get_max_length");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "editable"), "set_editable", "is_editable");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "uppercase"), "set_uppercase", "is_uppercase");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "secret"), "set_secret", "is_secret");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "secret_character"), "set_secret_character", "get_secret_character");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flat"), "set_flat", "is_flat");
@@ -2084,6 +2099,7 @@ LineEdit::LineEdit() {
 	scroll_offset = 0;
 	window_has_focus = true;
 	max_length = 0;
+	upper = false;
 	pass = false;
 	secret_character = "*";
 	flat = false;

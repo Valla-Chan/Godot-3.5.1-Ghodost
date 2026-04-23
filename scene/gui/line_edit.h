@@ -55,6 +55,7 @@ private:
 	Align align;
 
 	bool editable;
+	bool upper;
 	bool pass;
 	bool text_changed_dirty;
 
@@ -217,6 +218,9 @@ public:
 
 	void set_editable(bool p_editable);
 	bool is_editable() const;
+
+	void set_uppercase(bool p_upper);
+	bool is_uppercase() const;
 
 	void set_secret(bool p_secret);
 	bool is_secret() const;
