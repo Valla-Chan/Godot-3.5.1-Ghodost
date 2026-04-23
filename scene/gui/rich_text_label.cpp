@@ -2857,13 +2857,14 @@ String RichTextLabel::get_text() const {
 }
 
 // Get the text after the bbcode has been parsed out
+// returns translated text. will need to be edited to return non translated text with a bool arg.
 String RichTextLabel::get_parsed_text() const {
 	String txt = "";
 	Item *it = main;
 	while (it) {
 		if (it->type == ITEM_TEXT) {
 			ItemText *t = static_cast<ItemText *>(it);
-			txt += t->text;
+			txt += t->xl_text;
 		} else if (it->type == ITEM_NEWLINE) {
 			txt += "\n";
 		} else if (it->type == ITEM_INDENT) {
