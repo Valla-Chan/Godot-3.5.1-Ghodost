@@ -641,9 +641,6 @@ void LineEdit::_gui_input(Ref<InputEvent> p_event) {
 						CharType ucodestr[2] = { (CharType)k->get_unicode(), 0 };
 						int prev_len = text.length();
 						append_at_cursor(ucodestr);
-						if (text.length() != prev_len) {
-							_text_changed();
-						}
 						accept_event();
 					}
 
@@ -826,9 +823,6 @@ void LineEdit::_notification(int p_what) {
 
 			const String &t1 = using_placeholder ? placeholder_translated : text;
 			const String &t = upper ? t1.to_upper() : t1;
-
-			//int content_width = size.width - style->get_margin(MARGIN_LEFT) - style->get_margin(MARGIN_RIGHT);
-			//int text_width = font->get_string_size(t).width;
 
 			switch (align) {
 				case ALIGN_FILL:
@@ -1351,9 +1345,9 @@ void LineEdit::delete_char() {
 	}
 
 	Ref<Font> font = get_font_scaled("font");
-	if (font != nullptr) {
-		cached_width -= font->get_char_size(pass ? secret_character[0] : text[cursor_pos - 1]).width;
-	}
+	//if (font != nullptr) {
+	//	cached_width -= font->get_char_size(pass ? secret_character[0] : text[cursor_pos - 1]).width;
+	//}
 
 	text.erase(cursor_pos - 1, 1);
 
@@ -1372,9 +1366,7 @@ void LineEdit::delete_text(int p_from_column, int p_to_column) {
 	if (text.size() > 0) {
 		Ref<Font> font = get_font_scaled("font");
 		if (font != nullptr) {
-			for (int i = p_from_column; i < p_to_column; i++) {
-				cached_width -= font->get_char_size(pass ? secret_character[0] : text[i]).width;
-			}
+			update_cached_width();
 		}
 	} else {
 		cached_width = 0;
@@ -1434,10 +1426,6 @@ void LineEdit::show_virtual_keyboard() {
 			OS::get_singleton()->show_virtual_keyboard(text, get_global_rect(), false, max_length, cursor_pos);
 		}
 	}
-}
-
-String LineEdit::get_text() const {
-	return text;
 }
 
 void LineEdit::set_placeholder(String p_text) {
@@ -1632,7 +1620,8 @@ void LineEdit::selection_delete() {
 void LineEdit::set_max_length(int p_max_length) {
 	ERR_FAIL_COND(p_max_length < 0);
 	max_length = p_max_length;
-	set_text(text);
+	const String t = text;
+	set_text(t);
 }
 
 int LineEdit::get_max_length() const {
@@ -1943,9 +1932,8 @@ void LineEdit::update_placeholder_width() {
 	Ref<Font> font = get_font_scaled("font");
 	cached_placeholder_width = 0;
 	if (font != nullptr) {
-		for (int i = 0; i < placeholder_translated.length(); i++) {
-			cached_placeholder_width += font->get_char_size(placeholder_translated[i]).width;
-		}
+		String &t = upper ? placeholder_translated.to_upper() : placeholder_translated;
+		cached_placeholder_width = font->get_string_size(t).width;
 	}
 }
 
