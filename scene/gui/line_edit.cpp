@@ -74,13 +74,6 @@ void LineEdit::_gui_input(Ref<InputEvent> p_event) {
 			set_cursor_at_pixel_pos(b->get_position().x);
 			if (!paste_buffer.empty()) {
 				append_at_cursor(paste_buffer);
-
-				if (!text_changed_dirty) {
-					if (is_inside_tree()) {
-						MessageQueue::get_singleton()->push_call(this, "_text_changed");
-					}
-					text_changed_dirty = true;
-				}
 			}
 
 			grab_focus();
@@ -293,10 +286,8 @@ void LineEdit::_gui_input(Ref<InputEvent> p_event) {
 
 					if (editable) {
 						deselect();
-						text = text.substr(cursor_pos, text.length() - cursor_pos);
-						update_cached_width();
+						set_text(text.substr(cursor_pos, text.length() - cursor_pos));
 						set_cursor_position(0);
-						_text_changed();
 					}
 
 				} break;
@@ -312,8 +303,7 @@ void LineEdit::_gui_input(Ref<InputEvent> p_event) {
 
 					if (editable) {
 						deselect();
-						text = text.substr(0, cursor_pos);
-						_text_changed();
+						set_text(text.substr(0, cursor_pos));
 					}
 
 				} break;
@@ -721,12 +711,6 @@ void LineEdit::drop_data(const Point2 &p_point, const Variant &p_data) {
 			grab_focus();
 		}
 		select(caret_column_tmp, cursor_pos);
-		if (!text_changed_dirty) {
-			if (is_inside_tree()) {
-				MessageQueue::get_singleton()->push_call(this, "_text_changed");
-			}
-			text_changed_dirty = true;
-		}
 		update();
 	}
 }
@@ -1108,13 +1092,6 @@ void LineEdit::paste_text() {
 			selection_delete();
 		}
 		append_at_cursor(paste_buffer);
-
-		if (!text_changed_dirty) {
-			if (is_inside_tree() && text.length() != prev_len) {
-				MessageQueue::get_singleton()->push_call(this, "_text_changed");
-			}
-			text_changed_dirty = true;
-		}
 	}
 }
 
@@ -1357,7 +1334,8 @@ void LineEdit::delete_char() {
 		scroll_offset = CLAMP(scroll_offset - 1, 0, MAX(text.length() - 1, 0));
 	}
 
-	_text_changed();
+	const String t = text;
+	set_text(t);
 }
 
 void LineEdit::delete_text(int p_from_column, int p_to_column) {
@@ -1386,12 +1364,8 @@ void LineEdit::delete_text(int p_from_column, int p_to_column) {
 		scroll_offset = CLAMP(scroll_offset - (p_to_column - p_from_column), 0, MAX(text.length() - 1, 0));
 	}
 
-	if (!text_changed_dirty) {
-		if (is_inside_tree()) {
-			MessageQueue::get_singleton()->push_call(this, "_text_changed");
-		}
-		text_changed_dirty = true;
-	}
+	const String t = text;
+	set_text(t);
 }
 
 void LineEdit::set_text(const String &p_text) {
@@ -1529,6 +1503,7 @@ int LineEdit::get_scroll_offset() const {
 }
 
 void LineEdit::append_at_cursor(String p_text) {
+	const String text_prev = text;
 	if (max_length > 0) {
 		// Truncate text to append to fit in max_length, if needed.
 		int available_chars = max_length - text.length();
@@ -1540,8 +1515,18 @@ void LineEdit::append_at_cursor(String p_text) {
 	String pre = text.substr(0, cursor_pos);
 	String post = text.substr(cursor_pos, text.length() - cursor_pos);
 	text = pre + p_text + post;
-	update_cached_width();
-	set_cursor_position(cursor_pos + p_text.length());
+	if (text != text_prev) {
+		update_cached_width();
+		set_cursor_position(cursor_pos + p_text.length());
+		if (!text_changed_dirty) {
+			if (is_inside_tree()) {
+				MessageQueue::get_singleton()->push_call(this, "_text_changed");
+			}
+			text_changed_dirty = true;
+			return;
+		}
+		_text_changed();
+	}
 }
 
 void LineEdit::clear_internal() {
