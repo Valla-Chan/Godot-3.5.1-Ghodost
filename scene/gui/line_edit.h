@@ -160,6 +160,8 @@ private:
 	void _gui_input(Ref<InputEvent> p_event);
 	void _notification(int p_what);
 
+	void _set_text(const String p_text);
+
 protected:
 	static void _bind_methods();
 
@@ -197,7 +199,7 @@ public:
 	int get_cursor_position() const;
 	void set_max_length(int p_max_length);
 	int get_max_length() const;
-	void append_at_cursor(String p_text);
+	void append_at_cursor(String p_text, bool p_clear = false);
 	void clear();
 
 	bool cursor_get_blink_enabled() const;

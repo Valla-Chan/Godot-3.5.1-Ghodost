@@ -286,7 +286,7 @@ void LineEdit::_gui_input(Ref<InputEvent> p_event) {
 
 					if (editable) {
 						deselect();
-						set_text(text.substr(cursor_pos, text.length() - cursor_pos));
+						_set_text(text.substr(cursor_pos, text.length() - cursor_pos));
 						set_cursor_position(0);
 					}
 
@@ -303,7 +303,7 @@ void LineEdit::_gui_input(Ref<InputEvent> p_event) {
 
 					if (editable) {
 						deselect();
-						set_text(text.substr(0, cursor_pos));
+						_set_text(text.substr(0, cursor_pos));
 					}
 
 				} break;
@@ -1322,20 +1322,21 @@ void LineEdit::delete_char() {
 	}
 
 	Ref<Font> font = get_font_scaled("font");
-	//if (font != nullptr) {
-	//	cached_width -= font->get_char_size(pass ? secret_character[0] : text[cursor_pos - 1]).width;
-	//}
 
-	text.erase(cursor_pos - 1, 1);
+	String t = text;
+	t.erase(cursor_pos - 1, 1);
 
-	set_cursor_position(get_cursor_position() - 1);
+	int cursor = (get_cursor_position() - 1);
+	int scroll = get_scroll_offset();
 
 	if (align == ALIGN_CENTER || align == ALIGN_RIGHT) {
-		scroll_offset = CLAMP(scroll_offset - 1, 0, MAX(text.length() - 1, 0));
+		scroll_offset = CLAMP(scroll_offset - 1, 0, MAX(t.length() - 1, 0));
 	}
 
-	const String t = text;
-	set_text(t);
+	_set_text(t);
+
+	set_cursor_position(cursor);
+	set_scroll_offset(scroll);
 }
 
 void LineEdit::delete_text(int p_from_column, int p_to_column) {
@@ -1350,36 +1351,43 @@ void LineEdit::delete_text(int p_from_column, int p_to_column) {
 		cached_width = 0;
 	}
 
-	text.erase(p_from_column, p_to_column - p_from_column);
-	cursor_pos -= CLAMP(cursor_pos - p_from_column, 0, p_to_column - p_from_column);
+	String t = text;
+	t.erase(p_from_column, p_to_column - p_from_column);
+	int cursor = cursor_pos - CLAMP(cursor_pos - p_from_column, 0, p_to_column - p_from_column);
+	int scroll = get_scroll_offset();
 
-	if (cursor_pos >= text.length()) {
-		cursor_pos = text.length();
+	_set_text(t);
+
+	if (cursor >= t.length()) {
+		cursor = t.length();
 	}
-	if (scroll_offset > cursor_pos) {
-		scroll_offset = cursor_pos;
+	if (scroll > cursor) {
+		scroll = cursor;
 	}
 
 	if (align == ALIGN_CENTER || align == ALIGN_RIGHT) {
-		scroll_offset = CLAMP(scroll_offset - (p_to_column - p_from_column), 0, MAX(text.length() - 1, 0));
+		scroll = CLAMP(scroll - (p_to_column - p_from_column), 0, MAX(t.length() - 1, 0));
 	}
 
-	const String t = text;
-	set_text(t);
+	set_cursor_position(cursor);
+	set_scroll_offset(scroll);
 }
 
 void LineEdit::set_text(const String &p_text) {
-	clear_internal();
-	append_at_cursor(p_text);
+	_set_text(p_text);
 	_create_undo_state();
+	cursor_pos = 0;
+	scroll_offset = 0;
+}
+
+void LineEdit::_set_text(const String p_text) {
+	append_at_cursor(p_text, true);
 
 	if (expand_to_text_length) {
 		minimum_size_changed();
 	}
 
 	update();
-	cursor_pos = 0;
-	scroll_offset = 0;
 }
 
 void LineEdit::clear() {
@@ -1423,13 +1431,8 @@ float LineEdit::get_placeholder_alpha() const {
 }
 
 void LineEdit::set_cursor_position(int p_pos) {
-	if (p_pos > (int)text.length()) {
-		p_pos = text.length();
-	}
-
-	if (p_pos < 0) {
-		p_pos = 0;
-	}
+	p_pos = MIN(p_pos, text.length());
+	p_pos = MAX(p_pos, 0);
 
 	cursor_pos = p_pos;
 
@@ -1502,30 +1505,37 @@ int LineEdit::get_scroll_offset() const {
 	return scroll_offset;
 }
 
-void LineEdit::append_at_cursor(String p_text) {
+void LineEdit::append_at_cursor(String p_text, bool p_clear) {
 	const String text_prev = text;
+	if (p_clear) {
+		clear_internal();
+	}
+	bool rejected = false;
 	if (max_length > 0) {
 		// Truncate text to append to fit in max_length, if needed.
 		int available_chars = max_length - text.length();
 		if (p_text.length() > available_chars) {
 			emit_signal("text_change_rejected", p_text.substr(available_chars));
 			p_text = p_text.substr(0, available_chars);
+			rejected = true;
 		}
 	}
 	String pre = text.substr(0, cursor_pos);
 	String post = text.substr(cursor_pos, text.length() - cursor_pos);
 	text = pre + p_text + post;
-	if (text != text_prev) {
+	if (text != text_prev || rejected || p_text.length() == max_length) {
 		update_cached_width();
 		set_cursor_position(cursor_pos + p_text.length());
-		if (!text_changed_dirty) {
-			if (is_inside_tree()) {
-				MessageQueue::get_singleton()->push_call(this, "_text_changed");
+		if (text != text_prev) {
+			if (!text_changed_dirty) {
+				if (is_inside_tree()) {
+					MessageQueue::get_singleton()->push_call(this, "_text_changed");
+				}
+				text_changed_dirty = true;
+				return;
 			}
-			text_changed_dirty = true;
-			return;
+			_text_changed();
 		}
-		_text_changed();
 	}
 }
 
@@ -1605,8 +1615,7 @@ void LineEdit::selection_delete() {
 void LineEdit::set_max_length(int p_max_length) {
 	ERR_FAIL_COND(p_max_length < 0);
 	max_length = p_max_length;
-	const String t = text;
-	set_text(t);
+	_set_text(text);
 }
 
 int LineEdit::get_max_length() const {
