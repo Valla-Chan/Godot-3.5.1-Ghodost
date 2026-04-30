@@ -805,8 +805,7 @@ void LineEdit::_notification(int p_what) {
 			bool using_placeholder = text.empty() && ime_text.empty();
 			int cached_text_width = using_placeholder ? cached_placeholder_width : cached_width;
 
-			const String &t1 = using_placeholder ? placeholder_translated : text;
-			const String &t = upper ? t1.to_upper() : t1;
+			const String &t = using_placeholder ? placeholder_translated : (upper ? text.to_upper() : text);
 
 			switch (align) {
 				case ALIGN_FILL:
@@ -926,9 +925,7 @@ void LineEdit::_notification(int p_what) {
 				int yofs = y_ofs + (caret_height - font->get_height()) / 2;
 				float drawnx = drawer.draw_char(ci, Point2(x_ofs, yofs + font_ascent), cchar, next, selected ? font_color_selected : font_color);
 
-				int caret_x_ofs = x_ofs_prev;
-				if (cursor_pos > 0)
-					caret_x_ofs += font->get_char_size(cchar).width;
+				int caret_x_ofs = x_ofs;
 				// Draw mid-text caret
 				if (char_ofs == cursor_pos && draw_caret && !using_placeholder) {
 					if (ime_text.length() == 0) {
@@ -1374,6 +1371,9 @@ void LineEdit::delete_text(int p_from_column, int p_to_column) {
 }
 
 void LineEdit::set_text(const String &p_text) {
+	if (p_text == text) {
+		return;
+	}
 	_set_text(p_text);
 	_create_undo_state();
 	cursor_pos = 0;
@@ -1381,7 +1381,7 @@ void LineEdit::set_text(const String &p_text) {
 }
 
 void LineEdit::_set_text(const String p_text) {
-	append_at_cursor(p_text, true);
+	append_at_cursor_internal(p_text, true);
 
 	if (expand_to_text_length) {
 		minimum_size_changed();
@@ -1505,7 +1505,11 @@ int LineEdit::get_scroll_offset() const {
 	return scroll_offset;
 }
 
-void LineEdit::append_at_cursor(String p_text, bool p_clear) {
+void LineEdit::append_at_cursor(String p_text) {
+	append_at_cursor_internal(p_text);
+}
+
+void LineEdit::append_at_cursor_internal(String p_text, bool p_clear) {
 	const String text_prev = text;
 	if (p_clear) {
 		clear_internal();
@@ -1615,7 +1619,10 @@ void LineEdit::selection_delete() {
 void LineEdit::set_max_length(int p_max_length) {
 	ERR_FAIL_COND(p_max_length < 0);
 	max_length = p_max_length;
+	int cursor = cursor_pos;
 	_set_text(text);
+	update_cached_width();
+	set_cursor_position(cursor);
 }
 
 int LineEdit::get_max_length() const {
@@ -1702,6 +1709,18 @@ void LineEdit::set_secret_character(const String &p_string) {
 
 String LineEdit::get_secret_character() const {
 	return secret_character;
+}
+
+String LineEdit::get_displayed_text() const {
+	String t;
+	if (pass) {
+		for (int i = 0; i < text.length(); i++) {
+			t += secret_character;
+		}
+	} else {
+		t = upper ? text.to_upper() : text;
+	}
+	return t;
 }
 
 void LineEdit::select(int p_from, int p_to) {
@@ -1893,6 +1912,16 @@ Ref<Texture> LineEdit::get_right_icon() {
 	return right_icon;
 }
 
+void LineEdit::set_extra_spaces(const int p_spaces) {
+	extra_spaces = MAX(p_spaces, 0);
+	update_cached_width();
+	update();
+}
+
+int LineEdit::get_extra_spaces() const {
+	return extra_spaces;
+}
+
 void LineEdit::_text_changed() {
 	if (expand_to_text_length) {
 		minimum_size_changed();
@@ -1912,11 +1941,11 @@ void LineEdit::update_cached_width() {
 	Ref<Font> font = get_font_scaled("font");
 	cached_width = 0;
 	if (font != nullptr) {
-		String t;
-		if (upper) {
-			t = pass ? secret_character.to_upper() : text.to_upper();
-		} else {
-			t = pass ? secret_character : text;
+		String &t = get_displayed_text();
+		if (extra_spaces > 0) {
+			for (int i = 0; i < extra_spaces; i++) {
+				t += "0";
+			}
 		}
 		cached_width = font->get_string_size(t).width;
 	}
@@ -1926,8 +1955,7 @@ void LineEdit::update_placeholder_width() {
 	Ref<Font> font = get_font_scaled("font");
 	cached_placeholder_width = 0;
 	if (font != nullptr) {
-		String &t = upper ? placeholder_translated.to_upper() : placeholder_translated;
-		cached_placeholder_width = font->get_string_size(t).width;
+		cached_placeholder_width = font->get_string_size(placeholder_translated).width;
 	}
 }
 
@@ -2045,6 +2073,8 @@ void LineEdit::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_deselect_on_focus_loss_enabled"), &LineEdit::is_deselect_on_focus_loss_enabled);
 	ClassDB::bind_method(D_METHOD("set_right_icon", "icon"), &LineEdit::set_right_icon);
 	ClassDB::bind_method(D_METHOD("get_right_icon"), &LineEdit::get_right_icon);
+	ClassDB::bind_method(D_METHOD("set_extra_spaces", "spaces"), &LineEdit::set_extra_spaces);
+	ClassDB::bind_method(D_METHOD("get_extra_spaces"), &LineEdit::get_extra_spaces);
 
 	ADD_SIGNAL(MethodInfo("text_changed", PropertyInfo(Variant::STRING, "new_text")));
 	ADD_SIGNAL(MethodInfo("text_change_rejected", PropertyInfo(Variant::STRING, "rejected_substring")));
@@ -2066,6 +2096,7 @@ void LineEdit::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "align", PROPERTY_HINT_ENUM, "Left,Center,Right,Fill"), "set_align", "get_align");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "max_length", PROPERTY_HINT_RANGE, "0,1000,1,or_greater"), "set_max_length", "get_max_length");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "extra_spaces", PROPERTY_HINT_RANGE, "0,1000,1,or_greater", PROPERTY_USAGE_NOEDITOR), "set_extra_spaces", "get_extra_spaces");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "editable"), "set_editable", "is_editable");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "uppercase"), "set_uppercase", "is_uppercase");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "secret"), "set_secret", "is_secret");
@@ -2110,6 +2141,7 @@ LineEdit::LineEdit() {
 	middle_mouse_paste_enabled = true;
 	selecting_enabled = true;
 	deselect_on_focus_loss_enabled = true;
+	extra_spaces = 0;
 
 	undo_stack_pos = nullptr;
 	_create_undo_state();

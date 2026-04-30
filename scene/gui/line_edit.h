@@ -67,6 +67,7 @@ private:
 	float placeholder_alpha;
 	String ime_text;
 	Point2 ime_selection;
+	int extra_spaces;
 
 	bool selecting_enabled;
 	bool deselect_on_focus_loss_enabled;
@@ -161,6 +162,7 @@ private:
 	void _notification(int p_what);
 
 	void _set_text(const String p_text);
+	void append_at_cursor_internal(String p_text, bool p_clear = false);
 
 protected:
 	static void _bind_methods();
@@ -199,7 +201,7 @@ public:
 	int get_cursor_position() const;
 	void set_max_length(int p_max_length);
 	int get_max_length() const;
-	void append_at_cursor(String p_text, bool p_clear = false);
+	void append_at_cursor(String p_text);
 	void clear();
 
 	bool cursor_get_blink_enabled() const;
@@ -227,6 +229,7 @@ public:
 
 	void set_secret_character(const String &p_string);
 	String get_secret_character() const;
+	String get_displayed_text() const;
 
 	virtual Size2 get_minimum_size() const;
 
@@ -256,6 +259,9 @@ public:
 
 	void set_right_icon(const Ref<Texture> &p_icon);
 	Ref<Texture> get_right_icon();
+
+	void set_extra_spaces(const int p_spaces);
+	int get_extra_spaces() const;
 
 	virtual bool is_text_field() const;
 
