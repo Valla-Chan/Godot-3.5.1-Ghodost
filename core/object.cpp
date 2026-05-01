@@ -1227,7 +1227,10 @@ Error Object::emit_signal(const StringName &p_name, const Variant **p_args, int 
 		const Variant **args = p_args;
 		int argc = p_argcount;
 
-		if (c.binds.size()) {
+		if (c.flags & CONNECT_DROP_BINDS) {
+			args = (const Variant **)c.binds.ptr();
+			argc = c.binds.size();
+		} else if (c.binds.size()) {
 			//handle binds
 			bind_mem.resize(p_argcount + c.binds.size());
 
@@ -1794,6 +1797,7 @@ void Object::_bind_methods() {
 	BIND_ENUM_CONSTANT(CONNECT_PERSIST);
 	BIND_ENUM_CONSTANT(CONNECT_ONESHOT);
 	BIND_ENUM_CONSTANT(CONNECT_REFERENCE_COUNTED);
+	BIND_ENUM_CONSTANT(CONNECT_DROP_BINDS);
 }
 
 void Object::call_deferred(const StringName &p_method, VARIANT_ARG_DECLARE) {

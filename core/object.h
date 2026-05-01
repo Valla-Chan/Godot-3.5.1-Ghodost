@@ -413,6 +413,7 @@ public:
 		CONNECT_PERSIST = 2, // hint for scene to save this connection
 		CONNECT_ONESHOT = 4,
 		CONNECT_REFERENCE_COUNTED = 8,
+		CONNECT_DROP_BINDS = 16, // drop binds from signal
 	};
 
 	struct Connection {

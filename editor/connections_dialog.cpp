@@ -324,6 +324,10 @@ bool ConnectDialog::get_oneshot() const {
 	return oneshot->is_pressed();
 }
 
+bool ConnectDialog::get_dropbinds() const {
+	return dropbinds->is_pressed();
+}
+
 /*
  * Returns true if ConnectDialog is being used to edit an existing connection.
  */
@@ -354,9 +358,11 @@ void ConnectDialog::init(Connection c, bool bEdit) {
 
 	bool bDeferred = (c.flags & CONNECT_DEFERRED) == CONNECT_DEFERRED;
 	bool bOneshot = (c.flags & CONNECT_ONESHOT) == CONNECT_ONESHOT;
+	bool bDropBinds = (c.flags & CONNECT_DROP_BINDS) == CONNECT_DROP_BINDS;
 
 	deferred->set_pressed(bDeferred);
 	oneshot->set_pressed(bOneshot);
+	dropbinds->set_pressed(bDropBinds);
 
 	cdbinds->params.clear();
 	cdbinds->params = c.binds;
@@ -618,6 +624,12 @@ ConnectDialog::ConnectDialog() {
 	oneshot->set_tooltip(TTR("Disconnects the signal after its first emission."));
 	vbc_right->add_child(oneshot);
 
+	dropbinds = memnew(CheckBox);
+	dropbinds->set_h_size_flags(0);
+	dropbinds->set_text(TTR("Drop Signal Binds"));
+	dropbinds->set_tooltip(TTR("Connects this signal without the emitted arguments."));
+	vbc_right->add_child(dropbinds);
+
 	dst_method_select_popup = memnew(ConfirmationDialog);
 	dst_method_select_popup->set_title("Select a method");
 	dst_method_select_popup->get_ok()->set_text("Select");
@@ -688,7 +700,8 @@ void ConnectionsDock::_make_or_edit_connection() {
 	cToMake.binds = connect_dialog->get_binds();
 	bool defer = connect_dialog->get_deferred();
 	bool oshot = connect_dialog->get_oneshot();
-	cToMake.flags = CONNECT_PERSIST | (defer ? CONNECT_DEFERRED : 0) | (oshot ? CONNECT_ONESHOT : 0);
+	bool dropbinds = connect_dialog->get_dropbinds();
+	cToMake.flags = CONNECT_PERSIST | (defer ? CONNECT_DEFERRED : 0) | (oshot ? CONNECT_ONESHOT : 0) | (dropbinds ? CONNECT_DROP_BINDS : 0);
 
 	// Conditions to add function: must have a script and must not have the method already
 	// (in the class, the script itself, or inherited).
@@ -1211,6 +1224,9 @@ void ConnectionsDock::update_tree() {
 				}
 				if (c.flags & CONNECT_ONESHOT) {
 					path += " (oneshot)";
+				}
+				if (c.flags & CONNECT_DROP_BINDS) {
+					path += " (dropbinds)";
 				}
 				if (c.binds.size()) {
 					path += " binds(";
