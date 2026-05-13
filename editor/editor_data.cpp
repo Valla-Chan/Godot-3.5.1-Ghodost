@@ -1076,7 +1076,7 @@ void EditorSelection::add_node(Node *p_node) {
 
 	p_node->connect("tree_exiting", this, "_node_removed", varray(p_node), CONNECT_ONESHOT);
 
-	//emit_signal("selection_changed");
+	emit_signal("selection_changed");
 }
 
 void EditorSelection::remove_node(Node *p_node) {
@@ -1094,7 +1094,8 @@ void EditorSelection::remove_node(Node *p_node) {
 	}
 	selection.erase(p_node);
 	p_node->disconnect("tree_exiting", this, "_node_removed");
-	//emit_signal("selection_changed");
+	// NOTE: uncommenting this fixes the scenetree multi-selection glitch but crashes for spriteframes items.
+	emit_signal("selection_changed");
 }
 bool EditorSelection::is_selected(Node *p_node) const {
 	return selection.has(p_node);
@@ -1129,6 +1130,7 @@ void EditorSelection::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_transformable_selected_nodes"), &EditorSelection::_get_transformable_selected_nodes);
 	ClassDB::bind_method(D_METHOD("_emit_change"), &EditorSelection::_emit_change);
 	ADD_SIGNAL(MethodInfo("selection_changed"));
+	ADD_SIGNAL(MethodInfo("node_removed"));
 	//ADD_SIGNAL(MethodInfo("nodelist_changed"));
 }
 

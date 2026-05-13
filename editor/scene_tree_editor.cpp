@@ -167,17 +167,24 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		return false;
 	}
 
-	// add hidden root
-	if (!p_parent) {
-		TreeItem *rootitem = tree->create_item(nullptr);
-		tree->set_hide_root(true);
+	// Stupid fucking hack. im done trying to fix this shit.
+	if (tree->is_blocked()) {
+		return false;
+	}
 
-		// add copy of marked nodes at root
-		for (Set<Node *>::Element *E = marked.front(); E; E = E->next()) {
-			_add_nodes(E->get(), tree->get_root(), p_scroll_to_selected);
+	if (connect_to_script_mode) {
+		// add hidden root
+		if (!p_parent) {
+			TreeItem *rootitem = tree->create_item(nullptr);
+			tree->set_hide_root(true);
+
+			// add copy of marked nodes at root
+			for (Set<Node *>::Element *E = marked.front(); E; E = E->next()) {
+				_add_nodes(E->get(), tree->get_root(), p_scroll_to_selected);
+			}
+
+			p_parent = rootitem;
 		}
-
-		p_parent = rootitem;
 	}
 
 
@@ -198,10 +205,8 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 	} else {
 		part_of_subscene = p_node != get_scene_node() && get_scene_node()->get_scene_inherited_state().is_valid() && get_scene_node()->get_scene_inherited_state()->find_node_by_path(get_scene_node()->get_path_to(p_node)) >= 0;
 	}
-
-	TreeItem *item = tree->create_item(p_parent);
-
 	
+	TreeItem *item = tree->create_item(p_parent);
 	item->set_text(0, p_node->get_name());
 	if (can_rename && !part_of_subscene /*(p_node->get_owner() == get_scene_node() || p_node==get_scene_node())*/) {
 		item->set_editable(0, true);
@@ -648,7 +653,7 @@ void SceneTreeEditor::_node_renamed(Node *p_node) {
 }
 
 void SceneTreeEditor::_update_tree(bool p_scroll_to_selected) {
-	if (!is_inside_tree()) {
+	if (!is_inside_tree() || tree->is_blocked()) { // stupid hack for multi select fix.
 		tree_dirty = false;
 		return;
 	}

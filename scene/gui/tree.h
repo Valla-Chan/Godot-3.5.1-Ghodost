@@ -546,6 +546,8 @@ public:
 
 	void clear();
 
+	bool is_blocked() const { return blocked > 0; }
+
 	TreeItem *create_item(TreeItem *p_parent = nullptr, int p_idx = -1);
 	TreeItem *get_root();
 	TreeItem *get_last_item();
