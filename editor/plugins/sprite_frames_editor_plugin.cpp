@@ -2368,7 +2368,7 @@ void SpriteFramesEditorPlugin::edit_current_object() {
 void SpriteFramesEditorPlugin::edit(Object *p_object) {
 	frames_editor->set_undo_redo(&get_undo_redo());
 
-	if (edited_object && (edited_object->is_class("AnimatedTextureRect") || edited_object->is_class("AnimatedSprite") || edited_object->is_class("AnimatedSprite3D"))) {
+	if (ObjectDB::instance_validate(edited_object) && (edited_object->is_class("AnimatedTextureRect") || edited_object->is_class("AnimatedSprite") || edited_object->is_class("AnimatedSprite3D"))) {
 		if (edited_object->is_connected("frames_resource_changed", this, "edit_current_object")) {
 			edited_object->disconnect("frames_resource_changed", this, "edit_current_object");
 		}

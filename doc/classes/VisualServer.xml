@@ -180,6 +180,7 @@
 			<argument index="8" name="draw_center" type="bool" default="true" />
 			<argument index="9" name="modulate" type="Color" default="Color( 1, 1, 1, 1 )" />
 			<argument index="10" name="normal_map" type="RID" />
+			<argument index="11" name="scale" type="float" />
 			<description>
 				Adds a nine patch image to the [CanvasItem]'s draw commands.
 				See [NinePatchRect] for more explanation.
