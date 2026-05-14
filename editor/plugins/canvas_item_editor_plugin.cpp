@@ -444,11 +444,18 @@ Point2 CanvasItemEditor::snap_point(Point2 p_target, unsigned int p_modes, unsig
 		Point2 offset = grid_offset;
 		if (snap_relative) {
 			List<CanvasItem *> selection = _get_edited_canvas_items();
+			// make this use the first selection item no matter what.
+			if (selection.size() > 0 && Object::cast_to<Node2D>(selection[0])) {
+				offset = Object::cast_to<Node2D>(selection[0])->get_global_position();
+			} else {
+				offset = _get_encompassing_rect_from_list(selection).position;
+			}
+			/*
 			if (selection.size() == 1 && Object::cast_to<Node2D>(selection[0])) {
 				offset = Object::cast_to<Node2D>(selection[0])->get_global_position();
 			} else if (selection.size() > 0) {
-				offset = _get_encompassing_rect_from_list(selection).position;
-			}
+				//offset = _get_encompassing_rect_from_list(selection).position;
+			}*/
 		}
 		Point2 grid_output;
 		grid_output.x = Math::stepify(p_target.x - offset.x, grid_step.x * Math::pow(2.0, grid_step_multiplier)) + offset.x;
