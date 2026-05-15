@@ -170,7 +170,11 @@ Point2 SpriteBase::get_texture_scale() const {
 
 
 bool SpriteBase::is_pixel_opaque(const Point2 &p_point) const {
-	return true;
+	if (_edit_use_rect()) {
+		return _edit_get_rect().has_point(p_point);
+	} else {
+		return false;
+	}
 }
 
 

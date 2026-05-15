@@ -42,7 +42,7 @@
 #ifdef TOOLS_ENABLED
 
 Rect2 AnimatedSprite::_edit_get_rect() const {
-	return _get_rect();
+	return get_rect();
 }
 
 bool AnimatedSprite::_edit_use_rect() const {
@@ -56,18 +56,14 @@ bool AnimatedSprite::_edit_use_rect() const {
 	return t.is_valid();
 }
 
-bool AnimatedSprite::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
-	return Node2D::_edit_is_selected_on_click(p_point, p_tolerance);
-}
-
 #endif
 
 Rect2 AnimatedSprite::get_anchorable_rect() const {
-	return _get_rect();
+	return get_rect();
 }
 
 
-Rect2 AnimatedSprite::_get_rect() const {
+Rect2 AnimatedSprite::get_rect() const {
 	if (!frames.is_valid() || !frames->has_animation(animation) || frame < 0 || frame >= frames->get_frame_count(animation)) {
 		return Rect2();
 	}
@@ -99,6 +95,106 @@ Rect2 AnimatedSprite::_get_rect() const {
 	}
 
 	return Rect2(ofs, s);
+}
+
+Ref<Texture> AnimatedSprite::get_current_texture() const {
+	if (!frames.is_valid() || !frames->has_animation(animation) || frame < 0 || frame >= frames->get_frame_count(animation)) {
+		return Ref<Texture>();
+	}
+
+	return frames->get_frame(animation, frame);
+}
+
+void AnimatedSprite::_get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_clip) const {
+	Rect2 base_rect;
+
+	Ref<Texture> current_texture = get_current_texture();
+
+	r_filter_clip = false;
+	Size2 frame_size = current_texture->get_size();
+
+	r_src_rect.size = frame_size;
+	r_src_rect.position = base_rect.position;
+
+	Point2 dest_offset = get_offset();
+	dest_offset += get_world_offset() / get_scale();
+	if (is_centered()) {
+		dest_offset -= frame_size * get_texture_scale() / 2;
+	}
+	//VALLA EDITS
+	if (is_basealigned()) {
+		if (is_centered()) {
+			dest_offset.y -= frame_size.y * get_texture_scale().y / 2;
+		} else {
+			dest_offset.y -= frame_size.y * get_texture_scale().y;
+		}
+	}
+
+	if (Engine::get_singleton()->get_use_gpu_pixel_snap() || get_force_pixel_snapping()) {
+		dest_offset = dest_offset.floor();
+	}
+
+	r_dst_rect = Rect2(dest_offset, frame_size * get_texture_scale());
+
+	if (is_flipped_h()) {
+		r_dst_rect.size.x = -r_dst_rect.size.x;
+	}
+	if (is_flipped_v()) {
+		r_dst_rect.size.y = -r_dst_rect.size.y;
+	}
+}
+
+bool AnimatedSprite::is_pixel_opaque(const Point2 &p_point) const {
+	Ref<Texture> current_texture = get_current_texture();
+	if (current_texture.is_null()) {
+		return false;
+	}
+
+	if (current_texture->get_size().width == 0 || current_texture->get_size().height == 0) {
+		return false;
+	}
+
+	Rect2 src_rect, dst_rect;
+	bool filter_clip;
+	_get_rects(src_rect, dst_rect, filter_clip);
+	dst_rect.size = dst_rect.size.abs();
+
+	if (!dst_rect.has_point(p_point)) {
+		return false;
+	}
+
+	Vector2 q = (p_point - dst_rect.position) / dst_rect.size;
+	if (is_flipped_h()) {
+		q.x = 1.0f - q.x;
+	}
+	if (is_flipped_v()) {
+		q.y = 1.0f - q.y;
+	}
+	q = q * src_rect.size + src_rect.position;
+
+	bool is_repeat = current_texture->get_flags() & Texture::FLAG_REPEAT;
+	bool is_mirrored_repeat = current_texture->get_flags() & Texture::FLAG_MIRRORED_REPEAT;
+	if (is_repeat) {
+		int mirror_x = 0;
+		int mirror_y = 0;
+		if (is_mirrored_repeat) {
+			mirror_x = (int)(q.x / current_texture->get_size().width);
+			mirror_y = (int)(q.y / current_texture->get_size().height);
+		}
+		q.x = Math::fmod(q.x, current_texture->get_size().width);
+		q.y = Math::fmod(q.y, current_texture->get_size().height);
+		if (mirror_x % 2 == 1) {
+			q.x = current_texture->get_size().width - q.x - 1;
+		}
+		if (mirror_y % 2 == 1) {
+			q.y = current_texture->get_size().height - q.y - 1;
+		}
+	} else {
+		q.x = MIN(q.x, current_texture->get_size().width - 1);
+		q.y = MIN(q.y, current_texture->get_size().height - 1);
+	}
+
+	return current_texture->is_pixel_opaque((int)q.x, (int)q.y);
 }
 
 void SpriteFrames::add_frame(const StringName &p_anim, const Ref<Texture> &p_frame, int p_at_pos) {
@@ -975,6 +1071,8 @@ void AnimatedSprite::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_animation_locked", "speed_scale"), &AnimatedSprite::set_animation_locked);
 	ClassDB::bind_method(D_METHOD("is_animation_locked"), &AnimatedSprite::is_animation_locked);
+
+	ClassDB::bind_method(D_METHOD("get_rect"), &AnimatedSprite::get_rect);
 
 	ClassDB::bind_method(D_METHOD("_res_changed"), &AnimatedSprite::_res_changed);
 

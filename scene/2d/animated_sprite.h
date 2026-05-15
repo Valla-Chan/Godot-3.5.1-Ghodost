@@ -251,9 +251,9 @@ class AnimatedSprite : public SpriteBase {
 
 	void _res_changed();
 
+	void _get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_filter_clip) const;
 	float _get_frame_duration();
 	void _reset_timeout();
-	Rect2 _get_rect() const;
 
 	bool _frames_valid() const;
 
@@ -266,8 +266,11 @@ public:
 #ifdef TOOLS_ENABLED
 	virtual Rect2 _edit_get_rect() const;
 	virtual bool _edit_use_rect() const;
-	virtual bool _edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const;
 #endif
+
+	Rect2 get_rect() const;
+	Ref<Texture> get_current_texture() const;
+	bool is_pixel_opaque(const Point2 &p_point) const;
 
 	virtual Rect2 get_anchorable_rect() const;
 
