@@ -275,13 +275,14 @@ public:
 	virtual float _edit_get_rotation() const { return 0.0; };
 
 	// Used to resize/move the node
-	virtual bool _edit_use_rect() const { return false; }; // MAYBE REPLACE BY A _edit_get_editmode()
 	virtual void _edit_set_rect(const Rect2 &p_rect){};
-	virtual Rect2 _edit_get_rect() const { return Rect2(0, 0, 0, 0); };
+	virtual bool _edit_use_rect() const;
+	virtual Rect2 _edit_get_rect() const;
+	virtual bool _edit_show_rect_handles() const;
 	virtual Size2 _edit_get_minimum_size() const { return Size2(-1, -1); }; // LOOKS WEIRD
 
 	// Used to set a pivot
-	virtual bool _edit_use_pivot() const { return false; };
+	virtual bool _edit_use_pivot() const;
 	virtual void _edit_set_pivot(const Point2 &p_pivot){};
 	virtual Point2 _edit_get_pivot() const { return Point2(); };
 

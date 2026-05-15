@@ -336,6 +336,32 @@ CanvasItemMaterial::~CanvasItemMaterial() {
 
 ///////////////////////////////////////////////////////////////////
 #ifdef TOOLS_ENABLED
+
+bool CanvasItem::_edit_use_rect() const {
+	if (get_script_instance() && get_script_instance()->has_method("_edit_get_rect")) {
+		return true;
+	}
+	return false;
+}
+
+Rect2 CanvasItem::_edit_get_rect() const {
+	if (!(get_script_instance() && get_script_instance()->has_method("_edit_get_rect"))) {
+		return Rect2();
+	}
+	return get_script_instance()->call("_edit_get_rect");
+}
+
+bool CanvasItem::_edit_show_rect_handles() const {
+	if (!(get_script_instance() && get_script_instance()->has_method("_edit_show_rect_handles"))) {
+		return _edit_use_rect();
+	}
+	return get_script_instance()->call("_edit_show_rect_handles");
+}
+
+bool CanvasItem::_edit_use_pivot() const {
+	return _edit_use_rect();
+}
+
 bool CanvasItem::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
 	if (_edit_use_rect()) {
 		return _edit_get_rect().has_point(p_point);
@@ -1086,8 +1112,8 @@ void CanvasItem::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_edit_set_scale", "scale"), &CanvasItem::_edit_set_scale);
 	ClassDB::bind_method(D_METHOD("_edit_get_scale"), &CanvasItem::_edit_get_scale);
 	ClassDB::bind_method(D_METHOD("_edit_set_rect", "rect"), &CanvasItem::_edit_set_rect);
-	ClassDB::bind_method(D_METHOD("_edit_get_rect"), &CanvasItem::_edit_get_rect);
-	ClassDB::bind_method(D_METHOD("_edit_use_rect"), &CanvasItem::_edit_use_rect);
+	//ClassDB::bind_method(D_METHOD("_edit_get_rect"), &CanvasItem::_edit_get_rect);
+	//ClassDB::bind_method(D_METHOD("_edit_use_rect"), &CanvasItem::_edit_use_rect);
 	ClassDB::bind_method(D_METHOD("_edit_set_rotation", "degrees"), &CanvasItem::_edit_set_rotation);
 	ClassDB::bind_method(D_METHOD("_edit_get_rotation"), &CanvasItem::_edit_get_rotation);
 	ClassDB::bind_method(D_METHOD("_edit_use_rotation"), &CanvasItem::_edit_use_rotation);
@@ -1179,6 +1205,9 @@ void CanvasItem::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("make_canvas_position_local", "screen_point"), &CanvasItem::make_canvas_position_local);
 	ClassDB::bind_method(D_METHOD("make_input_local", "event"), &CanvasItem::make_input_local);
+
+	ClassDB::add_virtual_method(get_class_static(), MethodInfo(Variant::RECT2, "_edit_get_rect"));
+	ClassDB::add_virtual_method(get_class_static(), MethodInfo(Variant::BOOL, "_edit_show_rect_handles"));
 
 	BIND_VMETHOD(MethodInfo("_draw"));
 

@@ -1179,7 +1179,7 @@ Rect2 Control::get_parent_anchorable_rect() const {
 	}
 
 	Rect2 parent_rect;
-	if (data.parent_canvas_item) {
+	if (data.parent_canvas_item && data.parent_canvas_item->_edit_get_rect() != Rect2()) {
 		parent_rect = data.parent_canvas_item->get_anchorable_rect();
 	} else {
 		parent_rect = get_viewport()->get_visible_rect();

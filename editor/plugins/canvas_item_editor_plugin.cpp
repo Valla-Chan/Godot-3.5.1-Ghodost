@@ -1905,7 +1905,7 @@ bool CanvasItemEditor::_gui_input_resize(const Ref<InputEvent> &p_event) {
 			List<CanvasItem *> selection = _get_edited_canvas_items();
 			if (selection.size() == 1) {
 				CanvasItem *canvas_item = selection[0];
-				if (canvas_item->_edit_use_rect() && _is_node_movable(canvas_item)) {
+				if (canvas_item->_edit_use_rect() && canvas_item->_edit_show_rect_handles() && _is_node_movable(canvas_item)) {
 					Rect2 rect = canvas_item->_edit_get_rect();
 					Transform2D xform = transform * canvas_item->get_global_transform_with_canvas();
 
@@ -2885,7 +2885,7 @@ bool CanvasItemEditor::_gui_input_hover(const Ref<InputEvent> &p_event) {
 		for (int i = 0; i < hovering_results_items.size(); i++) {
 			CanvasItem *canvas_item = hovering_results_items[i].item;
 
-			if (canvas_item->_edit_use_rect()) {
+			if (canvas_item->_edit_use_rect() && canvas_item->_edit_show_rect_handles()) {
 				continue;
 			}
 
@@ -3745,7 +3745,7 @@ void CanvasItemEditor::_draw_selection() {
 			}
 
 			// Draw the resize handles
-			if (tool == TOOL_SELECT && canvas_item->_edit_use_rect() && _is_node_movable(canvas_item)) {
+			if (tool == TOOL_SELECT && canvas_item->_edit_use_rect() && canvas_item->_edit_show_rect_handles() && _is_node_movable(canvas_item)) {
 				Rect2 rect = canvas_item->_edit_get_rect();
 				Vector2 endpoints[4] = {
 					xform.xform(rect.position),
@@ -3989,7 +3989,7 @@ void CanvasItemEditor::_draw_invisible_nodes_positions(Node *p_node, const Trans
 		_draw_invisible_nodes_positions(p_node->get_child(i), parent_xform, canvas_xform);
 	}
 
-	if (canvas_item && !canvas_item->_edit_use_rect() && (!editor_selection->is_selected(canvas_item) || _is_node_locked(canvas_item))) {
+	if (canvas_item && (!canvas_item->_edit_use_rect() || !canvas_item->_edit_show_rect_handles()) && (!editor_selection->is_selected(canvas_item) || _is_node_locked(canvas_item))) {
 		Transform2D xform = transform * canvas_xform * parent_xform;
 
 		// Draw the node's position
