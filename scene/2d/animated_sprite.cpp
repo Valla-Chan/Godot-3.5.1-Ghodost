@@ -78,7 +78,7 @@ Rect2 AnimatedSprite::get_rect() const {
 	Size2 s = t->get_size() * get_texture_scale();
 
 	Point2 ofs = get_offset();
-	ofs += get_world_offset() / get_scale() * get_texture_scale();
+	ofs += get_world_offset() / get_scale(); //* get_texture_scale();
 	if (is_centered()) {
 		ofs -= s / 2;
 	}
@@ -761,7 +761,7 @@ void AnimatedSprite::_notification(int p_what) {
 
 			Size2 s = texture->get_size(); //* get_texture_scale()
 			Point2 ofs = get_offset();
-			ofs += get_world_offset() / get_scale() * get_texture_scale();
+			ofs += get_world_offset() / get_scale(); //* get_texture_scale();
 			if (is_centered()) {
 				ofs -= s * get_texture_scale() / 2;
 			}
