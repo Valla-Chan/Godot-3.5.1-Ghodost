@@ -1228,8 +1228,12 @@ Error Object::emit_signal(const StringName &p_name, const Variant **p_args, int 
 		int argc = p_argcount;
 
 		if (c.flags & CONNECT_DROP_BINDS) {
-			args = (const Variant **)c.binds.ptr();
-			argc = c.binds.size();
+			bind_mem.resize(c.binds.size());
+			for (int j = 0; j < c.binds.size(); j++) {
+				bind_mem.write[j] = &c.binds[j];
+			}
+			args = (const Variant **)bind_mem.ptr();
+			argc = bind_mem.size();
 		} else if (c.binds.size()) {
 			//handle binds
 			bind_mem.resize(p_argcount + c.binds.size());
