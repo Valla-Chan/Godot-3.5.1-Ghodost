@@ -1179,8 +1179,13 @@ Rect2 Control::get_parent_anchorable_rect() const {
 	}
 
 	Rect2 parent_rect;
-	if (data.parent_canvas_item && data.parent_canvas_item->_edit_get_rect() != Rect2()) {
-		parent_rect = data.parent_canvas_item->get_anchorable_rect();
+	if (data.parent_canvas_item) {
+		if (data.parent_canvas_item->get_anchorable_rect() != Rect2()) {
+			parent_rect = data.parent_canvas_item->get_anchorable_rect();
+		}
+		else if (data.parent_canvas_item->_edit_get_rect() != Rect2()) {
+			parent_rect = data.parent_canvas_item->_edit_get_rect();
+		}
 	} else {
 		parent_rect = get_viewport()->get_visible_rect();
 	}
@@ -1630,6 +1635,13 @@ void Control::set_global_position(const Point2 &p_point, bool p_keep_margins) {
 
 void Control::_compute_anchors(Rect2 p_rect, const float p_margins[4], float (&r_anchors)[4]) {
 	Size2 parent_rect_size = get_parent_anchorable_rect().size;
+	if (parent_rect_size == Size2()) {
+		r_anchors[0] = 0;
+		r_anchors[1] = 0;
+		r_anchors[2] = 0;
+		r_anchors[3] = 0;
+		return;
+	}
 	ERR_FAIL_COND(parent_rect_size.x == 0.0);
 	ERR_FAIL_COND(parent_rect_size.y == 0.0);
 
