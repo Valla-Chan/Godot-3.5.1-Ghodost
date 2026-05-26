@@ -60,7 +60,7 @@ PoolVector<Vector2> ConcavePolygonShape2D::get_segments() const {
 	return Physics2DServer::get_singleton()->shape_get_data(get_rid());
 }
 
-void ConcavePolygonShape2D::draw(const RID &p_to_rid, const Color &p_color) {
+void ConcavePolygonShape2D::draw(const RID &p_to_rid, const Color &p_color, bool p_antialiased) {
 	PoolVector<Vector2> s = get_segments();
 	int len = s.size();
 	if (len == 0 || (len % 2) == 1) {
@@ -69,7 +69,7 @@ void ConcavePolygonShape2D::draw(const RID &p_to_rid, const Color &p_color) {
 
 	PoolVector<Vector2>::Read r = s.read();
 	for (int i = 0; i < len; i += 2) {
-		VisualServer::get_singleton()->canvas_item_add_line(p_to_rid, r[i], r[i + 1], p_color, 2);
+		VisualServer::get_singleton()->canvas_item_add_line(p_to_rid, r[i], r[i + 1], p_color, 2, p_antialiased);
 	}
 }
 

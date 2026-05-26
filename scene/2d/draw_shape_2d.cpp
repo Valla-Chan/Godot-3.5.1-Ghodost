@@ -55,7 +55,7 @@ void DrawShape2D::_notification(int p_what) {
 			}
 
 			rect = Rect2();
-			shape->draw(get_canvas_item(), color);
+			shape->draw(get_canvas_item(), color, antialiased);
 
 			rect = shape->get_rect();
 			rect = rect.grow(3);
@@ -80,6 +80,10 @@ void DrawShape2D::set_shape(const Ref<Shape2D> &p_shape) {
 	update_configuration_warning();
 }
 
+Ref<Shape2D> DrawShape2D::get_shape() const {
+	return shape;
+}
+
 void DrawShape2D::set_color(const Color &p_color) {
 	color = p_color;
 	update();
@@ -88,8 +92,12 @@ Color DrawShape2D::get_color() const {
 	return color;
 }
 
-Ref<Shape2D> DrawShape2D::get_shape() const {
-	return shape;
+void DrawShape2D::set_antialiased(const bool p_enabled) {
+	antialiased = p_enabled;
+	update();
+}
+bool DrawShape2D::get_antialiased() const {
+	return antialiased;
 }
 
 bool DrawShape2D::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
@@ -133,13 +141,18 @@ void DrawShape2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_shape"), &DrawShape2D::get_shape);
 	ClassDB::bind_method(D_METHOD("set_color", "color"), &DrawShape2D::set_color);
 	ClassDB::bind_method(D_METHOD("get_color"), &DrawShape2D::get_color);
+	ClassDB::bind_method(D_METHOD("set_antialiased", "color"), &DrawShape2D::set_antialiased);
+	ClassDB::bind_method(D_METHOD("get_antialiased"), &DrawShape2D::get_antialiased);
 	ClassDB::bind_method(D_METHOD("_shape_changed"), &DrawShape2D::_shape_changed);
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "shape", PROPERTY_HINT_RESOURCE_TYPE, "Shape2D"), "set_shape", "get_shape");
 	ADD_PROPERTY(PropertyInfo(Variant::COLOR, "color"), "set_color", "get_color");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "antialiased"), "set_antialiased", "get_antialiased");
 }
 
 DrawShape2D::DrawShape2D() {
+	antialiased = true;
 	rect = Rect2(-Point2(10, 10), Point2(20, 20));
+	color = Color(1, 1, 1);
 	set_notify_local_transform(true);
 }

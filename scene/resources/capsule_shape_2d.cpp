@@ -78,7 +78,7 @@ real_t CapsuleShape2D::get_height() const {
 	return height;
 }
 
-void CapsuleShape2D::draw(const RID &p_to_rid, const Color &p_color) {
+void CapsuleShape2D::draw(const RID &p_to_rid, const Color &p_color, bool p_antialiased) {
 	Vector<Vector2> points = _get_points();
 	Vector<Color> col;
 	col.push_back(p_color);
@@ -86,7 +86,7 @@ void CapsuleShape2D::draw(const RID &p_to_rid, const Color &p_color) {
 	if (is_collision_outline_enabled()) {
 		VisualServer::get_singleton()->canvas_item_add_polyline(p_to_rid, points, col, 1.0, true);
 		// Draw the last segment as it's not drawn by `canvas_item_add_polyline()`.
-		VisualServer::get_singleton()->canvas_item_add_line(p_to_rid, points[points.size() - 1], points[0], p_color, 1.0, true);
+		VisualServer::get_singleton()->canvas_item_add_line(p_to_rid, points[points.size() - 1], points[0], p_color, 1.0, p_antialiased);
 	}
 }
 

@@ -63,8 +63,8 @@ Vector2 SegmentShape2D::get_b() const {
 	return b;
 }
 
-void SegmentShape2D::draw(const RID &p_to_rid, const Color &p_color) {
-	VisualServer::get_singleton()->canvas_item_add_line(p_to_rid, a, b, p_color, 3);
+void SegmentShape2D::draw(const RID &p_to_rid, const Color &p_color, bool p_antialiased) {
+	VisualServer::get_singleton()->canvas_item_add_line(p_to_rid, a, b, p_color, 3, p_antialiased);
 }
 
 Rect2 SegmentShape2D::get_rect() const {
@@ -106,9 +106,9 @@ void RayShape2D::_update_shape() {
 	emit_changed();
 }
 
-void RayShape2D::draw(const RID &p_to_rid, const Color &p_color) {
+void RayShape2D::draw(const RID &p_to_rid, const Color &p_color, bool p_antialiased) {
 	Vector2 tip = Vector2(0, get_length());
-	VS::get_singleton()->canvas_item_add_line(p_to_rid, Vector2(), tip, p_color, 3);
+	VS::get_singleton()->canvas_item_add_line(p_to_rid, Vector2(), tip, p_color, 3, p_antialiased);
 	Vector<Vector2> pts;
 	float tsize = 4;
 	pts.push_back(tip + Vector2(0, tsize));

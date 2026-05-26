@@ -45,7 +45,7 @@ public:
 	void set_segments(const PoolVector<Vector2> &p_segments);
 	PoolVector<Vector2> get_segments() const;
 
-	virtual void draw(const RID &p_to_rid, const Color &p_color);
+	virtual void draw(const RID &p_to_rid, const Color &p_color, bool p_antialiased = false);
 	virtual Rect2 get_rect() const;
 	virtual real_t get_enclosing_radius() const;
 

@@ -36,6 +36,7 @@
 class DrawShape2D : public Node2D {
 	GDCLASS(DrawShape2D, Node2D);
 	Ref<Shape2D> shape;
+	bool antialiased;
 	Rect2 rect;
 	void _shape_changed();
 	Color color;
@@ -52,6 +53,9 @@ public:
 
 	void set_color(const Color &p_color);
 	Color get_color() const;
+
+	void set_antialiased(const bool p_enable);
+	bool get_antialiased() const;
 
 	virtual String get_configuration_warning() const;
 

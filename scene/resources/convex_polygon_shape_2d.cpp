@@ -71,7 +71,7 @@ void ConvexPolygonShape2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::POOL_VECTOR2_ARRAY, "points"), "set_points", "get_points");
 }
 
-void ConvexPolygonShape2D::draw(const RID &p_to_rid, const Color &p_color) {
+void ConvexPolygonShape2D::draw(const RID &p_to_rid, const Color &p_color, bool p_antialiased) {
 	if (points.size() < 3) {
 		return;
 	}
@@ -82,7 +82,7 @@ void ConvexPolygonShape2D::draw(const RID &p_to_rid, const Color &p_color) {
 	if (is_collision_outline_enabled()) {
 		VisualServer::get_singleton()->canvas_item_add_polyline(p_to_rid, points, col, 1.0, true);
 		// Draw the last segment as it's not drawn by `canvas_item_add_polyline()`.
-		VisualServer::get_singleton()->canvas_item_add_line(p_to_rid, points[points.size() - 1], points[0], p_color, 1.0, true);
+		VisualServer::get_singleton()->canvas_item_add_line(p_to_rid, points[points.size() - 1], points[0], p_color, 1.0, p_antialiased);
 	}
 }
 

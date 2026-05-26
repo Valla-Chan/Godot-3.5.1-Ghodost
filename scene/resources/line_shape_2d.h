@@ -53,7 +53,7 @@ public:
 	Vector2 get_normal() const;
 	real_t get_d() const;
 
-	virtual void draw(const RID &p_to_rid, const Color &p_color);
+	virtual void draw(const RID &p_to_rid, const Color &p_color, bool p_antialiased = false);
 	virtual Rect2 get_rect() const;
 	virtual real_t get_enclosing_radius() const;
 

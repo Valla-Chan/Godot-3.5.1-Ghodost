@@ -69,7 +69,7 @@ real_t CircleShape2D::get_enclosing_radius() const {
 	return radius;
 }
 
-void CircleShape2D::draw(const RID &p_to_rid, const Color &p_color) {
+void CircleShape2D::draw(const RID &p_to_rid, const Color &p_color, bool p_antialiased) {
 	Vector<Vector2> points;
 	for (int i = 0; i < 24; i++) {
 		points.push_back(Vector2(Math::cos(i * Math_PI * 2 / 24.0), Math::sin(i * Math_PI * 2 / 24.0)) * get_radius());
@@ -81,7 +81,7 @@ void CircleShape2D::draw(const RID &p_to_rid, const Color &p_color) {
 	if (is_collision_outline_enabled()) {
 		VisualServer::get_singleton()->canvas_item_add_polyline(p_to_rid, points, col, 1.0, true);
 		// Draw the last segment as it's not drawn by `canvas_item_add_polyline()`.
-		VisualServer::get_singleton()->canvas_item_add_line(p_to_rid, points[points.size() - 1], points[0], p_color, 1.0, true);
+		VisualServer::get_singleton()->canvas_item_add_line(p_to_rid, points[points.size() - 1], points[0], p_color, 1.0, p_antialiased);
 	}
 }
 
