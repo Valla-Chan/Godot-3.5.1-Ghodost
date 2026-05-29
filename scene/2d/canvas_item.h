@@ -202,6 +202,10 @@ private:
 	bool notify_local_transform;
 	bool notify_transform;
 
+	int z_index;
+	bool z_relative;
+	bool y_sort_enabled;
+
 	Ref<Material> material;
 
 	mutable Transform2D global_transform;
@@ -376,6 +380,15 @@ public:
 
 	Ref<InputEvent> make_input_local(const Ref<InputEvent> &p_event) const;
 	Vector2 make_canvas_position_local(const Vector2 &screen_point) const;
+
+	void set_z_index(int p_z);
+	int get_z_index() const;
+
+	void set_z_as_relative(bool p_enabled);
+	bool is_z_relative() const;
+
+	void set_y_sort_enabled(bool p_enabled);
+	bool is_y_sort_enabled() const;
 
 	Vector2 get_global_mouse_position() const;
 	Vector2 get_local_mouse_position() const;

@@ -378,30 +378,6 @@ void Node2D::set_global_transform(const Transform2D &p_transform) {
 	}
 }
 
-void Node2D::set_z_index(int p_z) {
-	ERR_FAIL_COND(p_z < VS::CANVAS_ITEM_Z_MIN);
-	ERR_FAIL_COND(p_z > VS::CANVAS_ITEM_Z_MAX);
-	z_index = p_z;
-	VS::get_singleton()->canvas_item_set_z_index(get_canvas_item(), z_index);
-	_change_notify("z_index");
-}
-
-void Node2D::set_z_as_relative(bool p_enabled) {
-	if (z_relative == p_enabled) {
-		return;
-	}
-	z_relative = p_enabled;
-	VS::get_singleton()->canvas_item_set_z_as_relative_to_parent(get_canvas_item(), p_enabled);
-}
-
-bool Node2D::is_z_relative() const {
-	return z_relative;
-}
-
-int Node2D::get_z_index() const {
-	return z_index;
-}
-
 Transform2D Node2D::get_relative_transform_to_parent(const Node *p_parent) const {
 	if (p_parent == this) {
 		return Transform2D();
@@ -477,12 +453,6 @@ void Node2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("to_local", "global_point"), &Node2D::to_local);
 	ClassDB::bind_method(D_METHOD("to_global", "local_point"), &Node2D::to_global);
 
-	ClassDB::bind_method(D_METHOD("set_z_index", "z_index"), &Node2D::set_z_index);
-	ClassDB::bind_method(D_METHOD("get_z_index"), &Node2D::get_z_index);
-
-	ClassDB::bind_method(D_METHOD("set_z_as_relative", "enable"), &Node2D::set_z_as_relative);
-	ClassDB::bind_method(D_METHOD("is_z_relative"), &Node2D::is_z_relative);
-
 	ClassDB::bind_method(D_METHOD("get_relative_transform_to_parent", "parent"), &Node2D::get_relative_transform_to_parent);
 
 	ADD_GROUP("Transform", "");
@@ -501,10 +471,6 @@ void Node2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "global_skew", PROPERTY_HINT_NONE, "", 0), "set_global_skew", "get_global_skew");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "global_skew_degrees", PROPERTY_HINT_NONE, "", 0), "set_global_skew_degrees", "get_global_skew_degrees");
 	ADD_PROPERTY(PropertyInfo(Variant::TRANSFORM2D, "global_transform", PROPERTY_HINT_NONE, "", 0), "set_global_transform", "get_global_transform");
-
-	ADD_GROUP("Z Index", "");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "z_index", PROPERTY_HINT_RANGE, itos(VS::CANVAS_ITEM_Z_MIN) + "," + itos(VS::CANVAS_ITEM_Z_MAX) + ",1"), "set_z_index", "get_z_index");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "z_as_relative"), "set_z_as_relative", "is_z_relative");
 }
 
 #ifdef TOOLS_ENABLED
@@ -526,6 +492,4 @@ Node2D::Node2D() {
 	scale = Vector2(1, 1);
 	skew = 0;
 	_xform_dirty = false;
-	z_index = 0;
-	z_relative = true;
 }

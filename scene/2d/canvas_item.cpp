@@ -1077,6 +1077,43 @@ Ref<InputEvent> CanvasItem::make_input_local(const Ref<InputEvent> &p_event) con
 	return p_event->xformed_by((get_canvas_transform() * get_global_transform()).affine_inverse());
 }
 
+
+void CanvasItem::set_z_index(int p_z) {
+	ERR_FAIL_COND(p_z < VS::CANVAS_ITEM_Z_MIN);
+	ERR_FAIL_COND(p_z > VS::CANVAS_ITEM_Z_MAX);
+	z_index = p_z;
+	VS::get_singleton()->canvas_item_set_z_index(get_canvas_item(), z_index);
+	_change_notify("z_index");
+}
+
+int CanvasItem::get_z_index() const {
+	return z_index;
+}
+
+void CanvasItem::set_z_as_relative(bool p_enabled) {
+	if (z_relative == p_enabled) {
+		return;
+	}
+	z_relative = p_enabled;
+	VS::get_singleton()->canvas_item_set_z_as_relative_to_parent(get_canvas_item(), p_enabled);
+}
+
+bool CanvasItem::is_z_relative() const {
+	return z_relative;
+}
+
+void CanvasItem::set_y_sort_enabled(bool p_enabled) {
+	if (y_sort_enabled == p_enabled) {
+		return;
+	}
+	y_sort_enabled = p_enabled;
+	VS::get_singleton()->canvas_item_set_sort_children_by_y(get_canvas_item(), p_enabled);
+}
+
+bool CanvasItem::is_y_sort_enabled() const {
+	return y_sort_enabled;
+}
+
 Vector2 CanvasItem::get_global_mouse_position() const {
 	ERR_FAIL_COND_V(!get_viewport(), Vector2());
 	return get_canvas_transform().affine_inverse().xform(get_viewport()->get_mouse_position());
@@ -1206,6 +1243,15 @@ void CanvasItem::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("make_canvas_position_local", "screen_point"), &CanvasItem::make_canvas_position_local);
 	ClassDB::bind_method(D_METHOD("make_input_local", "event"), &CanvasItem::make_input_local);
 
+	ClassDB::bind_method(D_METHOD("set_z_index", "z_index"), &CanvasItem::set_z_index);
+	ClassDB::bind_method(D_METHOD("get_z_index"), &CanvasItem::get_z_index);
+
+	ClassDB::bind_method(D_METHOD("set_z_as_relative", "enable"), &CanvasItem::set_z_as_relative);
+	ClassDB::bind_method(D_METHOD("is_z_relative"), &CanvasItem::is_z_relative);
+
+	ClassDB::bind_method(D_METHOD("set_y_sort_enabled", "enable"), &CanvasItem::set_y_sort_enabled);
+	ClassDB::bind_method(D_METHOD("is_y_sort_enabled"), &CanvasItem::is_y_sort_enabled);
+
 	ClassDB::add_virtual_method(get_class_static(), MethodInfo(Variant::RECT2, "_edit_get_rect"));
 	ClassDB::add_virtual_method(get_class_static(), MethodInfo(Variant::BOOL, "_edit_show_rect_handles"));
 
@@ -1225,6 +1271,11 @@ void CanvasItem::_bind_methods() {
 	//exporting these things doesn't really make much sense i think
 	// ADD_PROPERTY(PropertyInfo(Variant::BOOL, "toplevel", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_as_toplevel", "is_set_as_toplevel");
 	// ADD_PROPERTY(PropertyInfo(Variant::BOOL,"transform/notify"),"set_transform_notify","is_transform_notify_enabled");
+
+	ADD_GROUP("Sorting", "");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "z_index", PROPERTY_HINT_RANGE, itos(VS::CANVAS_ITEM_Z_MIN) + "," + itos(VS::CANVAS_ITEM_Z_MAX) + ",1"), "set_z_index", "get_z_index");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "z_as_relative"), "set_z_as_relative", "is_z_relative");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "y_sort_enabled"), "set_y_sort_enabled", "is_y_sort_enabled");
 
 	ADD_SIGNAL(MethodInfo("draw"));
 	ADD_SIGNAL(MethodInfo("visibility_changed"));
@@ -1325,6 +1376,10 @@ CanvasItem::CanvasItem() :
 	notify_local_transform = false;
 	notify_transform = false;
 	light_mask = 1;
+
+	z_index = 0;
+	z_relative = true;
+	y_sort_enabled = false;
 
 	C = nullptr;
 }

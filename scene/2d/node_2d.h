@@ -41,9 +41,6 @@ class Node2D : public CanvasItem {
 	Size2 scale;
 	float skew;
 
-	int z_index;
-	bool z_relative;
-
 	Transform2D _mat;
 
 	bool _xform_dirty;
@@ -110,17 +107,11 @@ public:
 	void set_global_skew_degrees(const float p_degrees);
 	void set_global_scale(const Size2 &p_scale);
 
-	void set_z_index(int p_z);
-	int get_z_index() const;
-
 	void look_at(const Vector2 &p_pos);
 	float get_angle_to(const Vector2 &p_pos) const;
 
 	Point2 to_local(Point2 p_global) const;
 	Point2 to_global(Point2 p_local) const;
-
-	void set_z_as_relative(bool p_enabled);
-	bool is_z_relative() const;
 
 	Transform2D get_relative_transform_to_parent(const Node *p_parent) const;
 
