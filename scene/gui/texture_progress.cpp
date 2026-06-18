@@ -76,6 +76,16 @@ bool TextureProgress::get_nine_patch_stretch() const {
 	return nine_patch_stretch;
 }
 
+void TextureProgress::set_scale_progress_end(bool p_enable) {
+	scale_progress_end = p_enable;
+	update();
+	minimum_size_changed();
+}
+
+bool TextureProgress::get_scale_progress_end() const {
+	return scale_progress_end;
+}
+
 Size2 TextureProgress::get_minimum_size() const {
 	if (nine_patch_stretch) {
 		return Size2(stretch_margin[MARGIN_LEFT] + stretch_margin[MARGIN_RIGHT], stretch_margin[MARGIN_TOP] + stretch_margin[MARGIN_BOTTOM]);
@@ -231,7 +241,7 @@ void TextureProgress::draw_nine_patch_stretched(const Ref<Texture> &p_texture, F
 	Rect2 src_rect = Rect2(Point2(), texture_size);
 	Rect2 dst_rect = Rect2(Point2(), get_size());
 
-	if (p_ratio < 1.0) {
+	if (p_ratio < 1.0 && !scale_progress_end) {
 		// Drawing a partially-filled 9-patch is a little tricky -
 		// texture is divided by 3 sections toward fill direction,
 		// then middle section is stretching while the other two aren't.
@@ -386,6 +396,48 @@ void TextureProgress::draw_nine_patch_stretched(const Ref<Texture> &p_texture, F
 				break;
 		}
 	}
+	// scale_progress_end, so keep end caps
+	else if (p_ratio < 1.0 && scale_progress_end) {
+	switch (p_mode) {
+		case FILL_LEFT_TO_RIGHT: {
+			dst_rect.size.x *= p_ratio;
+		} break;
+
+		case FILL_RIGHT_TO_LEFT: {
+			double filled = dst_rect.size.x * p_ratio;
+			dst_rect.position.x += dst_rect.size.x - filled;
+			dst_rect.size.x = filled;
+		} break;
+
+		case FILL_TOP_TO_BOTTOM: {
+			dst_rect.size.y *= p_ratio;
+		} break;
+
+		case FILL_BOTTOM_TO_TOP: {
+			double filled = dst_rect.size.y * p_ratio;
+			dst_rect.position.y += dst_rect.size.y - filled;
+			dst_rect.size.y = filled;
+		} break;
+
+		case FILL_BILINEAR_LEFT_AND_RIGHT: {
+			double filled = dst_rect.size.x * p_ratio;
+			dst_rect.position.x += (dst_rect.size.x - filled) * 0.5;
+			dst_rect.size.x = filled;
+		} break;
+
+		case FILL_BILINEAR_TOP_AND_BOTTOM: {
+			double filled = dst_rect.size.y * p_ratio;
+			dst_rect.position.y += (dst_rect.size.y - filled) * 0.5;
+			dst_rect.size.y = filled;
+		} break;
+
+		case FILL_CLOCKWISE:
+		case FILL_CLOCKWISE_AND_COUNTER_CLOCKWISE:
+		case FILL_COUNTER_CLOCKWISE:
+		case FILL_MODE_MAX:
+			break;
+	}
+}
 
 	if (p_texture == progress) {
 		dst_rect.position += progress_offset;
@@ -640,6 +692,9 @@ void TextureProgress::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_nine_patch_stretch", "stretch"), &TextureProgress::set_nine_patch_stretch);
 	ClassDB::bind_method(D_METHOD("get_nine_patch_stretch"), &TextureProgress::get_nine_patch_stretch);
 
+	ClassDB::bind_method(D_METHOD("set_scale_progress_end", "enable"), &TextureProgress::set_scale_progress_end);
+	ClassDB::bind_method(D_METHOD("get_scale_progress_end"), &TextureProgress::get_scale_progress_end);
+
 	ClassDB::bind_method(D_METHOD("set_texel_scale", "scale"), &TextureProgress::set_scale);
 	ClassDB::bind_method(D_METHOD("get_texel_scale"), &TextureProgress::get_scale);
 
@@ -660,6 +715,7 @@ void TextureProgress::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "radial_center_offset"), "set_radial_center_offset", "get_radial_center_offset");
 	ADD_GROUP("Stretch", "stretch_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "nine_patch_stretch"), "set_nine_patch_stretch", "get_nine_patch_stretch");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "scale_progress_end"),  "set_scale_progress_end", "get_scale_progress_end");
 	ADD_PROPERTYI(PropertyInfo(Variant::INT, "stretch_margin_left", PROPERTY_HINT_RANGE, "0,16384,1"), "set_stretch_margin", "get_stretch_margin", MARGIN_LEFT);
 	ADD_PROPERTYI(PropertyInfo(Variant::INT, "stretch_margin_top", PROPERTY_HINT_RANGE, "0,16384,1"), "set_stretch_margin", "get_stretch_margin", MARGIN_TOP);
 	ADD_PROPERTYI(PropertyInfo(Variant::INT, "stretch_margin_right", PROPERTY_HINT_RANGE, "0,16384,1"), "set_stretch_margin", "get_stretch_margin", MARGIN_RIGHT);
@@ -679,6 +735,7 @@ void TextureProgress::_bind_methods() {
 TextureProgress::TextureProgress() {
 	mode = FILL_LEFT_TO_RIGHT;
 	scale = 1.0f;
+	scale_progress_end = false;
 	rad_init_angle = 0;
 	rad_center_off = Point2();
 	rad_max_degrees = 360;

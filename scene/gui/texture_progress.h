@@ -40,6 +40,8 @@ class TextureProgress : public Range {
 	Ref<Texture> progress;
 	Ref<Texture> over;
 
+	bool scale_progress_end;
+
 protected:
 	static void _bind_methods();
 	void _notification(int p_what);
@@ -87,6 +89,9 @@ public:
 
 	void set_nine_patch_stretch(bool p_stretch);
 	bool get_nine_patch_stretch() const;
+
+	void set_scale_progress_end(bool p_enable);
+	bool get_scale_progress_end() const;
 
 	void set_tint_under(const Color &p_tint);
 	Color get_tint_under() const;
