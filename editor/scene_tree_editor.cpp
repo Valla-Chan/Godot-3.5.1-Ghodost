@@ -172,7 +172,7 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 		return false;
 	}
 
-	if (connect_to_script_mode) {
+	//if (connect_to_script_mode) {
 		// add hidden root
 		if (!p_parent) {
 			TreeItem *rootitem = tree->create_item(nullptr);
@@ -185,7 +185,7 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 
 			p_parent = rootitem;
 		}
-	}
+	//}
 
 
 	bool is_root = p_node->get_parent() == get_scene_node() || p_node == get_scene_node();
