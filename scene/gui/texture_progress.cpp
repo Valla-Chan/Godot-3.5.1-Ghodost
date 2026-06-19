@@ -398,46 +398,46 @@ void TextureProgress::draw_nine_patch_stretched(const Ref<Texture> &p_texture, F
 	}
 	// scale_progress_end, so keep end caps
 	else if (p_ratio < 1.0 && scale_progress_end) {
-	switch (p_mode) {
-		case FILL_LEFT_TO_RIGHT: {
-			dst_rect.size.x *= p_ratio;
-		} break;
+		switch (p_mode) {
+			case FILL_LEFT_TO_RIGHT: {
+				dst_rect.size.x *= p_ratio;
+			} break;
 
-		case FILL_RIGHT_TO_LEFT: {
-			double filled = dst_rect.size.x * p_ratio;
-			dst_rect.position.x += dst_rect.size.x - filled;
-			dst_rect.size.x = filled;
-		} break;
+			case FILL_RIGHT_TO_LEFT: {
+				double filled = dst_rect.size.x * p_ratio;
+				dst_rect.position.x += dst_rect.size.x - filled;
+				dst_rect.size.x = filled;
+			} break;
 
-		case FILL_TOP_TO_BOTTOM: {
-			dst_rect.size.y *= p_ratio;
-		} break;
+			case FILL_TOP_TO_BOTTOM: {
+				dst_rect.size.y *= p_ratio;
+			} break;
 
-		case FILL_BOTTOM_TO_TOP: {
-			double filled = dst_rect.size.y * p_ratio;
-			dst_rect.position.y += dst_rect.size.y - filled;
-			dst_rect.size.y = filled;
-		} break;
+			case FILL_BOTTOM_TO_TOP: {
+				double filled = dst_rect.size.y * p_ratio;
+				dst_rect.position.y += dst_rect.size.y - filled;
+				dst_rect.size.y = filled;
+			} break;
 
-		case FILL_BILINEAR_LEFT_AND_RIGHT: {
-			double filled = dst_rect.size.x * p_ratio;
-			dst_rect.position.x += (dst_rect.size.x - filled) * 0.5;
-			dst_rect.size.x = filled;
-		} break;
+			case FILL_BILINEAR_LEFT_AND_RIGHT: {
+				double filled = dst_rect.size.x * p_ratio;
+				dst_rect.position.x += (dst_rect.size.x - filled) * 0.5;
+				dst_rect.size.x = filled;
+			} break;
 
-		case FILL_BILINEAR_TOP_AND_BOTTOM: {
-			double filled = dst_rect.size.y * p_ratio;
-			dst_rect.position.y += (dst_rect.size.y - filled) * 0.5;
-			dst_rect.size.y = filled;
-		} break;
+			case FILL_BILINEAR_TOP_AND_BOTTOM: {
+				double filled = dst_rect.size.y * p_ratio;
+				dst_rect.position.y += (dst_rect.size.y - filled) * 0.5;
+				dst_rect.size.y = filled;
+			} break;
 
-		case FILL_CLOCKWISE:
-		case FILL_CLOCKWISE_AND_COUNTER_CLOCKWISE:
-		case FILL_COUNTER_CLOCKWISE:
-		case FILL_MODE_MAX:
-			break;
+			case FILL_CLOCKWISE:
+			case FILL_CLOCKWISE_AND_COUNTER_CLOCKWISE:
+			case FILL_COUNTER_CLOCKWISE:
+			case FILL_MODE_MAX:
+				break;
+		}
 	}
-}
 
 	if (p_texture == progress) {
 		dst_rect.position += progress_offset;
