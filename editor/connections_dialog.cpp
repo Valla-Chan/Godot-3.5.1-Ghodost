@@ -448,6 +448,9 @@ void ConnectDialog::_select_method_pressed() {
 		if (target->has_method("play_backwards")) {
 			dst_methods.push_back(MethodInfo("play_backwards"));
 		}
+		if (target->has_method("queue_free")) {
+			dst_methods.push_back(MethodInfo("queue_free"));
+		}
 		dst_methods.sort();
 
 
