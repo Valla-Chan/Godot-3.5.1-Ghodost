@@ -328,11 +328,15 @@ void SpriteFramesEditor::_sheet_zoom_auto() {
 	//if (sheet_zoom == 1) {
 	_sheet_zoom_in();
 	_sheet_zoom_out();
-	while (split_sheet_preview->get_custom_minimum_size().y < 192 && split_sheet_preview->get_custom_minimum_size().x < 192) {
+	size_t zoom = 512;
+	while (split_sheet_preview->get_custom_minimum_size().y < 192 && split_sheet_preview->get_custom_minimum_size().x < 192 && zoom > 0) {
 		_sheet_zoom_in();
+		zoom--;
 	}
-	while (split_sheet_preview->get_custom_minimum_size().y > 510 || split_sheet_preview->get_custom_minimum_size().x > 510) {
+	zoom = 512;
+	while (split_sheet_preview->get_custom_minimum_size().y > 510 || split_sheet_preview->get_custom_minimum_size().x > 510 && zoom > 0) {
 		_sheet_zoom_out();
+		zoom--;
 	}
 	Size2 texture_size = split_sheet_preview->get_texture()->get_size();
 	split_sheet_preview->set_custom_minimum_size(texture_size * sheet_zoom);
@@ -437,30 +441,24 @@ void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
 	last_frame_selected = -1;
 
 	bool new_texture = texture != split_sheet_preview->get_texture();
-	bool new_size = split_sheet_preview->get_texture() == nullptr || texture->get_size() != split_sheet_preview->get_texture()->get_size();
 	split_sheet_preview->set_texture(texture);
-	{
-		// Valla edits: make this not go back to 4x1 every time!!
-		const Size2i size = texture->get_size();
-
+	if (new_texture) {
 		// Reset spin max.
+		const Size2i size = texture->get_size();
 		split_sheet_size_x->set_max(size.x);
 		split_sheet_size_y->set_max(size.y);
 		split_sheet_sep_x->set_max(size.x);
 		split_sheet_sep_y->set_max(size.y);
 		split_sheet_offset_x->set_max(size.x);
 		split_sheet_offset_y->set_max(size.y);
+
+		// Different texture, reset to 4x4.
 		dominant_param = PARAM_FRAME_COUNT;
 		updating_split_settings = true;
-
-		if (firsttexture || (new_texture && new_size)) {
-			firsttexture = false;
-			// Different texture, reset to 4x1.
-			split_sheet_h->set_value(4);
-			split_sheet_v->set_value(1);
-		}
-		split_sheet_size_x->set_value(size.x / split_sheet_h->get_value());
-		split_sheet_size_y->set_value(size.y / split_sheet_v->get_value());
+		split_sheet_h->set_value(4);
+		split_sheet_v->set_value(4);
+		split_sheet_size_x->set_value(size.x / 4);
+		split_sheet_size_y->set_value(size.y / 4);
 		split_sheet_sep_x->set_value(0);
 		split_sheet_sep_y->set_value(0);
 		split_sheet_offset_x->set_value(0);
@@ -468,7 +466,7 @@ void SpriteFramesEditor::_prepare_sprite_sheet(const String &p_file) {
 		updating_split_settings = false;
 
 		// Reset zoom.
-		_sheet_zoom_auto();
+		_sheet_zoom_reset();
 	}
 	split_sheet_dialog->popup_centered_ratio(0.65);
 }
