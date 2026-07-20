@@ -253,14 +253,14 @@ Physics2DShapeQueryParameters::Physics2DShapeQueryParameters() {
 	collide_with_areas = false;
 }
 
-Dictionary Physics2DDirectSpaceState::_intersect_ray(const Vector2 &p_from, const Vector2 &p_to, const Vector<RID> &p_exclude, uint32_t p_layers, bool p_collide_with_bodies, bool p_collide_with_areas) {
+Dictionary Physics2DDirectSpaceState::_intersect_ray(const Vector2 &p_from, const Vector2 &p_to, const Vector<RID> &p_exclude, uint32_t p_layers, bool p_collide_with_bodies, bool p_collide_with_areas, bool p_hit_from_inside) {
 	RayResult inters;
 	Set<RID> exclude;
 	for (int i = 0; i < p_exclude.size(); i++) {
 		exclude.insert(p_exclude[i]);
 	}
 
-	bool res = intersect_ray(p_from, p_to, inters, exclude, p_layers, p_collide_with_bodies, p_collide_with_areas);
+	bool res = intersect_ray(p_from, p_to, inters, exclude, p_layers, p_collide_with_bodies, p_collide_with_areas, p_hit_from_inside);
 
 	if (!res) {
 		return Dictionary();
@@ -401,7 +401,7 @@ Physics2DDirectSpaceState::Physics2DDirectSpaceState() {
 void Physics2DDirectSpaceState::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("intersect_point", "point", "max_results", "exclude", "collision_layer", "collide_with_bodies", "collide_with_areas"), &Physics2DDirectSpaceState::_intersect_point, DEFVAL(32), DEFVAL(Array()), DEFVAL(0x7FFFFFFF), DEFVAL(true), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("intersect_point_on_canvas", "point", "canvas_instance_id", "max_results", "exclude", "collision_layer", "collide_with_bodies", "collide_with_areas"), &Physics2DDirectSpaceState::_intersect_point_on_canvas, DEFVAL(32), DEFVAL(Array()), DEFVAL(0x7FFFFFFF), DEFVAL(true), DEFVAL(false));
-	ClassDB::bind_method(D_METHOD("intersect_ray", "from", "to", "exclude", "collision_layer", "collide_with_bodies", "collide_with_areas"), &Physics2DDirectSpaceState::_intersect_ray, DEFVAL(Array()), DEFVAL(0x7FFFFFFF), DEFVAL(true), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("intersect_ray", "from", "to", "exclude", "collision_layer", "collide_with_bodies", "collide_with_areas", "hit_from_inside"), &Physics2DDirectSpaceState::_intersect_ray, DEFVAL(Array()), DEFVAL(0x7FFFFFFF), DEFVAL(true), DEFVAL(false), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("intersect_shape", "shape", "max_results"), &Physics2DDirectSpaceState::_intersect_shape, DEFVAL(32));
 	ClassDB::bind_method(D_METHOD("cast_motion", "shape"), &Physics2DDirectSpaceState::_cast_motion);
 	ClassDB::bind_method(D_METHOD("collide_shape", "shape", "max_results"), &Physics2DDirectSpaceState::_collide_shape, DEFVAL(32));

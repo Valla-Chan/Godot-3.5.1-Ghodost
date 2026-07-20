@@ -301,6 +301,16 @@ void RayCast2D::clear_exceptions() {
 	}
 }
 
+Array RayCast2D::get_exceptions() {
+	Array ret;
+	auto E = exclude.front();
+	while (E) {
+		ret.push_back(E->get());
+		E = E->next();
+	}
+	return ret;
+}
+
 void RayCast2D::set_collide_with_areas(bool p_enabled) {
 	collide_with_areas = p_enabled;
 }
@@ -350,6 +360,7 @@ void RayCast2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("remove_exception", "node"), &RayCast2D::remove_exception);
 
 	ClassDB::bind_method(D_METHOD("clear_exceptions"), &RayCast2D::clear_exceptions);
+	ClassDB::bind_method(D_METHOD("get_exceptions"), &RayCast2D::get_exceptions);
 
 	ClassDB::bind_method(D_METHOD("set_collision_mask", "mask"), &RayCast2D::set_collision_mask);
 	ClassDB::bind_method(D_METHOD("get_collision_mask"), &RayCast2D::get_collision_mask);

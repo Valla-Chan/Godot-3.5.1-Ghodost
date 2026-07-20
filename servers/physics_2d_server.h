@@ -143,7 +143,7 @@ public:
 class Physics2DDirectSpaceState : public Object {
 	GDCLASS(Physics2DDirectSpaceState, Object);
 
-	Dictionary _intersect_ray(const Vector2 &p_from, const Vector2 &p_to, const Vector<RID> &p_exclude = Vector<RID>(), uint32_t p_layers = 0, bool p_collide_with_bodies = true, bool p_collide_with_areas = false);
+	Dictionary _intersect_ray(const Vector2 &p_from, const Vector2 &p_to, const Vector<RID> &p_exclude = Vector<RID>(), uint32_t p_layers = 0, bool p_collide_with_bodies = true, bool p_collide_with_areas = false, bool p_hit_from_inside = false);
 	Array _intersect_point(const Vector2 &p_point, int p_max_results = 32, const Vector<RID> &p_exclude = Vector<RID>(), uint32_t p_layers = 0, bool p_collide_with_bodies = true, bool p_collide_with_areas = false);
 	Array _intersect_point_on_canvas(const Vector2 &p_point, ObjectID p_canvas_intance_id, int p_max_results = 32, const Vector<RID> &p_exclude = Vector<RID>(), uint32_t p_layers = 0, bool p_collide_with_bodies = true, bool p_collide_with_areas = false);
 	Array _intersect_point_impl(const Vector2 &p_point, int p_max_results, const Vector<RID> &p_exclud, uint32_t p_layers, bool p_collide_with_bodies, bool p_collide_with_areas, bool p_filter_by_canvas = false, ObjectID p_canvas_instance_id = 0);

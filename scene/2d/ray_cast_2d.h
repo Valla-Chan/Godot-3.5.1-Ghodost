@@ -101,6 +101,7 @@ public:
 	void remove_exception_rid(const RID &p_rid);
 	void remove_exception(const Object *p_object);
 	void clear_exceptions();
+	Array get_exceptions();
 
 	RayCast2D();
 };
