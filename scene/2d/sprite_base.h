@@ -44,11 +44,13 @@ class SpriteBase : public Node2D {
 	Point2 world_offset;
 	Point2 texture_scale;
 
-	Point2 pos_world;
-	Point2 pos_offset;
+	//Point2 pos_world;
+	//Point2 pos_offset;
 
 	bool hflip;
 	bool vflip;
+
+	//void _update_transform();
 
 protected:
 	static void _bind_methods();

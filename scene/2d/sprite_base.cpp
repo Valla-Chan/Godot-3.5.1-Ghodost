@@ -66,7 +66,18 @@ bool SpriteBase::_edit_is_selected_on_click(const Point2 &p_point, double p_tole
 }
 
 #endif
+/*
+void SpriteBase::_update_transform() {
+	Transform2D xform = get_transform();
+	xform.translate(world_offset);
+	VisualServer::get_singleton()->canvas_item_set_transform(get_canvas_item(), xform);
 
+	if (!is_inside_tree()) {
+		return;
+	}
+
+	_notify_transform();
+}*/
 
 void SpriteBase::set_force_pixel_snapping(bool p_snapping) {
 	force_pixel_snapping = p_snapping;
