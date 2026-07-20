@@ -810,7 +810,9 @@ void TileSetEditor::_on_texture_list_selected(int p_index) {
 		update_workspace_tile_mode();
 	}
 
-	_select_next_shape();
+	if (tileset.is_valid()) {
+		_select_next_shape();
+	}
 	//set_current_tile(-1);
 	workspace->update();
 	// Hacky fix for scrollbar/zoom issue
@@ -3472,6 +3474,9 @@ void TileSetEditor::update_workspace_minsize() {
 	Size2 workspace_min_size = get_current_texture()->get_size();
 	String current_texture_path = get_current_texture()->get_path();
 	List<int> tiles;
+	if (!tileset.is_valid()) {
+		return;
+	}
 	tileset->get_tile_list(&tiles);
 	for (List<int>::Element *E = tiles.front(); E; E = E->next()) {
 		if (tileset->tile_get_texture(E->get())->get_path() != current_texture_path) {
