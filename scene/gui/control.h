@@ -147,6 +147,8 @@ private:
 		Size2 minimum_size_cache;
 		bool minimum_size_valid;
 
+		Point2 pos_offset;
+
 		Size2 last_minimum_size;
 		bool updating_last_minimum_size;
 
@@ -360,8 +362,10 @@ public:
 	Point2 get_end() const;
 
 	void set_position(const Point2 &p_point, bool p_keep_margins = false);
+	void set_offset(const Point2 &p_point);
 	void set_global_position(const Point2 &p_point, bool p_keep_margins = false);
 	Point2 get_position() const;
+	Point2 get_offset() const;
 	Point2 get_global_position() const;
 
 	void set_size(const Size2 &p_size, bool p_keep_margins = false);

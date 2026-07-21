@@ -131,7 +131,7 @@ void Control::_edit_set_rect(const Rect2 &p_edit_rect) {
 }
 
 Rect2 Control::_edit_get_rect() const {
-	return Rect2(Point2(), get_size());
+	return Rect2(get_offset(), get_size());
 }
 
 bool Control::_edit_use_rect() const {
@@ -472,7 +472,7 @@ void Control::remove_child_notify(Node *p_child) {
 
 void Control::_update_canvas_item_transform() {
 	Transform2D xform = _get_internal_transform();
-	xform[2] += get_position();
+	xform[2] += get_position() + get_offset();
 
 	// We use a little workaround to avoid flickering when moving the pivot with _edit_set_pivot()
 	if (is_inside_tree() && Math::abs(Math::sin(data.rotation * 4.0f)) < 0.00001f && (get_viewport()->is_snap_controls_to_pixels_enabled() || data.force_pixel_snapping)) {
@@ -1676,6 +1676,20 @@ void Control::set_position(const Size2 &p_point, bool p_keep_margins) {
 	_size_changed();
 }
 
+// Valla edits
+
+void Control::set_offset(const Size2 &p_point) {
+	data.pos_offset = p_point;
+	if (is_inside_tree()) {
+		_update_canvas_item_transform(); //move because it won't be updated
+	}
+}
+
+Size2 Control::get_offset() const {
+	return data.pos_offset;
+}
+
+
 void Control::set_size_locked(bool p_locked) {
 	data.size_locked = p_locked;
 }
@@ -2835,6 +2849,9 @@ void Control::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("find_next_valid_focus"), &Control::find_next_valid_focus);
 	ClassDB::bind_method(D_METHOD("get_focus_owner"), &Control::get_focus_owner);
 
+	ClassDB::bind_method(D_METHOD("set_position_offset"), &Control::set_offset);
+	ClassDB::bind_method(D_METHOD("get_position_offset"), &Control::get_offset);
+
 	ClassDB::bind_method(D_METHOD("set_pivot_offset", "pivot_offset"), &Control::set_pivot_offset);
 	ClassDB::bind_method(D_METHOD("get_pivot_offset"), &Control::get_pivot_offset);
 	ClassDB::bind_method(D_METHOD("set_pivot_center_locked", "centered"), &Control::set_pivot_center_locked);
@@ -2974,6 +2991,7 @@ void Control::_bind_methods() {
 
 	ADD_GROUP("Rect", "rect_");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_position", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR), "_set_position", "get_position");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_position_offset", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR), "set_position_offset", "get_position_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_global_position", PROPERTY_HINT_NONE, "", 0), "_set_global_position", "get_global_position");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "rect_size", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR), "_set_size", "get_size");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "rect_lock_size"), "set_size_locked", "is_size_locked");
