@@ -1016,7 +1016,10 @@ void ProjectSettings::set_setting(const String &p_setting, const Variant &p_valu
 	set(p_setting, p_value);
 }
 
-Variant ProjectSettings::get_setting(const String &p_setting) const {
+Variant ProjectSettings::get_setting(const String &p_setting, const Variant &p_default) const {
+	if (!has_setting(p_setting)) {
+		return p_default;
+	}
 	return get(p_setting);
 }
 
@@ -1027,7 +1030,7 @@ bool ProjectSettings::has_custom_feature(const String &p_feature) const {
 void ProjectSettings::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_setting", "name"), &ProjectSettings::has_setting);
 	ClassDB::bind_method(D_METHOD("set_setting", "name", "value"), &ProjectSettings::set_setting);
-	ClassDB::bind_method(D_METHOD("get_setting", "name"), &ProjectSettings::get_setting);
+	ClassDB::bind_method(D_METHOD("get_setting", "name", "default"), &ProjectSettings::get_setting, DEFVAL(Variant()));
 	ClassDB::bind_method(D_METHOD("set_order", "name", "position"), &ProjectSettings::set_order);
 	ClassDB::bind_method(D_METHOD("get_order", "name"), &ProjectSettings::get_order);
 	ClassDB::bind_method(D_METHOD("set_initial_value", "name", "value"), &ProjectSettings::set_initial_value);

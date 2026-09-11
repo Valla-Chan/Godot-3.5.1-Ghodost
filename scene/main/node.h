@@ -383,6 +383,7 @@ public:
 	int get_index() const;
 
 	Ref<SceneTreeTween> create_tween();
+	Ref<SceneTreeTimer> create_timer(float p_delay_sec, bool p_process_pause = false);
 
 	void print_tree();
 	void print_tree_pretty();

@@ -2157,6 +2157,11 @@ Ref<SceneTreeTween> Node::create_tween() {
 	tween->bind_node(this);
 	return tween;
 }
+Ref<SceneTreeTimer> Node::create_timer(float p_delay_sec, bool p_process_pause) {
+	ERR_FAIL_COND_V_MSG(!data.tree, nullptr, "Can't create SceneTreeTimer when not inside scene tree.");
+	Ref<SceneTreeTimer> timer = get_tree()->create_timer(p_delay_sec, p_process_pause);
+	return timer;
+}
 
 void Node::remove_and_skip() {
 	ERR_FAIL_COND(!data.parent);
@@ -3248,6 +3253,7 @@ void Node::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_tree"), &Node::get_tree);
 	ClassDB::bind_method(D_METHOD("create_tween"), &Node::create_tween);
+	ClassDB::bind_method(D_METHOD("create_timer", "time_sec", "pause_mode_process"), &Node::create_timer, DEFVAL(true));
 
 	ClassDB::bind_method(D_METHOD("duplicate", "flags"), &Node::duplicate, DEFVAL(DUPLICATE_USE_INSTANCING | DUPLICATE_SIGNALS | DUPLICATE_GROUPS | DUPLICATE_SCRIPTS));
 	ClassDB::bind_method(D_METHOD("replace_by", "node", "keep_data"), &Node::replace_by, DEFVAL(false));
