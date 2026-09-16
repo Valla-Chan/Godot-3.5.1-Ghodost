@@ -79,7 +79,7 @@ int TextBase::get_font_spacing_offset() const {
 Ref<Font> TextBase::get_font_scaled(const String &p_font = "font") const {
 	Ref<Font> font = get_font(p_font);
 	Ref<DynamicFont> dynfont = font;
-	if (font_size_override > 0 || (font_scale != 1.0 && font_scale > 0) || font_spacing_offset != 0) {
+	if (dynfont.is_valid() && (font_size_override > 0 || (font_scale != 1.0 && font_scale > 0) || font_spacing_offset != 0)) {
 		if (font_scaled_cache.has(p_font) && font_scaled_cache[p_font].is_valid()) {
 			return font_scaled_cache[p_font];
 		}
