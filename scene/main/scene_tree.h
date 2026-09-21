@@ -51,26 +51,46 @@ class SceneTreeTimer : public Reference {
 	GDCLASS(SceneTreeTimer, Reference);
 
 	float time_left;
-	bool process_pause;
 	bool ignore_time_scale = false;
 
 protected:
 	static void _bind_methods();
 
 public:
+
+	enum TimerPauseMode {
+		TIMER_PAUSE_BOUND,
+		TIMER_PAUSE_STOP,
+		TIMER_PAUSE_PROCESS,
+	};
+
+private:
+	TimerPauseMode pause_mode = TimerPauseMode::TIMER_PAUSE_BOUND;
+	ObjectID bound_node;
+	bool is_bound = false;
+
+public:
 	void set_time_left(float p_time);
 	float get_time_left() const;
-
-	void set_pause_mode_process(bool p_pause_mode_process);
-	bool is_pause_mode_process();
 
 	void set_ignore_time_scale(bool p_ignore);
 	bool is_ignore_time_scale();
 
 	void release_connections();
 
+	TimerPauseMode get_pause_mode() const;
+
+	Ref<SceneTreeTimer> bind_node(Node *p_node);
+	Ref<SceneTreeTimer> set_pause_mode(TimerPauseMode p_mode);
+
+	bool can_process(bool p_tree_paused) const;
+	Node *get_bound_node() const;
+
 	SceneTreeTimer();
+
 };
+
+VARIANT_ENUM_CAST(SceneTreeTimer::TimerPauseMode);
 
 class SceneTree : public MainLoop {
 	_THREAD_SAFE_CLASS_

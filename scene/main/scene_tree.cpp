@@ -64,9 +64,17 @@ void SceneTreeTimer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_time_left"), &SceneTreeTimer::get_time_left);
 	ClassDB::bind_method(D_METHOD("release_connections"), &SceneTreeTimer::release_connections);
 
+	ClassDB::bind_method(D_METHOD("bind_node", "node"), &SceneTreeTimer::bind_node);
+	ClassDB::bind_method(D_METHOD("get_pause_mode"), &SceneTreeTimer::get_pause_mode);
+	ClassDB::bind_method(D_METHOD("set_pause_mode", "mode"), &SceneTreeTimer::set_pause_mode);
+
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "time_left"), "set_time_left", "get_time_left");
 
 	ADD_SIGNAL(MethodInfo("timeout"));
+
+	BIND_ENUM_CONSTANT(TIMER_PAUSE_BOUND);
+	BIND_ENUM_CONSTANT(TIMER_PAUSE_STOP);
+	BIND_ENUM_CONSTANT(TIMER_PAUSE_PROCESS);
 }
 
 void SceneTreeTimer::set_time_left(float p_time) {
@@ -75,14 +83,6 @@ void SceneTreeTimer::set_time_left(float p_time) {
 
 float SceneTreeTimer::get_time_left() const {
 	return time_left;
-}
-
-void SceneTreeTimer::set_pause_mode_process(bool p_pause_mode_process) {
-	process_pause = p_pause_mode_process;
-}
-
-bool SceneTreeTimer::is_pause_mode_process() {
-	return process_pause;
 }
 
 void SceneTreeTimer::set_ignore_time_scale(bool p_ignore) {
@@ -103,9 +103,46 @@ void SceneTreeTimer::release_connections() {
 	}
 }
 
+
+
+SceneTreeTimer::TimerPauseMode SceneTreeTimer::get_pause_mode() const {
+	return pause_mode;
+}
+
+Ref<SceneTreeTimer> SceneTreeTimer::bind_node(Node *p_node) {
+	ERR_FAIL_NULL_V(p_node, this);
+
+	bound_node = p_node->get_instance_id();
+	is_bound = true;
+	return this;
+}
+
+Ref<SceneTreeTimer> SceneTreeTimer::set_pause_mode(TimerPauseMode p_mode) {
+	pause_mode = p_mode;
+	return this;
+}
+
+bool SceneTreeTimer::can_process(bool p_tree_paused) const {
+	if (is_bound && pause_mode == TIMER_PAUSE_BOUND) {
+		Node *bound_node = get_bound_node();
+		if (bound_node) {
+			return bound_node->is_inside_tree() && bound_node->can_process();
+		}
+	}
+
+	return !p_tree_paused || pause_mode == TIMER_PAUSE_PROCESS;
+}
+
+Node *SceneTreeTimer::get_bound_node() const {
+	if (is_bound) {
+		return Object::cast_to<Node>(ObjectDB::get_instance(bound_node));
+	} else {
+		return nullptr;
+	}
+}
+
 SceneTreeTimer::SceneTreeTimer() {
 	time_left = 0;
-	process_pause = true;
 }
 
 // This should be called once per physics tick, to make sure the transform previous and current
@@ -633,7 +670,7 @@ bool SceneTree::idle(float p_time) {
 
 	for (List<Ref<SceneTreeTimer>>::Element *E = timers.front(); E;) {
 		List<Ref<SceneTreeTimer>>::Element *N = E->next();
-		if (pause && !E->get()->is_pause_mode_process()) {
+		if (!E->get()->can_process(pause)) {
 			if (E == L) {
 				break; //break on last, so if new timers were added during list traversal, ignore them.
 			}
@@ -1861,7 +1898,8 @@ void SceneTree::global_menu_action(const Variant &p_id, const Variant &p_meta) {
 Ref<SceneTreeTimer> SceneTree::create_timer(float p_delay_sec, bool p_process_pause) {
 	Ref<SceneTreeTimer> stt;
 	stt.instance();
-	stt->set_pause_mode_process(p_process_pause);
+	stt->set_pause_mode(SceneTreeTimer::TimerPauseMode(
+			SceneTreeTimer::TIMER_PAUSE_PROCESS ? p_process_pause : SceneTreeTimer::TIMER_PAUSE_BOUND));
 	stt->set_time_left(p_delay_sec);
 	timers.push_back(stt);
 	return stt;
