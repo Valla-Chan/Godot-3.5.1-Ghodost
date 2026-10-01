@@ -76,6 +76,7 @@ public:
 #ifdef TOOLS_ENABLED
 		DUPLICATE_FROM_EDITOR = 16,
 #endif
+		DUPLICATE_CHILDREN = 32,
 	};
 
 	enum NameCasing {
@@ -442,7 +443,7 @@ public:
 
 	int get_position_in_parent() const;
 
-	Node *duplicate(int p_flags = DUPLICATE_GROUPS | DUPLICATE_SIGNALS | DUPLICATE_SCRIPTS) const;
+	Node *duplicate(int p_flags = DUPLICATE_GROUPS | DUPLICATE_SIGNALS | DUPLICATE_SCRIPTS | DUPLICATE_CHILDREN) const;
 	Node *duplicate_and_reown(const Map<Node *, Node *> &p_reown_map) const;
 #ifdef TOOLS_ENABLED
 	Node *duplicate_from_editor(Map<const Node *, Node *> &r_duplimap) const;

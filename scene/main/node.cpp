@@ -2396,7 +2396,7 @@ Node *Node::_duplicate(int p_flags, Map<const Node *, Node *> *r_duplimap) const
 	List<const Node *> node_tree;
 	node_tree.push_front(this);
 
-	if (instanced) {
+	if (instanced && p_flags & DUPLICATE_CHILDREN) {
 		// Since nodes in the instanced hierarchy won't be duplicated explicitly, we need to make an inventory
 		// of all the nodes in the tree of the instanced scene in order to transfer the values of the properties
 
@@ -2486,44 +2486,46 @@ Node *Node::_duplicate(int p_flags, Map<const Node *, Node *> *r_duplimap) const
 		}
 	}
 
-	for (int i = 0; i < get_child_count(); i++) {
-		if (get_child(i)->data.parent_owned) {
-			continue;
-		}
-		if (instanced && get_child(i)->data.owner == this) {
-			continue; //part of instance
-		}
+	if (p_flags & DUPLICATE_CHILDREN) {
+		for (int i = 0; i < get_child_count(); i++) {
+			if (get_child(i)->data.parent_owned) {
+				continue;
+			}
+			if (instanced && get_child(i)->data.owner == this) {
+				continue; //part of instance
+			}
 
-		Node *dup = get_child(i)->_duplicate(p_flags, r_duplimap);
-		if (!dup) {
-			memdelete(node);
-			return nullptr;
-		}
+			Node *dup = get_child(i)->_duplicate(p_flags, r_duplimap);
+			if (!dup) {
+				memdelete(node);
+				return nullptr;
+			}
 
-		node->add_child(dup);
-		if (i < node->get_child_count() - 1) {
-			node->move_child(dup, i);
-		}
-	}
-
-	for (List<const Node *>::Element *E = hidden_roots.front(); E; E = E->next()) {
-		Node *parent = node->get_node(get_path_to(E->get()->data.parent));
-		if (!parent) {
-			memdelete(node);
-			return nullptr;
+			node->add_child(dup);
+			if (i < node->get_child_count() - 1) {
+				node->move_child(dup, i);
+			}
 		}
 
-		Node *dup = E->get()->_duplicate(p_flags, r_duplimap);
-		if (!dup) {
-			memdelete(node);
-			return nullptr;
-		}
+		for (List<const Node *>::Element *E = hidden_roots.front(); E; E = E->next()) {
+			Node *parent = node->get_node(get_path_to(E->get()->data.parent));
+			if (!parent) {
+				memdelete(node);
+				return nullptr;
+			}
 
-		parent->add_child(dup);
-		int pos = E->get()->get_position_in_parent();
+			Node *dup = E->get()->_duplicate(p_flags, r_duplimap);
+			if (!dup) {
+				memdelete(node);
+				return nullptr;
+			}
 
-		if (pos < parent->get_child_count() - 1) {
-			parent->move_child(dup, pos);
+			parent->add_child(dup);
+			int pos = E->get()->get_position_in_parent();
+
+			if (pos < parent->get_child_count() - 1) {
+				parent->move_child(dup, pos);
+			}
 		}
 	}
 
@@ -2546,7 +2548,7 @@ Node *Node::duplicate_from_editor(Map<const Node *, Node *> &r_duplimap) const {
 }
 
 Node *Node::duplicate_from_editor(Map<const Node *, Node *> &r_duplimap, const Map<RES, RES> &p_resource_remap) const {
-	Node *dupe = _duplicate(DUPLICATE_SIGNALS | DUPLICATE_GROUPS | DUPLICATE_SCRIPTS | DUPLICATE_USE_INSTANCING | DUPLICATE_FROM_EDITOR, &r_duplimap);
+	Node *dupe = _duplicate(DUPLICATE_SIGNALS | DUPLICATE_GROUPS | DUPLICATE_SCRIPTS | DUPLICATE_USE_INSTANCING | DUPLICATE_FROM_EDITOR | DUPLICATE_CHILDREN, &r_duplimap);
 
 	// This is used by SceneTreeDock's paste functionality. When pasting to foreign scene, resources are duplicated.
 	if (!p_resource_remap.empty()) {
@@ -3256,7 +3258,7 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("create_tween"), &Node::create_tween);
 	ClassDB::bind_method(D_METHOD("create_timer", "time_sec", "pause_mode_process"), &Node::create_timer, DEFVAL(false));
 
-	ClassDB::bind_method(D_METHOD("duplicate", "flags"), &Node::duplicate, DEFVAL(DUPLICATE_USE_INSTANCING | DUPLICATE_SIGNALS | DUPLICATE_GROUPS | DUPLICATE_SCRIPTS));
+	ClassDB::bind_method(D_METHOD("duplicate", "flags"), &Node::duplicate, DEFVAL(DUPLICATE_USE_INSTANCING | DUPLICATE_SIGNALS | DUPLICATE_GROUPS | DUPLICATE_SCRIPTS | DUPLICATE_CHILDREN));
 	ClassDB::bind_method(D_METHOD("replace_by", "node", "keep_data"), &Node::replace_by, DEFVAL(false));
 
 	ClassDB::bind_method(D_METHOD("set_scene_instance_load_placeholder", "load_placeholder"), &Node::set_scene_instance_load_placeholder);
@@ -3370,6 +3372,7 @@ void Node::_bind_methods() {
 	BIND_ENUM_CONSTANT(DUPLICATE_GROUPS);
 	BIND_ENUM_CONSTANT(DUPLICATE_SCRIPTS);
 	BIND_ENUM_CONSTANT(DUPLICATE_USE_INSTANCING);
+	BIND_ENUM_CONSTANT(DUPLICATE_CHILDREN);
 
 	ADD_SIGNAL(MethodInfo("visgroup_hidden_changed"));
 	ADD_SIGNAL(MethodInfo("ready"));
