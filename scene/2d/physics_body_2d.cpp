@@ -991,10 +991,10 @@ void RigidBody2D::_reload_physics_characteristics() {
 
 //////////////////////////
 
-Ref<KinematicCollision2D> KinematicBody2D::_move(const Vector2 &p_motion, bool p_infinite_inertia, bool p_exclude_raycast_shapes, bool p_test_only) {
+Ref<KinematicCollision2D> KinematicBody2D::_move(const Vector2 &p_motion, bool p_infinite_inertia, bool p_exclude_raycast_shapes, bool p_test_only, bool p_cancel_sliding) {
 	Collision col;
 
-	bool collided = move_and_collide(p_motion, p_infinite_inertia, col, p_exclude_raycast_shapes, p_test_only);
+	bool collided = move_and_collide(p_motion, p_infinite_inertia, col, p_exclude_raycast_shapes, p_test_only, p_cancel_sliding);
 
 	// Don't report collision when the whole motion is done.
 	if (collided && col.collision_safe_fraction < 1) {
@@ -1118,10 +1118,75 @@ bool KinematicBody2D::move_and_collide(const Vector2 &p_motion, bool p_infinite_
 	return colliding;
 }
 
+bool KinematicBody2D::test_move_and_collide_from_transform(Transform2D &p_transform, const Vector2 &p_motion, bool p_infinite_inertia, Collision &r_collision, bool p_exclude_raycast_shapes, bool p_cancel_sliding, const Set<RID> &p_exclude) {
+	if (sync_to_physics) {
+		ERR_PRINT("Functions move_and_slide and move_and_collide do not work together with 'sync to physics' option. Please read the documentation.");
+	}
+	Physics2DServer::MotionResult result;
+
+	bool colliding = Physics2DServer::get_singleton()->body_test_motion(get_rid(), p_transform, p_motion, p_infinite_inertia, margin, &result, p_exclude_raycast_shapes, p_exclude);
+
+	// Restore direction of motion to be along original motion,
+	// in order to avoid sliding due to recovery,
+	// but only if collision depth is low enough to avoid tunneling.
+	if (p_cancel_sliding) {
+		real_t motion_length = p_motion.length();
+		real_t precision = 0.001;
+
+		if (colliding) {
+			// Can't just use margin as a threshold because collision depth is calculated on unsafe motion,
+			// so even in normal resting cases the depth can be a bit more than the margin.
+			precision += motion_length * (result.collision_unsafe_fraction - result.collision_safe_fraction);
+
+			if (result.collision_depth > (real_t)margin + precision) {
+				p_cancel_sliding = false;
+			}
+		}
+
+		if (p_cancel_sliding) {
+			// When motion is null, recovery is the resulting motion.
+			Vector2 motion_normal;
+			if (motion_length > CMP_EPSILON) {
+				motion_normal = p_motion / motion_length;
+			}
+
+			// Check depth of recovery.
+			real_t projected_length = result.motion.dot(motion_normal);
+			Vector2 recovery = result.motion - motion_normal * projected_length;
+			real_t recovery_length = recovery.length();
+			// Fixes cases where canceling slide causes the motion to go too deep into the ground,
+			// because we're only taking rest information into account and not general recovery.
+			if (recovery_length < (real_t)margin + precision) {
+				// Apply adjustment to motion.
+				result.motion = motion_normal * projected_length;
+				result.remainder = p_motion - result.motion;
+			}
+		}
+	}
+
+	if (colliding) {
+		r_collision.collider_metadata = result.collider_metadata;
+		r_collision.collider_shape = result.collider_shape;
+		r_collision.collider_vel = result.collider_velocity;
+		r_collision.collision = result.collision_point;
+		r_collision.normal = result.collision_normal;
+		r_collision.collider = result.collider_id;
+		r_collision.collider_rid = result.collider;
+		r_collision.travel = result.motion;
+		r_collision.remainder = result.remainder;
+		r_collision.local_shape = result.collision_local_shape;
+		r_collision.collision_safe_fraction = result.collision_safe_fraction;
+	}
+
+	p_transform.elements[2] += result.motion;
+
+	return colliding;
+}
+
 //so, if you pass 45 as limit, avoid numerical precision errors when angle is 45.
 #define FLOOR_ANGLE_THRESHOLD 0.01
 
-Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_velocity, const Vector2 &p_snap, const Vector2 &p_up_direction, bool p_stop_on_slope, int p_max_slides, float p_floor_max_angle, bool p_infinite_inertia) {
+Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_velocity, const Vector2 &p_snap, const Vector2 &p_up_direction, bool p_stop_on_slope, int p_max_slides, float p_floor_max_angle, bool p_infinite_inertia, bool p_test_only) {
 	Vector2 body_velocity = p_linear_velocity;
 	Vector2 body_velocity_normal = body_velocity.normalized();
 	Vector2 up_direction = p_up_direction.normalized();
@@ -1156,7 +1221,7 @@ Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_veloci
 		Collision floor_collision;
 		Set<RID> exclude;
 		exclude.insert(on_floor_body);
-		if (move_and_collide(current_floor_velocity * delta, p_infinite_inertia, floor_collision, true, false, false, exclude)) {
+		if (move_and_collide(current_floor_velocity * delta, p_infinite_inertia, floor_collision, true, p_test_only, false, exclude)) {
 			colliders.push_back(floor_collision);
 			_set_collision_direction(floor_collision, up_direction, p_floor_max_angle);
 		}
@@ -1169,6 +1234,7 @@ Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_veloci
 	// No sliding on first attempt to keep floor motion stable when possible,
 	// when stop on slope is enabled.
 	bool sliding_enabled = !p_stop_on_slope;
+	Transform2D gt = get_global_transform();
 	for (int iteration = 0; iteration < p_max_slides; ++iteration) {
 		Collision collision;
 		bool found_collision = false;
@@ -1176,7 +1242,10 @@ Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_veloci
 		for (int i = 0; i < 2; ++i) {
 			bool collided;
 			if (i == 0) { //collide
-				collided = move_and_collide(motion, p_infinite_inertia, collision, true, false, !sliding_enabled);
+				if (p_test_only)
+					collided = test_move_and_collide_from_transform(gt, motion, p_infinite_inertia, collision, true, !sliding_enabled);
+				else
+					collided = move_and_collide(motion, p_infinite_inertia, collision, true, false, !sliding_enabled);
 				if (!collided) {
 					motion = Vector2(); //clear because no collision happened and motion completed
 				}
@@ -1195,7 +1264,7 @@ Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_veloci
 
 				_set_collision_direction(collision, up_direction, p_floor_max_angle);
 
-				if (on_floor && p_stop_on_slope) {
+				if (on_floor && p_stop_on_slope && !p_test_only) {
 					if ((body_velocity_normal + up_direction).length() < 0.01) {
 						Transform2D gt = get_global_transform();
 						if (collision.travel.length() > margin) {
@@ -1230,7 +1299,6 @@ Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_veloci
 	if (was_on_floor && p_snap != Vector2() && !on_floor) {
 		// Apply snap.
 		Collision col;
-		Transform2D gt = get_global_transform();
 
 		if (move_and_collide(p_snap, p_infinite_inertia, col, false, true, false)) {
 			bool apply = true;
@@ -1256,7 +1324,8 @@ Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_veloci
 
 			if (apply) {
 				gt.elements[2] += col.travel;
-				set_global_transform(gt);
+				if (!p_test_only)
+					set_global_transform(gt);
 			}
 		}
 	}
@@ -1275,8 +1344,8 @@ Vector2 KinematicBody2D::_move_and_slide_internal(const Vector2 &p_linear_veloci
 	return body_velocity;
 }
 
-Vector2 KinematicBody2D::move_and_slide(const Vector2 &p_linear_velocity, const Vector2 &p_up_direction, bool p_stop_on_slope, int p_max_slides, float p_floor_max_angle, bool p_infinite_inertia) {
-	return _move_and_slide_internal(p_linear_velocity, Vector2(), p_up_direction, p_stop_on_slope, p_max_slides, p_floor_max_angle, p_infinite_inertia);
+Vector2 KinematicBody2D::move_and_slide(const Vector2 &p_linear_velocity, const Vector2 &p_up_direction, bool p_stop_on_slope, int p_max_slides, float p_floor_max_angle, bool p_infinite_inertia, bool p_test_only) {
+	return _move_and_slide_internal(p_linear_velocity, Vector2(), p_up_direction, p_stop_on_slope, p_max_slides, p_floor_max_angle, p_infinite_inertia, p_test_only);
 }
 
 Vector2 KinematicBody2D::move_and_slide_with_snap(const Vector2 &p_linear_velocity, const Vector2 &p_snap, const Vector2 &p_up_direction, bool p_stop_on_slope, int p_max_slides, float p_floor_max_angle, bool p_infinite_inertia) {
@@ -1485,7 +1554,7 @@ void KinematicBody2D::_notification(int p_what) {
 }
 void KinematicBody2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("move_and_collide", "rel_vec", "infinite_inertia", "exclude_raycast_shapes", "test_only"), &KinematicBody2D::_move, DEFVAL(true), DEFVAL(true), DEFVAL(false));
-	ClassDB::bind_method(D_METHOD("move_and_slide", "linear_velocity", "up_direction", "stop_on_slope", "max_slides", "floor_max_angle", "infinite_inertia"), &KinematicBody2D::move_and_slide, DEFVAL(Vector2(0, 0)), DEFVAL(false), DEFVAL(4), DEFVAL(Math::deg2rad((float)45)), DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("move_and_slide", "linear_velocity", "up_direction", "stop_on_slope", "max_slides", "floor_max_angle", "infinite_inertia", "test_only"), &KinematicBody2D::move_and_slide, DEFVAL(Vector2(0, 0)), DEFVAL(false), DEFVAL(4), DEFVAL(Math::deg2rad((float)45)), DEFVAL(true), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("move_and_slide_with_snap", "linear_velocity", "snap", "up_direction", "stop_on_slope", "max_slides", "floor_max_angle", "infinite_inertia"), &KinematicBody2D::move_and_slide_with_snap, DEFVAL(Vector2(0, 0)), DEFVAL(false), DEFVAL(4), DEFVAL(Math::deg2rad((float)45)), DEFVAL(true));
 
 	ClassDB::bind_method(D_METHOD("get_move_safe_fraction", "from", "rel_vec", "infinite_inertia"), &KinematicBody2D::get_move_safe_fraction, DEFVAL(true));
