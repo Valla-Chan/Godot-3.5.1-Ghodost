@@ -109,10 +109,6 @@ void Area2D::_body_enter_tree(ObjectID p_id) {
 	ERR_FAIL_COND(E->get().in_tree);
 
 	E->get().in_tree = true;
-	emit_signal(SceneStringNames::get_singleton()->body_entered, node);
-	for (int i = 0; i < E->get().shapes.size(); i++) {
-		emit_signal(SceneStringNames::get_singleton()->body_shape_entered, E->get().rid, node, E->get().shapes[i].body_shape, E->get().shapes[i].area_shape);
-	}
 }
 
 void Area2D::_body_exit_tree(ObjectID p_id) {
@@ -122,16 +118,18 @@ void Area2D::_body_exit_tree(ObjectID p_id) {
 	Map<ObjectID, BodyState>::Element *E = body_map.find(p_id);
 	ERR_FAIL_COND(!E);
 	ERR_FAIL_COND(!E->get().in_tree);
-	E->get().in_tree = false;
-	emit_signal(SceneStringNames::get_singleton()->body_exited, node);
-	for (int i = 0; i < E->get().shapes.size(); i++) {
-		emit_signal(SceneStringNames::get_singleton()->body_shape_exited, E->get().rid, node, E->get().shapes[i].body_shape, E->get().shapes[i].area_shape);
+	if (E->get().rc > 0) {
+		reparenting_bodies.insert(p_id);
+		call_deferred("_clear_reparenting_body", p_id);
 	}
+	E->get().in_tree = false;
 }
 
 void Area2D::_body_inout(int p_status, const RID &p_body, int p_instance, int p_body_shape, int p_area_shape) {
 	bool body_in = p_status == Physics2DServer::AREA_BODY_ADDED;
 	ObjectID objid = p_instance;
+
+	bool is_reparenting = reparenting_bodies.has(objid);
 
 	Object *obj = ObjectDB::get_instance(objid);
 	Node *node = Object::cast_to<Node>(obj);
@@ -164,7 +162,9 @@ void Area2D::_body_inout(int p_status, const RID &p_body, int p_instance, int p_
 		}
 
 		if (!node || E->get().in_tree) {
-			emit_signal(SceneStringNames::get_singleton()->body_shape_entered, p_body, node, p_body_shape, p_area_shape);
+			if (!is_reparenting) {
+				emit_signal(SceneStringNames::get_singleton()->body_shape_entered, p_body, node, p_body_shape, p_area_shape);
+			}
 		}
 
 	} else {
@@ -186,7 +186,9 @@ void Area2D::_body_inout(int p_status, const RID &p_body, int p_instance, int p_
 			}
 		}
 		if (!node || in_tree) {
-			emit_signal(SceneStringNames::get_singleton()->body_shape_exited, p_body, obj, p_body_shape, p_area_shape);
+			if (!is_reparenting) {
+				emit_signal(SceneStringNames::get_singleton()->body_shape_exited, p_body, obj, p_body_shape, p_area_shape);
+			}
 		}
 	}
 
@@ -285,6 +287,11 @@ void Area2D::_area_inout(int p_status, const RID &p_area, int p_instance, int p_
 
 	locked = false;
 }
+
+void Area2D::_clear_reparenting_body(ObjectID p_id) {
+	reparenting_bodies.erase(p_id);
+}
+
 
 void Area2D::_clear_monitoring() {
 	ERR_FAIL_COND_MSG(locked, "This function can't be used during the in/out signal.");
