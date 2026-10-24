@@ -57,7 +57,10 @@ void ProgressBar::_notification(int p_what) {
 		draw_style_box(bg, Rect2(Point2(), get_size()));
 		float r = get_as_ratio();
 		int mp = fg->get_minimum_size().width;
-		int p = r * (get_size().width - mp);
+		float p = r * (get_size().width - mp);
+		if (get_force_pixel_snapping()) {
+			p = round(p);
+		}
 		if (p > 0) {
 			draw_style_box(fg, Rect2(Point2(), Size2(p + fg->get_minimum_size().width, get_size().height)));
 		}

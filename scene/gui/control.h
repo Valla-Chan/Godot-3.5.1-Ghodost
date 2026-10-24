@@ -516,6 +516,8 @@ public:
 
 	Control *get_root_parent_control() const;
 
+	bool should_snap_to_pixel() const;
+
 	void set_clip_contents(bool p_clip);
 	bool is_clipping_contents();
 

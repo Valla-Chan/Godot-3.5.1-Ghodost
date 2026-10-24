@@ -2698,6 +2698,10 @@ Control *Control::get_root_parent_control() const {
 	return const_cast<Control *>(root);
 }
 
+bool Control::should_snap_to_pixel() const {
+	return data.force_pixel_snapping || (get_viewport() && get_viewport()->is_snap_controls_to_pixels_enabled());
+}
+
 void Control::set_block_minimum_size_adjust(bool p_block) {
 	data.block_minimum_size_adjust = p_block;
 }
