@@ -529,7 +529,9 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent, bool p_scroll
 				editor_selection->remove_node(n);
 			}
 		}
-		memdelete(item);
+		if (item->get_parent()) {
+			memdelete(item);
+		}
 		return false;
 	} else {
 		if (scroll) {
